@@ -30,7 +30,8 @@ LevelDBOptions::LevelDBOptions()
       block_cache(nullptr),
       block_size(4096),
       block_restart_interval(16),
-      compression(rocksdb_rs::compression_type::CompressionType::kSnappyCompression),
+      compression(
+          rocksdb_rs::compression_type::CompressionType::kSnappyCompression),
       filter_policy(nullptr) {}
 
 Options ConvertOptions(const LevelDBOptions& leveldb_options) {

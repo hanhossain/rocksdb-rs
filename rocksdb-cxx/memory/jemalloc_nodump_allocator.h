@@ -44,7 +44,8 @@ class JemallocNodumpAllocator : public BaseMemoryAllocator {
   static bool IsSupported(std::string* why);
   bool IsMutable() const { return !init_; }
 
-  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options) override;
+  rocksdb_rs::status::Status PrepareOptions(
+      const ConfigOptions& config_options) override;
 
 #ifdef ROCKSDB_JEMALLOC_NODUMP_ALLOCATOR
   void* Allocate(size_t size) override;

@@ -116,10 +116,10 @@ PersistentCacheTierTest::PersistentCacheTierTest()
     : path_(test::PerThreadDBPath("cache_test")) {
 #ifdef OS_LINUX
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
-  rocksdb::SyncPoint::GetInstance()->SetCallBack(
-      "NewRandomAccessFile:O_DIRECT", OnOpenForRead);
-  rocksdb::SyncPoint::GetInstance()->SetCallBack(
-      "NewWritableFile:O_DIRECT", OnOpenForWrite);
+  rocksdb::SyncPoint::GetInstance()->SetCallBack("NewRandomAccessFile:O_DIRECT",
+                                                 OnOpenForRead);
+  rocksdb::SyncPoint::GetInstance()->SetCallBack("NewWritableFile:O_DIRECT",
+                                                 OnOpenForWrite);
 #endif
 }
 
@@ -287,8 +287,8 @@ PersistentCacheDBTest::PersistentCacheDBTest()
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "GetUniqueIdFromFile:FS_IOC_GETVERSION", UniqueIdCallback);
-  rocksdb::SyncPoint::GetInstance()->SetCallBack(
-      "NewRandomAccessFile:O_DIRECT", OnOpenForRead);
+  rocksdb::SyncPoint::GetInstance()->SetCallBack("NewRandomAccessFile:O_DIRECT",
+                                                 OnOpenForRead);
 #endif
 }
 

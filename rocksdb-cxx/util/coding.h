@@ -20,9 +20,9 @@
 #include <string>
 
 #include "port/port.h"
-#include "rocksdb/slice.h"
 #include "rocksdb-rs/src/coding.rs.h"
 #include "rocksdb-rs/src/coding_lean.rs.h"
+#include "rocksdb/slice.h"
 
 // Some processors does not allow unaligned access to memory
 #if defined(__sparc)
@@ -71,7 +71,6 @@ inline const char* GetVarsignedint64Ptr(const char* p, const char* limit,
   *value = rocksdb_rs::coding::zigzagToI64(u);
   return ret;
 }
-
 
 // Lower-level versions of Put... that write directly into a character buffer
 // and return a pointer just past the last byte written.

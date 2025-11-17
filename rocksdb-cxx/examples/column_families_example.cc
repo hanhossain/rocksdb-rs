@@ -24,9 +24,9 @@ using rocksdb::DBOptions;
 using rocksdb::Options;
 using rocksdb::ReadOptions;
 using rocksdb::Slice;
-using rocksdb_rs::status::Status;
 using rocksdb::WriteBatch;
 using rocksdb::WriteOptions;
+using rocksdb_rs::status::Status;
 
 int main() {
   // open DB

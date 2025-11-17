@@ -27,19 +27,24 @@ std::atomic<extent_alloc_t*> JemallocNodumpAllocator::original_alloc_{nullptr};
 static std::unordered_map<std::string, OptionTypeInfo> jemalloc_type_info = {
     {"limit_tcache_size",
      {offsetof(struct JemallocAllocatorOptions, limit_tcache_size),
-      rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"tcache_size_lower_bound",
      {offsetof(struct JemallocAllocatorOptions, tcache_size_lower_bound),
-      rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"tcache_size_upper_bound",
      {offsetof(struct JemallocAllocatorOptions, tcache_size_upper_bound),
-      rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"num_arenas",
-     {offsetof(struct JemallocAllocatorOptions, num_arenas), rocksdb_rs::utilities::options_type::OptionType::kSizeT,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct JemallocAllocatorOptions, num_arenas),
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 bool JemallocNodumpAllocator::IsSupported(std::string* why) {
 #ifndef ROCKSDB_JEMALLOC
@@ -150,8 +155,8 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::InitializeArenas() {
     size_t hooks_size = sizeof(hooks);
     ret = mallctl(key.c_str(), &hooks, &hooks_size, nullptr, 0);
     if (ret != 0) {
-      return rocksdb_rs::status::Status_Incomplete("Failed to read existing hooks, error code: " +
-                                std::to_string(ret));
+      return rocksdb_rs::status::Status_Incomplete(
+          "Failed to read existing hooks, error code: " + std::to_string(ret));
     }
 
     // Store existing alloc.
@@ -174,8 +179,8 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::InitializeArenas() {
     extent_hooks_t* hooks_ptr = per_arena_hooks_.back().get();
     ret = mallctl(key.c_str(), nullptr, nullptr, &hooks_ptr, sizeof(hooks_ptr));
     if (ret != 0) {
-      return rocksdb_rs::status::Status_Incomplete("Failed to set custom hook, error code: " +
-                                std::to_string(ret));
+      return rocksdb_rs::status::Status_Incomplete(
+          "Failed to set custom hook, error code: " + std::to_string(ret));
     }
   }
   return rocksdb_rs::status::Status_OK();
@@ -195,9 +200,11 @@ rocksdb_rs::status::Status JemallocNodumpAllocator::PrepareOptions(
     return rocksdb_rs::status::Status_InvalidArgument(
         "tcache_size_lower_bound larger or equal to tcache_size_upper_bound.");
   } else if (options_.num_arenas < 1) {
-    return rocksdb_rs::status::Status_InvalidArgument("num_arenas must be a positive integer");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "num_arenas must be a positive integer");
   } else if (IsMutable()) {
-    rocksdb_rs::status::Status s = MemoryAllocator::PrepareOptions(config_options);
+    rocksdb_rs::status::Status s =
+        MemoryAllocator::PrepareOptions(config_options);
 #ifdef ROCKSDB_JEMALLOC_NODUMP_ALLOCATOR
     if (s.ok()) {
       s = InitializeArenas();
@@ -256,13 +263,14 @@ void* JemallocNodumpAllocator::Alloc(extent_hooks_t* extent, void* new_addr,
   return result;
 }
 
-rocksdb_rs::status::Status JemallocNodumpAllocator::DestroyArena(uint32_t arena_index) {
+rocksdb_rs::status::Status JemallocNodumpAllocator::DestroyArena(
+    uint32_t arena_index) {
   assert(arena_index != 0);
   std::string key = "arena." + std::to_string(arena_index) + ".destroy";
   int ret = mallctl(key.c_str(), nullptr, 0, nullptr, 0);
   if (ret != 0) {
-    return rocksdb_rs::status::Status_Incomplete("Failed to destroy jemalloc arena, error code: " +
-                              std::to_string(ret));
+    return rocksdb_rs::status::Status_Incomplete(
+        "Failed to destroy jemalloc arena, error code: " + std::to_string(ret));
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -284,7 +292,8 @@ rocksdb_rs::status::Status NewJemallocNodumpAllocator(
     JemallocAllocatorOptions& options,
     std::shared_ptr<MemoryAllocator>* memory_allocator) {
   if (memory_allocator == nullptr) {
-    return rocksdb_rs::status::Status_InvalidArgument("memory_allocator must be non-null.");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "memory_allocator must be non-null.");
   }
 #ifndef ROCKSDB_JEMALLOC
   (void)options;

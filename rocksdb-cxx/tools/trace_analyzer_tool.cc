@@ -4,7 +4,6 @@
 //  (found in the LICENSE.Apache file in the root directory).
 //
 
-
 #ifdef GFLAGS
 #ifdef NUMA
 #include <numa.h>
@@ -27,6 +26,7 @@
 #include "file/line_file_reader.h"
 #include "file/writable_file_writer.h"
 #include "options/cf_options.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/iterator.h"
@@ -44,8 +44,6 @@
 #include "util/gflags_compat.h"
 #include "util/random.h"
 #include "util/string_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 using GFLAGS_NAMESPACE::ParseCommandLineFlags;
 
@@ -415,10 +413,12 @@ rocksdb_rs::status::Status TraceAnalyzer::ReadTraceHeader(Trace* header) {
   s = TracerHelper::DecodeTrace(encoded_trace, header);
 
   if (header->type != kTraceBegin) {
-    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect header.");
+    return rocksdb_rs::status::Status_Corruption(
+        "Corrupted trace file. Incorrect header.");
   }
   if (header->payload.substr(0, kTraceMagic.length()) != kTraceMagic) {
-    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect magic.");
+    return rocksdb_rs::status::Status_Corruption(
+        "Corrupted trace file. Incorrect magic.");
   }
 
   return s;
@@ -431,7 +431,8 @@ rocksdb_rs::status::Status TraceAnalyzer::ReadTraceFooter(Trace* footer) {
     return s;
   }
   if (footer->type != kTraceEnd) {
-    return rocksdb_rs::status::Status_Corruption("Corrupted trace file. Incorrect footer.");
+    return rocksdb_rs::status::Status_Corruption(
+        "Corrupted trace file. Incorrect footer.");
   }
   return s;
 }
@@ -568,7 +569,8 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatistics() {
                          "access_count: %" PRIu64 " num: %" PRIu64 "\n",
                          record.first, record.second);
           if (ret < 0) {
-            return rocksdb_rs::status::Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError(
+                "Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_count_dist_f->Append(printout);
@@ -648,7 +650,8 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatistics() {
 
 // Process the statistics of the key access and
 // prefix of the accessed keys if required
-rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceStats& stats) {
+rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(
+    TraceStats& stats) {
   int ret;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string prefix = "0";
@@ -660,7 +663,8 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceSta
   for (auto& record : stats.a_key_stats) {
     // write the key access statistic file
     if (!stats.a_key_f) {
-      return rocksdb_rs::status::Status_IOError("Failed to open accessed_key_stats file.");
+      return rocksdb_rs::status::Status_IOError(
+          "Failed to open accessed_key_stats file.");
     }
     stats.a_succ_count += record.second.succ_count;
     double succ_ratio = 0.0;
@@ -685,8 +689,7 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceSta
     // write the prefix cut of the accessed keys
     if (FLAGS_output_prefix_cut > 0 && stats.a_prefix_cut_f) {
       if (record.first.compare(0, FLAGS_output_prefix_cut, prefix) != 0) {
-        std::string prefix_out =
-            rocksdb::LDBCommand::StringToHex(prefix);
+        std::string prefix_out = rocksdb::LDBCommand::StringToHex(prefix);
         if (prefix_count == 0) {
           prefix_ave_access = 0.0;
         } else {
@@ -753,11 +756,12 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticKeyStatsOrPrefix(TraceSta
 
 // Process the statistics of different query type
 // correlations
-rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticCorrelation(TraceStats& stats,
-                                               StatsUnit& unit) {
+rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticCorrelation(
+    TraceStats& stats, StatsUnit& unit) {
   if (stats.correlation_output.size() !=
       analyzer_opts_.correlation_list.size()) {
-    return rocksdb_rs::status::Status_Corruption("Cannot make the statistic of correlation.");
+    return rocksdb_rs::status::Status_Corruption(
+        "Cannot make the statistic of correlation.");
   }
 
   for (int i = 0; i < static_cast<int>(analyzer_opts_.correlation_list.size());
@@ -808,7 +812,8 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
           while (time_line < time_it.first) {
             ret = snprintf(buffer_, sizeof(buffer_), "%u\n", 0);
             if (ret < 0) {
-              return rocksdb_rs::status::Status_IOError("Format the output failed");
+              return rocksdb_rs::status::Status_IOError(
+                  "Format the output failed");
             }
             std::string printout(buffer_);
             s = stat.second.a_qps_f->Append(printout);
@@ -820,7 +825,8 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
           }
           ret = snprintf(buffer_, sizeof(buffer_), "%u\n", time_it.second);
           if (ret < 0) {
-            return rocksdb_rs::status::Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError(
+                "Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_qps_f->Append(printout);
@@ -870,7 +876,8 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
           ret = snprintf(buffer_, sizeof(buffer_), "%" PRIu64 " %.12f\n",
                          cur_num, cur_ratio);
           if (ret < 0) {
-            return rocksdb_rs::status::Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError(
+                "Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_key_num_f->Append(printout);
@@ -889,7 +896,8 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
                          stat.second.top_k_qps_sec.top().second,
                          stat.second.top_k_qps_sec.top().first);
           if (ret < 0) {
-            return rocksdb_rs::status::Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError(
+                "Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.second.a_top_qps_prefix_f->Append(printout);
@@ -908,7 +916,8 @@ rocksdb_rs::status::Status TraceAnalyzer::MakeStatisticQPS() {
                              "The prefix: %s Access count: %u\n",
                              qps_prefix_out.c_str(), qps_prefix.second);
               if (ret < 0) {
-                return rocksdb_rs::status::Status_IOError("Format the output failed");
+                return rocksdb_rs::status::Status_IOError(
+                    "Format the output failed");
               }
               std::string pout(buffer_);
               s = stat.second.a_top_qps_prefix_f->Append(pout);
@@ -1020,7 +1029,8 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
                        stat.time_series.front().type,
                        stat.time_series.front().ts, key_id);
           if (ret < 0) {
-            return rocksdb_rs::status::Status_IOError("Format the output failed");
+            return rocksdb_rs::status::Status_IOError(
+                "Format the output failed");
           }
           std::string printout(buffer_);
           s = stat.time_series_f->Append(printout);
@@ -1041,8 +1051,10 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
       std::vector<std::string> prefix(kTaTypeNum);
       std::unique_ptr<FSSequentialFile> file;
 
-      s = env_->GetFileSystem()->NewSequentialFile(
-          whole_key_path, FileOptions(env_options_), &file, nullptr).status();
+      s = env_->GetFileSystem()
+              ->NewSequentialFile(whole_key_path, FileOptions(env_options_),
+                                  &file, nullptr)
+              .status();
       if (!s.ok()) {
         fprintf(stderr, "Cannot open the whole key space file of CF: %u\n",
                 cf_id);
@@ -1069,7 +1081,8 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
                                "%" PRIu64 " %" PRIu64 "\n", cfs_[cf_id].w_count,
                                stat.a_key_stats[input_key].access_count);
                 if (ret < 0) {
-                  return rocksdb_rs::status::Status_IOError("Format the output failed");
+                  return rocksdb_rs::status::Status_IOError(
+                      "Format the output failed");
                 }
                 std::string printout(buffer_);
                 s = stat.w_key_f->Append(printout);
@@ -1090,7 +1103,8 @@ rocksdb_rs::status::Status TraceAnalyzer::ReProcessing() {
                 ret = snprintf(buffer_, sizeof(buffer_), "%" PRIu64 " %s\n",
                                cfs_[cf_id].w_count, prefix_out.c_str());
                 if (ret < 0) {
-                  return rocksdb_rs::status::Status_IOError("Format the output failed");
+                  return rocksdb_rs::status::Status_IOError(
+                      "Format the output failed");
                 }
                 std::string printout(buffer_);
                 s = stat.w_prefix_cut_f->Append(printout);
@@ -1166,11 +1180,9 @@ rocksdb_rs::status::Status TraceAnalyzer::EndProcessing() {
 
 // Insert the corresponding key statistics to the correct type
 // and correct CF, output the time-series file if needed
-rocksdb_rs::status::Status TraceAnalyzer::KeyStatsInsertion(const uint32_t& type,
-                                        const uint32_t& cf_id,
-                                        const std::string& key,
-                                        const size_t value_size,
-                                        const uint64_t ts) {
+rocksdb_rs::status::Status TraceAnalyzer::KeyStatsInsertion(
+    const uint32_t& type, const uint32_t& cf_id, const std::string& key,
+    const size_t value_size, const uint64_t ts) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   StatsUnit unit;
   unit.key_id = 0;
@@ -1321,10 +1333,9 @@ rocksdb_rs::status::Status TraceAnalyzer::KeyStatsInsertion(const uint32_t& type
 }
 
 // Update the correlation unit of each key if enabled
-rocksdb_rs::status::Status TraceAnalyzer::StatsUnitCorrelationUpdate(StatsUnit& unit,
-                                                 const uint32_t& type_second,
-                                                 const uint64_t& ts,
-                                                 const std::string& key) {
+rocksdb_rs::status::Status TraceAnalyzer::StatsUnitCorrelationUpdate(
+    StatsUnit& unit, const uint32_t& type_second, const uint64_t& ts,
+    const std::string& key) {
   if (type_second >= kTaTypeNum) {
     fprintf(stderr, "Unknown Type Id: %u\n", type_second);
     return rocksdb_rs::status::Status_NotFound();
@@ -1363,8 +1374,8 @@ rocksdb_rs::status::Status TraceAnalyzer::StatsUnitCorrelationUpdate(StatsUnit& 
 // when a new trace statistic is created, the file handler
 // pointers should be initiated if needed according to
 // the trace analyzer options
-rocksdb_rs::status::Status TraceAnalyzer::OpenStatsOutputFiles(const std::string& type,
-                                           TraceStats& new_stats) {
+rocksdb_rs::status::Status TraceAnalyzer::OpenStatsOutputFiles(
+    const std::string& type, TraceStats& new_stats) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (FLAGS_output_key_stats) {
     s = CreateOutputFile(type, new_stats.cf_name, "accessed_key_stats.txt",
@@ -1427,8 +1438,7 @@ rocksdb_rs::status::Status TraceAnalyzer::OpenStatsOutputFiles(const std::string
 // create the output path of the files to be opened
 rocksdb_rs::status::Status TraceAnalyzer::CreateOutputFile(
     const std::string& type, const std::string& cf_name,
-    const std::string& ending,
-    std::unique_ptr<rocksdb::WritableFile>* f_ptr) {
+    const std::string& ending, std::unique_ptr<rocksdb::WritableFile>* f_ptr) {
   std::string path;
   path = output_path_ + "/" + FLAGS_output_prefix + "-" + type + "-" + cf_name +
          "-" + ending;
@@ -1496,8 +1506,9 @@ rocksdb_rs::status::Status TraceAnalyzer::CloseOutputFiles() {
   return s;
 }
 
-rocksdb_rs::status::Status TraceAnalyzer::Handle(const WriteQueryTraceRecord& record,
-                             std::unique_ptr<TraceRecordResult>* /*result*/) {
+rocksdb_rs::status::Status TraceAnalyzer::Handle(
+    const WriteQueryTraceRecord& record,
+    std::unique_ptr<TraceRecordResult>* /*result*/) {
   total_writes_++;
   // Note that, if the write happens in a transaction,
   // 'Write' will be called twice, one for Prepare, one for
@@ -1522,16 +1533,18 @@ rocksdb_rs::status::Status TraceAnalyzer::Handle(const WriteQueryTraceRecord& re
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status TraceAnalyzer::Handle(const GetQueryTraceRecord& record,
-                             std::unique_ptr<TraceRecordResult>* /*result*/) {
+rocksdb_rs::status::Status TraceAnalyzer::Handle(
+    const GetQueryTraceRecord& record,
+    std::unique_ptr<TraceRecordResult>* /*result*/) {
   total_gets_++;
   return OutputAnalysisResult(TraceOperationType::kGet, record.GetTimestamp(),
                               record.GetColumnFamilyID(),
                               std::move(record.GetKey()), 0);
 }
 
-rocksdb_rs::status::Status TraceAnalyzer::Handle(const IteratorSeekQueryTraceRecord& record,
-                             std::unique_ptr<TraceRecordResult>* /*result*/) {
+rocksdb_rs::status::Status TraceAnalyzer::Handle(
+    const IteratorSeekQueryTraceRecord& record,
+    std::unique_ptr<TraceRecordResult>* /*result*/) {
   TraceOperationType op_type;
   if (record.GetSeekType() == IteratorSeekQueryTraceRecord::kSeek) {
     op_type = TraceOperationType::kIteratorSeek;
@@ -1548,8 +1561,9 @@ rocksdb_rs::status::Status TraceAnalyzer::Handle(const IteratorSeekQueryTraceRec
                               std::move(record.GetKey()), 0);
 }
 
-rocksdb_rs::status::Status TraceAnalyzer::Handle(const MultiGetQueryTraceRecord& record,
-                             std::unique_ptr<TraceRecordResult>* /*result*/) {
+rocksdb_rs::status::Status TraceAnalyzer::Handle(
+    const MultiGetQueryTraceRecord& record,
+    std::unique_ptr<TraceRecordResult>* /*result*/) {
   total_multigets_++;
 
   std::vector<uint32_t> cf_ids = record.GetColumnFamilyIDs();
@@ -1576,52 +1590,54 @@ rocksdb_rs::status::Status TraceAnalyzer::Handle(const MultiGetQueryTraceRecord&
 }
 
 // Handle the Put request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::PutCF(uint32_t column_family_id, const Slice& key,
-                            const Slice& value) {
+rocksdb_rs::status::Status TraceAnalyzer::PutCF(uint32_t column_family_id,
+                                                const Slice& key,
+                                                const Slice& value) {
   return OutputAnalysisResult(TraceOperationType::kPut, write_batch_ts_,
                               column_family_id, key, value.size());
 }
 
-rocksdb_rs::status::Status TraceAnalyzer::PutEntityCF(uint32_t column_family_id, const Slice& key,
-                                  const Slice& value) {
+rocksdb_rs::status::Status TraceAnalyzer::PutEntityCF(uint32_t column_family_id,
+                                                      const Slice& key,
+                                                      const Slice& value) {
   return OutputAnalysisResult(TraceOperationType::kPutEntity, write_batch_ts_,
                               column_family_id, key, value.size());
 }
 
 // Handle the Delete request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::DeleteCF(uint32_t column_family_id, const Slice& key) {
+rocksdb_rs::status::Status TraceAnalyzer::DeleteCF(uint32_t column_family_id,
+                                                   const Slice& key) {
   return OutputAnalysisResult(TraceOperationType::kDelete, write_batch_ts_,
                               column_family_id, key, 0);
 }
 
 // Handle the SingleDelete request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::SingleDeleteCF(uint32_t column_family_id,
-                                     const Slice& key) {
+rocksdb_rs::status::Status TraceAnalyzer::SingleDeleteCF(
+    uint32_t column_family_id, const Slice& key) {
   return OutputAnalysisResult(TraceOperationType::kSingleDelete,
                               write_batch_ts_, column_family_id, key, 0);
 }
 
 // Handle the DeleteRange request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::DeleteRangeCF(uint32_t column_family_id,
-                                    const Slice& begin_key,
-                                    const Slice& end_key) {
+rocksdb_rs::status::Status TraceAnalyzer::DeleteRangeCF(
+    uint32_t column_family_id, const Slice& begin_key, const Slice& end_key) {
   return OutputAnalysisResult(TraceOperationType::kRangeDelete, write_batch_ts_,
                               {column_family_id, column_family_id},
                               {begin_key, end_key}, {0, 0});
 }
 
 // Handle the Merge request in the write batch of the trace
-rocksdb_rs::status::Status TraceAnalyzer::MergeCF(uint32_t column_family_id, const Slice& key,
-                              const Slice& value) {
+rocksdb_rs::status::Status TraceAnalyzer::MergeCF(uint32_t column_family_id,
+                                                  const Slice& key,
+                                                  const Slice& value) {
   return OutputAnalysisResult(TraceOperationType::kMerge, write_batch_ts_,
                               column_family_id, key, value.size());
 }
 
-rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationType op_type,
-                                           uint64_t timestamp,
-                                           std::vector<uint32_t> cf_ids,
-                                           std::vector<Slice> keys,
-                                           std::vector<size_t> value_sizes) {
+rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(
+    TraceOperationType op_type, uint64_t timestamp,
+    std::vector<uint32_t> cf_ids, std::vector<Slice> keys,
+    std::vector<size_t> value_sizes) {
   assert(!cf_ids.empty());
   assert(cf_ids.size() == keys.size());
   assert(cf_ids.size() == value_sizes.size());
@@ -1636,7 +1652,8 @@ rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationTyp
       s = WriteTraceSequence(op_type, cf_ids[i], keys[i], value_sizes[i],
                              timestamp);
       if (!s.ok()) {
-        return rocksdb_rs::status::Status_Corruption("Failed to write the trace sequence to file");
+        return rocksdb_rs::status::Status_Corruption(
+            "Failed to write the trace sequence to file");
       }
     }
   }
@@ -1661,17 +1678,17 @@ rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationTyp
         op_type, cf_ids[i], keys[i].ToString(),
         value_sizes[i] == 0 ? kShadowValueSize : value_sizes[i], timestamp);
     if (!s.ok()) {
-      return rocksdb_rs::status::Status_Corruption("Failed to insert key statistics");
+      return rocksdb_rs::status::Status_Corruption(
+          "Failed to insert key statistics");
     }
   }
 
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(TraceOperationType op_type,
-                                           uint64_t timestamp, uint32_t cf_id,
-                                           const Slice& key,
-                                           size_t value_size) {
+rocksdb_rs::status::Status TraceAnalyzer::OutputAnalysisResult(
+    TraceOperationType op_type, uint64_t timestamp, uint32_t cf_id,
+    const Slice& key, size_t value_size) {
   return OutputAnalysisResult(
       op_type, timestamp, std::vector<uint32_t>({cf_id}),
       std::vector<Slice>({key}), std::vector<size_t>({value_size}));
@@ -1747,8 +1764,8 @@ void TraceAnalyzer::PrintStatistics() {
         printf("The Top %d keys that are accessed:\n",
                FLAGS_print_top_k_access);
         while (!stat.top_k_queue.empty()) {
-          std::string hex_key = rocksdb::LDBCommand::StringToHex(
-              stat.top_k_queue.top().second);
+          std::string hex_key =
+              rocksdb::LDBCommand::StringToHex(stat.top_k_queue.top().second);
           printf("Access_count: %" PRIu64 " %s\n", stat.top_k_queue.top().first,
                  hex_key.c_str());
           stat.top_k_queue.pop();
@@ -1844,13 +1861,10 @@ void TraceAnalyzer::PrintStatistics() {
 }
 
 // Write the trace sequence to file
-rocksdb_rs::status::Status TraceAnalyzer::WriteTraceSequence(const uint32_t& type,
-                                         const uint32_t& cf_id,
-                                         const Slice& key,
-                                         const size_t value_size,
-                                         const uint64_t ts) {
-  std::string hex_key =
-      rocksdb::LDBCommand::StringToHex(key.ToString());
+rocksdb_rs::status::Status TraceAnalyzer::WriteTraceSequence(
+    const uint32_t& type, const uint32_t& cf_id, const Slice& key,
+    const size_t value_size, const uint64_t ts) {
+  std::string hex_key = rocksdb::LDBCommand::StringToHex(key.ToString());
   int ret;
   ret = snprintf(buffer_, sizeof(buffer_), "%u %u %zu %" PRIu64 "\n", type,
                  cf_id, value_size, ts);

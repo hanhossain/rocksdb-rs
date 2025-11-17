@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/write_prepared_txn_db.h"
 
 #include <algorithm>
@@ -81,8 +80,10 @@ rocksdb_rs::status::Status WritePreparedTxnDB::Initialize(
     explicit CommitSubBatchPreReleaseCallback(WritePreparedTxnDB* db)
         : db_(db) {}
     rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
-                    bool is_mem_disabled __attribute__((__unused__)), uint64_t,
-                    size_t /*index*/, size_t /*total*/) override {
+                                        bool is_mem_disabled
+                                        __attribute__((__unused__)),
+                                        uint64_t, size_t /*index*/,
+                                        size_t /*total*/) override {
       assert(!is_mem_disabled);
       db_->AddCommitted(commit_seq, commit_seq);
       return rocksdb_rs::status::Status_OK();
@@ -101,7 +102,8 @@ rocksdb_rs::status::Status WritePreparedTxnDB::Initialize(
 
 rocksdb_rs::status::Status WritePreparedTxnDB::VerifyCFOptions(
     const ColumnFamilyOptions& cf_options) {
-  rocksdb_rs::status::Status s = PessimisticTransactionDB::VerifyCFOptions(cf_options);
+  rocksdb_rs::status::Status s =
+      PessimisticTransactionDB::VerifyCFOptions(cf_options);
   if (!s.ok()) {
     return s;
   }
@@ -125,7 +127,7 @@ Transaction* WritePreparedTxnDB::BeginTransaction(
 }
 
 rocksdb_rs::status::Status WritePreparedTxnDB::Write(const WriteOptions& opts,
-                                 WriteBatch* updates) {
+                                                     WriteBatch* updates) {
   if (txn_db_options_.skip_concurrency_control) {
     // Skip locking the rows
     const size_t UNKNOWN_BATCH_CNT = 0;
@@ -155,9 +157,9 @@ rocksdb_rs::status::Status WritePreparedTxnDB::Write(
   }
 }
 
-rocksdb_rs::status::Status WritePreparedTxnDB::WriteInternal(const WriteOptions& write_options_orig,
-                                         WriteBatch* batch, size_t batch_cnt,
-                                         WritePreparedTxn* txn) {
+rocksdb_rs::status::Status WritePreparedTxnDB::WriteInternal(
+    const WriteOptions& write_options_orig, WriteBatch* batch, size_t batch_cnt,
+    WritePreparedTxn* txn) {
   ROCKS_LOG_DETAILS(db_impl_->immutable_db_options().info_log,
                     "CommitBatchInternal");
   if (batch->Count() == 0) {
@@ -247,9 +249,9 @@ rocksdb_rs::status::Status WritePreparedTxnDB::WriteInternal(const WriteOptions&
   return s;
 }
 
-rocksdb_rs::status::Status WritePreparedTxnDB::Get(const ReadOptions& options,
-                               ColumnFamilyHandle* column_family,
-                               const Slice& key, PinnableSlice* value) {
+rocksdb_rs::status::Status WritePreparedTxnDB::Get(
+    const ReadOptions& options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* value) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
@@ -320,7 +322,8 @@ rust::Vec<rocksdb_rs::status::Status> WritePreparedTxnDB::MultiGet(
   size_t num_keys = keys.size();
   values->resize(num_keys);
 
-  rust::Vec<rocksdb_rs::status::Status> stat_list = rocksdb_rs::status::Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> stat_list =
+      rocksdb_rs::status::Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = this->Get(options, column_family[i], keys[i], &(*values)[i]);
   }

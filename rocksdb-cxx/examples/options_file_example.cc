@@ -75,8 +75,8 @@ int main() {
 
   // destroy and open DB
   DB* db;
-  rocksdb_rs::status::Status s = rocksdb::DestroyDB(kDBPath,
-                                          Options(db_opt, cf_descs[0].options));
+  rocksdb_rs::status::Status s =
+      rocksdb::DestroyDB(kDBPath, Options(db_opt, cf_descs[0].options));
   assert(s.ok());
   s = DB::Open(Options(db_opt, cf_descs[0].options), kDBPath, &db);
   assert(s.ok());

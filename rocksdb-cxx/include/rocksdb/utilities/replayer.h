@@ -53,7 +53,8 @@ class Replayer {
   // Status_Incomplete() if Prepare() was not called or no more available
   // trace;
   // Status_NotSupported() if the read trace type is not supported.
-  virtual rocksdb_rs::status::Status Next(std::unique_ptr<TraceRecord>* record) = 0;
+  virtual rocksdb_rs::status::Status Next(
+      std::unique_ptr<TraceRecord>* record) = 0;
 
   // Execute one TraceRecord.
   // Return Status_OK() if the execution was successful. Get/MultiGet traces
@@ -67,8 +68,9 @@ class Replayer {
   // The actual operation execution status and result(s) will be saved in
   // result. For example, a GetQueryTraceRecord will have its DB::Get() status
   // and the returned value saved in a SingleValueTraceExecutionResult.
-  virtual rocksdb_rs::status::Status Execute(const std::unique_ptr<TraceRecord>& record,
-                         std::unique_ptr<TraceRecordResult>* result) = 0;
+  virtual rocksdb_rs::status::Status Execute(
+      const std::unique_ptr<TraceRecord>& record,
+      std::unique_ptr<TraceRecordResult>* result) = 0;
 
   // Replay all the traces from the provided trace stream, taking the delay
   // between the traces into consideration.
@@ -77,7 +79,8 @@ class Replayer {
   // actual operation execution result (See the description for Execute()).
   virtual rocksdb_rs::status::Status Replay(
       const ReplayOptions& options,
-      const std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)>&
+      const std::function<void(rocksdb_rs::status::Status,
+                               std::unique_ptr<TraceRecordResult>&&)>&
           result_callback) = 0;
 };
 

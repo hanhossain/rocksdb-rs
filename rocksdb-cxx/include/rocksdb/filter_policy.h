@@ -27,11 +27,10 @@
 #include <string>
 #include <vector>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/advanced_options.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/types.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -78,7 +77,8 @@ struct FilterBuildingContext {
   bool is_bottommost = false;
 
   // Reason for creating the file with the filter
-  rocksdb_rs::types::TableFileCreationReason reason = rocksdb_rs::types::TableFileCreationReason::kMisc;
+  rocksdb_rs::types::TableFileCreationReason reason =
+      rocksdb_rs::types::TableFileCreationReason::kMisc;
 };
 
 // Determines what kind of filter (if any) to generate in SST files, and under
@@ -112,9 +112,9 @@ class FilterPolicy : public Customizable {
   //   "bloomfilter:[bits_per_key]",
   //   e.g. ""bloomfilter:4"
   //   The above string is equivalent to calling NewBloomFilterPolicy(4).
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& value,
-                                 std::shared_ptr<const FilterPolicy>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& value,
+      std::shared_ptr<const FilterPolicy>* result);
 
   // Return a new FilterBitsBuilder for constructing full or partitioned
   // filter blocks, or return nullptr to indicate "no filter". Custom

@@ -27,10 +27,11 @@ namespace blob_db {
 BlobDumpTool::BlobDumpTool()
     : reader_(nullptr), buffer_(nullptr), buffer_size_(0) {}
 
-rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename, DisplayType show_key,
-                         DisplayType show_blob,
-                         DisplayType show_uncompressed_blob,
-                         bool show_summary) {
+rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename,
+                                             DisplayType show_key,
+                                             DisplayType show_blob,
+                                             DisplayType show_uncompressed_blob,
+                                             bool show_summary) {
   constexpr size_t kReadaheadSize = 2 * 1024 * 1024;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   const auto fs = FileSystem::Default();
@@ -56,7 +57,8 @@ rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename, Displa
   reader_.reset(new RandomAccessFileReader(std::move(file), filename));
   uint64_t offset = 0;
   uint64_t footer_offset = 0;
-  rocksdb_rs::compression_type::CompressionType compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   s = DumpBlobLogHeader(&offset, &compression);
   if (!s.ok()) {
     return s;
@@ -84,7 +86,8 @@ rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename, Displa
     fprintf(stdout, "  total records: %" PRIu64 "\n", total_records);
     fprintf(stdout, "  total key size: %" PRIu64 "\n", total_key_size);
     fprintf(stdout, "  total blob size: %" PRIu64 "\n", total_blob_size);
-    if (compression != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+    if (compression !=
+        rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       fprintf(stdout, "  total raw blob size: %" PRIu64 "\n",
               total_uncompressed_blob_size);
     }
@@ -92,7 +95,8 @@ rocksdb_rs::status::Status BlobDumpTool::Run(const std::string& filename, Displa
   return s;
 }
 
-rocksdb_rs::status::Status BlobDumpTool::Read(uint64_t offset, size_t size, Slice* result) {
+rocksdb_rs::status::Status BlobDumpTool::Read(uint64_t offset, size_t size,
+                                              Slice* result) {
   if (buffer_size_ < size) {
     if (buffer_size_ == 0) {
       buffer_size_ = 4096;
@@ -102,19 +106,24 @@ rocksdb_rs::status::Status BlobDumpTool::Read(uint64_t offset, size_t size, Slic
     }
     buffer_.reset(new char[buffer_size_]);
   }
-  rocksdb_rs::status::Status s = reader_->Read(IOOptions(), offset, size, result, buffer_.get(),
-                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
+  rocksdb_rs::status::Status s =
+      reader_
+          ->Read(IOOptions(), offset, size, result, buffer_.get(), nullptr,
+                 Env::IO_TOTAL /* rate_limiter_priority */)
+          .status();
   if (!s.ok()) {
     return s;
   }
   if (result->size() != size) {
-    return rocksdb_rs::status::Status_Corruption("Reach the end of the file unexpectedly.");
+    return rocksdb_rs::status::Status_Corruption(
+        "Reach the end of the file unexpectedly.");
   }
   return s;
 }
 
-rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogHeader(uint64_t* offset,
-                                       rocksdb_rs::compression_type::CompressionType* compression) {
+rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogHeader(
+    uint64_t* offset,
+    rocksdb_rs::compression_type::CompressionType* compression) {
   Slice slice;
   rocksdb_rs::status::Status s = Read(0, BlobLogHeader::kSize, &slice);
   if (!s.ok()) {
@@ -143,8 +152,8 @@ rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogHeader(uint64_t* offset,
   return s;
 }
 
-rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
-                                       uint64_t* footer_offset) {
+rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogFooter(
+    uint64_t file_size, uint64_t* footer_offset) {
   auto no_footer = [&]() {
     *footer_offset = file_size;
     fprintf(stdout, "No blob log footer.\n");
@@ -155,7 +164,8 @@ rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
   }
   Slice slice;
   *footer_offset = file_size - BlobLogFooter::kSize;
-  rocksdb_rs::status::Status s = Read(*footer_offset, BlobLogFooter::kSize, &slice);
+  rocksdb_rs::status::Status s =
+      Read(*footer_offset, BlobLogFooter::kSize, &slice);
   if (!s.ok()) {
     return s;
   }
@@ -171,19 +181,19 @@ rocksdb_rs::status::Status BlobDumpTool::DumpBlobLogFooter(uint64_t file_size,
   return s;
 }
 
-rocksdb_rs::status::Status BlobDumpTool::DumpRecord(DisplayType show_key, DisplayType show_blob,
-                                DisplayType show_uncompressed_blob,
-                                bool show_summary, rocksdb_rs::compression_type::CompressionType compression,
-                                uint64_t* offset, uint64_t* total_records,
-                                uint64_t* total_key_size,
-                                uint64_t* total_blob_size,
-                                uint64_t* total_uncompressed_blob_size) {
+rocksdb_rs::status::Status BlobDumpTool::DumpRecord(
+    DisplayType show_key, DisplayType show_blob,
+    DisplayType show_uncompressed_blob, bool show_summary,
+    rocksdb_rs::compression_type::CompressionType compression, uint64_t* offset,
+    uint64_t* total_records, uint64_t* total_key_size,
+    uint64_t* total_blob_size, uint64_t* total_uncompressed_blob_size) {
   if (show_key != DisplayType::kNone) {
     fprintf(stdout, "Read record with offset 0x%" PRIx64 " (%" PRIu64 "):\n",
             *offset, *offset);
   }
   Slice slice;
-  rocksdb_rs::status::Status s = Read(*offset, BlobLogRecord::kHeaderSize, &slice);
+  rocksdb_rs::status::Status s =
+      Read(*offset, BlobLogRecord::kHeaderSize, &slice);
   if (!s.ok()) {
     return s;
   }
@@ -206,7 +216,8 @@ rocksdb_rs::status::Status BlobDumpTool::DumpRecord(DisplayType show_key, Displa
   }
   // Decompress value
   std::string uncompressed_value;
-  if (compression != rocksdb_rs::compression_type::CompressionType::kNoCompression &&
+  if (compression !=
+          rocksdb_rs::compression_type::CompressionType::kNoCompression &&
       (show_uncompressed_blob != DisplayType::kNone || show_summary)) {
     BlockContents contents;
     UncompressionContext context(compression);
@@ -277,4 +288,3 @@ std::string BlobDumpTool::GetString(std::pair<T, T> p) {
 
 }  // namespace blob_db
 }  // namespace rocksdb
-

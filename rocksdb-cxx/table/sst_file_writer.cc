@@ -23,7 +23,6 @@ const std::string ExternalSstFilePropertyNames::kVersion =
 const std::string ExternalSstFilePropertyNames::kGlobalSeqno =
     "rocksdb.external_sst_file.global_seqno";
 
-
 const size_t kFadviseTrigger = 1024 * 1024;  // 1MB
 
 struct SstFileWriter::Rep {
@@ -63,7 +62,7 @@ struct SstFileWriter::Rep {
   uint64_t next_file_number = 1;
 
   rocksdb_rs::status::Status AddImpl(const Slice& user_key, const Slice& value,
-                 ValueType value_type) {
+                                     ValueType value_type) {
     if (!builder) {
       return rocksdb_rs::status::Status_InvalidArgument("File is not opened");
     }
@@ -98,21 +97,24 @@ struct SstFileWriter::Rep {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& value, ValueType value_type) {
+  rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& value,
+                                 ValueType value_type) {
     if (internal_comparator.user_comparator()->timestamp_size() != 0) {
-      return rocksdb_rs::status::Status_InvalidArgument("Timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Timestamp size mismatch");
     }
 
     return AddImpl(user_key, value, value_type);
   }
 
-  rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& timestamp, const Slice& value,
-             ValueType value_type) {
+  rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& timestamp,
+                                 const Slice& value, ValueType value_type) {
     const size_t timestamp_size = timestamp.size();
 
     if (internal_comparator.user_comparator()->timestamp_size() !=
         timestamp_size) {
-      return rocksdb_rs::status::Status_InvalidArgument("Timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Timestamp size mismatch");
     }
 
     const size_t user_key_size = user_key.size();
@@ -130,7 +132,8 @@ struct SstFileWriter::Rep {
     return AddImpl(user_key_with_ts, value, value_type);
   }
 
-  rocksdb_rs::status::Status DeleteRangeImpl(const Slice& begin_key, const Slice& end_key) {
+  rocksdb_rs::status::Status DeleteRangeImpl(const Slice& begin_key,
+                                             const Slice& end_key) {
     if (!builder) {
       return rocksdb_rs::status::Status_InvalidArgument("File is not opened");
     }
@@ -139,7 +142,8 @@ struct SstFileWriter::Rep {
     if (cmp > 0) {
       // It's an empty range where endpoints appear mistaken. Don't bother
       // applying it to the DB, and return an error to the user.
-      return rocksdb_rs::status::Status_InvalidArgument("end key comes before start key");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "end key comes before start key");
     } else if (cmp == 0) {
       // It's an empty range. Don't bother applying it to the DB.
       return rocksdb_rs::status::Status_OK();
@@ -175,21 +179,25 @@ struct SstFileWriter::Rep {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status DeleteRange(const Slice& begin_key, const Slice& end_key) {
+  rocksdb_rs::status::Status DeleteRange(const Slice& begin_key,
+                                         const Slice& end_key) {
     if (internal_comparator.user_comparator()->timestamp_size() != 0) {
-      return rocksdb_rs::status::Status_InvalidArgument("Timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Timestamp size mismatch");
     }
     return DeleteRangeImpl(begin_key, end_key);
   }
 
   // begin_key and end_key should be users keys without timestamp.
-  rocksdb_rs::status::Status DeleteRange(const Slice& begin_key, const Slice& end_key,
-                     const Slice& timestamp) {
+  rocksdb_rs::status::Status DeleteRange(const Slice& begin_key,
+                                         const Slice& end_key,
+                                         const Slice& timestamp) {
     const size_t timestamp_size = timestamp.size();
 
     if (internal_comparator.user_comparator()->timestamp_size() !=
         timestamp_size) {
-      return rocksdb_rs::status::Status_InvalidArgument("Timestamp size mismatch");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Timestamp size mismatch");
     }
 
     const size_t begin_key_size = begin_key.size();
@@ -267,8 +275,10 @@ rocksdb_rs::status::Status SstFileWriter::Open(const std::string& file_path) {
   Rep* r = rep_.get();
   std::unique_ptr<FSWritableFile> sst_file;
   FileOptions cur_file_opts(r->env_options);
-  rocksdb_rs::status::Status s = r->ioptions.env->GetFileSystem()->NewWritableFile(
-      file_path, cur_file_opts, &sst_file, nullptr).status();
+  rocksdb_rs::status::Status s =
+      r->ioptions.env->GetFileSystem()
+          ->NewWritableFile(file_path, cur_file_opts, &sst_file, nullptr)
+          .status();
   if (!s.ok()) {
     return s;
   }
@@ -278,7 +288,8 @@ rocksdb_rs::status::Status SstFileWriter::Open(const std::string& file_path) {
   rocksdb_rs::compression_type::CompressionType compression_type;
   CompressionOptions compression_opts;
   if (r->mutable_cf_options.bottommost_compression !=
-      rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption) {
+      rocksdb_rs::compression_type::CompressionType::
+          kDisableCompressionOption) {
     compression_type = r->mutable_cf_options.bottommost_compression;
     if (r->mutable_cf_options.bottommost_compression_opts.enabled) {
       compression_opts = r->mutable_cf_options.bottommost_compression_opts;
@@ -328,9 +339,10 @@ rocksdb_rs::status::Status SstFileWriter::Open(const std::string& file_path) {
       r->ioptions, r->mutable_cf_options, r->internal_comparator,
       &int_tbl_prop_collector_factories, compression_type, compression_opts,
       cf_id, r->column_family_name, unknown_level, false /* is_bottommost */,
-      rocksdb_rs::types::TableFileCreationReason::kMisc, 0 /* oldest_key_time */,
-      0 /* file_creation_time */, "SST Writer" /* db_id */, r->db_session_id,
-      0 /* target_file_size */, r->next_file_number);
+      rocksdb_rs::types::TableFileCreationReason::kMisc,
+      0 /* oldest_key_time */, 0 /* file_creation_time */,
+      "SST Writer" /* db_id */, r->db_session_id, 0 /* target_file_size */,
+      r->next_file_number);
   // External SST files used to each get a unique session id. Now for
   // slightly better uniqueness probability in constructing cache keys, we
   // assign fake file numbers to each file (into table properties) and keep
@@ -357,20 +369,24 @@ rocksdb_rs::status::Status SstFileWriter::Open(const std::string& file_path) {
   return s;
 }
 
-rocksdb_rs::status::Status SstFileWriter::Add(const Slice& user_key, const Slice& value) {
+rocksdb_rs::status::Status SstFileWriter::Add(const Slice& user_key,
+                                              const Slice& value) {
   return rep_->Add(user_key, value, ValueType::kTypeValue);
 }
 
-rocksdb_rs::status::Status SstFileWriter::Put(const Slice& user_key, const Slice& value) {
+rocksdb_rs::status::Status SstFileWriter::Put(const Slice& user_key,
+                                              const Slice& value) {
   return rep_->Add(user_key, value, ValueType::kTypeValue);
 }
 
-rocksdb_rs::status::Status SstFileWriter::Put(const Slice& user_key, const Slice& timestamp,
-                          const Slice& value) {
+rocksdb_rs::status::Status SstFileWriter::Put(const Slice& user_key,
+                                              const Slice& timestamp,
+                                              const Slice& value) {
   return rep_->Add(user_key, timestamp, value, ValueType::kTypeValue);
 }
 
-rocksdb_rs::status::Status SstFileWriter::Merge(const Slice& user_key, const Slice& value) {
+rocksdb_rs::status::Status SstFileWriter::Merge(const Slice& user_key,
+                                                const Slice& value) {
   return rep_->Add(user_key, value, ValueType::kTypeMerge);
 }
 
@@ -378,29 +394,33 @@ rocksdb_rs::status::Status SstFileWriter::Delete(const Slice& user_key) {
   return rep_->Add(user_key, Slice(), ValueType::kTypeDeletion);
 }
 
-rocksdb_rs::status::Status SstFileWriter::Delete(const Slice& user_key, const Slice& timestamp) {
+rocksdb_rs::status::Status SstFileWriter::Delete(const Slice& user_key,
+                                                 const Slice& timestamp) {
   return rep_->Add(user_key, timestamp, Slice(),
                    ValueType::kTypeDeletionWithTimestamp);
 }
 
 rocksdb_rs::status::Status SstFileWriter::DeleteRange(const Slice& begin_key,
-                                  const Slice& end_key) {
+                                                      const Slice& end_key) {
   return rep_->DeleteRange(begin_key, end_key);
 }
 
-rocksdb_rs::status::Status SstFileWriter::DeleteRange(const Slice& begin_key, const Slice& end_key,
-                                  const Slice& timestamp) {
+rocksdb_rs::status::Status SstFileWriter::DeleteRange(const Slice& begin_key,
+                                                      const Slice& end_key,
+                                                      const Slice& timestamp) {
   return rep_->DeleteRange(begin_key, end_key, timestamp);
 }
 
-rocksdb_rs::status::Status SstFileWriter::Finish(ExternalSstFileInfo* file_info) {
+rocksdb_rs::status::Status SstFileWriter::Finish(
+    ExternalSstFileInfo* file_info) {
   Rep* r = rep_.get();
   if (!r->builder) {
     return rocksdb_rs::status::Status_InvalidArgument("File is not opened");
   }
   if (r->file_info.num_entries == 0 &&
       r->file_info.num_range_del_entries == 0) {
-    return rocksdb_rs::status::Status_InvalidArgument("Cannot create sst file with no entries");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Cannot create sst file with no entries");
   }
 
   rocksdb_rs::status::Status s = r->builder->Finish();

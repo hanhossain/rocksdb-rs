@@ -32,15 +32,15 @@ enum OptionSection : char {
 static const std::string opt_section_titles[] = {
     "Version", "DBOptions", "CFOptions", "TableOptions/", "Unknown"};
 
-rocksdb_rs::status::Status PersistRocksDBOptions(const DBOptions& db_opt,
-                             const std::vector<std::string>& cf_names,
-                             const std::vector<ColumnFamilyOptions>& cf_opts,
-                             const std::string& file_name, FileSystem* fs);
-rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_options,
-                             const DBOptions& db_opt,
-                             const std::vector<std::string>& cf_names,
-                             const std::vector<ColumnFamilyOptions>& cf_opts,
-                             const std::string& file_name, FileSystem* fs);
+rocksdb_rs::status::Status PersistRocksDBOptions(
+    const DBOptions& db_opt, const std::vector<std::string>& cf_names,
+    const std::vector<ColumnFamilyOptions>& cf_opts,
+    const std::string& file_name, FileSystem* fs);
+rocksdb_rs::status::Status PersistRocksDBOptions(
+    const ConfigOptions& config_options, const DBOptions& db_opt,
+    const std::vector<std::string>& cf_names,
+    const std::vector<ColumnFamilyOptions>& cf_opts,
+    const std::string& file_name, FileSystem* fs);
 
 class RocksDBOptionsParser {
  public:
@@ -51,10 +51,12 @@ class RocksDBOptionsParser {
   // `file_readahead_size` is used for readahead for the option file.
   // If 0 is given, a default value will be used.
   rocksdb_rs::status::Status Parse(const std::string& file_name, FileSystem* fs,
-               bool ignore_unknown_options, size_t file_readahead_size);
+                                   bool ignore_unknown_options,
+                                   size_t file_readahead_size);
 
   rocksdb_rs::status::Status Parse(const ConfigOptions& config_options,
-               const std::string& file_name, FileSystem* fs);
+                                   const std::string& file_name,
+                                   FileSystem* fs);
 
   static std::string TrimAndRemoveComment(const std::string& line,
                                           const bool trim_only = false);
@@ -91,23 +93,29 @@ class RocksDBOptionsParser {
       const std::unordered_map<std::string, std::string>* new_opt_map =
           nullptr);
 
-  static rocksdb_rs::status::Status VerifyTableFactory(const ConfigOptions& config_options,
-                                   const TableFactory* base_tf,
-                                   const TableFactory* file_tf);
+  static rocksdb_rs::status::Status VerifyTableFactory(
+      const ConfigOptions& config_options, const TableFactory* base_tf,
+      const TableFactory* file_tf);
 
-  static rocksdb_rs::status::Status ExtraParserCheck(const RocksDBOptionsParser& input_parser);
+  static rocksdb_rs::status::Status ExtraParserCheck(
+      const RocksDBOptionsParser& input_parser);
 
-  static rocksdb_rs::status::Status ParseStatement(std::string* name, std::string* value,
-                               const std::string& line, const int line_num);
+  static rocksdb_rs::status::Status ParseStatement(std::string* name,
+                                                   std::string* value,
+                                                   const std::string& line,
+                                                   const int line_num);
 
  protected:
   bool IsSection(const std::string& line);
-  rocksdb_rs::status::Status ParseSection(OptionSection* section, std::string* title,
-                      std::string* argument, const std::string& line,
-                      const int line_num);
+  rocksdb_rs::status::Status ParseSection(OptionSection* section,
+                                          std::string* title,
+                                          std::string* argument,
+                                          const std::string& line,
+                                          const int line_num);
 
   rocksdb_rs::status::Status CheckSection(const OptionSection section,
-                      const std::string& section_arg, const int line_num);
+                                          const std::string& section_arg,
+                                          const int line_num);
 
   rocksdb_rs::status::Status EndSection(
       const ConfigOptions& config_options, const OptionSection section,
@@ -116,11 +124,13 @@ class RocksDBOptionsParser {
 
   rocksdb_rs::status::Status ValidityCheck();
 
-  static rocksdb_rs::status::Status InvalidArgument(const int line_num, const std::string& message);
+  static rocksdb_rs::status::Status InvalidArgument(const int line_num,
+                                                    const std::string& message);
 
   rocksdb_rs::status::Status ParseVersionNumber(const std::string& ver_name,
-                            const std::string& ver_string, const int max_count,
-                            int* version);
+                                                const std::string& ver_string,
+                                                const int max_count,
+                                                int* version);
 
   ColumnFamilyOptions* GetCFOptionsImpl(const std::string& name) {
     assert(cf_names_.size() == cf_opts_.size());
@@ -144,6 +154,5 @@ class RocksDBOptionsParser {
   int db_version[3];
   int opt_file_version[3];
 };
-
 
 }  // namespace rocksdb

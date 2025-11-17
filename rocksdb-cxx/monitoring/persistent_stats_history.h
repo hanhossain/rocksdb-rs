@@ -27,8 +27,8 @@ enum StatsVersionKeyType : uint32_t {
 // Read the version number from persitent stats cf depending on type provided
 // stores the version number in `*version_number`
 // returns Status_OK() on success, or other status code on failure
-rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
-                                          uint64_t* version_number);
+rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(
+    DBImpl* db, StatsVersionKeyType type, uint64_t* version_number);
 
 // Encode timestamp and stats key into buf
 // Format: timestamp(10 digit) + '#' + key

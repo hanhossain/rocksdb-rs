@@ -12,10 +12,11 @@
 #include "rocksdb/utilities/customizable_util.h"
 
 namespace rocksdb {
-rocksdb_rs::status::Status WalFilter::CreateFromString(const ConfigOptions& config_options,
-                                   const std::string& value,
-                                   WalFilter** filter) {
-  rocksdb_rs::status::Status s = LoadStaticObject<WalFilter>(config_options, value, filter);
+rocksdb_rs::status::Status WalFilter::CreateFromString(
+    const ConfigOptions& config_options, const std::string& value,
+    WalFilter** filter) {
+  rocksdb_rs::status::Status s =
+      LoadStaticObject<WalFilter>(config_options, value, filter);
   return s;
 }
 

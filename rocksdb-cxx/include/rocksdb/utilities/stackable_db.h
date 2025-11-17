@@ -42,9 +42,9 @@ class StackableDB : public DB {
 
   virtual DB* GetRootDB() override { return db_->GetRootDB(); }
 
-  virtual rocksdb_rs::status::Status CreateColumnFamily(const ColumnFamilyOptions& options,
-                                    const std::string& column_family_name,
-                                    ColumnFamilyHandle** handle) override {
+  virtual rocksdb_rs::status::Status CreateColumnFamily(
+      const ColumnFamilyOptions& options, const std::string& column_family_name,
+      ColumnFamilyHandle** handle) override {
     return db_->CreateColumnFamily(options, column_family_name, handle);
   }
 
@@ -61,7 +61,8 @@ class StackableDB : public DB {
     return db_->CreateColumnFamilies(column_families, handles);
   }
 
-  virtual rocksdb_rs::status::Status DropColumnFamily(ColumnFamilyHandle* column_family) override {
+  virtual rocksdb_rs::status::Status DropColumnFamily(
+      ColumnFamilyHandle* column_family) override {
     return db_->DropColumnFamily(column_family);
   }
 
@@ -77,33 +78,39 @@ class StackableDB : public DB {
 
   using DB::Put;
   virtual rocksdb_rs::status::Status Put(const WriteOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     const Slice& val) override {
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         const Slice& val) override {
     return db_->Put(options, column_family, key, val);
   }
-  rocksdb_rs::status::Status Put(const WriteOptions& options, ColumnFamilyHandle* column_family,
-             const Slice& key, const Slice& ts, const Slice& val) override {
+  rocksdb_rs::status::Status Put(const WriteOptions& options,
+                                 ColumnFamilyHandle* column_family,
+                                 const Slice& key, const Slice& ts,
+                                 const Slice& val) override {
     return db_->Put(options, column_family, key, ts, val);
   }
 
   using DB::PutEntity;
   rocksdb_rs::status::Status PutEntity(const WriteOptions& options,
-                   ColumnFamilyHandle* column_family, const Slice& key,
-                   const WideColumns& columns) override {
+                                       ColumnFamilyHandle* column_family,
+                                       const Slice& key,
+                                       const WideColumns& columns) override {
     return db_->PutEntity(options, column_family, key, columns);
   }
 
   using DB::Get;
   virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     PinnableSlice* value) override {
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         PinnableSlice* value) override {
     return db_->Get(options, column_family, key, value);
   }
 
   using DB::GetEntity;
   rocksdb_rs::status::Status GetEntity(const ReadOptions& options,
-                   ColumnFamilyHandle* column_family, const Slice& key,
-                   PinnableWideColumns* columns) override {
+                                       ColumnFamilyHandle* column_family,
+                                       const Slice& key,
+                                       PinnableWideColumns* columns) override {
     return db_->GetEntity(options, column_family, key, columns);
   }
 
@@ -130,7 +137,8 @@ class StackableDB : public DB {
   virtual void MultiGet(const ReadOptions& options,
                         ColumnFamilyHandle* column_family,
                         const size_t num_keys, const Slice* keys,
-                        PinnableSlice* values, rocksdb_rs::status::Status* statuses,
+                        PinnableSlice* values,
+                        rocksdb_rs::status::Status* statuses,
                         const bool sorted_input = false) override {
     return db_->MultiGet(options, column_family, num_keys, keys, values,
                          statuses, sorted_input);
@@ -141,14 +149,16 @@ class StackableDB : public DB {
   void MultiGetEntity(const ReadOptions& options,
                       ColumnFamilyHandle* column_family, size_t num_keys,
                       const Slice* keys, PinnableWideColumns* results,
-                      rocksdb_rs::status::Status* statuses, bool sorted_input) override {
+                      rocksdb_rs::status::Status* statuses,
+                      bool sorted_input) override {
     db_->MultiGetEntity(options, column_family, num_keys, keys, results,
                         statuses, sorted_input);
   }
 
   void MultiGetEntity(const ReadOptions& options, size_t num_keys,
                       ColumnFamilyHandle** column_families, const Slice* keys,
-                      PinnableWideColumns* results, rocksdb_rs::status::Status* statuses,
+                      PinnableWideColumns* results,
+                      rocksdb_rs::status::Status* statuses,
                       bool sorted_input) override {
     db_->MultiGetEntity(options, num_keys, column_families, keys, results,
                         statuses, sorted_input);
@@ -188,20 +198,24 @@ class StackableDB : public DB {
   }
 
   using DB::ClipColumnFamily;
-  virtual rocksdb_rs::status::Status ClipColumnFamily(ColumnFamilyHandle* column_family,
-                                  const Slice& begin_key,
-                                  const Slice& end_key) override {
+  virtual rocksdb_rs::status::Status ClipColumnFamily(
+      ColumnFamilyHandle* column_family, const Slice& begin_key,
+      const Slice& end_key) override {
     return db_->ClipColumnFamily(column_family, begin_key, end_key);
   }
 
   using DB::VerifyFileChecksums;
-  rocksdb_rs::status::Status VerifyFileChecksums(const ReadOptions& read_opts) override {
+  rocksdb_rs::status::Status VerifyFileChecksums(
+      const ReadOptions& read_opts) override {
     return db_->VerifyFileChecksums(read_opts);
   }
 
-  virtual rocksdb_rs::status::Status VerifyChecksum() override { return db_->VerifyChecksum(); }
+  virtual rocksdb_rs::status::Status VerifyChecksum() override {
+    return db_->VerifyChecksum();
+  }
 
-  virtual rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& options) override {
+  virtual rocksdb_rs::status::Status VerifyChecksum(
+      const ReadOptions& options) override {
     return db_->VerifyChecksum(options);
   }
 
@@ -215,46 +229,54 @@ class StackableDB : public DB {
 
   using DB::Delete;
   virtual rocksdb_rs::status::Status Delete(const WriteOptions& wopts,
-                        ColumnFamilyHandle* column_family,
-                        const Slice& key) override {
+                                            ColumnFamilyHandle* column_family,
+                                            const Slice& key) override {
     return db_->Delete(wopts, column_family, key);
   }
-  rocksdb_rs::status::Status Delete(const WriteOptions& wopts, ColumnFamilyHandle* column_family,
-                const Slice& key, const Slice& ts) override {
+  rocksdb_rs::status::Status Delete(const WriteOptions& wopts,
+                                    ColumnFamilyHandle* column_family,
+                                    const Slice& key,
+                                    const Slice& ts) override {
     return db_->Delete(wopts, column_family, key, ts);
   }
 
   using DB::SingleDelete;
-  virtual rocksdb_rs::status::Status SingleDelete(const WriteOptions& wopts,
-                              ColumnFamilyHandle* column_family,
-                              const Slice& key) override {
+  virtual rocksdb_rs::status::Status SingleDelete(
+      const WriteOptions& wopts, ColumnFamilyHandle* column_family,
+      const Slice& key) override {
     return db_->SingleDelete(wopts, column_family, key);
   }
   rocksdb_rs::status::Status SingleDelete(const WriteOptions& wopts,
-                      ColumnFamilyHandle* column_family, const Slice& key,
-                      const Slice& ts) override {
+                                          ColumnFamilyHandle* column_family,
+                                          const Slice& key,
+                                          const Slice& ts) override {
     return db_->SingleDelete(wopts, column_family, key, ts);
   }
 
   using DB::DeleteRange;
   rocksdb_rs::status::Status DeleteRange(const WriteOptions& wopts,
-                     ColumnFamilyHandle* column_family, const Slice& start_key,
-                     const Slice& end_key) override {
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& start_key,
+                                         const Slice& end_key) override {
     return db_->DeleteRange(wopts, column_family, start_key, end_key);
   }
 
   using DB::Merge;
   virtual rocksdb_rs::status::Status Merge(const WriteOptions& options,
-                       ColumnFamilyHandle* column_family, const Slice& key,
-                       const Slice& value) override {
+                                           ColumnFamilyHandle* column_family,
+                                           const Slice& key,
+                                           const Slice& value) override {
     return db_->Merge(options, column_family, key, value);
   }
-  rocksdb_rs::status::Status Merge(const WriteOptions& options, ColumnFamilyHandle* column_family,
-               const Slice& key, const Slice& ts, const Slice& value) override {
+  rocksdb_rs::status::Status Merge(const WriteOptions& options,
+                                   ColumnFamilyHandle* column_family,
+                                   const Slice& key, const Slice& ts,
+                                   const Slice& value) override {
     return db_->Merge(options, column_family, key, ts, value);
   }
 
-  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts, WriteBatch* updates) override {
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts,
+                                           WriteBatch* updates) override {
     return db_->Write(opts, updates);
   }
 
@@ -302,10 +324,10 @@ class StackableDB : public DB {
   }
 
   using DB::GetApproximateSizes;
-  virtual rocksdb_rs::status::Status GetApproximateSizes(const SizeApproximationOptions& options,
-                                     ColumnFamilyHandle* column_family,
-                                     const Range* r, int n,
-                                     uint64_t* sizes) override {
+  virtual rocksdb_rs::status::Status GetApproximateSizes(
+      const SizeApproximationOptions& options,
+      ColumnFamilyHandle* column_family, const Range* r, int n,
+      uint64_t* sizes) override {
     return db_->GetApproximateSizes(options, column_family, r, n, sizes);
   }
 
@@ -318,9 +340,9 @@ class StackableDB : public DB {
   }
 
   using DB::CompactRange;
-  virtual rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& options,
-                              ColumnFamilyHandle* column_family,
-                              const Slice* begin, const Slice* end) override {
+  virtual rocksdb_rs::status::Status CompactRange(
+      const CompactRangeOptions& options, ColumnFamilyHandle* column_family,
+      const Slice* begin, const Slice* end) override {
     return db_->CompactRange(options, column_family, begin, end);
   }
 
@@ -397,8 +419,8 @@ class StackableDB : public DB {
   }
 
   using DB::Flush;
-  virtual rocksdb_rs::status::Status Flush(const FlushOptions& fopts,
-                       ColumnFamilyHandle* column_family) override {
+  virtual rocksdb_rs::status::Status Flush(
+      const FlushOptions& fopts, ColumnFamilyHandle* column_family) override {
     return db_->Flush(fopts, column_family);
   }
   virtual rocksdb_rs::status::Status Flush(
@@ -407,14 +429,21 @@ class StackableDB : public DB {
     return db_->Flush(fopts, column_families);
   }
 
-  virtual rocksdb_rs::status::Status SyncWAL() override { return db_->SyncWAL(); }
+  virtual rocksdb_rs::status::Status SyncWAL() override {
+    return db_->SyncWAL();
+  }
 
-  virtual rocksdb_rs::status::Status FlushWAL(bool sync) override { return db_->FlushWAL(sync); }
+  virtual rocksdb_rs::status::Status FlushWAL(bool sync) override {
+    return db_->FlushWAL(sync);
+  }
 
-  virtual rocksdb_rs::status::Status LockWAL() override { return db_->LockWAL(); }
+  virtual rocksdb_rs::status::Status LockWAL() override {
+    return db_->LockWAL();
+  }
 
-  virtual rocksdb_rs::status::Status UnlockWAL() override { return db_->UnlockWAL(); }
-
+  virtual rocksdb_rs::status::Status UnlockWAL() override {
+    return db_->UnlockWAL();
+  }
 
   virtual rocksdb_rs::status::Status DisableFileDeletions() override {
     return db_->DisableFileDeletions();
@@ -459,11 +488,14 @@ class StackableDB : public DB {
   }
 
   using DB::EndBlockCacheTrace;
-  rocksdb_rs::status::Status EndBlockCacheTrace() override { return db_->EndBlockCacheTrace(); }
+  rocksdb_rs::status::Status EndBlockCacheTrace() override {
+    return db_->EndBlockCacheTrace();
+  }
 
   using DB::StartIOTrace;
-  rocksdb_rs::status::Status StartIOTrace(const TraceOptions& options,
-                      std::unique_ptr<TraceWriter>&& trace_writer) override {
+  rocksdb_rs::status::Status StartIOTrace(
+      const TraceOptions& options,
+      std::unique_ptr<TraceWriter>&& trace_writer) override {
     return db_->StartIOTrace(options, std::move(trace_writer));
   }
 
@@ -471,8 +503,9 @@ class StackableDB : public DB {
   rocksdb_rs::status::Status EndIOTrace() override { return db_->EndIOTrace(); }
 
   using DB::StartTrace;
-  rocksdb_rs::status::Status StartTrace(const TraceOptions& options,
-                    std::unique_ptr<TraceWriter>&& trace_writer) override {
+  rocksdb_rs::status::Status StartTrace(
+      const TraceOptions& options,
+      std::unique_ptr<TraceWriter>&& trace_writer) override {
     return db_->StartTrace(options, std::move(trace_writer));
   }
 
@@ -480,15 +513,16 @@ class StackableDB : public DB {
   rocksdb_rs::status::Status EndTrace() override { return db_->EndTrace(); }
 
   using DB::NewDefaultReplayer;
-  rocksdb_rs::status::Status NewDefaultReplayer(const std::vector<ColumnFamilyHandle*>& handles,
-                            std::unique_ptr<TraceReader>&& reader,
-                            std::unique_ptr<Replayer>* replayer) override {
+  rocksdb_rs::status::Status NewDefaultReplayer(
+      const std::vector<ColumnFamilyHandle*>& handles,
+      std::unique_ptr<TraceReader>&& reader,
+      std::unique_ptr<Replayer>* replayer) override {
     return db_->NewDefaultReplayer(handles, std::move(reader), replayer);
   }
 
-
-  virtual rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>& vec, uint64_t* mfs,
-                              bool flush_memtable = true) override {
+  virtual rocksdb_rs::status::Status GetLiveFiles(
+      std::vector<std::string>& vec, uint64_t* mfs,
+      bool flush_memtable = true) override {
     return db_->GetLiveFiles(vec, mfs, flush_memtable);
   }
 
@@ -496,17 +530,18 @@ class StackableDB : public DB {
     return db_->GetLatestSequenceNumber();
   }
 
-  rocksdb_rs::status::Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* column_family,
-                                  std::string ts_low) override {
+  rocksdb_rs::status::Status IncreaseFullHistoryTsLow(
+      ColumnFamilyHandle* column_family, std::string ts_low) override {
     return db_->IncreaseFullHistoryTsLow(column_family, ts_low);
   }
 
-  rocksdb_rs::status::Status GetFullHistoryTsLow(ColumnFamilyHandle* column_family,
-                             std::string* ts_low) override {
+  rocksdb_rs::status::Status GetFullHistoryTsLow(
+      ColumnFamilyHandle* column_family, std::string* ts_low) override {
     return db_->GetFullHistoryTsLow(column_family, ts_low);
   }
 
-  virtual rocksdb_rs::status::Status GetSortedWalFiles(VectorLogPtr& files) override {
+  virtual rocksdb_rs::status::Status GetSortedWalFiles(
+      VectorLogPtr& files) override {
     return db_->GetSortedWalFiles(files);
   }
 
@@ -515,7 +550,8 @@ class StackableDB : public DB {
     return db_->GetCurrentWalFile(current_log_file);
   }
 
-  virtual rocksdb_rs::status::Status GetCreationTimeOfOldestFile(uint64_t* creation_time) override {
+  virtual rocksdb_rs::status::Status GetCreationTimeOfOldestFile(
+      uint64_t* creation_time) override {
     return db_->GetCreationTimeOfOldestFile(creation_time);
   }
 
@@ -530,18 +566,21 @@ class StackableDB : public DB {
     return db_->DeleteFile(name);
   }
 
-  virtual rocksdb_rs::status::Status GetDbIdentity(std::string& identity) const override {
+  virtual rocksdb_rs::status::Status GetDbIdentity(
+      std::string& identity) const override {
     return db_->GetDbIdentity(identity);
   }
 
-  virtual rocksdb_rs::status::Status GetDbSessionId(std::string& session_id) const override {
+  virtual rocksdb_rs::status::Status GetDbSessionId(
+      std::string& session_id) const override {
     return db_->GetDbSessionId(session_id);
   }
 
   using DB::SetOptions;
-  virtual rocksdb_rs::status::Status SetOptions(ColumnFamilyHandle* column_family_handle,
-                            const std::unordered_map<std::string, std::string>&
-                                new_options) override {
+  virtual rocksdb_rs::status::Status SetOptions(
+      ColumnFamilyHandle* column_family_handle,
+      const std::unordered_map<std::string, std::string>& new_options)
+      override {
     return db_->SetOptions(column_family_handle, new_options);
   }
 
@@ -552,7 +591,9 @@ class StackableDB : public DB {
   }
 
   using DB::ResetStats;
-  virtual rocksdb_rs::status::Status ResetStats() override { return db_->ResetStats(); }
+  virtual rocksdb_rs::status::Status ResetStats() override {
+    return db_->ResetStats();
+  }
 
   using DB::GetPropertiesOfAllTables;
   virtual rocksdb_rs::status::Status GetPropertiesOfAllTables(
@@ -574,14 +615,14 @@ class StackableDB : public DB {
     return db_->GetUpdatesSince(seq_number, iter, read_options);
   }
 
-  virtual rocksdb_rs::status::Status SuggestCompactRange(ColumnFamilyHandle* column_family,
-                                     const Slice* begin,
-                                     const Slice* end) override {
+  virtual rocksdb_rs::status::Status SuggestCompactRange(
+      ColumnFamilyHandle* column_family, const Slice* begin,
+      const Slice* end) override {
     return db_->SuggestCompactRange(column_family, begin, end);
   }
 
-  virtual rocksdb_rs::status::Status PromoteL0(ColumnFamilyHandle* column_family,
-                           int target_level) override {
+  virtual rocksdb_rs::status::Status PromoteL0(
+      ColumnFamilyHandle* column_family, int target_level) override {
     return db_->PromoteL0(column_family, target_level);
   }
 

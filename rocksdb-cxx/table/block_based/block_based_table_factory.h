@@ -71,8 +71,9 @@ class BlockBasedTableFactory : public TableFactory {
       WritableFileWriter* file) const override;
 
   // Valdates the specified DB Options.
-  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                         const ColumnFamilyOptions& cf_opts) const override;
+  rocksdb_rs::status::Status ValidateOptions(
+      const DBOptions& db_opts,
+      const ColumnFamilyOptions& cf_opts) const override;
   rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& opts) override;
 
   std::string GetPrintableOptions() const override;
@@ -84,9 +85,10 @@ class BlockBasedTableFactory : public TableFactory {
  protected:
   const void* GetOptionsPtr(const std::string& name) const override;
   rocksdb_rs::status::Status ParseOption(const ConfigOptions& config_options,
-                     const OptionTypeInfo& opt_info,
-                     const std::string& opt_name, const std::string& opt_value,
-                     void* opt_ptr) override;
+                                         const OptionTypeInfo& opt_info,
+                                         const std::string& opt_name,
+                                         const std::string& opt_value,
+                                         void* opt_ptr) override;
   void InitializeOptions();
 
  private:

@@ -5,7 +5,6 @@
 //
 #pragma once
 
-
 #include <limits>
 #include <list>
 #include <map>
@@ -13,11 +12,10 @@
 #include <vector>
 
 #include "monitoring/histogram.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/persistent_cache.h"
 #include "rocksdb/system_clock.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 // Persistent Cache
 //
@@ -120,7 +118,8 @@ struct PersistentCacheConfig {
     // - dispatch size and buffer size need to be aligned
     if (!writer_qdepth || writer_dispatch_size > write_buffer_size ||
         write_buffer_size % writer_dispatch_size) {
-      return rocksdb_rs::status::Status_InvalidArgument("invalid writer settings");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "invalid writer settings");
     }
 
     return rocksdb_rs::status::Status_OK();
@@ -257,12 +256,14 @@ class PersistentCacheTier : public PersistentCache {
   virtual PersistentCache::StatsType Stats() override;
 
   // Insert to page cache
-  virtual rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
-                        const size_t size) override = 0;
+  virtual rocksdb_rs::status::Status Insert(const Slice& page_key,
+                                            const char* data,
+                                            const size_t size) override = 0;
 
   // Lookup page cache by page identifier
-  virtual rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
-                        size_t* size) override = 0;
+  virtual rocksdb_rs::status::Status Lookup(const Slice& page_key,
+                                            std::unique_ptr<char[]>* data,
+                                            size_t* size) override = 0;
 
   // Does it store compressed data ?
   virtual bool IsCompressed() override = 0;
@@ -306,9 +307,10 @@ class PersistentTieredCache : public PersistentCacheTier {
   std::string PrintStats() override;
   PersistentCache::StatsType Stats() override;
   rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
-                const size_t size) override;
-  rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
-                size_t* size) override;
+                                    const size_t size) override;
+  rocksdb_rs::status::Status Lookup(const Slice& page_key,
+                                    std::unique_ptr<char[]>* data,
+                                    size_t* size) override;
   bool IsCompressed() override;
 
   std::string GetPrintableOptions() const override {
@@ -338,4 +340,3 @@ class PersistentTieredCache : public PersistentCacheTier {
 };
 
 }  // namespace rocksdb
-

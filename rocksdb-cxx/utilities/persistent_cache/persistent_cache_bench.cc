@@ -195,7 +195,8 @@ class CacheTierBenchmark {
     // insert
     StopWatchNano timer(SystemClock::Default().get(), /*auto_start=*/true);
     while (true) {
-      rocksdb_rs::status::Status status = cache_->Insert(block_key, block.get(), FLAGS_iosize);
+      rocksdb_rs::status::Status status =
+          cache_->Insert(block_key, block.get(), FLAGS_iosize);
       if (status.ok()) {
         break;
       }

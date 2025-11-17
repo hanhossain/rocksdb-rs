@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include "port/port.h"
 #include "rocksdb/options.h"
 #include "rocksdb/utilities/optimistic_transaction_db.h"
@@ -88,15 +87,17 @@ class RandomTransactionInserter {
   bool DBInsert(DB* db);
 
   // Get the ikey'th key from set set_i
-  static rocksdb_rs::status::Status DBGet(DB* db, Transaction* txn, ReadOptions& read_options,
-                      uint16_t set_i, uint64_t ikey, bool get_for_update,
-                      uint64_t* int_value, std::string* full_key,
-                      bool* unexpected_error);
+  static rocksdb_rs::status::Status DBGet(
+      DB* db, Transaction* txn, ReadOptions& read_options, uint16_t set_i,
+      uint64_t ikey, bool get_for_update, uint64_t* int_value,
+      std::string* full_key, bool* unexpected_error);
 
   // Returns OK if Invariant is true.
-  static rocksdb_rs::status::Status Verify(DB* db, uint16_t num_sets, uint64_t num_keys_per_set = 0,
-                       bool take_snapshot = false, Random64* rand = nullptr,
-                       uint64_t delay_ms = 0);
+  static rocksdb_rs::status::Status Verify(DB* db, uint16_t num_sets,
+                                           uint64_t num_keys_per_set = 0,
+                                           bool take_snapshot = false,
+                                           Random64* rand = nullptr,
+                                           uint64_t delay_ms = 0);
 
   // Returns the status of the previous Insert operation
   rocksdb_rs::status::Status GetLastStatus() { return last_status_.Clone(); }
@@ -144,4 +145,3 @@ class RandomTransactionInserter {
 };
 
 }  // namespace rocksdb
-

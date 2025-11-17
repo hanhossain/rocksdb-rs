@@ -136,15 +136,15 @@ std::string PersistentTieredCache::PrintStats() {
   return tiers_.front()->PrintStats();
 }
 
-rocksdb_rs::status::Status PersistentTieredCache::Insert(const Slice& page_key, const char* data,
-                                     const size_t size) {
+rocksdb_rs::status::Status PersistentTieredCache::Insert(const Slice& page_key,
+                                                         const char* data,
+                                                         const size_t size) {
   assert(!tiers_.empty());
   return tiers_.front()->Insert(page_key, data, size);
 }
 
-rocksdb_rs::status::Status PersistentTieredCache::Lookup(const Slice& page_key,
-                                     std::unique_ptr<char[]>* data,
-                                     size_t* size) {
+rocksdb_rs::status::Status PersistentTieredCache::Lookup(
+    const Slice& page_key, std::unique_ptr<char[]>* data, size_t* size) {
   assert(!tiers_.empty());
   return tiers_.front()->Lookup(page_key, data, size);
 }
@@ -162,4 +162,3 @@ bool PersistentTieredCache::IsCompressed() {
 }
 
 }  // namespace rocksdb
-

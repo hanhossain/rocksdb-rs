@@ -90,8 +90,8 @@ TEST_F(RepeatableThreadTest, MockEnvTest) {
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 #endif  // OS_MACOSX && !NDEBUG
 
-  rocksdb::RepeatableThread thread(
-      [&] { count++; }, "rt_test", mock_clock_.get(), 1 * kSecond, 1 * kSecond);
+  rocksdb::RepeatableThread thread([&] { count++; }, "rt_test",
+                                   mock_clock_.get(), 1 * kSecond, 1 * kSecond);
   for (int i = 1; i <= kIteration; i++) {
     // Bump current time
     thread.TEST_WaitForRun([&] { mock_clock_->SetCurrentTime(i); });

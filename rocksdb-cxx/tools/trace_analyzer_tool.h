@@ -188,42 +188,52 @@ class TraceAnalyzer : private TraceRecord::Handler,
 
  private:
   using TraceRecord::Handler::Handle;
-  rocksdb_rs::status::Status Handle(const WriteQueryTraceRecord& record,
-                std::unique_ptr<TraceRecordResult>* result) override;
-  rocksdb_rs::status::Status Handle(const GetQueryTraceRecord& record,
-                std::unique_ptr<TraceRecordResult>* result) override;
-  rocksdb_rs::status::Status Handle(const IteratorSeekQueryTraceRecord& record,
-                std::unique_ptr<TraceRecordResult>* result) override;
-  rocksdb_rs::status::Status Handle(const MultiGetQueryTraceRecord& record,
-                std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Handle(
+      const WriteQueryTraceRecord& record,
+      std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Handle(
+      const GetQueryTraceRecord& record,
+      std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Handle(
+      const IteratorSeekQueryTraceRecord& record,
+      std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Handle(
+      const MultiGetQueryTraceRecord& record,
+      std::unique_ptr<TraceRecordResult>* result) override;
 
   using WriteBatch::Handler::PutCF;
   rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
-               const Slice& value) override;
+                                   const Slice& value) override;
 
   using WriteBatch::Handler::PutEntityCF;
-  rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id, const Slice& key,
-                     const Slice& value) override;
+  rocksdb_rs::status::Status PutEntityCF(uint32_t column_family_id,
+                                         const Slice& key,
+                                         const Slice& value) override;
 
   using WriteBatch::Handler::DeleteCF;
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override;
+  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
+                                      const Slice& key) override;
 
   using WriteBatch::Handler::SingleDeleteCF;
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) override;
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
+                                            const Slice& key) override;
 
   using WriteBatch::Handler::DeleteRangeCF;
-  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
-                       const Slice& end_key) override;
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id,
+                                           const Slice& begin_key,
+                                           const Slice& end_key) override;
 
   using WriteBatch::Handler::MergeCF;
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
-                 const Slice& value) override;
+  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id,
+                                     const Slice& key,
+                                     const Slice& value) override;
 
   // The following hanlders are not implemented, return Status_OK() to avoid
   // the running time assertion and other irrelevant falures.
   using WriteBatch::Handler::PutBlobIndexCF;
-  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
-                        const Slice& /*value*/) override {
+  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t /*column_family_id*/,
+                                            const Slice& /*key*/,
+                                            const Slice& /*value*/) override {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -232,36 +242,48 @@ class TraceAnalyzer : private TraceRecord::Handler,
   void LogData(const Slice& /*blob*/) override {}
 
   using WriteBatch::Handler::MarkBeginPrepare;
-  rocksdb_rs::status::Status MarkBeginPrepare(bool = false) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool = false) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   using WriteBatch::Handler::MarkEndPrepare;
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice& /*xid*/) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice& /*xid*/) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   using WriteBatch::Handler::MarkNoop;
-  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   using WriteBatch::Handler::MarkRollback;
-  rocksdb_rs::status::Status MarkRollback(const Slice& /*xid*/) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkRollback(const Slice& /*xid*/) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   using WriteBatch::Handler::MarkCommit;
-  rocksdb_rs::status::Status MarkCommit(const Slice& /*xid*/) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice& /*xid*/) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   using WriteBatch::Handler::MarkCommitWithTimestamp;
-  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& /*xid*/,
-                                 const Slice& /*commit_ts*/) override {
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(
+      const Slice& /*xid*/, const Slice& /*commit_ts*/) override {
     return rocksdb_rs::status::Status_OK();
   }
 
   // Process each trace operation and output the analysis result to
   // stdout/files.
-  rocksdb_rs::status::Status OutputAnalysisResult(TraceOperationType op_type, uint64_t timestamp,
-                              std::vector<uint32_t> cf_ids,
-                              std::vector<Slice> keys,
-                              std::vector<size_t> value_sizes);
+  rocksdb_rs::status::Status OutputAnalysisResult(
+      TraceOperationType op_type, uint64_t timestamp,
+      std::vector<uint32_t> cf_ids, std::vector<Slice> keys,
+      std::vector<size_t> value_sizes);
 
-  rocksdb_rs::status::Status OutputAnalysisResult(TraceOperationType op_type, uint64_t timestamp,
-                              uint32_t cf_id, const Slice& key,
-                              size_t value_size);
+  rocksdb_rs::status::Status OutputAnalysisResult(TraceOperationType op_type,
+                                                  uint64_t timestamp,
+                                                  uint32_t cf_id,
+                                                  const Slice& key,
+                                                  size_t value_size);
 
   rocksdb::Env* env_;
   EnvOptions env_options_;
@@ -286,11 +308,9 @@ class TraceAnalyzer : private TraceRecord::Handler,
   uint64_t time_series_start_;
   uint32_t sample_max_;
   uint32_t cur_time_sec_;
-  std::unique_ptr<rocksdb::WritableFile>
-      trace_sequence_f_;                                    // readable trace
-  std::unique_ptr<rocksdb::WritableFile> qps_f_;  // overall qps
-  std::unique_ptr<rocksdb::WritableFile>
-      cf_qps_f_;              // The qps of each CF>
+  std::unique_ptr<rocksdb::WritableFile> trace_sequence_f_;  // readable trace
+  std::unique_ptr<rocksdb::WritableFile> qps_f_;             // overall qps
+  std::unique_ptr<rocksdb::WritableFile> cf_qps_f_;  // The qps of each CF>
   std::vector<TypeUnit> ta_;  // The main statistic collecting data structure
   std::map<uint32_t, CfUnit> cfs_;  // All the cf_id appears in this trace;
   std::vector<uint32_t> qps_peak_;
@@ -299,26 +319,33 @@ class TraceAnalyzer : private TraceRecord::Handler,
   rocksdb_rs::status::Status ReadTraceHeader(Trace* header);
   rocksdb_rs::status::Status ReadTraceFooter(Trace* footer);
   rocksdb_rs::status::Status ReadTraceRecord(Trace* trace);
-  rocksdb_rs::status::Status KeyStatsInsertion(const uint32_t& type, const uint32_t& cf_id,
-                           const std::string& key, const size_t value_size,
-                           const uint64_t ts);
-  rocksdb_rs::status::Status StatsUnitCorrelationUpdate(StatsUnit& unit, const uint32_t& type,
-                                    const uint64_t& ts, const std::string& key);
-  rocksdb_rs::status::Status OpenStatsOutputFiles(const std::string& type, TraceStats& new_stats);
+  rocksdb_rs::status::Status KeyStatsInsertion(const uint32_t& type,
+                                               const uint32_t& cf_id,
+                                               const std::string& key,
+                                               const size_t value_size,
+                                               const uint64_t ts);
+  rocksdb_rs::status::Status StatsUnitCorrelationUpdate(StatsUnit& unit,
+                                                        const uint32_t& type,
+                                                        const uint64_t& ts,
+                                                        const std::string& key);
+  rocksdb_rs::status::Status OpenStatsOutputFiles(const std::string& type,
+                                                  TraceStats& new_stats);
   rocksdb_rs::status::Status CreateOutputFile(
       const std::string& type, const std::string& cf_name,
-      const std::string& ending,
-      std::unique_ptr<rocksdb::WritableFile>* f_ptr);
+      const std::string& ending, std::unique_ptr<rocksdb::WritableFile>* f_ptr);
   rocksdb_rs::status::Status CloseOutputFiles();
 
   void PrintStatistics();
   rocksdb_rs::status::Status TraceUnitWriter(
       std::unique_ptr<rocksdb::WritableFile>& f_ptr, TraceUnit& unit);
-  rocksdb_rs::status::Status WriteTraceSequence(const uint32_t& type, const uint32_t& cf_id,
-                            const Slice& key, const size_t value_size,
-                            const uint64_t ts);
+  rocksdb_rs::status::Status WriteTraceSequence(const uint32_t& type,
+                                                const uint32_t& cf_id,
+                                                const Slice& key,
+                                                const size_t value_size,
+                                                const uint64_t ts);
   rocksdb_rs::status::Status MakeStatisticKeyStatsOrPrefix(TraceStats& stats);
-  rocksdb_rs::status::Status MakeStatisticCorrelation(TraceStats& stats, StatsUnit& unit);
+  rocksdb_rs::status::Status MakeStatisticCorrelation(TraceStats& stats,
+                                                      StatsUnit& unit);
   rocksdb_rs::status::Status MakeStatisticQPS();
   int db_version_;
 };
@@ -326,4 +353,3 @@ class TraceAnalyzer : private TraceRecord::Handler,
 int trace_analyzer_tool(int argc, char** argv);
 
 }  // namespace rocksdb
-

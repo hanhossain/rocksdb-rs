@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include <string>
 
 #include "rocksdb/customizable.h"
@@ -31,18 +30,20 @@ std::shared_ptr<FileSystem> NewEncryptedFS(
 // blocks). E.g. CTR (Counter operation mode) supports this requirement.
 class BlockAccessCipherStream {
  public:
-  virtual ~BlockAccessCipherStream(){};
+  virtual ~BlockAccessCipherStream() {};
 
   // BlockSize returns the size of each block supported by this cipher stream.
   virtual size_t BlockSize() = 0;
 
   // Encrypt one or more (partial) blocks of data at the file offset.
   // Length of data is given in dataSize.
-  virtual rocksdb_rs::status::Status Encrypt(uint64_t fileOffset, char* data, size_t dataSize);
+  virtual rocksdb_rs::status::Status Encrypt(uint64_t fileOffset, char* data,
+                                             size_t dataSize);
 
   // Decrypt one or more (partial) blocks of data at the file offset.
   // Length of data is given in dataSize.
-  virtual rocksdb_rs::status::Status Decrypt(uint64_t fileOffset, char* data, size_t dataSize);
+  virtual rocksdb_rs::status::Status Decrypt(uint64_t fileOffset, char* data,
+                                             size_t dataSize);
 
  protected:
   // Allocate scratch space which is passed to EncryptBlock/DecryptBlock.
@@ -50,13 +51,15 @@ class BlockAccessCipherStream {
 
   // Encrypt a block of data at the given block index.
   // Length of data is equal to BlockSize();
-  virtual rocksdb_rs::status::Status EncryptBlock(uint64_t blockIndex, char* data,
-                              char* scratch) = 0;
+  virtual rocksdb_rs::status::Status EncryptBlock(uint64_t blockIndex,
+                                                  char* data,
+                                                  char* scratch) = 0;
 
   // Decrypt a block of data at the given block index.
   // Length of data is equal to BlockSize();
-  virtual rocksdb_rs::status::Status DecryptBlock(uint64_t blockIndex, char* data,
-                              char* scratch) = 0;
+  virtual rocksdb_rs::status::Status DecryptBlock(uint64_t blockIndex,
+                                                  char* data,
+                                                  char* scratch) = 0;
 };
 
 // BlockCipher
@@ -82,9 +85,9 @@ class BlockCipher : public Customizable {
   // @return OK if the cipher was successfully created
   // @return NotFound if an invalid name was specified in the value
   // @return InvalidArgument if either the options were not valid
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& value,
-                                 std::shared_ptr<BlockCipher>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& value,
+      std::shared_ptr<BlockCipher>* result);
 
   static const char* Type() { return "BlockCipher"; }
   // Short-cut method to create a ROT13 BlockCipher.
@@ -131,9 +134,9 @@ class EncryptionProvider : public Customizable {
   // @return OK if the provider was successfully created
   // @return NotFound if an invalid name was specified in the value
   // @return InvalidArgument if either the options were not valid
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& value,
-                                 std::shared_ptr<EncryptionProvider>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& value,
+      std::shared_ptr<EncryptionProvider>* result);
 
   static const char* Type() { return "EncryptionProvider"; }
 
@@ -148,8 +151,8 @@ class EncryptionProvider : public Customizable {
 
   // CreateNewPrefix initialized an allocated block of prefix memory
   // for a new file.
-  virtual rocksdb_rs::status::Status CreateNewPrefix(const std::string& fname, char* prefix,
-                                 size_t prefixLength) const = 0;
+  virtual rocksdb_rs::status::Status CreateNewPrefix(
+      const std::string& fname, char* prefix, size_t prefixLength) const = 0;
 
   // Method to add a new cipher key for use by the EncryptionProvider.
   // @param descriptor   Descriptor for this key
@@ -160,8 +163,9 @@ class EncryptionProvider : public Customizable {
   //                  files
   // @return OK if the cipher was successfully added to the provider, non-OK
   // otherwise
-  virtual rocksdb_rs::status::Status AddCipher(const std::string& descriptor, const char* cipher,
-                           size_t len, bool for_write) = 0;
+  virtual rocksdb_rs::status::Status AddCipher(const std::string& descriptor,
+                                               const char* cipher, size_t len,
+                                               bool for_write) = 0;
 
   // CreateCipherStream creates a block access cipher stream for a file given
   // name and options.
@@ -194,8 +198,9 @@ class EncryptedSequentialFile : public FSSequentialFile {
         offset_(prefixLength),
         prefixLength_(prefixLength) {}
 
-  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options, Slice* result,
-                char* scratch, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options,
+                                       Slice* result, char* scratch,
+                                       IODebugContext* dbg) override;
 
   rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override;
 
@@ -203,11 +208,13 @@ class EncryptedSequentialFile : public FSSequentialFile {
 
   size_t GetRequiredBufferAlignment() const override;
 
-  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset,
+                                                  size_t length) override;
 
-  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
-                          Slice* result, char* scratch,
-                          IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n,
+                                                 const IOOptions& options,
+                                                 Slice* result, char* scratch,
+                                                 IODebugContext* dbg) override;
 };
 
 class EncryptedRandomAccessFile : public FSRandomAccessFile {
@@ -224,12 +231,14 @@ class EncryptedRandomAccessFile : public FSRandomAccessFile {
         stream_(std::move(s)),
         prefixLength_(prefixLength) {}
 
-  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                Slice* result, char* scratch,
-                IODebugContext* dbg) const override;
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                       const IOOptions& options, Slice* result,
+                                       char* scratch,
+                                       IODebugContext* dbg) const override;
 
-  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
-                    IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override;
 
   size_t GetUniqueId(char* id, size_t max_size) const override;
 
@@ -239,7 +248,8 @@ class EncryptedRandomAccessFile : public FSRandomAccessFile {
 
   size_t GetRequiredBufferAlignment() const override;
 
-  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset,
+                                                  size_t length) override;
 };
 
 class EncryptedWritableFile : public FSWritableFile {
@@ -258,13 +268,14 @@ class EncryptedWritableFile : public FSWritableFile {
         prefixLength_(prefixLength) {}
 
   using FSWritableFile::Append;
-  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
-                  IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data,
+                                         const IOOptions& options,
+                                         IODebugContext* dbg) override;
 
   using FSWritableFile::PositionedAppend;
-  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
-                            const IOOptions& options,
-                            IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus PositionedAppend(
+      const Slice& data, uint64_t offset, const IOOptions& options,
+      IODebugContext* dbg) override;
 
   bool IsSyncThreadSafe() const override;
 
@@ -274,13 +285,16 @@ class EncryptedWritableFile : public FSWritableFile {
 
   uint64_t GetFileSize(const IOOptions& options, IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& options,
-                    IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Truncate(uint64_t size,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override;
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset,
+                                                  size_t length) override;
 
-  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
-                     IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override;
 
   void PrepareWrite(size_t offset, size_t len, const IOOptions& options,
                     IODebugContext* dbg) override;
@@ -290,14 +304,18 @@ class EncryptedWritableFile : public FSWritableFile {
   void GetPreallocationStatus(size_t* block_size,
                               size_t* last_allocated_block) override;
 
-  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& options,
-                    IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options,
+                                        IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
+                                       IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
+                                        IODebugContext* dbg) override;
 };
 
 class EncryptedRandomRWFile : public FSRandomRWFile {
@@ -318,20 +336,26 @@ class EncryptedRandomRWFile : public FSRandomRWFile {
 
   size_t GetRequiredBufferAlignment() const override;
 
-  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
-                 IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data,
+                                        const IOOptions& options,
+                                        IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                Slice* result, char* scratch,
-                IODebugContext* dbg) const override;
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                       const IOOptions& options, Slice* result,
+                                       char* scratch,
+                                       IODebugContext* dbg) const override;
 
-  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options,
+                                        IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
+                                       IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
+                                        IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
+                                        IODebugContext* dbg) override;
 };
 
 class EncryptedFileSystem : public FileSystemWrapper {
@@ -347,8 +371,9 @@ class EncryptedFileSystem : public FileSystemWrapper {
   //                  files
   // @return OK if the cipher was successfully added to the provider, non-OK
   // otherwise
-  virtual rocksdb_rs::status::Status AddCipher(const std::string& descriptor, const char* cipher,
-                           size_t len, bool for_write) = 0;
+  virtual rocksdb_rs::status::Status AddCipher(const std::string& descriptor,
+                                               const char* cipher, size_t len,
+                                               bool for_write) = 0;
   static const char* kClassName() { return "EncryptedFileSystem"; }
   bool IsInstanceOf(const std::string& name) const override {
     if (name == kClassName()) {
@@ -359,4 +384,3 @@ class EncryptedFileSystem : public FileSystemWrapper {
   }
 };
 }  // namespace rocksdb
-

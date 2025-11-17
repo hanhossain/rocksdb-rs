@@ -95,7 +95,8 @@ inline uint64_t GetSliceNPHash64(const Slice& s, uint64_t seed) {
 extern uint64_t GetSlicePartsNPHash64(const SliceParts& data, uint64_t seed);
 
 inline size_t GetSliceRangedNPHash(const Slice& s, size_t range) {
-  return rocksdb_rs::util::fastrange::FastRange64(NPHash64(s.data(), s.size()), range);
+  return rocksdb_rs::util::fastrange::FastRange64(NPHash64(s.data(), s.size()),
+                                                  range);
 }
 
 // TODO: consider rename to GetSliceHash32

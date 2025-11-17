@@ -29,8 +29,9 @@ class SstFileWriterPropertiesCollector : public IntTblPropCollector {
                                             SequenceNumber global_seqno)
       : version_(version), global_seqno_(global_seqno) {}
 
-  virtual rocksdb_rs::status::Status InternalAdd(const Slice& /*key*/, const Slice& /*value*/,
-                             uint64_t /*file_size*/) override {
+  virtual rocksdb_rs::status::Status InternalAdd(
+      const Slice& /*key*/, const Slice& /*value*/,
+      uint64_t /*file_size*/) override {
     // Intentionally left blank. Have no interest in collecting stats for
     // individual key/value pairs.
     return rocksdb_rs::status::Status_OK();
@@ -44,15 +45,18 @@ class SstFileWriterPropertiesCollector : public IntTblPropCollector {
     return;
   }
 
-  virtual rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+  virtual rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* properties) override {
     // File version
     std::string version_val;
-    rocksdb_rs::coding::PutFixed32(version_val, static_cast<uint32_t>(version_));
+    rocksdb_rs::coding::PutFixed32(version_val,
+                                   static_cast<uint32_t>(version_));
     properties->insert({ExternalSstFilePropertyNames::kVersion, version_val});
 
     // Global Sequence number
     std::string seqno_val;
-    rocksdb_rs::coding::PutFixed64(seqno_val, static_cast<uint64_t>(global_seqno_));
+    rocksdb_rs::coding::PutFixed64(seqno_val,
+                                   static_cast<uint64_t>(global_seqno_));
     properties->insert({ExternalSstFilePropertyNames::kGlobalSeqno, seqno_val});
 
     return rocksdb_rs::status::Status_OK();

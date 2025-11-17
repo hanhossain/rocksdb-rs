@@ -140,7 +140,7 @@ class TtlTest : public testing::Test {
     kv_it_ = kvmap_.begin();
     for (int64_t i = 0; i < num_ops && kv_it_ != kvmap_.end(); i++, ++kv_it_) {
       switch (batch_ops[i]) {
-          case BatchOperation::OP_PUT:
+        case BatchOperation::OP_PUT:
           ASSERT_OK(batch.Put(kv_it_->first, kv_it_->second));
           break;
         case BatchOperation::OP_DELETE:
@@ -253,8 +253,9 @@ class TtlTest : public testing::Test {
     advance(kv_it_, st_pos);
     std::string v;
     for (int64_t i = 0; kv_it_ != kvmap_.end() && i < span; i++, ++kv_it_) {
-      rocksdb_rs::status::Status s = (cf == nullptr) ? db_ttl_->Get(ropts, kv_it_->first, &v)
-                                 : db_ttl_->Get(ropts, cf, kv_it_->first, &v);
+      rocksdb_rs::status::Status s =
+          (cf == nullptr) ? db_ttl_->Get(ropts, kv_it_->first, &v)
+                          : db_ttl_->Get(ropts, cf, kv_it_->first, &v);
       if (s.ok() != check) {
         fprintf(stderr, "key=%s ", kv_it_->first.c_str());
         if (!s.ok()) {
@@ -565,7 +566,8 @@ TEST_F(TtlTest, ReadOnlyPresentForever) {
   ASSERT_TRUE(db_ttl_);
 
   env_->Sleep(2);
-  rocksdb_rs::status::Status s = ManualCompact();  // T=2:Set1 should still be there
+  rocksdb_rs::status::Status s =
+      ManualCompact();  // T=2:Set1 should still be there
   ASSERT_TRUE(s.IsNotSupported());
   CompactCheck(0, kSampleSize_);
   CloseTtl();
@@ -909,4 +911,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

@@ -32,17 +32,16 @@ class MyMerge : public rocksdb::MergeOperator {
 class MyFilter : public rocksdb::CompactionFilter {
  public:
   bool Filter(int level, const rocksdb::Slice& key,
-              const rocksdb::Slice& existing_value,
-              std::string* new_value, bool* value_changed) const override {
+              const rocksdb::Slice& existing_value, std::string* new_value,
+              bool* value_changed) const override {
     fprintf(stderr, "Filter(%s)\n", key.ToString().c_str());
     ++count_;
     assert(*value_changed == false);
     return false;
   }
 
-  bool FilterMergeOperand(
-      int level, const rocksdb::Slice& key,
-      const rocksdb::Slice& existing_value) const override {
+  bool FilterMergeOperand(int level, const rocksdb::Slice& key,
+                          const rocksdb::Slice& existing_value) const override {
     fprintf(stderr, "FilterMerge(%s)\n", key.ToString().c_str());
     ++merge_count_;
     return existing_value == "bad";

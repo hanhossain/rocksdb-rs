@@ -58,8 +58,8 @@ class Comparator : public Customizable, public CompareInterface {
   ~Comparator() override {}
 
   static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
-                                 const std::string& id,
-                                 const Comparator** comp);
+                                                     const std::string& id,
+                                                     const Comparator** comp);
   static const char* Type() { return "Comparator"; }
 
   // The name of the comparator.  Used to check for comparator

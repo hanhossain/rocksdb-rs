@@ -132,11 +132,14 @@ class PointLockManager : public LockManager {
   // this column family is no longer in use.
   void RemoveColumnFamily(const ColumnFamilyHandle* cf) override;
 
-  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
-                 const std::string& key, Env* env, bool exclusive) override;
-  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
-                 const Endpoint& start, const Endpoint& end, Env* env,
-                 bool exclusive) override;
+  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn,
+                                     ColumnFamilyId column_family_id,
+                                     const std::string& key, Env* env,
+                                     bool exclusive) override;
+  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn,
+                                     ColumnFamilyId column_family_id,
+                                     const Endpoint& start, const Endpoint& end,
+                                     Env* env, bool exclusive) override;
 
   void UnLock(PessimisticTransaction* txn, const LockTracker& tracker,
               Env* env) override;
@@ -196,15 +199,17 @@ class PointLockManager : public LockManager {
 
   std::shared_ptr<LockMap> GetLockMap(uint32_t column_family_id);
 
-  rocksdb_rs::status::Status AcquireWithTimeout(PessimisticTransaction* txn, LockMap* lock_map,
-                            LockMapStripe* stripe, uint32_t column_family_id,
-                            const std::string& key, Env* env, int64_t timeout,
-                            const LockInfo& lock_info);
+  rocksdb_rs::status::Status AcquireWithTimeout(
+      PessimisticTransaction* txn, LockMap* lock_map, LockMapStripe* stripe,
+      uint32_t column_family_id, const std::string& key, Env* env,
+      int64_t timeout, const LockInfo& lock_info);
 
-  rocksdb_rs::status::Status AcquireLocked(LockMap* lock_map, LockMapStripe* stripe,
-                       const std::string& key, Env* env,
-                       const LockInfo& lock_info, uint64_t* wait_time,
-                       autovector<TransactionID>* txn_ids);
+  rocksdb_rs::status::Status AcquireLocked(LockMap* lock_map,
+                                           LockMapStripe* stripe,
+                                           const std::string& key, Env* env,
+                                           const LockInfo& lock_info,
+                                           uint64_t* wait_time,
+                                           autovector<TransactionID>* txn_ids);
 
   void UnLockKey(PessimisticTransaction* txn, const std::string& key,
                  LockMapStripe* stripe, LockMap* lock_map, Env* env);

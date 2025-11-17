@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/transaction_test.h"
 
 #include <algorithm>
@@ -2886,7 +2885,8 @@ TEST_P(TransactionTest, MultiGetBatchedTest) {
 
   std::vector<Slice> keys = {"aaa", "bbb", "ccc", "ddd", "eee", "fff", "ggg"};
   std::vector<PinnableSlice> values(keys.size());
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   txn->MultiGet(snapshot_read_options, handles[1], keys.size(), keys.data(),
                 values.data(), statuses.data());
@@ -2981,7 +2981,8 @@ TEST_P(TransactionTest, MultiGetLargeBatchedTest) {
     keys.emplace_back(key_str[i]);
   }
   std::vector<PinnableSlice> values(keys.size());
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   wb.MultiGetFromBatchAndDB(db, snapshot_read_options, handles[1], keys.size(),
                             keys.data(), values.data(), statuses.data(), false);
@@ -3037,7 +3038,8 @@ TEST_P(TransactionTest, MultiGetSnapshot) {
 
   std::vector<Slice> keys;
   std::vector<PinnableSlice> values(1);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(1);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(1);
   keys.push_back(key);
   auto cfd = db->DefaultColumnFamily();
   txn2->MultiGet(read_options, cfd, 1, keys.data(), values.data(),
@@ -5471,9 +5473,10 @@ rocksdb_rs::status::Status TransactionStressTestInserter(
   // some failed due to write-conflicts.
   if (num_transactions != 1 &&
       inserter.GetFailureCount() > num_transactions / 2) {
-    return rocksdb_rs::status::Status_TryAgain("Too many transactions failed! " +
-                            std::to_string(inserter.GetFailureCount()) + " / " +
-                            std::to_string(num_transactions));
+    return rocksdb_rs::status::Status_TryAgain(
+        "Too many transactions failed! " +
+        std::to_string(inserter.GetFailureCount()) + " / " +
+        std::to_string(num_transactions));
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -5566,8 +5569,8 @@ TEST_P(MySQLStyleTransactionTest, TransactionStressTest) {
   }
 
   // Verify that data is consistent
-  rocksdb_rs::status::Status s = RandomTransactionInserter::Verify(db, num_sets, num_keys_per_set,
-                                               !TAKE_SNAPSHOT);
+  rocksdb_rs::status::Status s = RandomTransactionInserter::Verify(
+      db, num_sets, num_keys_per_set, !TAKE_SNAPSHOT);
   ASSERT_OK(s);
 }
 #endif  // !defined(ROCKSDB_VALGRIND_RUN) || defined(ROCKSDB_FULL_VALGRIND_RUN)
@@ -6013,8 +6016,8 @@ TEST_P(TransactionTest, DuplicateKeys) {
         }
         delete cf_handle;
       }  // with_commit_batch
-    }    // do_rollback
-  }      // do_prepare
+    }  // do_rollback
+  }  // do_prepare
 
   if (!options.unordered_write) {
     // Also test with max_successive_merges > 0. max_successive_merges will not
@@ -6435,7 +6438,8 @@ TEST_P(TransactionTest, OpenAndEnableU64Timestamp) {
   cf_opts.comparator = test::BytewiseComparatorWithU64TsWrapper();
   {
     ColumnFamilyHandle* cfh = nullptr;
-    const rocksdb_rs::status::Status s = db->CreateColumnFamily(cf_opts, test_cf_name, &cfh);
+    const rocksdb_rs::status::Status s =
+        db->CreateColumnFamily(cf_opts, test_cf_name, &cfh);
     if (txn_db_options.write_policy == WRITE_COMMITTED) {
       ASSERT_OK(s);
       delete cfh;

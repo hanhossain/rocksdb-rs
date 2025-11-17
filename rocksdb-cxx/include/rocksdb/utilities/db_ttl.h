@@ -49,15 +49,16 @@ class DBWithTTL : public StackableDB {
       const ColumnFamilyOptions& options, const std::string& column_family_name,
       ColumnFamilyHandle** handle, int ttl) = 0;
 
-  static rocksdb_rs::status::Status Open(const Options& options, const std::string& dbname,
-                     DBWithTTL** dbptr, int32_t ttl = 0,
-                     bool read_only = false);
+  static rocksdb_rs::status::Status Open(const Options& options,
+                                         const std::string& dbname,
+                                         DBWithTTL** dbptr, int32_t ttl = 0,
+                                         bool read_only = false);
 
-  static rocksdb_rs::status::Status Open(const DBOptions& db_options, const std::string& dbname,
-                     const std::vector<ColumnFamilyDescriptor>& column_families,
-                     std::vector<ColumnFamilyHandle*>* handles,
-                     DBWithTTL** dbptr, const std::vector<int32_t>& ttls,
-                     bool read_only = false);
+  static rocksdb_rs::status::Status Open(
+      const DBOptions& db_options, const std::string& dbname,
+      const std::vector<ColumnFamilyDescriptor>& column_families,
+      std::vector<ColumnFamilyHandle*>* handles, DBWithTTL** dbptr,
+      const std::vector<int32_t>& ttls, bool read_only = false);
 
   virtual void SetTtl(int32_t ttl) = 0;
 

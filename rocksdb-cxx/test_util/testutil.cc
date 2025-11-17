@@ -204,17 +204,21 @@ std::string RandomName(Random* rnd, const size_t len) {
   return ss.str();
 }
 
-rocksdb_rs::compression_type::CompressionType RandomCompressionType(Random* rnd) {
-  auto ret = static_cast<rocksdb_rs::compression_type::CompressionType>(rnd->Uniform(6));
+rocksdb_rs::compression_type::CompressionType RandomCompressionType(
+    Random* rnd) {
+  auto ret = static_cast<rocksdb_rs::compression_type::CompressionType>(
+      rnd->Uniform(6));
   while (!CompressionTypeSupported(ret)) {
-    ret = static_cast<rocksdb_rs::compression_type::CompressionType>((static_cast<int>(ret) + 1) % 6);
+    ret = static_cast<rocksdb_rs::compression_type::CompressionType>(
+        (static_cast<int>(ret) + 1) % 6);
   }
   return ret;
 }
 
-void RandomCompressionTypeVector(const size_t count,
-                                 std::vector<rocksdb_rs::compression_type::CompressionType>* types,
-                                 Random* rnd) {
+void RandomCompressionTypeVector(
+    const size_t count,
+    std::vector<rocksdb_rs::compression_type::CompressionType>* types,
+    Random* rnd) {
   types->clear();
   for (size_t i = 0; i < count; ++i) {
     types->emplace_back(RandomCompressionType(rnd));
@@ -430,7 +434,8 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
   EnvOptions env_options;
   env_options.use_mmap_writes = false;
   env_options.use_direct_writes = true;
-  std::string tmp = static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
+  std::string tmp =
+      static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   {
     std::unique_ptr<WritableFile> file;
@@ -445,11 +450,13 @@ bool IsDirectIOSupported(Env* env, const std::string& dir) {
 bool IsPrefetchSupported(const std::shared_ptr<FileSystem>& fs,
                          const std::string& dir) {
   bool supported = false;
-  std::string tmp = static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
+  std::string tmp =
+      static_cast<std::string>(rocksdb_rs::filename::TempFileName(dir, 999));
   Random rnd(301);
   std::string test_string = rnd.RandomString(4096);
   Slice data(test_string);
-  rocksdb_rs::status::Status s = WriteStringToFile(fs.get(), data, tmp, true).status();
+  rocksdb_rs::status::Status s =
+      WriteStringToFile(fs.get(), data, tmp, true).status();
   if (s.ok()) {
     std::unique_ptr<FSRandomAccessFile> file;
     auto io_s = fs->NewRandomAccessFile(tmp, FileOptions(), &file, nullptr);
@@ -479,8 +486,9 @@ size_t GetLinesCount(const std::string& fname, const std::string& pattern) {
   return count;
 }
 
-rocksdb_rs::status::Status CorruptFile(Env* env, const std::string& fname, int offset,
-                   int bytes_to_corrupt, bool verify_checksum /*=true*/) {
+rocksdb_rs::status::Status CorruptFile(Env* env, const std::string& fname,
+                                       int offset, int bytes_to_corrupt,
+                                       bool verify_checksum /*=true*/) {
   uint64_t size;
   rocksdb_rs::status::Status s = env->GetFileSize(fname, &size);
   if (!s.ok()) {
@@ -513,13 +521,15 @@ rocksdb_rs::status::Status CorruptFile(Env* env, const std::string& fname, int o
     Options options;
     options.env = env;
     EnvOptions env_options;
-    rocksdb_rs::status::Status v = VerifySstFileChecksum(options, env_options, fname);
+    rocksdb_rs::status::Status v =
+        VerifySstFileChecksum(options, env_options, fname);
     assert(!v.ok());
   }
   return s;
 }
 
-rocksdb_rs::status::Status TruncateFile(Env* env, const std::string& fname, uint64_t new_length) {
+rocksdb_rs::status::Status TruncateFile(Env* env, const std::string& fname,
+                                        uint64_t new_length) {
   uint64_t old_length;
   rocksdb_rs::status::Status s = env->GetFileSize(fname, &old_length);
   if (!s.ok() || new_length == old_length) {
@@ -535,7 +545,8 @@ rocksdb_rs::status::Status TruncateFile(Env* env, const std::string& fname, uint
   return s;
 }
 
-rocksdb_rs::status::Status TruncateFile(Env* env, const rust::String& fname, uint64_t new_length) {
+rocksdb_rs::status::Status TruncateFile(Env* env, const rust::String& fname,
+                                        uint64_t new_length) {
   return TruncateFile(env, static_cast<std::string>(fname), new_length);
 }
 
@@ -554,8 +565,9 @@ void DeleteDir(Env* env, const std::string& dirname) {
   TryDeleteDir(env, dirname);
 }
 
-rocksdb_rs::status::Status CreateEnvFromSystem(const ConfigOptions& config_options, Env** result,
-                           std::shared_ptr<Env>* guard) {
+rocksdb_rs::status::Status CreateEnvFromSystem(
+    const ConfigOptions& config_options, Env** result,
+    std::shared_ptr<Env>* guard) {
   const char* env_uri = getenv("TEST_ENV_URI");
   const char* fs_uri = getenv("TEST_FS_URI");
   if (env_uri || fs_uri) {
@@ -728,7 +740,6 @@ int RegisterTestObjects(ObjectLibrary& library, const std::string& arg) {
       });
   return static_cast<int>(library.GetFactoryCount(&num_types));
 }
-
 
 void RegisterTestLibrary(const std::string& arg) {
   static bool registered = false;

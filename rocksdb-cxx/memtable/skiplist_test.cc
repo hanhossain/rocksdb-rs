@@ -316,7 +316,10 @@ class TestState {
   enum class ReaderState { STARTING, RUNNING, DONE };
 
   explicit TestState(int s)
-      : seed_(s), quit_flag_(false), state_(ReaderState::STARTING), state_cv_(&mu_) {}
+      : seed_(s),
+        quit_flag_(false),
+        state_(ReaderState::STARTING),
+        state_cv_(&mu_) {}
 
   void Wait(ReaderState s) {
     mu_.Lock();

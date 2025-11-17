@@ -19,8 +19,8 @@ using rocksdb::DB;
 using rocksdb::Env;
 using rocksdb::Options;
 using rocksdb::ReadOptions;
-using rocksdb_rs::status::Status;
 using rocksdb::WriteOptions;
+using rocksdb_rs::status::Status;
 
 #if defined(OS_WIN)
 std::string kDBPath = "C:\\Windows\\TEMP\\rocksdb_example";

@@ -30,10 +30,11 @@ const std::string kCompatibleVersionKeyString =
 const uint64_t kStatsCFCurrentFormatVersion = 1;
 const uint64_t kStatsCFCompatibleFormatVersion = 1;
 
-rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsVersionKeyType type,
-                                          uint64_t* version_number) {
+rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(
+    DBImpl* db, StatsVersionKeyType type, uint64_t* version_number) {
   if (type >= StatsVersionKeyType::kKeyTypeMax) {
-    return rocksdb_rs::status::Status_InvalidArgument("Invalid stats version key type provided");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Invalid stats version key type provided");
   }
   std::string key;
   if (type == StatsVersionKeyType::kFormatVersion) {
@@ -44,10 +45,11 @@ rocksdb_rs::status::Status DecodePersistentStatsVersionNumber(DBImpl* db, StatsV
   ReadOptions options;
   options.verify_checksums = true;
   std::string result;
-  rocksdb_rs::status::Status s = db->Get(options, db->PersistentStatsColumnFamily(), key, &result);
+  rocksdb_rs::status::Status s =
+      db->Get(options, db->PersistentStatsColumnFamily(), key, &result);
   if (!s.ok() || result.empty()) {
-    return rocksdb_rs::status::Status_NotFound("Persistent stats version key " + key +
-                            " not found.");
+    return rocksdb_rs::status::Status_NotFound("Persistent stats version key " +
+                                               key + " not found.");
   }
 
   // read version_number but do nothing in current version
@@ -71,14 +73,17 @@ void OptimizeForPersistentStats(ColumnFamilyOptions* cfo) {
   cfo->max_bytes_for_level_base = 10 * 1048576;
   cfo->soft_pending_compaction_bytes_limit = 256 * 1048576;
   cfo->hard_pending_compaction_bytes_limit = 1073741824ul;
-  cfo->compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  cfo->compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
 }
 
 PersistentStatsHistoryIterator::~PersistentStatsHistoryIterator() {}
 
 bool PersistentStatsHistoryIterator::Valid() const { return valid_; }
 
-rocksdb_rs::status::Status PersistentStatsHistoryIterator::status() const { return status_.Clone(); }
+rocksdb_rs::status::Status PersistentStatsHistoryIterator::status() const {
+  return status_.Clone();
+}
 
 void PersistentStatsHistoryIterator::Next() {
   // increment start_time by 1 to avoid infinite loop

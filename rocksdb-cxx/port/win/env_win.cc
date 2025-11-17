@@ -90,8 +90,9 @@ WinClock::WinClock()
 
   HMODULE module = GetModuleHandle("kernel32.dll");
   if (module != NULL) {
-    GetSystemTimePreciseAsFileTime_ = (FnGetSystemTimePreciseAsFileTime)(
-        void*)GetProcAddress(module, "GetSystemTimePreciseAsFileTime");
+    GetSystemTimePreciseAsFileTime_ =
+        (FnGetSystemTimePreciseAsFileTime)(void*)GetProcAddress(
+            module, "GetSystemTimePreciseAsFileTime");
   }
 }
 
@@ -202,10 +203,11 @@ WinEnvIO::WinEnvIO(Env* hosted_env) : hosted_env_(hosted_env) {}
 
 WinEnvIO::~WinEnvIO() {}
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::DeleteFile(const std::string& fname,
-                                   const IOOptions& /*options*/,
-                                   IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinFileSystem::DeleteFile(
+    const std::string& fname, const IOOptions& /*options*/,
+    IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus result =
+      rocksdb_rs::io_status::IOStatus_new();
 
   BOOL ret = RX_DeleteFile(RX_FN(fname).c_str());
 
@@ -217,9 +219,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::DeleteFile(const std::string& fna
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::Truncate(const std::string& fname, size_t size,
-                                 const IOOptions& /*options*/,
-                                 IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::Truncate(
+    const std::string& fname, size_t size, const IOOptions& /*options*/,
+    IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   int result = rocksdb::port::Truncate(fname, size);
   if (result != 0) {
@@ -440,10 +442,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::OpenWritableFile(
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::NewWritableFile(const std::string& fname,
-                                        const FileOptions& options,
-                                        std::unique_ptr<FSWritableFile>* result,
-                                        IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::NewWritableFile(
+    const std::string& fname, const FileOptions& options,
+    std::unique_ptr<FSWritableFile>* result, IODebugContext* /*dbg*/) {
   return OpenWritableFile(fname, options, result, false);
 }
 
@@ -453,10 +454,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::ReopenWritableFile(
   return OpenWritableFile(fname, options, result, true);
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::NewRandomRWFile(const std::string& fname,
-                                        const FileOptions& options,
-                                        std::unique_ptr<FSRandomRWFile>* result,
-                                        IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::NewRandomRWFile(
+    const std::string& fname, const FileOptions& options,
+    std::unique_ptr<FSRandomRWFile>* result, IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   // Open the file for read-only random access
@@ -570,10 +570,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::NewMemoryMappedFileBuffer(
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::NewDirectory(const std::string& name,
-                                     const IOOptions& /*options*/,
-                                     std::unique_ptr<FSDirectory>* result,
-                                     IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::NewDirectory(
+    const std::string& name, const IOOptions& /*options*/,
+    std::unique_ptr<FSDirectory>* result, IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   // Must be nullptr on failure
   result->reset();
@@ -606,9 +605,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::NewDirectory(const std::string& n
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::FileExists(const std::string& fname,
-                                   const IOOptions& /*opts*/,
-                                   IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::FileExists(
+    const std::string& fname, const IOOptions& /*opts*/,
+    IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   // TODO: This does not follow symbolic links at this point
   // which is consistent with _access() impl on windows
@@ -633,11 +632,11 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::FileExists(const std::string& fna
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::GetChildren(const std::string& dir,
-                                    const IOOptions& /*opts*/,
-                                    std::vector<std::string>* result,
-                                    IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinFileSystem::GetChildren(
+    const std::string& dir, const IOOptions& /*opts*/,
+    std::vector<std::string>* result, IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus status =
+      rocksdb_rs::io_status::IOStatus_new();
   result->clear();
 
   RX_WIN32_FIND_DATA data;
@@ -697,10 +696,11 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetChildren(const std::string& di
   return status;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::CreateDir(const std::string& name,
-                                  const IOOptions& /*opts*/,
-                                  IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinFileSystem::CreateDir(
+    const std::string& name, const IOOptions& /*opts*/,
+    IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus result =
+      rocksdb_rs::io_status::IOStatus_new();
   BOOL ret = RX_CreateDirectory(RX_FN(name).c_str(), NULL);
   if (!ret) {
     auto lastError = GetLastError();
@@ -711,10 +711,11 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::CreateDir(const std::string& name
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::CreateDirIfMissing(const std::string& name,
-                                           const IOOptions& /*opts*/,
-                                           IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinFileSystem::CreateDirIfMissing(
+    const std::string& name, const IOOptions& /*opts*/,
+    IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus result =
+      rocksdb_rs::io_status::IOStatus_new();
 
   if (DirExists(name)) {
     return result;
@@ -727,16 +728,18 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::CreateDirIfMissing(const std::str
       result = IOErrorFromWindowsError("Failed to create a directory: " + name,
                                        lastError);
     } else {
-      result = rocksdb_rs::io_status::IOStatus_IOError(name + ": exists but is not a directory");
+      result = rocksdb_rs::io_status::IOStatus_IOError(
+          name + ": exists but is not a directory");
     }
   }
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::DeleteDir(const std::string& name,
-                                  const IOOptions& /*options*/,
-                                  IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinFileSystem::DeleteDir(
+    const std::string& name, const IOOptions& /*options*/,
+    IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus result =
+      rocksdb_rs::io_status::IOStatus_new();
   BOOL ret = RX_RemoveDirectory(RX_FN(name).c_str());
   if (!ret) {
     auto lastError = GetLastError();
@@ -746,9 +749,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::DeleteDir(const std::string& name
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::GetFileSize(const std::string& fname,
-                                    const IOOptions& /*opts*/, uint64_t* size,
-                                    IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::GetFileSize(
+    const std::string& fname, const IOOptions& /*opts*/, uint64_t* size,
+    IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   WIN32_FILE_ATTRIBUTE_DATA attrs;
@@ -783,10 +786,9 @@ uint64_t WinFileSystem::FileTimeToUnixTime(const FILETIME& ftTime) {
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::GetFileModificationTime(const std::string& fname,
-                                                const IOOptions& /*opts*/,
-                                                uint64_t* file_mtime,
-                                                IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::GetFileModificationTime(
+    const std::string& fname, const IOOptions& /*opts*/, uint64_t* file_mtime,
+    IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   WIN32_FILE_ATTRIBUTE_DATA attrs;
@@ -803,11 +805,11 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetFileModificationTime(const std
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::RenameFile(const std::string& src,
-                                   const std::string& target,
-                                   const IOOptions& /*opts*/,
-                                   IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinFileSystem::RenameFile(
+    const std::string& src, const std::string& target,
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus result =
+      rocksdb_rs::io_status::IOStatus_new();
 
   // rename() is not capable of replacing the existing file as on Linux
   // so use OS API directly
@@ -824,16 +826,17 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::RenameFile(const std::string& src
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::LinkFile(const std::string& src,
-                                 const std::string& target,
-                                 const IOOptions& /*opts*/,
-                                 IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinFileSystem::LinkFile(
+    const std::string& src, const std::string& target,
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus result =
+      rocksdb_rs::io_status::IOStatus_new();
 
   if (!RX_CreateHardLink(RX_FN(target).c_str(), RX_FN(src).c_str(), NULL)) {
     DWORD lastError = GetLastError();
     if (lastError == ERROR_NOT_SAME_DEVICE) {
-      return rocksdb_rs::io_status::IOStatus_NotSupported("No cross FS links allowed");
+      return rocksdb_rs::io_status::IOStatus_NotSupported(
+          "No cross FS links allowed");
     }
 
     std::string text("Failed to link: ");
@@ -845,9 +848,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::LinkFile(const std::string& src,
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::NumFileLinks(const std::string& fname,
-                                     const IOOptions& /*opts*/, uint64_t* count,
-                                     IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::NumFileLinks(
+    const std::string& fname, const IOOptions& /*opts*/, uint64_t* count,
+    IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   HANDLE handle =
       RX_CreateFile(RX_FN(fname).c_str(), 0,
@@ -873,13 +876,13 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::NumFileLinks(const std::string& f
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::AreFilesSame(const std::string& first,
-                                     const std::string& second,
-                                     const IOOptions& /*opts*/, bool* res,
-                                     IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::AreFilesSame(
+    const std::string& first, const std::string& second,
+    const IOOptions& /*opts*/, bool* res, IODebugContext* /*dbg*/) {
 // For MinGW builds
 #if (_WIN32_WINNT == _WIN32_WINNT_VISTA)
-  rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_NotSupported();
+  rocksdb_rs::io_status::IOStatus s =
+      rocksdb_rs::io_status::IOStatus_NotSupported();
 #else
   assert(res != nullptr);
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
@@ -948,13 +951,14 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::AreFilesSame(const std::string& f
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::LockFile(const std::string& lockFname,
-                                 const IOOptions& /*opts*/, FileLock** lock,
-                                 IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::LockFile(
+    const std::string& lockFname, const IOOptions& /*opts*/, FileLock** lock,
+    IODebugContext* /*dbg*/) {
   assert(lock != nullptr);
 
   *lock = NULL;
-  rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus result =
+      rocksdb_rs::io_status::IOStatus_new();
 
   // No-sharing, this is a LOCK file
   const DWORD ExclusiveAccessON = 0;
@@ -981,9 +985,10 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::LockFile(const std::string& lockF
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::UnlockFile(FileLock* lock, const IOOptions& /*opts*/,
-                                   IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus result = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinFileSystem::UnlockFile(
+    FileLock* lock, const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus result =
+      rocksdb_rs::io_status::IOStatus_new();
 
   assert(lock != nullptr);
 
@@ -992,9 +997,8 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::UnlockFile(FileLock* lock, const 
   return result;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::GetTestDirectory(const IOOptions& opts,
-                                         std::string* result,
-                                         IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::GetTestDirectory(
+    const IOOptions& opts, std::string* result, IODebugContext* dbg) {
   std::string output;
 
   const char* env = getenv("TEST_TMPDIR");
@@ -1021,10 +1025,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetTestDirectory(const IOOptions&
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::NewLogger(const std::string& fname,
-                                  const IOOptions& /*opts*/,
-                                  std::shared_ptr<Logger>* result,
-                                  IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::NewLogger(
+    const std::string& fname, const IOOptions& /*opts*/,
+    std::shared_ptr<Logger>* result, IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   result->reset();
@@ -1063,9 +1066,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::NewLogger(const std::string& fnam
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::IsDirectory(const std::string& path,
-                                    const IOOptions& /*opts*/, bool* is_dir,
-                                    IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::IsDirectory(
+    const std::string& path, const IOOptions& /*opts*/, bool* is_dir,
+    IODebugContext* /*dbg*/) {
   BOOL ret = RX_PathIsDirectory(RX_FN(path).c_str());
   if (is_dir) {
     *is_dir = ret ? true : false;
@@ -1088,10 +1091,9 @@ rocksdb_rs::status::Status WinEnvIO::GetHostName(char* name, uint64_t len) {
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::GetAbsolutePath(const std::string& db_path,
-                                        const IOOptions& /*options*/,
-                                        std::string* output_path,
-                                        IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::GetAbsolutePath(
+    const std::string& db_path, const IOOptions& /*options*/,
+    std::string* output_path, IODebugContext* dbg) {
   // Check if we already have an absolute path
   // For test compatibility we will consider starting slash as an
   // absolute path
@@ -1120,10 +1122,9 @@ rocksdb_rs::io_status::IOStatus WinFileSystem::GetAbsolutePath(const std::string
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WinFileSystem::GetFreeSpace(const std::string& path,
-                                     const IOOptions& /*options*/,
-                                     uint64_t* diskfree,
-                                     IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinFileSystem::GetFreeSpace(
+    const std::string& path, const IOOptions& /*options*/, uint64_t* diskfree,
+    IODebugContext* /*dbg*/) {
   assert(diskfree != nullptr);
   ULARGE_INTEGER freeBytes;
   BOOL f = RX_GetDiskFreeSpaceEx(RX_FN(path).c_str(), &freeBytes, NULL, NULL);
@@ -1371,7 +1372,8 @@ WinEnv::~WinEnv() {
   delete thread_status_updater_;
 }
 
-rocksdb_rs::status::Status WinEnv::GetThreadList(std::vector<ThreadStatus>* thread_list) {
+rocksdb_rs::status::Status WinEnv::GetThreadList(
+    std::vector<ThreadStatus>* thread_list) {
   assert(thread_status_updater_);
   return thread_status_updater_->GetThreadList(thread_list);
 }

@@ -13,9 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "rocksdb/customizable.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/customizable.h"
 
 namespace rocksdb {
 
@@ -695,9 +694,9 @@ class Statistics : public Customizable {
  public:
   ~Statistics() override {}
   static const char* Type() { return "Statistics"; }
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
-                                 const std::string& value,
-                                 std::shared_ptr<Statistics>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& opts, const std::string& value,
+      std::shared_ptr<Statistics>* result);
   // Default name of empty, for backwards compatibility.  Derived classes should
   // override this method.
   // This default implementation will likely be removed in a future release
@@ -731,7 +730,9 @@ class Statistics : public Customizable {
   }
 
   // Resets all ticker and histogram stats
-  virtual rocksdb_rs::status::Status Reset() { return rocksdb_rs::status::Status_NotSupported("Not implemented"); }
+  virtual rocksdb_rs::status::Status Reset() {
+    return rocksdb_rs::status::Status_NotSupported("Not implemented");
+  }
 
   using Customizable::ToString;
   // String representation of the statistic object. Must be thread-safe.

@@ -28,7 +28,7 @@ const std::string kUnnamedFuncName = "";
 const std::string kErrorFuncName = "kErrorFuncName";
 
 rocksdb_rs::status::Status AddAggregator(const std::string& function_name,
-                     std::unique_ptr<Aggregator>&& agg) {
+                                         std::unique_ptr<Aggregator>&& agg) {
   if (function_name == kErrorFuncName) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot register function name kErrorFuncName");
@@ -47,14 +47,17 @@ std::string EncodeAggFuncAndPayloadNoCheck(const Slice& function_name,
   return result;
 }
 
-rocksdb_rs::status::Status EncodeAggFuncAndPayload(const Slice& function_name, const Slice& payload,
-                               std::string& output) {
+rocksdb_rs::status::Status EncodeAggFuncAndPayload(const Slice& function_name,
+                                                   const Slice& payload,
+                                                   std::string& output) {
   if (function_name == kErrorFuncName) {
-    return rocksdb_rs::status::Status_InvalidArgument("Cannot use error function name");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Cannot use error function name");
   }
   if (function_name != kUnnamedFuncName &&
       func_map.find(function_name.ToString()) == func_map.end()) {
-    return rocksdb_rs::status::Status_InvalidArgument("Function name not registered");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Function name not registered");
   }
   output = EncodeAggFuncAndPayloadNoCheck(function_name, payload);
   return rocksdb_rs::status::Status_OK();

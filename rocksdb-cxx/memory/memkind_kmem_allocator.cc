@@ -11,7 +11,8 @@
 #include "memory/memkind_kmem_allocator.h"
 
 namespace rocksdb {
-rocksdb_rs::status::Status MemkindKmemAllocator::PrepareOptions(const ConfigOptions& options) {
+rocksdb_rs::status::Status MemkindKmemAllocator::PrepareOptions(
+    const ConfigOptions& options) {
   std::string message;
   if (!IsSupported(&message)) {
     return rocksdb_rs::status::Status_NotSupported(message);

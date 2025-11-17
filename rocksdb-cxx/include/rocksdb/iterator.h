@@ -20,11 +20,10 @@
 
 #include <string>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/cleanable.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/wide_columns.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -112,7 +111,8 @@ class Iterator : public Cleanable {
   // iterator will be invalidated after the call. Not supported if
   // ReadOptions.snapshot is given when creating the iterator.
   virtual rocksdb_rs::status::Status Refresh() {
-    return rocksdb_rs::status::Status_NotSupported("Refresh() is not supported");
+    return rocksdb_rs::status::Status_NotSupported(
+        "Refresh() is not supported");
   }
 
   // Property "rocksdb.iterator.is-key-pinned":
@@ -128,7 +128,8 @@ class Iterator : public Cleanable {
   // Property "rocksdb.iterator.internal-key":
   //   Get the user-key portion of the internal key at which the iteration
   //   stopped.
-  virtual rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop);
+  virtual rocksdb_rs::status::Status GetProperty(std::string prop_name,
+                                                 std::string* prop);
 
   virtual Slice timestamp() const {
     assert(false);

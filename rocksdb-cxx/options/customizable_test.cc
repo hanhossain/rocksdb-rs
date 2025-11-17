@@ -78,21 +78,19 @@ class TestCustomizable : public Customizable {
  public:
   TestCustomizable(const std::string& name) : name_(name) {}
   // Method to allow CheckedCast to work for this class
-  static const char* kClassName() {
-    return "TestCustomizable";
-  }
+  static const char* kClassName() { return "TestCustomizable"; }
 
   const char* Name() const override { return name_.c_str(); }
   static const char* Type() { return "test.custom"; }
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& opts, const std::string& value,
+      std::unique_ptr<TestCustomizable>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& opts, const std::string& value,
+      std::shared_ptr<TestCustomizable>* result);
   static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
-                                 const std::string& value,
-                                 std::unique_ptr<TestCustomizable>* result);
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
-                                 const std::string& value,
-                                 std::shared_ptr<TestCustomizable>* result);
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
-                                 const std::string& value,
-                                 TestCustomizable** result);
+                                                     const std::string& value,
+                                                     TestCustomizable** result);
   bool IsInstanceOf(const std::string& name) const override {
     if (name == kClassName()) {
       return true;
@@ -113,11 +111,15 @@ struct AOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> a_option_info = {
     {"int",
-     {offsetof(struct AOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
+     {offsetof(struct AOptions, i),
+      rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
     {"bool",
-     {offsetof(struct AOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct AOptions, b),
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 class ACustomizable : public TestCustomizable {
@@ -141,11 +143,15 @@ struct BOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> b_option_info = {
     {"string",
-     {offsetof(struct BOptions, s), rocksdb_rs::utilities::options_type::OptionType::kString,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct BOptions, s),
+      rocksdb_rs::utilities::options_type::OptionType::kString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"bool",
-     {offsetof(struct BOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct BOptions, b),
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 class BCustomizable : public TestCustomizable {
@@ -196,19 +202,24 @@ struct SimpleOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> simple_option_info = {
     {"bool",
-     {offsetof(struct SimpleOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct SimpleOptions, b),
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"unique",
      OptionTypeInfo::AsCustomUniquePtr<TestCustomizable>(
-         offsetof(struct SimpleOptions, cu), rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         offsetof(struct SimpleOptions, cu),
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
          rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)},
     {"shared",
      OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-         offsetof(struct SimpleOptions, cs), rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         offsetof(struct SimpleOptions, cs),
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
          rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)},
     {"pointer",
      OptionTypeInfo::AsCustomRawPtr<TestCustomizable>(
-         offsetof(struct SimpleOptions, cp), rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         offsetof(struct SimpleOptions, cp),
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
          rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)},
 };
 
@@ -254,9 +265,9 @@ rocksdb_rs::status::Status TestCustomizable::CreateFromString(
   return LoadUniqueObject<TestCustomizable>(config_options, value, result);
 }
 
-rocksdb_rs::status::Status TestCustomizable::CreateFromString(const ConfigOptions& config_options,
-                                          const std::string& value,
-                                          TestCustomizable** result) {
+rocksdb_rs::status::Status TestCustomizable::CreateFromString(
+    const ConfigOptions& config_options, const std::string& value,
+    TestCustomizable** result) {
   return LoadStaticObject<TestCustomizable>(config_options, value, result);
 }
 
@@ -381,7 +392,8 @@ TEST_F(CustomizableTest, AreEquivalentOptionsTest) {
       simple->cu->AreEquivalent(config_options, simple->cs.get(), &mismatch));
   ASSERT_FALSE(c1->AreEquivalent(config_options, c2.get(), &mismatch));
   ConfigOptions loosely = config_options;
-  loosely.sanity_level = ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
+  loosely.sanity_level =
+      ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
   ASSERT_TRUE(c1->AreEquivalent(loosely, c2.get(), &mismatch));
   ASSERT_TRUE(simple->cu->AreEquivalent(loosely, simple->cs.get(), &mismatch));
 
@@ -533,7 +545,8 @@ TEST_F(CustomizableTest, IsInstanceOfTest) {
 TEST_F(CustomizableTest, PrepareOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> p_option_info = {
       {"can_prepare",
-       {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+       {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
         rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
   };
 
@@ -545,7 +558,8 @@ TEST_F(CustomizableTest, PrepareOptionsTest) {
       RegisterOptions("Prepare", &can_prepare_, &p_option_info);
     }
 
-    rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& opts) override {
+    rocksdb_rs::status::Status PrepareOptions(
+        const ConfigOptions& opts) override {
       if (!can_prepare_) {
         return rocksdb_rs::status::Status_InvalidArgument("Cannot Prepare");
       } else {
@@ -613,8 +627,10 @@ namespace {
 static std::unordered_map<std::string, OptionTypeInfo> inner_option_info = {
     {"inner",
      OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kStringNameOnly)}
-};
+         0,
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::
+             kStringNameOnly)}};
 
 struct InnerOptions {
   static const char* kName() { return "InnerOptions"; }
@@ -744,12 +760,14 @@ TEST_F(CustomizableTest, CopyObjectTest) {
     CopyCustomizable() : prepared_(0), validated_(0) {}
     const char* Name() const override { return "CopyCustomizable"; }
 
-    rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override {
+    rocksdb_rs::status::Status PrepareOptions(
+        const ConfigOptions& options) override {
       prepared_++;
       return Customizable::PrepareOptions(options);
     }
-    rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                           const ColumnFamilyOptions& cf_opts) const override {
+    rocksdb_rs::status::Status ValidateOptions(
+        const DBOptions& db_opts,
+        const ColumnFamilyOptions& cf_opts) const override {
       validated_++;
       return Customizable::ValidateOptions(db_opts, cf_opts);
     }
@@ -894,12 +912,16 @@ namespace {
 static std::unordered_map<std::string, OptionTypeInfo> vector_option_info = {
     {"vector",
      OptionTypeInfo::Vector<std::shared_ptr<TestCustomizable>>(
-         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         0,
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
 
          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
 
          OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-             0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone))},
+             0,
+             rocksdb_rs::utilities::options_type::OptionVerificationType::
+                 kNormal,
+             rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone))},
 };
 class VectorConfigurable : public SimpleConfigurable {
  public:
@@ -938,7 +960,6 @@ TEST_F(CustomizableTest, NoNameTest) {
   ASSERT_EQ(copy.cv[0]->GetId(), "A_1");
   ASSERT_EQ(copts->cu, nullptr);
 }
-
 
 TEST_F(CustomizableTest, IgnoreUnknownObjects) {
   ConfigOptions ignore = config_options_;
@@ -1005,11 +1026,16 @@ TEST_F(CustomizableTest, MutableOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> mutable_option_info = {
       {"mutable",
        OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-           0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)}};
+           0,
+           rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)}};
   static std::unordered_map<std::string, OptionTypeInfo> immutable_option_info =
       {{"immutable",
         OptionTypeInfo::AsCustomSharedPtr<TestCustomizable>(
-            0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)}};
+            0,
+            rocksdb_rs::utilities::options_type::OptionVerificationType::
+                kNormal,
+            rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)}};
 
   class MutableCustomizable : public Customizable {
    private:
@@ -1223,14 +1249,14 @@ TEST_F(CustomizableTest, CreateManagedObjects) {
   ASSERT_EQ(mc1, obj);
 }
 
-
 namespace {
 class TestSecondaryCache : public SecondaryCache {
  public:
   static const char* kClassName() { return "Test"; }
   const char* Name() const override { return kClassName(); }
-  rocksdb_rs::status::Status Insert(const Slice& /*key*/, Cache::ObjectPtr /*value*/,
-                const Cache::CacheItemHelper* /*helper*/) override {
+  rocksdb_rs::status::Status Insert(
+      const Slice& /*key*/, Cache::ObjectPtr /*value*/,
+      const Cache::CacheItemHelper* /*helper*/) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
   std::unique_ptr<SecondaryCacheResultHandle> Lookup(
@@ -1296,13 +1322,15 @@ class MockEncryptionProvider : public EncryptionProvider {
   static const char* kClassName() { return "Mock"; }
   const char* Name() const override { return kClassName(); }
   size_t GetPrefixLength() const override { return 0; }
-  rocksdb_rs::status::Status CreateNewPrefix(const std::string& /*fname*/, char* /*prefix*/,
-                         size_t /*prefixLength*/) const override {
+  rocksdb_rs::status::Status CreateNewPrefix(
+      const std::string& /*fname*/, char* /*prefix*/,
+      size_t /*prefixLength*/) const override {
     return rocksdb_rs::status::Status_NotSupported();
   }
 
-  rocksdb_rs::status::Status AddCipher(const std::string& /*descriptor*/, const char* /*cipher*/,
-                   size_t /*len*/, bool /*for_write*/) override {
+  rocksdb_rs::status::Status AddCipher(const std::string& /*descriptor*/,
+                                       const char* /*cipher*/, size_t /*len*/,
+                                       bool /*for_write*/) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
 
@@ -1312,12 +1340,14 @@ class MockEncryptionProvider : public EncryptionProvider {
       std::unique_ptr<BlockAccessCipherStream>* /*result*/) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
-  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                         const ColumnFamilyOptions& cf_opts) const override {
+  rocksdb_rs::status::Status ValidateOptions(
+      const DBOptions& db_opts,
+      const ColumnFamilyOptions& cf_opts) const override {
     if (EndsWith(id_, "://test")) {
       return EncryptionProvider::ValidateOptions(db_opts, cf_opts);
     } else {
-      return rocksdb_rs::status::Status_InvalidArgument("MockProvider not initialized");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "MockProvider not initialized");
     }
   }
 
@@ -1329,8 +1359,12 @@ class MockCipher : public BlockCipher {
  public:
   const char* Name() const override { return "Mock"; }
   size_t BlockSize() override { return 0; }
-  rocksdb_rs::status::Status Encrypt(char* /*data*/) override { return rocksdb_rs::status::Status_NotSupported(); }
-  rocksdb_rs::status::Status Decrypt(char* data) override { return Encrypt(data); }
+  rocksdb_rs::status::Status Encrypt(char* /*data*/) override {
+    return rocksdb_rs::status::Status_NotSupported();
+  }
+  rocksdb_rs::status::Status Decrypt(char* data) override {
+    return Encrypt(data);
+  }
 };
 
 class DummyFileSystem : public FileSystemWrapper {
@@ -1340,8 +1374,6 @@ class DummyFileSystem : public FileSystemWrapper {
   static const char* kClassName() { return "DummyFileSystem"; }
   const char* Name() const override { return kClassName(); }
 };
-
-
 
 class MockTablePropertiesCollectorFactory
     : public TablePropertiesCollectorFactory {
@@ -1532,9 +1564,11 @@ class LoadCustomizableTest : public testing::Test {
   }
 
   template <typename T, typename U>
-  rocksdb_rs::status::Status TestCreateStatic(const std::string& name, U** result,
-                          bool delete_result = false) {
-    rocksdb_rs::status::Status s = T::CreateFromString(config_options_, name, result);
+  rocksdb_rs::status::Status TestCreateStatic(const std::string& name,
+                                              U** result,
+                                              bool delete_result = false) {
+    rocksdb_rs::status::Status s =
+        T::CreateFromString(config_options_, name, result);
     if (s.ok()) {
       EXPECT_NE(*result, nullptr);
       EXPECT_TRUE(*result != nullptr && (*result)->IsInstanceOf(name));
@@ -1568,7 +1602,8 @@ class LoadCustomizableTest : public testing::Test {
       const std::function<std::vector<std::string>(const std::string&)>& alt =
           nullptr) {
     std::unordered_set<std::string> factories = expected;
-    rocksdb_rs::status::Status s = T::CreateFromString(config_options_, mock, object);
+    rocksdb_rs::status::Status s =
+        T::CreateFromString(config_options_, mock, object);
     EXPECT_NOK(s);
     std::vector<std::string> builtins;
     ObjectLibrary::Default()->GetFactoryNames(T::Type(), &builtins);
@@ -1632,9 +1667,9 @@ class LoadCustomizableTest : public testing::Test {
   }
 
   template <typename T>
-  rocksdb_rs::status::Status TestSharedBuiltins(const std::string& mock,
-                            const std::string& expected,
-                            std::vector<std::string>* failed = nullptr) {
+  rocksdb_rs::status::Status TestSharedBuiltins(
+      const std::string& mock, const std::string& expected,
+      std::vector<std::string>* failed = nullptr) {
     std::unordered_set<std::string> values;
     if (!expected.empty()) {
       values.insert(expected);
@@ -1644,19 +1679,21 @@ class LoadCustomizableTest : public testing::Test {
       return TestExpectedBuiltins<T>(mock, values, &object, failed);
     } else {
       std::vector<std::string> failures;
-      rocksdb_rs::status::Status s = TestExpectedBuiltins<T>(mock, values, &object, &failures);
+      rocksdb_rs::status::Status s =
+          TestExpectedBuiltins<T>(mock, values, &object, &failures);
       EXPECT_EQ(0U, failures.size());
       return s;
     }
   }
 
   template <typename T, typename U>
-  rocksdb_rs::status::Status TestStaticBuiltins(const std::string& mock, U** object,
-                            const std::unordered_set<std::string>& expected,
-                            std::vector<std::string>* failed,
-                            bool delete_objects = false) {
+  rocksdb_rs::status::Status TestStaticBuiltins(
+      const std::string& mock, U** object,
+      const std::unordered_set<std::string>& expected,
+      std::vector<std::string>* failed, bool delete_objects = false) {
     std::unordered_set<std::string> factories = expected;
-    rocksdb_rs::status::Status s = TestCreateStatic<T>(mock, object, delete_objects);
+    rocksdb_rs::status::Status s =
+        TestCreateStatic<T>(mock, object, delete_objects);
     EXPECT_NOK(s);
     std::vector<std::string> builtins;
     ObjectLibrary::Default()->GetFactoryNames(T::Type(), &builtins);

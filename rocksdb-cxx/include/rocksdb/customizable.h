@@ -8,9 +8,8 @@
 
 #pragma once
 
-#include "rocksdb/configurable.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/configurable.h"
 
 namespace rocksdb {
 /**
@@ -160,8 +159,9 @@ class Customizable : public Configurable {
                      std::string* mismatch) const override;
   // Gets the value of the option associated with the input name
   // @see Configurable::GetOption for more details
-  rocksdb_rs::status::Status GetOption(const ConfigOptions& config_options, const std::string& name,
-                   std::string* value) const override;
+  rocksdb_rs::status::Status GetOption(const ConfigOptions& config_options,
+                                       const std::string& name,
+                                       std::string* value) const override;
   // Helper method for getting for parsing the opt_value into the corresponding
   // options for use in potentially creating a new Customizable object (this
   // method is primarily a support method for LoadSharedObject et al for new

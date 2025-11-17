@@ -85,8 +85,8 @@ void ShortenedIndexBuilder::FindShortestInternalKeySeparator(
       comparator.Compare(user_start, tmp) < 0) {
     // User key has become shorter physically, but larger logically.
     // Tack on the earliest possible number to the shortened user key.
-    rocksdb_rs::coding::PutFixed64(tmp,
-               PackSequenceAndType(kMaxSequenceNumber, kValueTypeForSeek));
+    rocksdb_rs::coding::PutFixed64(
+        tmp, PackSequenceAndType(kMaxSequenceNumber, kValueTypeForSeek));
     assert(InternalKeyComparator(&comparator).Compare(*start, tmp) < 0);
     assert(InternalKeyComparator(&comparator).Compare(tmp, limit) < 0);
     start->swap(tmp);
@@ -101,8 +101,8 @@ void ShortenedIndexBuilder::FindShortInternalKeySuccessor(
   if (tmp.size() <= user_key.size() && comparator.Compare(user_key, tmp) < 0) {
     // User key has become shorter physically, but larger logically.
     // Tack on the earliest possible number to the shortened user key.
-    rocksdb_rs::coding::PutFixed64(tmp,
-               PackSequenceAndType(kMaxSequenceNumber, kValueTypeForSeek));
+    rocksdb_rs::coding::PutFixed64(
+        tmp, PackSequenceAndType(kMaxSequenceNumber, kValueTypeForSeek));
     assert(InternalKeyComparator(&comparator).Compare(*key, tmp) < 0);
     key->swap(tmp);
   }

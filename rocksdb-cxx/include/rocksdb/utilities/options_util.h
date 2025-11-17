@@ -6,16 +6,14 @@
 // This file contains utility functions for RocksDB Options.
 #pragma once
 
-
 #include <string>
 #include <vector>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/options.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 struct ConfigOptions;
@@ -67,24 +65,23 @@ struct ConfigOptions;
 //     to the options file itself.
 //
 // @see LoadOptionsFromFile
-rocksdb_rs::status::Status LoadLatestOptions(const ConfigOptions& config_options,
-                         const std::string& dbpath, DBOptions* db_options,
-                         std::vector<ColumnFamilyDescriptor>* cf_descs,
-                         std::shared_ptr<Cache>* cache = {});
+rocksdb_rs::status::Status LoadLatestOptions(
+    const ConfigOptions& config_options, const std::string& dbpath,
+    DBOptions* db_options, std::vector<ColumnFamilyDescriptor>* cf_descs,
+    std::shared_ptr<Cache>* cache = {});
 
 // Similar to LoadLatestOptions, this function constructs the DBOptions
 // and ColumnFamilyDescriptors based on the specified RocksDB Options file.
 //
 // @see LoadLatestOptions
-rocksdb_rs::status::Status LoadOptionsFromFile(const ConfigOptions& config_options,
-                           const std::string& options_file_name,
-                           DBOptions* db_options,
-                           std::vector<ColumnFamilyDescriptor>* cf_descs,
-                           std::shared_ptr<Cache>* cache = {});
+rocksdb_rs::status::Status LoadOptionsFromFile(
+    const ConfigOptions& config_options, const std::string& options_file_name,
+    DBOptions* db_options, std::vector<ColumnFamilyDescriptor>* cf_descs,
+    std::shared_ptr<Cache>* cache = {});
 
 // Returns the latest options file name under the specified db path.
-rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
-                                std::string* options_file_name);
+rocksdb_rs::status::Status GetLatestOptionsFileName(
+    const std::string& dbpath, Env* env, std::string* options_file_name);
 
 // Returns Status_OK if the input DBOptions and ColumnFamilyDescriptors
 // are compatible with the latest options stored in the specified DB path.

@@ -122,105 +122,120 @@ class WinFileSystem : public FileSystem {
   size_t GetPageSize() const { return page_size_; }
   size_t GetAllocationGranularity() const { return allocation_granularity_; }
 
-  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& fname, const IOOptions& options,
-                      IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& fname,
+                                             const IOOptions& options,
+                                             IODebugContext* dbg) override;
 
   // Truncate the named file to the specified size.
-  rocksdb_rs::io_status::IOStatus Truncate(const std::string& /*fname*/, size_t /*size*/,
-                    const IOOptions& /*options*/,
-                    IODebugContext* /*dbg*/) override;
-  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& fname,
-                             const FileOptions& file_opts,
-                             std::unique_ptr<FSSequentialFile>* result,
-                             IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Truncate(const std::string& /*fname*/,
+                                           size_t /*size*/,
+                                           const IOOptions& /*options*/,
+                                           IODebugContext* /*dbg*/) override;
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSSequentialFile>* result, IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
-                               const FileOptions& options,
-                               std::unique_ptr<FSRandomAccessFile>* result,
-                               IODebugContext* /*dbg*/) override;
-  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& f, const FileOptions& file_opts,
-                           std::unique_ptr<FSWritableFile>* r,
-                           IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus ReopenWritableFile(const std::string& fname,
-                              const FileOptions& options,
-                              std::unique_ptr<FSWritableFile>* result,
-                              IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(
+      const std::string& fname, const FileOptions& options,
+      std::unique_ptr<FSRandomAccessFile>* result,
+      IODebugContext* /*dbg*/) override;
+  rocksdb_rs::io_status::IOStatus NewWritableFile(
+      const std::string& f, const FileOptions& file_opts,
+      std::unique_ptr<FSWritableFile>* r, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus ReopenWritableFile(
+      const std::string& fname, const FileOptions& options,
+      std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus NewRandomRWFile(const std::string& fname,
-                           const FileOptions& file_opts,
-                           std::unique_ptr<FSRandomRWFile>* result,
-                           IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewRandomRWFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSRandomRWFile>* result, IODebugContext* dbg) override;
   rocksdb_rs::io_status::IOStatus NewMemoryMappedFileBuffer(
       const std::string& fname,
       std::unique_ptr<MemoryMappedFileBuffer>* result) override;
 
-  rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name, const IOOptions& io_opts,
-                        std::unique_ptr<FSDirectory>* result,
-                        IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus FileExists(const std::string& f, const IOOptions& io_opts,
-                      IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
-                       std::vector<std::string>* r,
-                       IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus CreateDir(const std::string& dirname, const IOOptions& options,
-                     IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewDirectory(
+      const std::string& name, const IOOptions& io_opts,
+      std::unique_ptr<FSDirectory>* result, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus FileExists(const std::string& f,
+                                             const IOOptions& io_opts,
+                                             IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir,
+                                              const IOOptions& io_opts,
+                                              std::vector<std::string>* r,
+                                              IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus CreateDir(const std::string& dirname,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override;
 
   // Creates directory if missing. Return Ok if it exists, or successful in
   // Creating.
-  rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& dirname,
-                              const IOOptions& options,
-                              IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus CreateDirIfMissing(
+      const std::string& dirname, const IOOptions& options,
+      IODebugContext* dbg) override;
 
   // Delete the specified directory.
-  rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& dirname, const IOOptions& options,
-                     IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& dirname,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override;
   // Store the size of fname in *file_size.
-  rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& fname, const IOOptions& options,
-                       uint64_t* file_size, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& fname,
+                                              const IOOptions& options,
+                                              uint64_t* file_size,
+                                              IODebugContext* dbg) override;
   // Store the last modification time of fname in *file_mtime.
-  rocksdb_rs::io_status::IOStatus GetFileModificationTime(const std::string& fname,
-                                   const IOOptions& options,
-                                   uint64_t* file_mtime,
-                                   IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus GetFileModificationTime(
+      const std::string& fname, const IOOptions& options, uint64_t* file_mtime,
+      IODebugContext* dbg) override;
   // Rename file src to target.
-  rocksdb_rs::io_status::IOStatus RenameFile(const std::string& src, const std::string& target,
-                      const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus RenameFile(const std::string& src,
+                                             const std::string& target,
+                                             const IOOptions& options,
+                                             IODebugContext* dbg) override;
 
   // Hard Link file src to target.
-  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& /*src*/, const std::string& /*target*/,
-                    const IOOptions& /*options*/,
-                    IODebugContext* /*dbg*/) override;
-  rocksdb_rs::io_status::IOStatus NumFileLinks(const std::string& /*fname*/,
-                        const IOOptions& /*options*/, uint64_t* /*count*/,
-                        IODebugContext* /*dbg*/) override;
-  rocksdb_rs::io_status::IOStatus AreFilesSame(const std::string& /*first*/,
-                        const std::string& /*second*/,
-                        const IOOptions& /*options*/, bool* /*res*/,
-                        IODebugContext* /*dbg*/) override;
-  rocksdb_rs::io_status::IOStatus LockFile(const std::string& fname, const IOOptions& options,
-                    FileLock** lock, IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* lock, const IOOptions& options,
-                      IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus GetTestDirectory(const IOOptions& options, std::string* path,
-                            IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& /*src*/,
+                                           const std::string& /*target*/,
+                                           const IOOptions& /*options*/,
+                                           IODebugContext* /*dbg*/) override;
+  rocksdb_rs::io_status::IOStatus NumFileLinks(
+      const std::string& /*fname*/, const IOOptions& /*options*/,
+      uint64_t* /*count*/, IODebugContext* /*dbg*/) override;
+  rocksdb_rs::io_status::IOStatus AreFilesSame(
+      const std::string& /*first*/, const std::string& /*second*/,
+      const IOOptions& /*options*/, bool* /*res*/,
+      IODebugContext* /*dbg*/) override;
+  rocksdb_rs::io_status::IOStatus LockFile(const std::string& fname,
+                                           const IOOptions& options,
+                                           FileLock** lock,
+                                           IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* lock,
+                                             const IOOptions& options,
+                                             IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus GetTestDirectory(
+      const IOOptions& options, std::string* path,
+      IODebugContext* dbg) override;
 
   // Create and returns a default logger (an instance of EnvLogger) for storing
   // informational messages. Derived classes can override to provide custom
   // logger.
-  rocksdb_rs::io_status::IOStatus NewLogger(const std::string& fname, const IOOptions& io_opts,
-                     std::shared_ptr<Logger>* result,
-                     IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewLogger(const std::string& fname,
+                                            const IOOptions& io_opts,
+                                            std::shared_ptr<Logger>* result,
+                                            IODebugContext* dbg) override;
   // Get full directory name for this db.
-  rocksdb_rs::io_status::IOStatus GetAbsolutePath(const std::string& db_path, const IOOptions& options,
-                           std::string* output_path,
-                           IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus IsDirectory(const std::string& /*path*/, const IOOptions& options,
-                       bool* is_dir, IODebugContext* /*dgb*/) override;
+  rocksdb_rs::io_status::IOStatus GetAbsolutePath(const std::string& db_path,
+                                                  const IOOptions& options,
+                                                  std::string* output_path,
+                                                  IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus IsDirectory(const std::string& /*path*/,
+                                              const IOOptions& options,
+                                              bool* is_dir,
+                                              IODebugContext* /*dgb*/) override;
   // This seems to clash with a macro on Windows, so #undef it here
 #undef GetFreeSpace
-  rocksdb_rs::io_status::IOStatus GetFreeSpace(const std::string& /*path*/,
-                        const IOOptions& /*options*/, uint64_t* /*diskfree*/,
-                        IODebugContext* /*dbg*/) override;
+  rocksdb_rs::io_status::IOStatus GetFreeSpace(
+      const std::string& /*path*/, const IOOptions& /*options*/,
+      uint64_t* /*diskfree*/, IODebugContext* /*dbg*/) override;
   FileOptions OptimizeForLogWrite(const FileOptions& file_options,
                                   const DBOptions& db_options) const override;
   FileOptions OptimizeForManifestRead(
@@ -235,10 +250,9 @@ class WinFileSystem : public FileSystem {
 
   virtual bool DirExists(const std::string& dname);
   // Helper for NewWritable and ReopenWritableFile
-  virtual rocksdb_rs::io_status::IOStatus OpenWritableFile(const std::string& fname,
-                                    const FileOptions& options,
-                                    std::unique_ptr<FSWritableFile>* result,
-                                    bool reopen);
+  virtual rocksdb_rs::io_status::IOStatus OpenWritableFile(
+      const std::string& fname, const FileOptions& options,
+      std::unique_ptr<FSWritableFile>* result, bool reopen);
 
  private:
   std::shared_ptr<SystemClock> clock_;
@@ -271,7 +285,8 @@ class WinEnv : public CompositeEnv {
 
   rocksdb_rs::status::Status GetHostName(char* name, uint64_t len) override;
 
-  rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* thread_list) override;
+  rocksdb_rs::status::Status GetThreadList(
+      std::vector<ThreadStatus>* thread_list) override;
 
   void Schedule(void (*function)(void*), void* arg, Env::Priority pri,
                 void* tag, void (*unschedFunction)(void* arg)) override;

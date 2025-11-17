@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "db/version_edit.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/flush_block_policy.h"
 #include "rocksdb/listener.h"
 #include "rocksdb/options.h"
@@ -24,8 +25,6 @@
 #include "table/meta_blocks.h"
 #include "table/table_builder.h"
 #include "util/compression.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -130,22 +129,25 @@ class BlockBasedTableBuilder : public TableBuilder {
                   BlockType block_type);
   // Directly write data to the file.
   void WriteMaybeCompressedBlock(
-      const Slice& block_contents, rocksdb_rs::compression_type::CompressionType, BlockHandle* handle,
+      const Slice& block_contents,
+      rocksdb_rs::compression_type::CompressionType, BlockHandle* handle,
       BlockType block_type, const Slice* uncompressed_block_data = nullptr);
 
   void SetupCacheKeyPrefix(const TableBuilderOptions& tbo);
 
   template <typename TBlocklike>
   rocksdb_rs::status::Status InsertBlockInCache(const Slice& block_contents,
-                            const BlockHandle* handle, BlockType block_type);
+                                                const BlockHandle* handle,
+                                                BlockType block_type);
 
-  rocksdb_rs::status::Status InsertBlockInCacheHelper(const Slice& block_contents,
-                                  const BlockHandle* handle,
-                                  BlockType block_type);
+  rocksdb_rs::status::Status InsertBlockInCacheHelper(
+      const Slice& block_contents, const BlockHandle* handle,
+      BlockType block_type);
 
-  rocksdb_rs::status::Status InsertBlockInCompressedCache(const Slice& block_contents,
-                                      const rocksdb_rs::compression_type::CompressionType type,
-                                      const BlockHandle* handle);
+  rocksdb_rs::status::Status InsertBlockInCompressedCache(
+      const Slice& block_contents,
+      const rocksdb_rs::compression_type::CompressionType type,
+      const BlockHandle* handle);
 
   void WriteFilterBlock(MetaIndexBuilder* meta_index_builder);
   void WriteIndexBlock(MetaIndexBuilder* meta_index_builder,
@@ -181,14 +183,13 @@ class BlockBasedTableBuilder : public TableBuilder {
 
   // Given uncompressed block content, try to compress it and return result and
   // compression type
-  void CompressAndVerifyBlock(const Slice& uncompressed_block_data,
-                              bool is_data_block,
-                              const CompressionContext& compression_ctx,
-                              UncompressionContext* verify_ctx,
-                              std::string* compressed_output,
-                              Slice* result_block_contents,
-                              rocksdb_rs::compression_type::CompressionType* result_compression_type,
-                              rocksdb_rs::status::Status* out_status);
+  void CompressAndVerifyBlock(
+      const Slice& uncompressed_block_data, bool is_data_block,
+      const CompressionContext& compression_ctx,
+      UncompressionContext* verify_ctx, std::string* compressed_output,
+      Slice* result_block_contents,
+      rocksdb_rs::compression_type::CompressionType* result_compression_type,
+      rocksdb_rs::status::Status* out_status);
 
   // Get compressed blocks from BGWorkCompression and write them into SST
   void BGWorkWriteMaybeCompressedBlock();
@@ -202,8 +203,9 @@ class BlockBasedTableBuilder : public TableBuilder {
 };
 
 Slice CompressBlock(const Slice& uncompressed_data, const CompressionInfo& info,
-                    rocksdb_rs::compression_type::CompressionType* type, uint32_t format_version,
-                    bool do_sample, std::string* compressed_output,
+                    rocksdb_rs::compression_type::CompressionType* type,
+                    uint32_t format_version, bool do_sample,
+                    std::string* compressed_output,
                     std::string* sampled_output_fast,
                     std::string* sampled_output_slow);
 

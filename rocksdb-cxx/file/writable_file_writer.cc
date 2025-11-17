@@ -24,26 +24,27 @@
 #include "util/rate_limiter_impl.h"
 
 namespace rocksdb {
-rocksdb_rs::io_status::IOStatus WritableFileWriter::Create(const std::shared_ptr<FileSystem>& fs,
-                                    const std::string& fname,
-                                    const FileOptions& file_opts,
-                                    std::unique_ptr<WritableFileWriter>* writer,
-                                    IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WritableFileWriter::Create(
+    const std::shared_ptr<FileSystem>& fs, const std::string& fname,
+    const FileOptions& file_opts, std::unique_ptr<WritableFileWriter>* writer,
+    IODebugContext* dbg) {
   if (file_opts.use_direct_writes &&
       0 == file_opts.writable_file_max_buffer_size) {
     return rocksdb_rs::io_status::IOStatus_InvalidArgument(
         "Direct write requires writable_file_max_buffer_size > 0");
   }
   std::unique_ptr<FSWritableFile> file;
-  rocksdb_rs::io_status::IOStatus io_s = fs->NewWritableFile(fname, file_opts, &file, dbg);
+  rocksdb_rs::io_status::IOStatus io_s =
+      fs->NewWritableFile(fname, file_opts, &file, dbg);
   if (io_s.ok()) {
     writer->reset(new WritableFileWriter(std::move(file), fname, file_opts));
   }
   return io_s;
 }
 
-rocksdb_rs::io_status::IOStatus WritableFileWriter::Append(const Slice& data, uint32_t crc32c_checksum,
-                                    Env::IOPriority op_rate_limiter_priority) {
+rocksdb_rs::io_status::IOStatus WritableFileWriter::Append(
+    const Slice& data, uint32_t crc32c_checksum,
+    Env::IOPriority op_rate_limiter_priority) {
   if (seen_error()) {
     return AssertFalseAndGetStatusForPrevError();
   }
@@ -106,7 +107,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Append(const Slice& data, ui
       if ((buf_.Capacity() - buf_.CurrentSize()) >= left) {
         size_t appended = buf_.Append(src, left);
         if (appended != left) {
-          s = rocksdb_rs::io_status::IOStatus_Corruption("Write buffer append failure");
+          s = rocksdb_rs::io_status::IOStatus_Corruption(
+              "Write buffer append failure");
         }
         buffered_data_crc32c_checksum_ = crc32c::Crc32cCombine(
             buffered_data_crc32c_checksum_, crc32c_checksum, appended);
@@ -177,8 +179,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Append(const Slice& data, ui
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WritableFileWriter::Pad(const size_t pad_bytes,
-                                 Env::IOPriority op_rate_limiter_priority) {
+rocksdb_rs::io_status::IOStatus WritableFileWriter::Pad(
+    const size_t pad_bytes, Env::IOPriority op_rate_limiter_priority) {
   if (seen_error()) {
     return AssertFalseAndGetStatusForPrevError();
   }
@@ -216,7 +218,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Pad(const size_t pad_bytes,
 
 rocksdb_rs::io_status::IOStatus WritableFileWriter::Close() {
   if (seen_error()) {
-    rocksdb_rs::io_status::IOStatus interim = rocksdb_rs::io_status::IOStatus_new();
+    rocksdb_rs::io_status::IOStatus interim =
+        rocksdb_rs::io_status::IOStatus_new();
     if (writable_file_.get() != nullptr) {
       interim = writable_file_->Close(IOOptions(), nullptr);
       writable_file_.reset();
@@ -242,7 +245,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Close() {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   s = Flush();  // flush cache to OS
 
-  rocksdb_rs::io_status::IOStatus interim = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus interim =
+      rocksdb_rs::io_status::IOStatus_new();
   IOOptions io_options;
   io_options.rate_limiter_priority = writable_file_->GetIOPriority();
   // In direct I/O mode we write whole pages so
@@ -322,7 +326,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Close() {
 
 // write out the cached data to the OS cache or storage if direct I/O
 // enabled
-rocksdb_rs::io_status::IOStatus WritableFileWriter::Flush(Env::IOPriority op_rate_limiter_priority) {
+rocksdb_rs::io_status::IOStatus WritableFileWriter::Flush(
+    Env::IOPriority op_rate_limiter_priority) {
   if (seen_error()) {
     return AssertFalseAndGetStatusForPrevError();
   }
@@ -452,7 +457,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::Sync(bool use_fsync) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WritableFileWriter::SyncWithoutFlush(bool use_fsync) {
+rocksdb_rs::io_status::IOStatus WritableFileWriter::SyncWithoutFlush(
+    bool use_fsync) {
   if (seen_error()) {
     return AssertFalseAndGetStatusForPrevError();
   }
@@ -473,7 +479,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::SyncWithoutFlush(bool use_fs
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WritableFileWriter::SyncInternal(bool use_fsync) {
+rocksdb_rs::io_status::IOStatus WritableFileWriter::SyncInternal(
+    bool use_fsync) {
   // Caller is supposed to check seen_error_
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   IOSTATS_TIMER_GUARD(fsync_nanos);
@@ -511,7 +518,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::SyncInternal(bool use_fsync)
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WritableFileWriter::RangeSync(uint64_t offset, uint64_t nbytes) {
+rocksdb_rs::io_status::IOStatus WritableFileWriter::RangeSync(uint64_t offset,
+                                                              uint64_t nbytes) {
   if (seen_error()) {
     return AssertFalseAndGetStatusForPrevError();
   }
@@ -524,7 +532,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::RangeSync(uint64_t offset, u
   }
   IOOptions io_options;
   io_options.rate_limiter_priority = writable_file_->GetIOPriority();
-  rocksdb_rs::io_status::IOStatus s = writable_file_->RangeSync(offset, nbytes, io_options, nullptr);
+  rocksdb_rs::io_status::IOStatus s =
+      writable_file_->RangeSync(offset, nbytes, io_options, nullptr);
   if (!s.ok()) {
     set_seen_error();
   }
@@ -683,7 +692,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteBufferedWithChecksum(
 
       IOSTATS_CPU_TIMER_GUARD(cpu_write_nanos, clock_);
 
-      rocksdb_rs::coding_lean::EncodeFixed32(checksum_buf, buffered_data_crc32c_checksum_);
+      rocksdb_rs::coding_lean::EncodeFixed32(checksum_buf,
+                                             buffered_data_crc32c_checksum_);
       v_info.checksum = Slice(checksum_buf, sizeof(uint32_t));
       s = writable_file_->Append(Slice(src, left), io_options, v_info, nullptr);
       SetPerfLevel(prev_perf_level);
@@ -760,7 +770,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteDirect(
   if (seen_error()) {
     assert(false);
 
-    return rocksdb_rs::io_status::IOStatus_IOError("Writer has previous error.");
+    return rocksdb_rs::io_status::IOStatus_IOError(
+        "Writer has previous error.");
   }
 
   assert(use_direct_io());
@@ -923,7 +934,8 @@ rocksdb_rs::io_status::IOStatus WritableFileWriter::WriteDirectWithChecksum(
       start_ts = FileOperationInfo::StartNow();
     }
     // direct writes must be positional
-    rocksdb_rs::coding_lean::EncodeFixed32(checksum_buf, buffered_data_crc32c_checksum_);
+    rocksdb_rs::coding_lean::EncodeFixed32(checksum_buf,
+                                           buffered_data_crc32c_checksum_);
     v_info.checksum = Slice(checksum_buf, sizeof(uint32_t));
     s = writable_file_->PositionedAppend(Slice(src, left), write_offset,
                                          io_options, v_info, nullptr);

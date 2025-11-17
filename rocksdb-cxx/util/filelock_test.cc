@@ -5,9 +5,8 @@
 //
 #include <fcntl.h>
 
-#include "rocksdb/env.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/env.h"
 
 #ifdef __FreeBSD__
 #include <sys/types.h>
@@ -38,9 +37,13 @@ class LockTest : public testing::Test {
 
   ~LockTest() override {}
 
-  rocksdb_rs::status::Status LockFile(FileLock** db_lock) { return env_->LockFile(file_, db_lock); }
+  rocksdb_rs::status::Status LockFile(FileLock** db_lock) {
+    return env_->LockFile(file_, db_lock);
+  }
 
-  rocksdb_rs::status::Status UnlockFile(FileLock* db_lock) { return env_->UnlockFile(db_lock); }
+  rocksdb_rs::status::Status UnlockFile(FileLock* db_lock) {
+    return env_->UnlockFile(db_lock);
+  }
 
   bool AssertFileIsLocked() {
     return CheckFileLock(/* lock_expected = */ true);
@@ -96,8 +99,7 @@ class LockTest : public testing::Test {
     } else if (pid > 0) {
       // parent process
       int status;
-      while (-1 == waitpid(pid, &status, 0))
-        ;
+      while (-1 == waitpid(pid, &status, 0));
       if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         // child process exited with non success status
         return false;

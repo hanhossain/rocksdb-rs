@@ -14,8 +14,8 @@
 
 #include "db/version_edit.h"
 #include "port/port.h"
-#include "rocksdb/comparator.h"
 #include "rocksdb-rs/src/io_status.rs.h"
+#include "rocksdb/comparator.h"
 #include "rocksdb/table.h"
 #include "table/internal_iterator.h"
 #include "table/table_builder.h"
@@ -65,7 +65,7 @@ class MockTableFactory : public TableFactory {
   // MockTableBuilder. file_contents has to have a format of <internal_key,
   // value>. Those key-value pairs will then be inserted into the mock table.
   rocksdb_rs::status::Status CreateMockTable(Env* env, const std::string& fname,
-                         KVVector file_contents);
+                                             KVVector file_contents);
 
   virtual std::string GetPrintableOptions() const override {
     return std::string();
@@ -80,8 +80,10 @@ class MockTableFactory : public TableFactory {
   void AssertLatestFiles(const std::vector<KVVector>& files_contents);
 
  private:
-  rocksdb_rs::status::Status GetAndWriteNextID(WritableFileWriter* file, uint32_t* id) const;
-  rocksdb_rs::status::Status GetIDFromFile(RandomAccessFileReader* file, uint32_t* id) const;
+  rocksdb_rs::status::Status GetAndWriteNextID(WritableFileWriter* file,
+                                               uint32_t* id) const;
+  rocksdb_rs::status::Status GetIDFromFile(RandomAccessFileReader* file,
+                                           uint32_t* id) const;
 
   mutable MockTableFileSystem file_system_;
   mutable std::atomic<uint32_t> next_id_;

@@ -15,12 +15,12 @@ namespace rocksdb {
 // key.
 class HashIndexReader : public BlockBasedTable::IndexReaderCommon {
  public:
-  static rocksdb_rs::status::Status Create(const BlockBasedTable* table, const ReadOptions& ro,
-                       FilePrefetchBuffer* prefetch_buffer,
-                       InternalIterator* meta_index_iter, bool use_cache,
-                       bool prefetch, bool pin,
-                       BlockCacheLookupContext* lookup_context,
-                       std::unique_ptr<IndexReader>* index_reader);
+  static rocksdb_rs::status::Status Create(
+      const BlockBasedTable* table, const ReadOptions& ro,
+      FilePrefetchBuffer* prefetch_buffer, InternalIterator* meta_index_iter,
+      bool use_cache, bool prefetch, bool pin,
+      BlockCacheLookupContext* lookup_context,
+      std::unique_ptr<IndexReader>* index_reader);
 
   InternalIteratorBase<IndexValue>* NewIterator(
       const ReadOptions& read_options, bool disable_prefix_seek,

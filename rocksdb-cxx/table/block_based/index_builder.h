@@ -97,8 +97,9 @@ class IndexBuilder {
   // the second level index pointing to each block of partitioned indexes. The
   // last call to Finish() that returns Status_OK() populates index_blocks with
   // the 2nd level index content.
-  virtual rocksdb_rs::status::Status Finish(IndexBlocks* index_blocks,
-                        const BlockHandle& last_partition_block_handle) = 0;
+  virtual rocksdb_rs::status::Status Finish(
+      IndexBlocks* index_blocks,
+      const BlockHandle& last_partition_block_handle) = 0;
 
   // Get the size for index block. Must be called after ::Finish.
   virtual size_t IndexSize() const = 0;
@@ -233,8 +234,9 @@ class ShortenedIndexBuilder : public IndexBuilder {
   }
 
   using IndexBuilder::Finish;
-  rocksdb_rs::status::Status Finish(IndexBlocks* index_blocks,
-                const BlockHandle& /*last_partition_block_handle*/) override {
+  rocksdb_rs::status::Status Finish(
+      IndexBlocks* index_blocks,
+      const BlockHandle& /*last_partition_block_handle*/) override {
     if (seperator_is_key_plus_seq_) {
       index_blocks->index_block_contents = index_block_builder_.Finish();
     } else {
@@ -350,13 +352,14 @@ class HashIndexBuilder : public IndexBuilder {
     }
   }
 
-  rocksdb_rs::status::Status Finish(IndexBlocks* index_blocks,
-                const BlockHandle& last_partition_block_handle) override {
+  rocksdb_rs::status::Status Finish(
+      IndexBlocks* index_blocks,
+      const BlockHandle& last_partition_block_handle) override {
     if (pending_block_num_ != 0) {
       FlushPendingPrefix();
     }
-    rocksdb_rs::status::Status s = primary_index_builder_.Finish(index_blocks,
-                                             last_partition_block_handle);
+    rocksdb_rs::status::Status s = primary_index_builder_.Finish(
+        index_blocks, last_partition_block_handle);
     index_blocks->meta_blocks.insert(
         {kHashIndexPrefixesBlock.c_str(), prefix_block_});
     index_blocks->meta_blocks.insert(
@@ -429,8 +432,9 @@ class PartitionedIndexBuilder : public IndexBuilder {
                      const Slice* first_key_in_next_block,
                      const BlockHandle& block_handle) override;
 
-  rocksdb_rs::status::Status Finish(IndexBlocks* index_blocks,
-                const BlockHandle& last_partition_block_handle) override;
+  rocksdb_rs::status::Status Finish(
+      IndexBlocks* index_blocks,
+      const BlockHandle& last_partition_block_handle) override;
 
   size_t IndexSize() const override { return index_size_; }
   size_t TopLevelIndexSize(uint64_t) const { return top_level_index_size_; }

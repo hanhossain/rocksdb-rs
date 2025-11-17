@@ -5,17 +5,18 @@
 
 #pragma once
 
-#include "rocksdb/db.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/db.h"
 
 namespace rocksdb {
 namespace experimental {
 
 // Supported only for Leveled compaction
-rocksdb_rs::status::Status SuggestCompactRange(DB* db, ColumnFamilyHandle* column_family,
-                           const Slice* begin, const Slice* end);
-rocksdb_rs::status::Status SuggestCompactRange(DB* db, const Slice* begin, const Slice* end);
+rocksdb_rs::status::Status SuggestCompactRange(
+    DB* db, ColumnFamilyHandle* column_family, const Slice* begin,
+    const Slice* end);
+rocksdb_rs::status::Status SuggestCompactRange(DB* db, const Slice* begin,
+                                               const Slice* end);
 
 // Move all L0 files to target_level skipping compaction.
 // This operation succeeds only if the files in L0 have disjoint ranges; this
@@ -24,7 +25,7 @@ rocksdb_rs::status::Status SuggestCompactRange(DB* db, const Slice* begin, const
 // If any of the above condition is violated, InvalidArgument will be
 // returned.
 rocksdb_rs::status::Status PromoteL0(DB* db, ColumnFamilyHandle* column_family,
-                 int target_level = 1);
+                                     int target_level = 1);
 
 struct UpdateManifestForFilesStateOptions {
   // When true, read current file temperatures from FileSystem and update in

@@ -10,9 +10,8 @@
 
 #include "db/blob/blob_log_format.h"
 #include "file/random_access_file_reader.h"
-#include "rocksdb/slice.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/slice.h"
 
 namespace rocksdb {
 namespace blob_db {
@@ -28,9 +27,10 @@ class BlobDumpTool {
 
   BlobDumpTool();
 
-  rocksdb_rs::status::Status Run(const std::string& filename, DisplayType show_key,
-             DisplayType show_blob, DisplayType show_uncompressed_blob,
-             bool show_summary);
+  rocksdb_rs::status::Status Run(const std::string& filename,
+                                 DisplayType show_key, DisplayType show_blob,
+                                 DisplayType show_uncompressed_blob,
+                                 bool show_summary);
 
  private:
   std::unique_ptr<RandomAccessFileReader> reader_;
@@ -38,14 +38,17 @@ class BlobDumpTool {
   size_t buffer_size_;
 
   rocksdb_rs::status::Status Read(uint64_t offset, size_t size, Slice* result);
-  rocksdb_rs::status::Status DumpBlobLogHeader(uint64_t* offset, rocksdb_rs::compression_type::CompressionType* compression);
-  rocksdb_rs::status::Status DumpBlobLogFooter(uint64_t file_size, uint64_t* footer_offset);
-  rocksdb_rs::status::Status DumpRecord(DisplayType show_key, DisplayType show_blob,
-                    DisplayType show_uncompressed_blob, bool show_summary,
-                    rocksdb_rs::compression_type::CompressionType compression, uint64_t* offset,
-                    uint64_t* total_records, uint64_t* total_key_size,
-                    uint64_t* total_blob_size,
-                    uint64_t* total_uncompressed_blob_size);
+  rocksdb_rs::status::Status DumpBlobLogHeader(
+      uint64_t* offset,
+      rocksdb_rs::compression_type::CompressionType* compression);
+  rocksdb_rs::status::Status DumpBlobLogFooter(uint64_t file_size,
+                                               uint64_t* footer_offset);
+  rocksdb_rs::status::Status DumpRecord(
+      DisplayType show_key, DisplayType show_blob,
+      DisplayType show_uncompressed_blob, bool show_summary,
+      rocksdb_rs::compression_type::CompressionType compression,
+      uint64_t* offset, uint64_t* total_records, uint64_t* total_key_size,
+      uint64_t* total_blob_size, uint64_t* total_uncompressed_blob_size);
   void DumpSlice(const Slice s, DisplayType type);
 
   template <class T>
@@ -54,4 +57,3 @@ class BlobDumpTool {
 
 }  // namespace blob_db
 }  // namespace rocksdb
-

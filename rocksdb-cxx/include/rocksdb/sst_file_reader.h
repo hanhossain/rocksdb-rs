@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include "rocksdb/iterator.h"
 #include "rocksdb/options.h"
 #include "rocksdb/slice.h"
@@ -32,9 +31,12 @@ class SstFileReader {
   std::shared_ptr<const TableProperties> GetTableProperties() const;
 
   // Verifies whether there is corruption in this table.
-  rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& /*read_options*/);
+  rocksdb_rs::status::Status VerifyChecksum(
+      const ReadOptions& /*read_options*/);
 
-  rocksdb_rs::status::Status VerifyChecksum() { return VerifyChecksum(ReadOptions()); }
+  rocksdb_rs::status::Status VerifyChecksum() {
+    return VerifyChecksum(ReadOptions());
+  }
 
  private:
   struct Rep;
@@ -42,4 +44,3 @@ class SstFileReader {
 };
 
 }  // namespace rocksdb
-

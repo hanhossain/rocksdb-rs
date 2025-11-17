@@ -100,7 +100,8 @@ int IOTraceRecordParser::ReadIOTraceRecords() {
 
   status = NewFileTraceReader(env, EnvOptions(), input_file_, &trace_reader);
   if (!status.ok()) {
-    fprintf(stderr, "%s: %s\n", input_file_.c_str(), status.ToString()->c_str());
+    fprintf(stderr, "%s: %s\n", input_file_.c_str(),
+            status.ToString()->c_str());
     return 1;
   }
   io_trace_reader.reset(new IOTraceReader(std::move(trace_reader)));
@@ -109,7 +110,8 @@ int IOTraceRecordParser::ReadIOTraceRecords() {
   IOTraceHeader header;
   status = io_trace_reader->ReadHeader(&header);
   if (!status.ok()) {
-    fprintf(stderr, "%s: %s\n", input_file_.c_str(), status.ToString()->c_str());
+    fprintf(stderr, "%s: %s\n", input_file_.c_str(),
+            status.ToString()->c_str());
     return 1;
   }
   PrintHumanReadableHeader(header);

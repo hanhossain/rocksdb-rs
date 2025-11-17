@@ -188,7 +188,8 @@ bool NotifyCollectTableCollectorsOnAdd(
     Logger* info_log) {
   bool all_succeeded = true;
   for (auto& collector : collectors) {
-    rocksdb_rs::status::Status s = collector->InternalAdd(key, value, file_size);
+    rocksdb_rs::status::Status s =
+        collector->InternalAdd(key, value, file_size);
     all_succeeded = all_succeeded && s.ok();
     if (!s.ok()) {
       LogPropertiesCollectionError(info_log, "Add" /* method */,
@@ -215,7 +216,8 @@ bool NotifyCollectTableCollectorsOnFinish(
   bool all_succeeded = true;
   for (auto& collector : collectors) {
     UserCollectedProperties user_collected_properties;
-    rocksdb_rs::status::Status s = collector->Finish(&user_collected_properties);
+    rocksdb_rs::status::Status s =
+        collector->Finish(&user_collected_properties);
 
     all_succeeded = all_succeeded && s.ok();
     if (!s.ok()) {
@@ -404,7 +406,8 @@ rocksdb_rs::status::Status ReadTablePropertiesHelper(
         uint64_t global_seqno_offset =
             new_table_properties->external_sst_file_global_seqno_offset -
             handle.offset();
-        rocksdb_rs::coding_lean::EncodeFixed64(&tmp_buf[static_cast<size_t>(global_seqno_offset)], 0);
+        rocksdb_rs::coding_lean::EncodeFixed64(
+            &tmp_buf[static_cast<size_t>(global_seqno_offset)], 0);
         s = VerifyBlockChecksum(footer.checksum_type(), tmp_buf.data(),
                                 block_size, file->file_name(), handle.offset());
       }
@@ -418,13 +421,12 @@ rocksdb_rs::status::Status ReadTablePropertiesHelper(
   return s;
 }
 
-rocksdb_rs::status::Status ReadTableProperties(RandomAccessFileReader* file, uint64_t file_size,
-                           uint64_t table_magic_number,
-                           const ImmutableOptions& ioptions,
-                           const ReadOptions& read_options,
-                           std::unique_ptr<TableProperties>* properties,
-                           MemoryAllocator* memory_allocator,
-                           FilePrefetchBuffer* prefetch_buffer) {
+rocksdb_rs::status::Status ReadTableProperties(
+    RandomAccessFileReader* file, uint64_t file_size,
+    uint64_t table_magic_number, const ImmutableOptions& ioptions,
+    const ReadOptions& read_options,
+    std::unique_ptr<TableProperties>* properties,
+    MemoryAllocator* memory_allocator, FilePrefetchBuffer* prefetch_buffer) {
   BlockHandle block_handle;
   Footer footer;
   rocksdb_rs::status::Status s =
@@ -445,9 +447,9 @@ rocksdb_rs::status::Status ReadTableProperties(RandomAccessFileReader* file, uin
   return s;
 }
 
-rocksdb_rs::status::Status FindOptionalMetaBlock(InternalIterator* meta_index_iter,
-                             const std::string& meta_block_name,
-                             BlockHandle* block_handle) {
+rocksdb_rs::status::Status FindOptionalMetaBlock(
+    InternalIterator* meta_index_iter, const std::string& meta_block_name,
+    BlockHandle* block_handle) {
   assert(block_handle != nullptr);
   meta_index_iter->Seek(meta_block_name);
   if (meta_index_iter->status().ok()) {
@@ -470,25 +472,24 @@ rocksdb_rs::status::Status FindOptionalMetaBlock(InternalIterator* meta_index_it
 }
 
 rocksdb_rs::status::Status FindMetaBlock(InternalIterator* meta_index_iter,
-                     const std::string& meta_block_name,
-                     BlockHandle* block_handle) {
+                                         const std::string& meta_block_name,
+                                         BlockHandle* block_handle) {
   rocksdb_rs::status::Status s =
       FindOptionalMetaBlock(meta_index_iter, meta_block_name, block_handle);
   if (s.ok() && block_handle->IsNull()) {
-    return rocksdb_rs::status::Status_Corruption("Cannot find the meta block", meta_block_name);
+    return rocksdb_rs::status::Status_Corruption("Cannot find the meta block",
+                                                 meta_block_name);
   } else {
     return s;
   }
 }
 
-rocksdb_rs::status::Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file,
-                                uint64_t file_size, uint64_t table_magic_number,
-                                const ImmutableOptions& ioptions,
-                                const ReadOptions& read_options,
-                                BlockContents* metaindex_contents,
-                                MemoryAllocator* memory_allocator,
-                                FilePrefetchBuffer* prefetch_buffer,
-                                Footer* footer_out) {
+rocksdb_rs::status::Status ReadMetaIndexBlockInFile(
+    RandomAccessFileReader* file, uint64_t file_size,
+    uint64_t table_magic_number, const ImmutableOptions& ioptions,
+    const ReadOptions& read_options, BlockContents* metaindex_contents,
+    MemoryAllocator* memory_allocator, FilePrefetchBuffer* prefetch_buffer,
+    Footer* footer_out) {
   Footer footer;
   IOOptions opts;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
@@ -511,7 +512,8 @@ rocksdb_rs::status::Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file
                       false /* do decompression */, false /*maybe_compressed*/,
                       BlockType::kMetaIndex, UncompressionDict::GetEmptyDict(),
                       PersistentCacheOptions::kEmpty, memory_allocator)
-      .ReadBlockContents().status();
+      .ReadBlockContents()
+      .status();
 }
 
 rocksdb_rs::status::Status FindMetaBlockInFile(
@@ -537,14 +539,12 @@ rocksdb_rs::status::Status FindMetaBlockInFile(
   return FindMetaBlock(meta_iter.get(), meta_block_name, block_handle);
 }
 
-rocksdb_rs::status::Status ReadMetaBlock(RandomAccessFileReader* file,
-                     FilePrefetchBuffer* prefetch_buffer, uint64_t file_size,
-                     uint64_t table_magic_number,
-                     const ImmutableOptions& ioptions,
-                     const ReadOptions& read_options,
-                     const std::string& meta_block_name, BlockType block_type,
-                     BlockContents* contents,
-                     MemoryAllocator* memory_allocator) {
+rocksdb_rs::status::Status ReadMetaBlock(
+    RandomAccessFileReader* file, FilePrefetchBuffer* prefetch_buffer,
+    uint64_t file_size, uint64_t table_magic_number,
+    const ImmutableOptions& ioptions, const ReadOptions& read_options,
+    const std::string& meta_block_name, BlockType block_type,
+    BlockContents* contents, MemoryAllocator* memory_allocator) {
   // TableProperties requires special handling because of checksum issues.
   // Call ReadTableProperties instead for that case.
   assert(block_type != BlockType::kProperties);
@@ -564,7 +564,8 @@ rocksdb_rs::status::Status ReadMetaBlock(RandomAccessFileReader* file,
                       false /*maybe_compressed*/, block_type,
                       UncompressionDict::GetEmptyDict(),
                       PersistentCacheOptions::kEmpty, memory_allocator)
-      .ReadBlockContents().status();
+      .ReadBlockContents()
+      .status();
 }
 
 }  // namespace rocksdb

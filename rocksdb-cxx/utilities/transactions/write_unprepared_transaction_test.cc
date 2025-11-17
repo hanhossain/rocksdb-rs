@@ -56,10 +56,13 @@ class WriteUnpreparedSnapshotTest
 // verification operation
 INSTANTIATE_TEST_CASE_P(
     WriteUnpreparedSnapshotTest, WriteUnpreparedSnapshotTest,
-    ::testing::Combine(
-        ::testing::Bool(),
-        ::testing::Values(SnapshotAction::NO_SNAPSHOT, SnapshotAction::RO_SNAPSHOT, SnapshotAction::REFRESH_SNAPSHOT),
-        ::testing::Values(VerificationOperation::VERIFY_GET, VerificationOperation::VERIFY_NEXT, VerificationOperation::VERIFY_PREV)));
+    ::testing::Combine(::testing::Bool(),
+                       ::testing::Values(SnapshotAction::NO_SNAPSHOT,
+                                         SnapshotAction::RO_SNAPSHOT,
+                                         SnapshotAction::REFRESH_SNAPSHOT),
+                       ::testing::Values(VerificationOperation::VERIFY_GET,
+                                         VerificationOperation::VERIFY_NEXT,
+                                         VerificationOperation::VERIFY_PREV)));
 
 TEST_P(WriteUnpreparedTransactionTest, ReadYourOwnWrite) {
   // The following tests checks whether reading your own write for
@@ -728,4 +731,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

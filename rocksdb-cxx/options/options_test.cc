@@ -52,9 +52,10 @@ class UnregisteredTableFactory : public TableFactory {
   UnregisteredTableFactory() {}
   const char* Name() const override { return "Unregistered"; }
   using TableFactory::NewTableReader;
-  rocksdb_rs::status::Status NewTableReader(const ReadOptions&, const TableReaderOptions&,
-                        std::unique_ptr<RandomAccessFileReader>&&, uint64_t,
-                        std::unique_ptr<TableReader>*, bool) const override {
+  rocksdb_rs::status::Status NewTableReader(
+      const ReadOptions&, const TableReaderOptions&,
+      std::unique_ptr<RandomAccessFileReader>&&, uint64_t,
+      std::unique_ptr<TableReader>*, bool) const override {
     return rocksdb_rs::status::Status_NotSupported();
   }
   TableBuilder* NewTableBuilder(const TableBuilderOptions&,
@@ -184,7 +185,8 @@ TEST_F(OptionsTest, GetOptionsFromMapTest) {
   exact.input_strings_escaped = false;
   exact.ignore_unknown_options = false;
   exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
-  loose.sanity_level = ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
+  loose.sanity_level =
+      ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
 
   loose.input_strings_escaped = false;
   loose.ignore_unknown_options = true;
@@ -195,17 +197,28 @@ TEST_F(OptionsTest, GetOptionsFromMapTest) {
   ASSERT_EQ(new_cf_opt.min_write_buffer_number_to_merge, 3);
   ASSERT_EQ(new_cf_opt.max_write_buffer_number_to_maintain, 99);
   ASSERT_EQ(new_cf_opt.max_write_buffer_size_to_maintain, -99999);
-  ASSERT_EQ(new_cf_opt.compression, rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+  ASSERT_EQ(new_cf_opt.compression,
+            rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
   ASSERT_EQ(new_cf_opt.compression_per_level.size(), 9U);
-  ASSERT_EQ(new_cf_opt.compression_per_level[0], rocksdb_rs::compression_type::CompressionType::kNoCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[1], rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[2], rocksdb_rs::compression_type::CompressionType::kZlibCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[3], rocksdb_rs::compression_type::CompressionType::kBZip2Compression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[4], rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[5], rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[6], rocksdb_rs::compression_type::CompressionType::kXpressCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[7], rocksdb_rs::compression_type::CompressionType::kZSTD);
-  ASSERT_EQ(new_cf_opt.compression_per_level[8], rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[0],
+            rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[1],
+            rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[2],
+            rocksdb_rs::compression_type::CompressionType::kZlibCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[3],
+            rocksdb_rs::compression_type::CompressionType::kBZip2Compression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[4],
+            rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[5],
+            rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[6],
+            rocksdb_rs::compression_type::CompressionType::kXpressCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[7],
+            rocksdb_rs::compression_type::CompressionType::kZSTD);
+  ASSERT_EQ(
+      new_cf_opt.compression_per_level[8],
+      rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression);
   ASSERT_EQ(new_cf_opt.compression_opts.window_bits, 4);
   ASSERT_EQ(new_cf_opt.compression_opts.level, 5);
   ASSERT_EQ(new_cf_opt.compression_opts.strategy, 6);
@@ -215,7 +228,8 @@ TEST_F(OptionsTest, GetOptionsFromMapTest) {
   ASSERT_EQ(new_cf_opt.compression_opts.enabled, true);
   ASSERT_EQ(new_cf_opt.compression_opts.max_dict_buffer_bytes, 100u);
   ASSERT_EQ(new_cf_opt.compression_opts.use_zstd_dict_trainer, false);
-  ASSERT_EQ(new_cf_opt.bottommost_compression, rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+  ASSERT_EQ(new_cf_opt.bottommost_compression,
+            rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
   ASSERT_EQ(new_cf_opt.bottommost_compression_opts.window_bits, 5);
   ASSERT_EQ(new_cf_opt.bottommost_compression_opts.level, 6);
   ASSERT_EQ(new_cf_opt.bottommost_compression_opts.strategy, 7);
@@ -274,7 +288,8 @@ TEST_F(OptionsTest, GetOptionsFromMapTest) {
   ASSERT_EQ(new_cf_opt.enable_blob_files, true);
   ASSERT_EQ(new_cf_opt.min_blob_size, 1ULL << 10);
   ASSERT_EQ(new_cf_opt.blob_file_size, 1ULL << 30);
-  ASSERT_EQ(new_cf_opt.blob_compression_type, rocksdb_rs::compression_type::CompressionType::kZSTD);
+  ASSERT_EQ(new_cf_opt.blob_compression_type,
+            rocksdb_rs::compression_type::CompressionType::kZSTD);
   ASSERT_EQ(new_cf_opt.enable_blob_garbage_collection, true);
   ASSERT_EQ(new_cf_opt.blob_garbage_collection_age_cutoff, 0.5);
   ASSERT_EQ(new_cf_opt.blob_garbage_collection_force_threshold, 0.75);
@@ -613,7 +628,8 @@ TEST_F(OptionsTest, GetColumnFamilyOptionsFromStringTest) {
       "memtable=skip_list:10;arena_block_size=1024",
       &new_cf_opt));
   ASSERT_TRUE(new_cf_opt.memtable_factory != nullptr);
-  ASSERT_EQ(std::string(new_cf_opt.memtable_factory->Name()), "SkipListFactory");
+  ASSERT_EQ(std::string(new_cf_opt.memtable_factory->Name()),
+            "SkipListFactory");
   ASSERT_TRUE(new_cf_opt.memtable_factory->IsInstanceOf("SkipListFactory"));
 
   // blob cache
@@ -890,8 +906,8 @@ TEST_F(OptionsTest, OldInterfaceTest) {
   ASSERT_EQ(new_db_opt.verify_sst_unique_id_in_manifest, true);
   ASSERT_EQ(new_db_opt.max_open_files, 32);
   db_options_map["unknown_option"] = "1";
-  rocksdb_rs::status::Status s = GetDBOptionsFromMap(db_config_options, base_db_opt, db_options_map,
-                                 &new_db_opt);
+  rocksdb_rs::status::Status s = GetDBOptionsFromMap(
+      db_config_options, base_db_opt, db_options_map, &new_db_opt);
   ASSERT_NOK(s);
   ASSERT_TRUE(s.IsInvalidArgument());
 
@@ -921,7 +937,6 @@ TEST_F(OptionsTest, OldInterfaceTest) {
       RocksDBOptionsParser::VerifyDBOptions(exact, base_db_opt, new_db_opt));
 }
 
-
 TEST_F(OptionsTest, GetBlockBasedTableOptionsFromString) {
   BlockBasedTableOptions table_opt;
   BlockBasedTableOptions new_opt;
@@ -950,7 +965,7 @@ TEST_F(OptionsTest, GetBlockBasedTableOptionsFromString) {
   ASSERT_EQ(new_opt.index_type, BlockBasedTableOptions::kHashSearch);
   ASSERT_EQ(new_opt.checksum, ChecksumType::kxxHash);
   ASSERT_TRUE(new_opt.block_cache != nullptr);
-  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL*1024UL);
+  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL * 1024UL);
   ASSERT_EQ(new_opt.block_size, 1024UL);
   ASSERT_EQ(new_opt.block_size_deviation, 8);
   ASSERT_EQ(new_opt.block_restart_interval, 4);
@@ -1084,13 +1099,14 @@ TEST_F(OptionsTest, GetBlockBasedTableOptionsFromString) {
       "strict_capacity_limit=true;high_pri_pool_ratio=0.5;}",
       &new_opt));
   ASSERT_TRUE(new_opt.block_cache != nullptr);
-  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL*1024UL);
+  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL * 1024UL);
   ASSERT_EQ(std::dynamic_pointer_cast<ShardedCacheBase>(new_opt.block_cache)
                 ->GetNumShardBits(),
             4);
   ASSERT_EQ(new_opt.block_cache->HasStrictCapacityLimit(), true);
-  ASSERT_EQ(std::dynamic_pointer_cast<LRUCache>(
-                new_opt.block_cache)->GetHighPriPoolRatio(), 0.5);
+  ASSERT_EQ(std::dynamic_pointer_cast<LRUCache>(new_opt.block_cache)
+                ->GetHighPriPoolRatio(),
+            0.5);
 
   // Set only block cache capacity. Check other values are
   // reset to default values.
@@ -1100,7 +1116,7 @@ TEST_F(OptionsTest, GetBlockBasedTableOptionsFromString) {
       "block_cache_compressed={capacity=2M}",
       &new_opt));
   ASSERT_TRUE(new_opt.block_cache != nullptr);
-  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 2*1024UL*1024UL);
+  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 2 * 1024UL * 1024UL);
   // Default values
   ASSERT_EQ(std::dynamic_pointer_cast<ShardedCacheBase>(new_opt.block_cache)
                 ->GetNumShardBits(),
@@ -1122,8 +1138,9 @@ TEST_F(OptionsTest, GetBlockBasedTableOptionsFromString) {
                 ->GetNumShardBits(),
             5);
   ASSERT_EQ(new_opt.block_cache->HasStrictCapacityLimit(), false);
-  ASSERT_EQ(std::dynamic_pointer_cast<LRUCache>(
-                new_opt.block_cache)->GetHighPriPoolRatio(), 0.5);
+  ASSERT_EQ(std::dynamic_pointer_cast<LRUCache>(new_opt.block_cache)
+                ->GetHighPriPoolRatio(),
+            0.5);
 
   // Set couple of block cache options.
   ASSERT_OK(GetBlockBasedTableOptionsFromString(
@@ -1134,7 +1151,7 @@ TEST_F(OptionsTest, GetBlockBasedTableOptionsFromString) {
       "strict_capacity_limit=true;}",
       &new_opt));
   ASSERT_TRUE(new_opt.block_cache != nullptr);
-  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL*1024UL);
+  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL * 1024UL);
   ASSERT_EQ(std::dynamic_pointer_cast<ShardedCacheBase>(new_opt.block_cache)
                 ->GetNumShardBits(),
             4);
@@ -1162,7 +1179,6 @@ TEST_F(OptionsTest, GetBlockBasedTableOptionsFromString) {
   ASSERT_TRUE(
       new_opt.filter_policy->IsInstanceOf(RibbonFilterPolicy::kNickName()));
 }
-
 
 TEST_F(OptionsTest, GetPlainTableOptionsFromString) {
   PlainTableOptions table_opt;
@@ -1215,14 +1231,14 @@ TEST_F(OptionsTest, GetMemTableRepFactoryFromString) {
                                              &new_mem_factory));
 
   ASSERT_OK(GetMemTableRepFactoryFromString("prefix_hash", &new_mem_factory));
-  ASSERT_OK(GetMemTableRepFactoryFromString("prefix_hash:1000",
-                                            &new_mem_factory));
+  ASSERT_OK(
+      GetMemTableRepFactoryFromString("prefix_hash:1000", &new_mem_factory));
   ASSERT_STREQ(new_mem_factory->Name(), "HashSkipListRepFactory");
   ASSERT_NOK(GetMemTableRepFactoryFromString("prefix_hash:1000:invalid_opt",
                                              &new_mem_factory));
 
-  ASSERT_OK(GetMemTableRepFactoryFromString("hash_linkedlist",
-                                            &new_mem_factory));
+  ASSERT_OK(
+      GetMemTableRepFactoryFromString("hash_linkedlist", &new_mem_factory));
   ASSERT_OK(GetMemTableRepFactoryFromString("hash_linkedlist:1000",
                                             &new_mem_factory));
   ASSERT_EQ(std::string(new_mem_factory->Name()), "HashLinkListRepFactory");
@@ -1380,7 +1396,9 @@ TEST_F(OptionsTest, GetOptionsFromStringTest) {
   ASSERT_EQ(new_options.compression_opts.parallel_threads, 1u);
   ASSERT_EQ(new_options.compression_opts.enabled, false);
   ASSERT_EQ(new_options.compression_opts.use_zstd_dict_trainer, true);
-  ASSERT_EQ(new_options.bottommost_compression, rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption);
+  ASSERT_EQ(
+      new_options.bottommost_compression,
+      rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption);
   ASSERT_EQ(new_options.bottommost_compression_opts.window_bits, 5);
   ASSERT_EQ(new_options.bottommost_compression_opts.level, 6);
   ASSERT_EQ(new_options.bottommost_compression_opts.strategy, 7);
@@ -1412,9 +1430,9 @@ TEST_F(OptionsTest, GetOptionsFromStringTest) {
   base_options.dump_malloc_stats = false;
   base_options.write_buffer_size = 1024;
   Options bad_options = new_options;
-  rocksdb_rs::status::Status s = GetOptionsFromString(config_options, base_options,
-                                  "create_if_missing=XX;dump_malloc_stats=true",
-                                  &bad_options);
+  rocksdb_rs::status::Status s = GetOptionsFromString(
+      config_options, base_options,
+      "create_if_missing=XX;dump_malloc_stats=true", &bad_options);
   ASSERT_NOK(s);
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_EQ(bad_options.dump_malloc_stats, false);
@@ -1746,7 +1764,6 @@ TEST_F(OptionsTest, MutableCFOptions) {
   ASSERT_EQ(bbto->block_size, 32768);
 }
 
-
 rocksdb_rs::status::Status StringToMap(
     const std::string& opts_str,
     std::unordered_map<std::string, std::string>* opts_map);
@@ -1807,17 +1824,17 @@ TEST_F(OptionsTest, StringToMapTest) {
   ASSERT_EQ(opts_map["k3"], "v3");
   // Multi-level nested options
   opts_map.clear();
-  ASSERT_OK(StringToMap("k1=v1;k2={nk1=nv1;nk2={nnk1=nnk2}};"
-                        "k3={nk1={nnk1={nnnk1=nnnv1;nnnk2;nnnv2}}};k4=v4",
-                        &opts_map));
+  ASSERT_OK(
+      StringToMap("k1=v1;k2={nk1=nv1;nk2={nnk1=nnk2}};"
+                  "k3={nk1={nnk1={nnnk1=nnnv1;nnnk2;nnnv2}}};k4=v4",
+                  &opts_map));
   ASSERT_EQ(opts_map["k1"], "v1");
   ASSERT_EQ(opts_map["k2"], "nk1=nv1;nk2={nnk1=nnk2}");
   ASSERT_EQ(opts_map["k3"], "nk1={nnk1={nnnk1=nnnv1;nnnk2;nnnv2}}");
   ASSERT_EQ(opts_map["k4"], "v4");
   // Garbage inside curly braces
   opts_map.clear();
-  ASSERT_OK(StringToMap("k1=v1;k2={dfad=};k3={=};k4=v4",
-                        &opts_map));
+  ASSERT_OK(StringToMap("k1=v1;k2={dfad=};k3={=};k4=v4", &opts_map));
   ASSERT_EQ(opts_map["k1"], "v1");
   ASSERT_EQ(opts_map["k2"], "dfad=");
   ASSERT_EQ(opts_map["k3"], "=");
@@ -1833,9 +1850,10 @@ TEST_F(OptionsTest, StringToMapTest) {
   ASSERT_EQ(opts_map["k2"], "{{{}}}{}{}");
   // With random spaces
   opts_map.clear();
-  ASSERT_OK(StringToMap("  k1 =  v1 ; k2= {nk1=nv1; nk2={nnk1=nnk2}}  ; "
-                        "k3={  {   } }; k4= v4  ",
-                        &opts_map));
+  ASSERT_OK(
+      StringToMap("  k1 =  v1 ; k2= {nk1=nv1; nk2={nnk1=nnk2}}  ; "
+                  "k3={  {   } }; k4= v4  ",
+                  &opts_map));
   ASSERT_EQ(opts_map["k1"], "v1");
   ASSERT_EQ(opts_map["k2"], "nk1=nv1; nk2={nnk1=nnk2}");
   ASSERT_EQ(opts_map["k3"], "{   }");
@@ -1883,8 +1901,8 @@ TEST_F(OptionsTest, StringToMapRandomTest) {
       for (int attempt = 0; attempt < 10; attempt++) {
         std::string str = base;
         // Replace random position to space
-        size_t pos = static_cast<size_t>(
-            rnd.Uniform(static_cast<int>(base.size())));
+        size_t pos =
+            static_cast<size_t>(rnd.Uniform(static_cast<int>(base.size())));
         str[pos] = ' ';
         rocksdb_rs::status::Status s = StringToMap(str, &opts_map);
         ASSERT_TRUE(s.ok() || s.IsInvalidArgument());
@@ -1901,8 +1919,8 @@ TEST_F(OptionsTest, StringToMapRandomTest) {
     std::string str = "";
     for (int attempt = 0; attempt < len; attempt++) {
       // Add a random character
-      size_t pos = static_cast<size_t>(
-          rnd.Uniform(static_cast<int>(chars.size())));
+      size_t pos =
+          static_cast<size_t>(rnd.Uniform(static_cast<int>(chars.size())));
       str.append(1, chars[pos]);
     }
     rocksdb_rs::status::Status s = StringToMap(str, &opts_map);
@@ -1916,23 +1934,29 @@ TEST_F(OptionsTest, StringToMapRandomTest) {
 TEST_F(OptionsTest, GetStringFromCompressionType) {
   std::string res;
 
-  ASSERT_OK(GetStringFromCompressionType(&res, rocksdb_rs::compression_type::CompressionType::kNoCompression));
+  ASSERT_OK(GetStringFromCompressionType(
+      &res, rocksdb_rs::compression_type::CompressionType::kNoCompression));
   ASSERT_EQ(res, "kNoCompression");
 
-  ASSERT_OK(GetStringFromCompressionType(&res, rocksdb_rs::compression_type::CompressionType::kSnappyCompression));
+  ASSERT_OK(GetStringFromCompressionType(
+      &res, rocksdb_rs::compression_type::CompressionType::kSnappyCompression));
   ASSERT_EQ(res, "kSnappyCompression");
 
-  ASSERT_OK(GetStringFromCompressionType(&res, rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption));
+  ASSERT_OK(GetStringFromCompressionType(
+      &res, rocksdb_rs::compression_type::CompressionType::
+                kDisableCompressionOption));
   ASSERT_EQ(res, "kDisableCompressionOption");
 
-  ASSERT_OK(GetStringFromCompressionType(&res, rocksdb_rs::compression_type::CompressionType::kLZ4Compression));
+  ASSERT_OK(GetStringFromCompressionType(
+      &res, rocksdb_rs::compression_type::CompressionType::kLZ4Compression));
   ASSERT_EQ(res, "kLZ4Compression");
 
-  ASSERT_OK(GetStringFromCompressionType(&res, rocksdb_rs::compression_type::CompressionType::kZlibCompression));
+  ASSERT_OK(GetStringFromCompressionType(
+      &res, rocksdb_rs::compression_type::CompressionType::kZlibCompression));
   ASSERT_EQ(res, "kZlibCompression");
 
-  ASSERT_NOK(
-      GetStringFromCompressionType(&res, static_cast<rocksdb_rs::compression_type::CompressionType>(-10)));
+  ASSERT_NOK(GetStringFromCompressionType(
+      &res, static_cast<rocksdb_rs::compression_type::CompressionType>(-10)));
 }
 
 TEST_F(OptionsTest, OnlyMutableDBOptions) {
@@ -2194,7 +2218,8 @@ class TestEventListener : public EventListener {
 static std::unordered_map<std::string, OptionTypeInfo>
     test_listener_option_info = {
         {"s",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kString,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 
 };
@@ -2397,17 +2422,28 @@ TEST_F(OptionsOldApiTest, GetOptionsFromMapTest) {
   ASSERT_EQ(new_cf_opt.min_write_buffer_number_to_merge, 3);
   ASSERT_EQ(new_cf_opt.max_write_buffer_number_to_maintain, 99);
   ASSERT_EQ(new_cf_opt.max_write_buffer_size_to_maintain, -99999);
-  ASSERT_EQ(new_cf_opt.compression, rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+  ASSERT_EQ(new_cf_opt.compression,
+            rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
   ASSERT_EQ(new_cf_opt.compression_per_level.size(), 9U);
-  ASSERT_EQ(new_cf_opt.compression_per_level[0], rocksdb_rs::compression_type::CompressionType::kNoCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[1], rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[2], rocksdb_rs::compression_type::CompressionType::kZlibCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[3], rocksdb_rs::compression_type::CompressionType::kBZip2Compression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[4], rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[5], rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[6], rocksdb_rs::compression_type::CompressionType::kXpressCompression);
-  ASSERT_EQ(new_cf_opt.compression_per_level[7], rocksdb_rs::compression_type::CompressionType::kZSTD);
-  ASSERT_EQ(new_cf_opt.compression_per_level[8], rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[0],
+            rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[1],
+            rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[2],
+            rocksdb_rs::compression_type::CompressionType::kZlibCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[3],
+            rocksdb_rs::compression_type::CompressionType::kBZip2Compression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[4],
+            rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[5],
+            rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[6],
+            rocksdb_rs::compression_type::CompressionType::kXpressCompression);
+  ASSERT_EQ(new_cf_opt.compression_per_level[7],
+            rocksdb_rs::compression_type::CompressionType::kZSTD);
+  ASSERT_EQ(
+      new_cf_opt.compression_per_level[8],
+      rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression);
   ASSERT_EQ(new_cf_opt.compression_opts.window_bits, 4);
   ASSERT_EQ(new_cf_opt.compression_opts.level, 5);
   ASSERT_EQ(new_cf_opt.compression_opts.strategy, 6);
@@ -2417,7 +2453,8 @@ TEST_F(OptionsOldApiTest, GetOptionsFromMapTest) {
   ASSERT_EQ(new_cf_opt.compression_opts.enabled, true);
   ASSERT_EQ(new_cf_opt.compression_opts.max_dict_buffer_bytes, 10u);
   ASSERT_EQ(new_cf_opt.compression_opts.use_zstd_dict_trainer, false);
-  ASSERT_EQ(new_cf_opt.bottommost_compression, rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+  ASSERT_EQ(new_cf_opt.bottommost_compression,
+            rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
   ASSERT_EQ(new_cf_opt.bottommost_compression_opts.window_bits, 5);
   ASSERT_EQ(new_cf_opt.bottommost_compression_opts.level, 6);
   ASSERT_EQ(new_cf_opt.bottommost_compression_opts.strategy, 7);
@@ -2479,7 +2516,8 @@ TEST_F(OptionsOldApiTest, GetOptionsFromMapTest) {
   ASSERT_EQ(new_cf_opt.enable_blob_files, true);
   ASSERT_EQ(new_cf_opt.min_blob_size, 1ULL << 10);
   ASSERT_EQ(new_cf_opt.blob_file_size, 1ULL << 30);
-  ASSERT_EQ(new_cf_opt.blob_compression_type, rocksdb_rs::compression_type::CompressionType::kZSTD);
+  ASSERT_EQ(new_cf_opt.blob_compression_type,
+            rocksdb_rs::compression_type::CompressionType::kZSTD);
   ASSERT_EQ(new_cf_opt.enable_blob_garbage_collection, true);
   ASSERT_EQ(new_cf_opt.blob_garbage_collection_age_cutoff, 0.5);
   ASSERT_EQ(new_cf_opt.blob_garbage_collection_force_threshold, 0.75);
@@ -2495,9 +2533,11 @@ TEST_F(OptionsOldApiTest, GetOptionsFromMapTest) {
                                            cf_options_map, &new_cf_opt));
   ConfigOptions exact, loose;
   exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
-  loose.sanity_level = ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
+  loose.sanity_level =
+      ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
 
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   cf_options_map["write_buffer_size"] = "1";
   ASSERT_OK(GetColumnFamilyOptionsFromMap(cf_config_options, base_cf_opt,
@@ -2506,7 +2546,8 @@ TEST_F(OptionsOldApiTest, GetOptionsFromMapTest) {
   cf_options_map["unknown_option"] = "1";
   ASSERT_NOK(GetColumnFamilyOptionsFromMap(cf_config_options, base_cf_opt,
                                            cf_options_map, &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   cf_config_options.input_strings_escaped = false;
   cf_config_options.ignore_unknown_options = true;
@@ -2515,7 +2556,8 @@ TEST_F(OptionsOldApiTest, GetOptionsFromMapTest) {
   ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(
       loose, base_cf_opt, new_cf_opt, nullptr /* new_opt_map */));
   ASSERT_NOK(RocksDBOptionsParser::VerifyCFOptions(
-      exact /* default for VerifyCFOptions */, base_cf_opt, new_cf_opt, nullptr));
+      exact /* default for VerifyCFOptions */, base_cf_opt, new_cf_opt,
+      nullptr));
 
   DBOptions base_db_opt;
   DBOptions new_db_opt;
@@ -2568,21 +2610,26 @@ TEST_F(OptionsOldApiTest, GetOptionsFromMapTest) {
   db_options_map["max_open_files"] = "hello";
   ASSERT_NOK(GetDBOptionsFromMap(db_config_options, base_db_opt, db_options_map,
                                  &new_db_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyDBOptions(exact, base_db_opt, new_db_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyDBOptions(loose, base_db_opt, new_db_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyDBOptions(exact, base_db_opt, new_db_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyDBOptions(loose, base_db_opt, new_db_opt));
 
   // unknow options should fail parsing without ignore_unknown_options = true
   db_options_map["unknown_db_option"] = "1";
   ASSERT_NOK(GetDBOptionsFromMap(db_config_options, base_db_opt, db_options_map,
                                  &new_db_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyDBOptions(exact, base_db_opt, new_db_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyDBOptions(exact, base_db_opt, new_db_opt));
 
   db_config_options.input_strings_escaped = false;
   db_config_options.ignore_unknown_options = true;
   ASSERT_OK(GetDBOptionsFromMap(db_config_options, base_db_opt, db_options_map,
                                 &new_db_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyDBOptions(loose, base_db_opt, new_db_opt));
-  ASSERT_NOK(RocksDBOptionsParser::VerifyDBOptions(exact, base_db_opt, new_db_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyDBOptions(loose, base_db_opt, new_db_opt));
+  ASSERT_NOK(
+      RocksDBOptionsParser::VerifyDBOptions(exact, base_db_opt, new_db_opt));
 }
 
 TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
@@ -2623,7 +2670,8 @@ TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
       "write_buffer_size=13;max_write_buffer_number_=14;", &new_cf_opt));
   ConfigOptions exact;
   exact.sanity_level = ConfigOptions::SanityLevel::kSanityLevelExactMatch;
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   // Comparator from object registry
   std::string kCompName = "reverse_comp";
@@ -2650,18 +2698,21 @@ TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
   ASSERT_NOK(GetColumnFamilyOptionsFromString(
       config_options, base_cf_opt,
       "write_buffer_size=13;max_write_buffer_number;", &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   // Error Paring value
   ASSERT_NOK(GetColumnFamilyOptionsFromString(
       config_options, base_cf_opt,
       "write_buffer_size=13;max_write_buffer_number=;", &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   // Missing option name
   ASSERT_NOK(GetColumnFamilyOptionsFromString(
       config_options, base_cf_opt, "write_buffer_size=13; =100;", &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   const uint64_t kilo = 1024UL;
   const uint64_t mega = 1024 * kilo;
@@ -2727,7 +2778,8 @@ TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
       "block_based_table_factory={{{block_size=4;};"
       "arena_block_size=1024",
       &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   // Unexpected chars after closing curly brace
   ASSERT_NOK(GetColumnFamilyOptionsFromString(
@@ -2736,7 +2788,8 @@ TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
       "block_based_table_factory={block_size=4;}};"
       "arena_block_size=1024",
       &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   ASSERT_NOK(GetColumnFamilyOptionsFromString(
       config_options, base_cf_opt,
@@ -2744,14 +2797,16 @@ TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
       "block_based_table_factory={block_size=4;}xdfa;"
       "arena_block_size=1024",
       &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   ASSERT_NOK(GetColumnFamilyOptionsFromString(
       config_options, base_cf_opt,
       "write_buffer_size=10;max_write_buffer_number=16;"
       "block_based_table_factory={block_size=4;}xdfa",
       &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   // Invalid block based table option
   ASSERT_NOK(GetColumnFamilyOptionsFromString(
@@ -2759,7 +2814,8 @@ TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
       "write_buffer_size=10;max_write_buffer_number=16;"
       "block_based_table_factory={xx_block_size=4;}",
       &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   ASSERT_OK(GetColumnFamilyOptionsFromString(config_options, base_cf_opt,
                                              "optimize_filters_for_hits=true",
@@ -2771,7 +2827,8 @@ TEST_F(OptionsOldApiTest, GetColumnFamilyOptionsFromStringTest) {
   ASSERT_NOK(GetColumnFamilyOptionsFromString(config_options, base_cf_opt,
                                               "optimize_filters_for_hits=junk",
                                               &new_cf_opt));
-  ASSERT_OK(RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
+  ASSERT_OK(
+      RocksDBOptionsParser::VerifyCFOptions(exact, base_cf_opt, new_cf_opt));
 
   // Nested plain table options
   // Empty
@@ -2928,7 +2985,7 @@ TEST_F(OptionsOldApiTest, GetBlockBasedTableOptionsFromString) {
   ASSERT_EQ(new_opt.checksum, ChecksumType::kxxHash);
   ASSERT_TRUE(new_opt.no_block_cache);
   ASSERT_TRUE(new_opt.block_cache != nullptr);
-  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL*1024UL);
+  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL * 1024UL);
   ASSERT_EQ(new_opt.block_size, 1024UL);
   ASSERT_EQ(new_opt.block_size_deviation, 8);
   ASSERT_EQ(new_opt.block_restart_interval, 4);
@@ -2993,13 +3050,14 @@ TEST_F(OptionsOldApiTest, GetBlockBasedTableOptionsFromString) {
       "strict_capacity_limit=true;high_pri_pool_ratio=0.5;}",
       &new_opt));
   ASSERT_TRUE(new_opt.block_cache != nullptr);
-  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL*1024UL);
+  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL * 1024UL);
   ASSERT_EQ(std::dynamic_pointer_cast<ShardedCacheBase>(new_opt.block_cache)
                 ->GetNumShardBits(),
             4);
   ASSERT_EQ(new_opt.block_cache->HasStrictCapacityLimit(), true);
-  ASSERT_EQ(std::dynamic_pointer_cast<LRUCache>(
-                new_opt.block_cache)->GetHighPriPoolRatio(), 0.5);
+  ASSERT_EQ(std::dynamic_pointer_cast<LRUCache>(new_opt.block_cache)
+                ->GetHighPriPoolRatio(),
+            0.5);
 
   // Set only block cache capacity. Check other values are
   // reset to default values.
@@ -3009,7 +3067,7 @@ TEST_F(OptionsOldApiTest, GetBlockBasedTableOptionsFromString) {
       "block_cache_compressed={capacity=2M}",
       &new_opt));
   ASSERT_TRUE(new_opt.block_cache != nullptr);
-  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 2*1024UL*1024UL);
+  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 2 * 1024UL * 1024UL);
   // Default values
   ASSERT_EQ(std::dynamic_pointer_cast<ShardedCacheBase>(new_opt.block_cache)
                 ->GetNumShardBits(),
@@ -3031,8 +3089,9 @@ TEST_F(OptionsOldApiTest, GetBlockBasedTableOptionsFromString) {
                 ->GetNumShardBits(),
             5);
   ASSERT_EQ(new_opt.block_cache->HasStrictCapacityLimit(), false);
-  ASSERT_EQ(std::dynamic_pointer_cast<LRUCache>(
-                new_opt.block_cache)->GetHighPriPoolRatio(), 0.5);
+  ASSERT_EQ(std::dynamic_pointer_cast<LRUCache>(new_opt.block_cache)
+                ->GetHighPriPoolRatio(),
+            0.5);
 
   // Set couple of block cache options.
   ASSERT_OK(GetBlockBasedTableOptionsFromString(
@@ -3043,7 +3102,7 @@ TEST_F(OptionsOldApiTest, GetBlockBasedTableOptionsFromString) {
       "strict_capacity_limit=true;}",
       &new_opt));
   ASSERT_TRUE(new_opt.block_cache != nullptr);
-  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL*1024UL);
+  ASSERT_EQ(new_opt.block_cache->GetCapacity(), 1024UL * 1024UL);
   ASSERT_EQ(std::dynamic_pointer_cast<ShardedCacheBase>(new_opt.block_cache)
                 ->GetNumShardBits(),
             4);
@@ -3139,7 +3198,9 @@ TEST_F(OptionsOldApiTest, GetOptionsFromStringTest) {
   ASSERT_EQ(new_options.compression_opts.parallel_threads, 1u);
   ASSERT_EQ(new_options.compression_opts.enabled, false);
   ASSERT_EQ(new_options.compression_opts.use_zstd_dict_trainer, true);
-  ASSERT_EQ(new_options.bottommost_compression, rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption);
+  ASSERT_EQ(
+      new_options.bottommost_compression,
+      rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption);
   ASSERT_EQ(new_options.bottommost_compression_opts.window_bits, 5);
   ASSERT_EQ(new_options.bottommost_compression_opts.level, 6);
   ASSERT_EQ(new_options.bottommost_compression_opts.strategy, 7);
@@ -3532,13 +3593,19 @@ TEST_F(OptionsParserTest, ParseVersion) {
   RocksDBOptionsParser parser;
 
   const std::vector<std::string> invalid_versions = {
-      "a.b.c", "3.2.2b", "3.-12", "3. 1",  // only digits and dots are allowed
+      "a.b.c",
+      "3.2.2b",
+      "3.-12",
+      "3. 1",  // only digits and dots are allowed
       "1.2.3.4",
       "1.2.3"  // can only contains at most one dot.
       "0",     // options_file_version must be at least one
       "3..2",
-      ".", ".1.2",             // must have at least one digit before each dot
-      "1.2.", "1.", "2.34."};  // must have at least one digit after each dot
+      ".",
+      ".1.2",  // must have at least one digit before each dot
+      "1.2.",
+      "1.",
+      "2.34."};  // must have at least one digit after each dot
   for (auto iv : invalid_versions) {
     snprintf(buffer, kLength - 1, file_template.c_str(), iv.c_str());
 
@@ -3697,7 +3764,10 @@ TEST_F(OptionsParserTest, Readahead) {
 TEST_F(OptionsParserTest, DumpAndParse) {
   DBOptions base_db_opt;
   std::vector<ColumnFamilyOptions> base_cf_opts;
-  std::vector<std::string> cf_names = {"default", "cf1", "cf2", "cf3",
+  std::vector<std::string> cf_names = {"default",
+                                       "cf1",
+                                       "cf2",
+                                       "cf3",
                                        "c:f:4:4:4"
                                        "p\\i\\k\\a\\chu\\\\\\",
                                        "###rocksdb#1-testcf#2###"};
@@ -3887,54 +3957,57 @@ class OptionsSanityCheckTest : public OptionsParserTest,
   }
 
  protected:
-  rocksdb_rs::status::Status SanityCheckOptions(const DBOptions& db_opts,
-                            const ColumnFamilyOptions& cf_opts,
-                            ConfigOptions::SanityLevel level) {
+  rocksdb_rs::status::Status SanityCheckOptions(
+      const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts,
+      ConfigOptions::SanityLevel level) {
     config_options_.sanity_level = level;
     return RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
         config_options_, db_opts, {"default"}, {cf_opts}, kOptionsFileName,
         fs_.get());
   }
 
-  rocksdb_rs::status::Status SanityCheckCFOptions(const ColumnFamilyOptions& cf_opts,
-                              ConfigOptions::SanityLevel level) {
+  rocksdb_rs::status::Status SanityCheckCFOptions(
+      const ColumnFamilyOptions& cf_opts, ConfigOptions::SanityLevel level) {
     return SanityCheckOptions(DBOptions(), cf_opts, level);
   }
 
   void SanityCheckCFOptions(const ColumnFamilyOptions& opts, bool exact) {
     ASSERT_OK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelNone));
     if (exact) {
-      ASSERT_OK(
-          SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+      ASSERT_OK(SanityCheckCFOptions(
+          opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     } else {
-      ASSERT_NOK(
-          SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+      ASSERT_NOK(SanityCheckCFOptions(
+          opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     }
   }
 
-  rocksdb_rs::status::Status SanityCheckDBOptions(const DBOptions& db_opts,
-                              ConfigOptions::SanityLevel level) {
+  rocksdb_rs::status::Status SanityCheckDBOptions(
+      const DBOptions& db_opts, ConfigOptions::SanityLevel level) {
     return SanityCheckOptions(db_opts, ColumnFamilyOptions(), level);
   }
 
   void SanityCheckDBOptions(const DBOptions& opts, bool exact) {
     ASSERT_OK(SanityCheckDBOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+    ASSERT_OK(SanityCheckDBOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelNone));
     if (exact) {
-      ASSERT_OK(
-          SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+      ASSERT_OK(SanityCheckDBOptions(
+          opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     } else {
-      ASSERT_NOK(
-          SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+      ASSERT_NOK(SanityCheckDBOptions(
+          opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     }
   }
 
-  rocksdb_rs::status::Status PersistOptions(const DBOptions& db_opts,
-                        const ColumnFamilyOptions& cf_opts) {
-    rocksdb_rs::status::Status s = fs_->DeleteFile(kOptionsFileName, IOOptions(), nullptr).status();
+  rocksdb_rs::status::Status PersistOptions(
+      const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts) {
+    rocksdb_rs::status::Status s =
+        fs_->DeleteFile(kOptionsFileName, IOOptions(), nullptr).status();
     if (!s.ok()) {
       return s;
     }
@@ -3942,7 +4015,8 @@ class OptionsSanityCheckTest : public OptionsParserTest,
                                  kOptionsFileName, fs_.get());
   }
 
-  rocksdb_rs::status::Status PersistCFOptions(const ColumnFamilyOptions& cf_opts) {
+  rocksdb_rs::status::Status PersistCFOptions(
+      const ColumnFamilyOptions& cf_opts) {
     return PersistOptions(DBOptions(), cf_opts);
   }
 
@@ -3962,8 +4036,8 @@ TEST_P(OptionsSanityCheckTest, MergeOperatorErrorMessage) {
 
   // Test when going from merge operator -> nullptr
   opts.merge_operator = nullptr;
-  rocksdb_rs::status::Status s =
-      SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible);
+  rocksdb_rs::status::Status s = SanityCheckCFOptions(
+      opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible);
   ASSERT_TRUE(s.IsInvalidArgument());
   std::string err_msg = *s.ToString();
   std::string specified = "The specified one is " + kNullptrString;
@@ -3973,7 +4047,8 @@ TEST_P(OptionsSanityCheckTest, MergeOperatorErrorMessage) {
 
   // Test when using a different merge operator
   opts.merge_operator.reset(test::RandomMergeOperator(&rnd));
-  s = SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible);
+  s = SanityCheckCFOptions(
+      opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible);
   ASSERT_TRUE(s.IsInvalidArgument());
   err_msg = *s.ToString();
   specified =
@@ -3990,8 +4065,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
   // default ColumnFamilyOptions
   {
     ASSERT_OK(PersistCFOptions(opts));
-    ASSERT_OK(
-        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
   }
 
   // prefix_extractor
@@ -4001,35 +4076,38 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     opts.prefix_extractor.reset(NewCappedPrefixTransform(10));
     ASSERT_OK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
-    ASSERT_OK(
-        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
     // use same prefix extractor but with different parameter
     opts.prefix_extractor.reset(NewCappedPrefixTransform(15));
     // expect pass only in
     // ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible
-    ASSERT_NOK(
-        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+    ASSERT_NOK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     ASSERT_OK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // repeat the test with FixedPrefixTransform
     opts.prefix_extractor.reset(NewFixedPrefixTransform(10));
-    ASSERT_NOK(
-        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+    ASSERT_NOK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     ASSERT_OK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // persist the change of prefix_extractor
     ASSERT_OK(PersistCFOptions(opts));
-    ASSERT_OK(
-        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
     // use same prefix extractor but with different parameter
     opts.prefix_extractor.reset(NewFixedPrefixTransform(15));
@@ -4043,11 +4121,13 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     // from non-null to null
     ASSERT_OK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelNone));
   }
   // persist the change
   ASSERT_OK(PersistCFOptions(opts));
-  ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+  ASSERT_OK(SanityCheckCFOptions(
+      opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
   // table_factory
   {
@@ -4056,12 +4136,13 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
       opts.table_factory.reset(test::RandomTableFactory(&rnd, tb));
       ASSERT_NOK(SanityCheckCFOptions(
           opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-      ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+      ASSERT_OK(SanityCheckCFOptions(
+          opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
       // persist the change
       ASSERT_OK(PersistCFOptions(opts));
-      ASSERT_OK(
-          SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+      ASSERT_OK(SanityCheckCFOptions(
+          opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
     }
   }
 
@@ -4071,7 +4152,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     opts.merge_operator.reset(test::RandomMergeOperator(&rnd));
     ASSERT_OK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
@@ -4082,7 +4164,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
       opts.merge_operator.reset(test::RandomMergeOperator(&rnd));
       ASSERT_NOK(SanityCheckCFOptions(
           opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-      ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+      ASSERT_OK(SanityCheckCFOptions(
+          opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
       // persist the change
       ASSERT_OK(PersistCFOptions(opts));
@@ -4093,7 +4176,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     opts.merge_operator = nullptr;
     ASSERT_NOK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_OK(SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelNone));
+    ASSERT_OK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelNone));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
@@ -4135,8 +4219,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     opts.persist_user_defined_timestamps = false;
     ASSERT_NOK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_NOK(
-        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+    ASSERT_NOK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
@@ -4146,8 +4230,8 @@ TEST_P(OptionsSanityCheckTest, CFOptionsSanityCheck) {
     opts.persist_user_defined_timestamps = true;
     ASSERT_NOK(SanityCheckCFOptions(
         opts, ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible));
-    ASSERT_NOK(
-        SanityCheckCFOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+    ASSERT_NOK(SanityCheckCFOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 
     // persist the change
     ASSERT_OK(PersistCFOptions(opts));
@@ -4161,8 +4245,8 @@ TEST_P(OptionsSanityCheckTest, DBOptionsSanityCheck) {
   // default DBOptions
   {
     ASSERT_OK(PersistDBOptions(opts));
-    ASSERT_OK(
-        SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+    ASSERT_OK(SanityCheckDBOptions(
+        opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
   }
 
   // File checksum generator
@@ -4193,7 +4277,8 @@ TEST_P(OptionsSanityCheckTest, DBOptionsSanityCheck) {
   }
   // persist the change
   ASSERT_OK(PersistDBOptions(opts));
-  ASSERT_OK(SanityCheckDBOptions(opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
+  ASSERT_OK(SanityCheckDBOptions(
+      opts, ConfigOptions::SanityLevel::kSanityLevelExactMatch));
 }
 
 namespace {
@@ -4312,7 +4397,8 @@ static void TestParseAndCompareOption(const ConfigOptions& config_options,
 }
 
 template <typename T>
-void TestOptInfo(const ConfigOptions& config_options, rocksdb_rs::utilities::options_type::OptionType opt_type,
+void TestOptInfo(const ConfigOptions& config_options,
+                 rocksdb_rs::utilities::options_type::OptionType opt_type,
                  T* base, T* comp) {
   std::string result;
   OptionTypeInfo opt_info(0, opt_type);
@@ -4329,43 +4415,61 @@ TEST_F(OptionTypeInfoTest, BasicTypes) {
   ConfigOptions config_options;
   {
     bool a = true, b = false;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kBoolean, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kBoolean, &a,
+                &b);
   }
   {
     int a = 100, b = 200;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kInt, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kInt, &a, &b);
   }
   {
     int32_t a = 100, b = 200;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kInt32T, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kInt32T, &a,
+                &b);
   }
   {
     int64_t a = 100, b = 200;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kInt64T, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kInt64T, &a,
+                &b);
   }
   {
     unsigned int a = 100, b = 200;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kUInt, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kUInt, &a, &b);
   }
   {
     uint32_t a = 100, b = 200;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kUInt32T, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kUInt32T, &a,
+                &b);
   }
   {
     uint64_t a = 100, b = 200;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kUInt64T, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kUInt64T, &a,
+                &b);
   }
   {
     size_t a = 100, b = 200;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kSizeT, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kSizeT, &a,
+                &b);
   }
   {
     std::string a = "100", b = "200";
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kString, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kString, &a,
+                &b);
   }
   {
     double a = 1.0, b = 2.0;
-    TestOptInfo(config_options, rocksdb_rs::utilities::options_type::OptionType::kDouble, &a, &b);
+    TestOptInfo(config_options,
+                rocksdb_rs::utilities::options_type::OptionType::kDouble, &a,
+                &b);
   }
 }
 
@@ -4381,47 +4485,59 @@ TEST_F(OptionTypeInfoTest, TestInvalidArgs) {
   size_t sz;
   double d;
 
-  ASSERT_NOK(OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kBoolean)
+  ASSERT_NOK(OptionTypeInfo(
+                 0, rocksdb_rs::utilities::options_type::OptionType::kBoolean)
                  .Parse(config_options, "b", "x", &b));
   ASSERT_NOK(
-      OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kInt).Parse(config_options, "b", "x", &i));
-  ASSERT_NOK(OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kInt32T)
+      OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kInt)
+          .Parse(config_options, "b", "x", &i));
+  ASSERT_NOK(OptionTypeInfo(
+                 0, rocksdb_rs::utilities::options_type::OptionType::kInt32T)
                  .Parse(config_options, "b", "x", &i32));
-  ASSERT_NOK(OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kInt64T)
+  ASSERT_NOK(OptionTypeInfo(
+                 0, rocksdb_rs::utilities::options_type::OptionType::kInt64T)
                  .Parse(config_options, "b", "x", &i64));
   ASSERT_NOK(
-      OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kUInt).Parse(config_options, "b", "x", &u));
-  ASSERT_NOK(OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kUInt32T)
+      OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kUInt)
+          .Parse(config_options, "b", "x", &u));
+  ASSERT_NOK(OptionTypeInfo(
+                 0, rocksdb_rs::utilities::options_type::OptionType::kUInt32T)
                  .Parse(config_options, "b", "x", &u32));
-  ASSERT_NOK(OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kUInt64T)
+  ASSERT_NOK(OptionTypeInfo(
+                 0, rocksdb_rs::utilities::options_type::OptionType::kUInt64T)
                  .Parse(config_options, "b", "x", &u64));
-  ASSERT_NOK(OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kSizeT)
-                 .Parse(config_options, "b", "x", &sz));
-  ASSERT_NOK(OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kDouble)
+  ASSERT_NOK(
+      OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kSizeT)
+          .Parse(config_options, "b", "x", &sz));
+  ASSERT_NOK(OptionTypeInfo(
+                 0, rocksdb_rs::utilities::options_type::OptionType::kDouble)
                  .Parse(config_options, "b", "x", &d));
 
   // Don't know how to convert Unknowns to anything else
-  ASSERT_NOK(OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kUnknown)
+  ASSERT_NOK(OptionTypeInfo(
+                 0, rocksdb_rs::utilities::options_type::OptionType::kUnknown)
                  .Parse(config_options, "b", "x", &d));
 
   // Verify that if the parse function throws an exception, it is also trapped
-  OptionTypeInfo func_info(0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
-                           rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
-                           [](const ConfigOptions&, const std::string&,
-                              const std::string& value, void* addr) {
-                             auto ptr = static_cast<int*>(addr);
-                             *ptr = ParseInt(value);
-                             return rocksdb_rs::status::Status_OK();
-                           });
+  OptionTypeInfo func_info(
+      0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+      [](const ConfigOptions&, const std::string&, const std::string& value,
+         void* addr) {
+        auto ptr = static_cast<int*>(addr);
+        *ptr = ParseInt(value);
+        return rocksdb_rs::status::Status_OK();
+      });
   ASSERT_OK(func_info.Parse(config_options, "b", "1", &i));
   ASSERT_NOK(func_info.Parse(config_options, "b", "x", &i));
 }
 
 TEST_F(OptionTypeInfoTest, TestParseFunc) {
-  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
-                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
+  OptionTypeInfo opt_info(
+      0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
   opt_info.SetParseFunc([](const ConfigOptions& /*opts*/,
                            const std::string& name, const std::string& value,
                            void* addr) {
@@ -4441,9 +4557,10 @@ TEST_F(OptionTypeInfoTest, TestParseFunc) {
 }
 
 TEST_F(OptionTypeInfoTest, TestSerializeFunc) {
-  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
+  OptionTypeInfo opt_info(
+      0, rocksdb_rs::utilities::options_type::OptionType::kString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
   opt_info.SetSerializeFunc([](const ConfigOptions& /*opts*/,
                                const std::string& name, const void* /*addr*/,
                                std::string* value) {
@@ -4463,8 +4580,10 @@ TEST_F(OptionTypeInfoTest, TestSerializeFunc) {
 }
 
 TEST_F(OptionTypeInfoTest, TestEqualsFunc) {
-  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
+  OptionTypeInfo opt_info(
+      0, rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
   opt_info.SetEqualsFunc([](const ConfigOptions& /*opts*/,
                             const std::string& name, const void* addr1,
                             const void* addr2, std::string* mismatch) {
@@ -4497,20 +4616,22 @@ TEST_F(OptionTypeInfoTest, TestEqualsFunc) {
 }
 
 TEST_F(OptionTypeInfoTest, TestPrepareFunc) {
-  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
-  opt_info.SetPrepareFunc(
-      [](const ConfigOptions& /*opts*/, const std::string& name, void* addr) {
-        auto i1 = static_cast<int*>(addr);
-        if (name == "x2") {
-          *i1 *= 2;
-        } else if (name == "/2") {
-          *i1 /= 2;
-        } else {
-          return rocksdb_rs::status::Status_InvalidArgument("Bad Argument", name);
-        }
-        return rocksdb_rs::status::Status_OK();
-      });
+  OptionTypeInfo opt_info(
+      0, rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
+  opt_info.SetPrepareFunc([](const ConfigOptions& /*opts*/,
+                             const std::string& name, void* addr) {
+    auto i1 = static_cast<int*>(addr);
+    if (name == "x2") {
+      *i1 *= 2;
+    } else if (name == "/2") {
+      *i1 /= 2;
+    } else {
+      return rocksdb_rs::status::Status_InvalidArgument("Bad Argument", name);
+    }
+    return rocksdb_rs::status::Status_OK();
+  });
   ConfigOptions config_options;
   int int1 = 100;
   ASSERT_OK(opt_info.Prepare(config_options, "x2", &int1));
@@ -4521,9 +4642,10 @@ TEST_F(OptionTypeInfoTest, TestPrepareFunc) {
   ASSERT_EQ(int1, 100);
 }
 TEST_F(OptionTypeInfoTest, TestValidateFunc) {
-  OptionTypeInfo opt_info(0, rocksdb_rs::utilities::options_type::OptionType::kSizeT,
-                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
+  OptionTypeInfo opt_info(
+      0, rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
   opt_info.SetValidateFunc([](const DBOptions& db_opts,
                               const ColumnFamilyOptions& cf_opts,
                               const std::string& name, const void* addr) {
@@ -4537,7 +4659,8 @@ TEST_F(OptionTypeInfoTest, TestValidateFunc) {
     if (is_valid) {
       return rocksdb_rs::status::Status_OK();
     } else {
-      return rocksdb_rs::status::Status_InvalidArgument("Mismatched value", name);
+      return rocksdb_rs::status::Status_InvalidArgument("Mismatched value",
+                                                        name);
     }
   });
   ConfigOptions config_options;
@@ -4555,18 +4678,22 @@ TEST_F(OptionTypeInfoTest, TestValidateFunc) {
 }
 
 TEST_F(OptionTypeInfoTest, TestOptionFlags) {
-  OptionTypeInfo opt_none(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                          rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize);
-  OptionTypeInfo opt_never(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                           rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                           rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever);
-  OptionTypeInfo opt_alias(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                           rocksdb_rs::utilities::options_type::OptionVerificationType::kAlias,
-                           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
-  OptionTypeInfo opt_deprecated(0, rocksdb_rs::utilities::options_type::OptionType::kString,
-                                rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
-                                rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
+  OptionTypeInfo opt_none(
+      0, rocksdb_rs::utilities::options_type::OptionType::kString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize);
+  OptionTypeInfo opt_never(
+      0, rocksdb_rs::utilities::options_type::OptionType::kString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever);
+  OptionTypeInfo opt_alias(
+      0, rocksdb_rs::utilities::options_type::OptionType::kString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kAlias,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
+  OptionTypeInfo opt_deprecated(
+      0, rocksdb_rs::utilities::options_type::OptionType::kString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone);
   ConfigOptions config_options;
   std::string opts_str;
   std::string base = "base";
@@ -4630,44 +4757,58 @@ TEST_F(OptionTypeInfoTest, TestBuiltinEnum) {
   ConfigOptions config_options;
   for (auto iter : OptionsHelper::compaction_style_string_map) {
     CompactionStyle e1, e2;
-    TestParseAndCompareOption(config_options,
-                              OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kCompactionStyle),
-                              "CompactionStyle", iter.first, &e1, &e2);
+    TestParseAndCompareOption(
+        config_options,
+        OptionTypeInfo(
+            0,
+            rocksdb_rs::utilities::options_type::OptionType::kCompactionStyle),
+        "CompactionStyle", iter.first, &e1, &e2);
     ASSERT_EQ(e1, iter.second);
   }
   for (auto iter : OptionsHelper::compaction_pri_string_map) {
     CompactionPri e1, e2;
-    TestParseAndCompareOption(config_options,
-                              OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kCompactionPri),
-                              "CompactionPri", iter.first, &e1, &e2);
+    TestParseAndCompareOption(
+        config_options,
+        OptionTypeInfo(
+            0, rocksdb_rs::utilities::options_type::OptionType::kCompactionPri),
+        "CompactionPri", iter.first, &e1, &e2);
     ASSERT_EQ(e1, iter.second);
   }
   for (auto iter : OptionsHelper::compression_type_string_map) {
     rocksdb_rs::compression_type::CompressionType e1, e2;
-    TestParseAndCompareOption(config_options,
-                              OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kCompressionType),
-                              "rocksdb_rs::compression_type::CompressionType", iter.first, &e1, &e2);
+    TestParseAndCompareOption(
+        config_options,
+        OptionTypeInfo(
+            0,
+            rocksdb_rs::utilities::options_type::OptionType::kCompressionType),
+        "rocksdb_rs::compression_type::CompressionType", iter.first, &e1, &e2);
     ASSERT_EQ(e1, iter.second);
   }
   for (auto iter : OptionsHelper::compaction_stop_style_string_map) {
     CompactionStopStyle e1, e2;
     TestParseAndCompareOption(
-        config_options, OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kCompactionStopStyle),
+        config_options,
+        OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::
+                              kCompactionStopStyle),
         "CompactionStopStyle", iter.first, &e1, &e2);
     ASSERT_EQ(e1, iter.second);
   }
   for (auto iter : OptionsHelper::checksum_type_string_map) {
     ChecksumType e1, e2;
-    TestParseAndCompareOption(config_options,
-                              OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kChecksumType),
-                              "CheckSumType", iter.first, &e1, &e2);
+    TestParseAndCompareOption(
+        config_options,
+        OptionTypeInfo(
+            0, rocksdb_rs::utilities::options_type::OptionType::kChecksumType),
+        "CheckSumType", iter.first, &e1, &e2);
     ASSERT_EQ(e1, iter.second);
   }
   for (auto iter : OptionsHelper::encoding_type_string_map) {
     EncodingType e1, e2;
-    TestParseAndCompareOption(config_options,
-                              OptionTypeInfo(0, rocksdb_rs::utilities::options_type::OptionType::kEncodingType),
-                              "EncodingType", iter.first, &e1, &e2);
+    TestParseAndCompareOption(
+        config_options,
+        OptionTypeInfo(
+            0, rocksdb_rs::utilities::options_type::OptionType::kEncodingType),
+        "EncodingType", iter.first, &e1, &e2);
     ASSERT_EQ(e1, iter.second);
   }
 }
@@ -4684,24 +4825,36 @@ TEST_F(OptionTypeInfoTest, TestStruct) {
   };
 
   std::unordered_map<std::string, OptionTypeInfo> basic_type_map = {
-      {"i", {offsetof(struct Basic, i), rocksdb_rs::utilities::options_type::OptionType::kInt}},
-      {"s", {offsetof(struct Basic, s), rocksdb_rs::utilities::options_type::OptionType::kString}},
+      {"i",
+       {offsetof(struct Basic, i),
+        rocksdb_rs::utilities::options_type::OptionType::kInt}},
+      {"s",
+       {offsetof(struct Basic, s),
+        rocksdb_rs::utilities::options_type::OptionType::kString}},
   };
   OptionTypeInfo basic_info = OptionTypeInfo::Struct(
-      "b", &basic_type_map, 0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      "b", &basic_type_map, 0,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable);
 
   std::unordered_map<std::string, OptionTypeInfo> extended_type_map = {
-      {"j", {offsetof(struct Extended, j), rocksdb_rs::utilities::options_type::OptionType::kInt}},
-      {"b", OptionTypeInfo::Struct(
-                "b", &basic_type_map, offsetof(struct Extended, b),
-                rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
-      {"m", OptionTypeInfo::Struct(
-                "m", &basic_type_map, offsetof(struct Extended, b),
-                rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)},
+      {"j",
+       {offsetof(struct Extended, j),
+        rocksdb_rs::utilities::options_type::OptionType::kInt}},
+      {"b",
+       OptionTypeInfo::Struct(
+           "b", &basic_type_map, offsetof(struct Extended, b),
+           rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
+      {"m",
+       OptionTypeInfo::Struct(
+           "m", &basic_type_map, offsetof(struct Extended, b),
+           rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)},
   };
   OptionTypeInfo extended_info = OptionTypeInfo::Struct(
-      "e", &extended_type_map, 0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      "e", &extended_type_map, 0,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable);
   Extended e1, e2;
   ConfigOptions config_options;
@@ -4758,7 +4911,8 @@ TEST_F(OptionTypeInfoTest, TestStruct) {
 
 TEST_F(OptionTypeInfoTest, TestArrayType) {
   OptionTypeInfo array_info = OptionTypeInfo::Array<std::string, 4>(
-      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
       {0, rocksdb_rs::utilities::options_type::OptionType::kString});
   std::array<std::string, 4> array1, array2;
   std::string mismatch;
@@ -4788,7 +4942,8 @@ TEST_F(OptionTypeInfoTest, TestArrayType) {
 
   std::array<std::string, 3> array3, array4;
   OptionTypeInfo bar_info = OptionTypeInfo::Array<std::string, 3>(
-      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
       {0, rocksdb_rs::utilities::options_type::OptionType::kString}, '|');
   TestParseAndCompareOption(config_options, bar_info, "v", "x|y|z", &array3,
                             &array4);
@@ -4820,7 +4975,8 @@ TEST_F(OptionTypeInfoTest, TestArrayType) {
 
 TEST_F(OptionTypeInfoTest, TestVectorType) {
   OptionTypeInfo vec_info = OptionTypeInfo::Vector<std::string>(
-      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
       {0, rocksdb_rs::utilities::options_type::OptionType::kString});
   std::vector<std::string> vec1, vec2;
   std::string mismatch;
@@ -4847,7 +5003,8 @@ TEST_F(OptionTypeInfoTest, TestVectorType) {
   ASSERT_EQ(vec1[3], "d");
 
   OptionTypeInfo bar_info = OptionTypeInfo::Vector<std::string>(
-      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+      0, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
       {0, rocksdb_rs::utilities::options_type::OptionType::kString}, '|');
   TestParseAndCompareOption(config_options, vec_info, "v", "x|y|z", &vec1,
                             &vec2);
@@ -4885,9 +5042,12 @@ TEST_F(OptionTypeInfoTest, TestStaticType) {
   };
 
   static std::unordered_map<std::string, OptionTypeInfo> type_map = {
-      {"size", {offsetof(struct SimpleOptions, size), rocksdb_rs::utilities::options_type::OptionType::kSizeT}},
+      {"size",
+       {offsetof(struct SimpleOptions, size),
+        rocksdb_rs::utilities::options_type::OptionType::kSizeT}},
       {"verify",
-       {offsetof(struct SimpleOptions, verify), rocksdb_rs::utilities::options_type::OptionType::kBoolean}},
+       {offsetof(struct SimpleOptions, verify),
+        rocksdb_rs::utilities::options_type::OptionType::kBoolean}},
   };
 
   ConfigOptions config_options;

@@ -9,11 +9,10 @@
 
 #include "options/options_helper.h"
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/utilities/options_type.h"
 #include "util/string_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -36,9 +35,9 @@ std::string Customizable::GenerateIndividualId() const {
   return ostr.str();
 }
 
-rocksdb_rs::status::Status Customizable::GetOption(const ConfigOptions& config_options,
-                               const std::string& opt_name,
-                               std::string* value) const {
+rocksdb_rs::status::Status Customizable::GetOption(
+    const ConfigOptions& config_options, const std::string& opt_name,
+    std::string* value) const {
   if (opt_name == OptionTypeInfo::kIdPropName()) {
     *value = GetId();
     return rocksdb_rs::status::Status_OK();
@@ -68,11 +67,11 @@ std::string Customizable::SerializeOptions(const ConfigOptions& config_options,
   return result;
 }
 
-
 bool Customizable::AreEquivalent(const ConfigOptions& config_options,
                                  const Configurable* other,
                                  std::string* mismatch) const {
-  if (config_options.sanity_level > ConfigOptions::SanityLevel::kSanityLevelNone &&
+  if (config_options.sanity_level >
+          ConfigOptions::SanityLevel::kSanityLevelNone &&
       this != other) {
     const Customizable* custom = reinterpret_cast<const Customizable*>(other);
     if (custom == nullptr) {  // Cast failed
@@ -127,7 +126,8 @@ rocksdb_rs::status::Status Customizable::ConfigureNewObject(
   if (object != nullptr) {
     status = object->ConfigureFromMap(config_options, opt_map);
   } else if (!opt_map.empty()) {
-    status = rocksdb_rs::status::Status_InvalidArgument("Cannot configure null object ");
+    status = rocksdb_rs::status::Status_InvalidArgument(
+        "Cannot configure null object ");
   }
   return status;
 }

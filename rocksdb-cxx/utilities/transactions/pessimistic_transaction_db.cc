@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/pessimistic_transaction_db.h"
 
 #include <cinttypes>
@@ -86,7 +85,8 @@ rocksdb_rs::status::Status PessimisticTransactionDB::VerifyCFOptions(
     return rocksdb_rs::status::Status_InvalidArgument(oss.str());
   }
   if (txn_db_options_.write_policy != WRITE_COMMITTED) {
-    return rocksdb_rs::status::Status_NotSupported("Only WriteCommittedTxn supports timestamp");
+    return rocksdb_rs::status::Status_NotSupported(
+        "Only WriteCommittedTxn supports timestamp");
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -118,7 +118,8 @@ rocksdb_rs::status::Status PessimisticTransactionDB::Initialize(
     compaction_enabled_cf_handles.push_back(handles[index]);
   }
 
-  rocksdb_rs::status::Status s = EnableAutoCompaction(compaction_enabled_cf_handles);
+  rocksdb_rs::status::Status s =
+      EnableAutoCompaction(compaction_enabled_cf_handles);
 
   // create 'real' transactions from recovered shell transactions
   auto dbimpl = static_cast_with_check<DBImpl>(GetRootDB());
@@ -197,17 +198,17 @@ TransactionDBOptions PessimisticTransactionDB::ValidateTxnDBOptions(
   return validated;
 }
 
-rocksdb_rs::status::Status TransactionDB::Open(const Options& options,
-                           const TransactionDBOptions& txn_db_options,
-                           const std::string& dbname, TransactionDB** dbptr) {
+rocksdb_rs::status::Status TransactionDB::Open(
+    const Options& options, const TransactionDBOptions& txn_db_options,
+    const std::string& dbname, TransactionDB** dbptr) {
   DBOptions db_options(options);
   ColumnFamilyOptions cf_options(options);
   std::vector<ColumnFamilyDescriptor> column_families;
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   std::vector<ColumnFamilyHandle*> handles;
-  rocksdb_rs::status::Status s = TransactionDB::Open(db_options, txn_db_options, dbname,
-                                 column_families, &handles, dbptr);
+  rocksdb_rs::status::Status s = TransactionDB::Open(
+      db_options, txn_db_options, dbname, column_families, &handles, dbptr);
   if (s.ok()) {
     assert(handles.size() == 1);
     // i can delete the handle since DBImpl is always holding a reference to
@@ -318,7 +319,8 @@ rocksdb_rs::status::Status WrapAnotherDBInternal(
           db, PessimisticTransactionDB::ValidateTxnDBOptions(txn_db_options)));
   }
   txn_db->UpdateCFComparatorMap(handles);
-  rocksdb_rs::status::Status s = txn_db->Initialize(compaction_enabled_cf_indices, handles);
+  rocksdb_rs::status::Status s =
+      txn_db->Initialize(compaction_enabled_cf_indices, handles);
   // In case of a failure at this point, db is deleted via the txn_db destructor
   // and set to nullptr.
   if (s.ok()) {
@@ -415,7 +417,8 @@ rocksdb_rs::status::Status PessimisticTransactionDB::CreateColumnFamilies(
     }
   }
 
-  rocksdb_rs::status::Status s = db_->CreateColumnFamilies(column_families, handles);
+  rocksdb_rs::status::Status s =
+      db_->CreateColumnFamilies(column_families, handles);
   if (s.ok()) {
     for (auto* handle : *handles) {
       lock_manager_->AddColumnFamily(handle);
@@ -454,17 +457,15 @@ rocksdb_rs::status::Status PessimisticTransactionDB::DropColumnFamilies(
   return s;
 }
 
-rocksdb_rs::status::Status PessimisticTransactionDB::TryLock(PessimisticTransaction* txn,
-                                         uint32_t cfh_id,
-                                         const std::string& key,
-                                         bool exclusive) {
+rocksdb_rs::status::Status PessimisticTransactionDB::TryLock(
+    PessimisticTransaction* txn, uint32_t cfh_id, const std::string& key,
+    bool exclusive) {
   return lock_manager_->TryLock(txn, cfh_id, key, GetEnv(), exclusive);
 }
 
-rocksdb_rs::status::Status PessimisticTransactionDB::TryRangeLock(PessimisticTransaction* txn,
-                                              uint32_t cfh_id,
-                                              const Endpoint& start_endp,
-                                              const Endpoint& end_endp) {
+rocksdb_rs::status::Status PessimisticTransactionDB::TryRangeLock(
+    PessimisticTransaction* txn, uint32_t cfh_id, const Endpoint& start_endp,
+    const Endpoint& end_endp) {
   return lock_manager_->TryLock(txn, cfh_id, start_endp, end_endp, GetEnv(),
                                 /*exclusive=*/true);
 }
@@ -499,9 +500,9 @@ Transaction* PessimisticTransactionDB::BeginInternalTransaction(
 // sort its keys before locking them.  This guarantees that TransactionDB write
 // methods cannot deadlock with each other (but still could deadlock with a
 // Transaction).
-rocksdb_rs::status::Status PessimisticTransactionDB::Put(const WriteOptions& options,
-                                     ColumnFamilyHandle* column_family,
-                                     const Slice& key, const Slice& val) {
+rocksdb_rs::status::Status PessimisticTransactionDB::Put(
+    const WriteOptions& options, ColumnFamilyHandle* column_family,
+    const Slice& key, const Slice& val) {
   rocksdb_rs::status::Status s = FailIfCfEnablesTs(this, column_family);
   if (!s.ok()) {
     return s;
@@ -523,9 +524,9 @@ rocksdb_rs::status::Status PessimisticTransactionDB::Put(const WriteOptions& opt
   return s;
 }
 
-rocksdb_rs::status::Status PessimisticTransactionDB::Delete(const WriteOptions& wopts,
-                                        ColumnFamilyHandle* column_family,
-                                        const Slice& key) {
+rocksdb_rs::status::Status PessimisticTransactionDB::Delete(
+    const WriteOptions& wopts, ColumnFamilyHandle* column_family,
+    const Slice& key) {
   rocksdb_rs::status::Status s = FailIfCfEnablesTs(this, column_family);
   if (!s.ok()) {
     return s;
@@ -548,9 +549,9 @@ rocksdb_rs::status::Status PessimisticTransactionDB::Delete(const WriteOptions& 
   return s;
 }
 
-rocksdb_rs::status::Status PessimisticTransactionDB::SingleDelete(const WriteOptions& wopts,
-                                              ColumnFamilyHandle* column_family,
-                                              const Slice& key) {
+rocksdb_rs::status::Status PessimisticTransactionDB::SingleDelete(
+    const WriteOptions& wopts, ColumnFamilyHandle* column_family,
+    const Slice& key) {
   rocksdb_rs::status::Status s = FailIfCfEnablesTs(this, column_family);
   if (!s.ok()) {
     return s;
@@ -573,9 +574,9 @@ rocksdb_rs::status::Status PessimisticTransactionDB::SingleDelete(const WriteOpt
   return s;
 }
 
-rocksdb_rs::status::Status PessimisticTransactionDB::Merge(const WriteOptions& options,
-                                       ColumnFamilyHandle* column_family,
-                                       const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status PessimisticTransactionDB::Merge(
+    const WriteOptions& options, ColumnFamilyHandle* column_family,
+    const Slice& key, const Slice& value) {
   rocksdb_rs::status::Status s = FailIfCfEnablesTs(this, column_family);
   if (!s.ok()) {
     return s;
@@ -598,13 +599,13 @@ rocksdb_rs::status::Status PessimisticTransactionDB::Merge(const WriteOptions& o
   return s;
 }
 
-rocksdb_rs::status::Status PessimisticTransactionDB::Write(const WriteOptions& opts,
-                                       WriteBatch* updates) {
+rocksdb_rs::status::Status PessimisticTransactionDB::Write(
+    const WriteOptions& opts, WriteBatch* updates) {
   return WriteWithConcurrencyControl(opts, updates);
 }
 
 rocksdb_rs::status::Status WriteCommittedTxnDB::Write(const WriteOptions& opts,
-                                  WriteBatch* updates) {
+                                                      WriteBatch* updates) {
   rocksdb_rs::status::Status s = FailIfBatchHasTs(updates);
   if (!s.ok()) {
     return s;
@@ -717,7 +718,8 @@ void PessimisticTransactionDB::UnregisterTransaction(Transaction* txn) {
 std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>>
 PessimisticTransactionDB::CreateTimestampedSnapshot(TxnTimestamp ts) {
   if (kMaxTxnTimestamp == ts) {
-    return std::make_pair(rocksdb_rs::status::Status_InvalidArgument("invalid ts"), nullptr);
+    return std::make_pair(
+        rocksdb_rs::status::Status_InvalidArgument("invalid ts"), nullptr);
   }
   assert(db_impl_);
   return db_impl_->CreateTimestampedSnapshot(kMaxSequenceNumber, ts);
@@ -742,8 +744,8 @@ rocksdb_rs::status::Status PessimisticTransactionDB::GetTimestampedSnapshots(
   return db_impl_->GetTimestampedSnapshots(ts_lb, ts_ub, timestamped_snapshots);
 }
 
-rocksdb_rs::status::Status SnapshotCreationCallback::operator()(SequenceNumber seq,
-                                            bool disable_memtable) {
+rocksdb_rs::status::Status SnapshotCreationCallback::operator()(
+    SequenceNumber seq, bool disable_memtable) {
   assert(db_impl_);
   assert(commit_ts_ != kMaxTxnTimestamp);
 

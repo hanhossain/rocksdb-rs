@@ -188,9 +188,10 @@ class FilePrefetchBuffer {
   // n                     : the number of bytes to read.
   // rate_limiter_priority : rate limiting priority, or `Env::IO_TOTAL` to
   //                         bypass.
-  rocksdb_rs::status::Status Prefetch(const IOOptions& opts, RandomAccessFileReader* reader,
-                  uint64_t offset, size_t n,
-                  Env::IOPriority rate_limiter_priority);
+  rocksdb_rs::status::Status Prefetch(const IOOptions& opts,
+                                      RandomAccessFileReader* reader,
+                                      uint64_t offset, size_t n,
+                                      Env::IOPriority rate_limiter_priority);
 
   // Request for reading the data from a file asynchronously.
   // If data already exists in the buffer, result will be updated.
@@ -202,8 +203,10 @@ class FilePrefetchBuffer {
   //
   // If data already exist in the buffer, it will return Status_OK, otherwise
   // it will send asynchronous request and return Status_TryAgain.
-  rocksdb_rs::status::Status PrefetchAsync(const IOOptions& opts, RandomAccessFileReader* reader,
-                       uint64_t offset, size_t n, Slice* result);
+  rocksdb_rs::status::Status PrefetchAsync(const IOOptions& opts,
+                                           RandomAccessFileReader* reader,
+                                           uint64_t offset, size_t n,
+                                           Slice* result);
 
   // Tries returning the data for a file read from this buffer if that data is
   // in the buffer.
@@ -221,13 +224,15 @@ class FilePrefetchBuffer {
   //                         bypass.
   // for_compaction        : true if cache read is done for compaction read.
   bool TryReadFromCache(const IOOptions& opts, RandomAccessFileReader* reader,
-                        uint64_t offset, size_t n, Slice* result, rocksdb_rs::status::Status* s,
+                        uint64_t offset, size_t n, Slice* result,
+                        rocksdb_rs::status::Status* s,
                         Env::IOPriority rate_limiter_priority,
                         bool for_compaction = false);
 
   bool TryReadFromCacheAsync(const IOOptions& opts,
                              RandomAccessFileReader* reader, uint64_t offset,
-                             size_t n, Slice* result, rocksdb_rs::status::Status* status,
+                             size_t n, Slice* result,
+                             rocksdb_rs::status::Status* status,
                              Env::IOPriority rate_limiter_priority);
 
   // The minimum `offset` ever passed to TryReadFromCache(). This will nly be
@@ -302,18 +307,22 @@ class FilePrefetchBuffer {
   // buffers if required.
   void PollAndUpdateBuffersIfNeeded(uint64_t offset);
 
-  rocksdb_rs::status::Status PrefetchAsyncInternal(const IOOptions& opts,
-                               RandomAccessFileReader* reader, uint64_t offset,
-                               size_t length, size_t readahead_size,
-                               Env::IOPriority rate_limiter_priority,
-                               bool& copy_to_third_buffer);
+  rocksdb_rs::status::Status PrefetchAsyncInternal(
+      const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
+      size_t length, size_t readahead_size,
+      Env::IOPriority rate_limiter_priority, bool& copy_to_third_buffer);
 
-  rocksdb_rs::status::Status Read(const IOOptions& opts, RandomAccessFileReader* reader,
-              Env::IOPriority rate_limiter_priority, uint64_t read_len,
-              uint64_t chunk_len, uint64_t rounddown_start, uint32_t index);
+  rocksdb_rs::status::Status Read(const IOOptions& opts,
+                                  RandomAccessFileReader* reader,
+                                  Env::IOPriority rate_limiter_priority,
+                                  uint64_t read_len, uint64_t chunk_len,
+                                  uint64_t rounddown_start, uint32_t index);
 
-  rocksdb_rs::status::Status ReadAsync(const IOOptions& opts, RandomAccessFileReader* reader,
-                   uint64_t read_len, uint64_t rounddown_start, uint32_t index);
+  rocksdb_rs::status::Status ReadAsync(const IOOptions& opts,
+                                       RandomAccessFileReader* reader,
+                                       uint64_t read_len,
+                                       uint64_t rounddown_start,
+                                       uint32_t index);
 
   // Copy the data from src to third buffer.
   void CopyDataToBuffer(uint32_t src, uint64_t& offset, size_t& length);
@@ -406,12 +415,11 @@ class FilePrefetchBuffer {
     bufs_[index].async_read_in_progress_ = false;
   }
 
-  rocksdb_rs::status::Status HandleOverlappingData(const IOOptions& opts,
-                               RandomAccessFileReader* reader, uint64_t offset,
-                               size_t length, size_t readahead_size,
-                               Env::IOPriority rate_limiter_priority,
-                               bool& copy_to_third_buffer, uint64_t& tmp_offset,
-                               size_t& tmp_length);
+  rocksdb_rs::status::Status HandleOverlappingData(
+      const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
+      size_t length, size_t readahead_size,
+      Env::IOPriority rate_limiter_priority, bool& copy_to_third_buffer,
+      uint64_t& tmp_offset, size_t& tmp_length);
 
   bool TryReadFromCacheUntracked(const IOOptions& opts,
                                  RandomAccessFileReader* reader,

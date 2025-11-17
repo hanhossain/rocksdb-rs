@@ -137,9 +137,9 @@ struct MutableDBOptions {
   int max_background_flushes;
 };
 
-rocksdb_rs::status::Status GetStringFromMutableDBOptions(const ConfigOptions& config_options,
-                                     const MutableDBOptions& mutable_opts,
-                                     std::string* opt_string);
+rocksdb_rs::status::Status GetStringFromMutableDBOptions(
+    const ConfigOptions& config_options, const MutableDBOptions& mutable_opts,
+    std::string* opt_string);
 
 rocksdb_rs::status::Status GetMutableDBOptionsFromStrings(
     const MutableDBOptions& base_options,

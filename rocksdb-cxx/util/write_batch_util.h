@@ -8,10 +8,9 @@
 #include <unordered_set>
 #include <vector>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/write_batch.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 // ColumnFamilyCollector is a write batch handler which does nothing
@@ -29,46 +28,62 @@ class ColumnFamilyCollector : public WriteBatch::Handler {
 
   ~ColumnFamilyCollector() override {}
 
-  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice&,
+                                   const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice&) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
+                                      const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice&) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
+                                            const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice&,
-                       const Slice&) override {
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id,
+                                           const Slice&,
+                                           const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
   rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice&,
-                 const Slice&) override {
+                                     const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t column_family_id, const Slice&,
-                        const Slice&) override {
+  rocksdb_rs::status::Status PutBlobIndexCF(uint32_t column_family_id,
+                                            const Slice&,
+                                            const Slice&) override {
     return AddColumnFamilyId(column_family_id);
   }
 
-  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
-
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
-
-  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
-
-  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
-
-  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&,
+                                                     const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+
+  rocksdb_rs::status::Status MarkNoop(bool) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   const std::unordered_set<uint32_t>& column_families() const {
     return column_family_ids_;

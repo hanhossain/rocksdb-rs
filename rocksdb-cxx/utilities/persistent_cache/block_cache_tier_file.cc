@@ -23,19 +23,19 @@ namespace rocksdb {
 //
 // File creation factories
 //
-rocksdb_rs::status::Status NewWritableCacheFile(Env* const env, const std::string& filepath,
-                            std::unique_ptr<WritableFile>* file,
-                            const bool use_direct_writes = false) {
+rocksdb_rs::status::Status NewWritableCacheFile(
+    Env* const env, const std::string& filepath,
+    std::unique_ptr<WritableFile>* file, const bool use_direct_writes = false) {
   EnvOptions opt;
   opt.use_direct_writes = use_direct_writes;
   rocksdb_rs::status::Status s = env->NewWritableFile(filepath, file, opt);
   return s;
 }
 
-rocksdb_rs::status::Status NewRandomAccessCacheFile(const std::shared_ptr<FileSystem>& fs,
-                                const std::string& filepath,
-                                std::unique_ptr<FSRandomAccessFile>* file,
-                                const bool use_direct_reads = true) {
+rocksdb_rs::status::Status NewRandomAccessCacheFile(
+    const std::shared_ptr<FileSystem>& fs, const std::string& filepath,
+    std::unique_ptr<FSRandomAccessFile>* file,
+    const bool use_direct_reads = true) {
   assert(fs.get());
 
   FileOptions opt;
@@ -211,8 +211,8 @@ bool RandomAccessCacheFile::OpenImpl(const bool enable_direct_reads) {
   assert(env_);
 
   std::unique_ptr<FSRandomAccessFile> file;
-  rocksdb_rs::status::Status status = NewRandomAccessCacheFile(env_->GetFileSystem(), Path(), &file,
-                                           enable_direct_reads);
+  rocksdb_rs::status::Status status = NewRandomAccessCacheFile(
+      env_->GetFileSystem(), Path(), &file, enable_direct_reads);
   if (!status.ok()) {
     Error(log_, "Error opening random access file %s. %s", Path().c_str(),
           status.ToString()->c_str());
@@ -235,8 +235,11 @@ bool RandomAccessCacheFile::Read(const LBA& lba, Slice* key, Slice* val,
   }
 
   Slice result;
-  rocksdb_rs::status::Status s = freader_->Read(IOOptions(), lba.off_, lba.size_, &result, scratch,
-                            nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
+  rocksdb_rs::status::Status s =
+      freader_
+          ->Read(IOOptions(), lba.off_, lba.size_, &result, scratch, nullptr,
+                 Env::IO_TOTAL /* rate_limiter_priority */)
+          .status();
   if (!s.ok()) {
     Error(log_, "Error reading from file %s. %s", Path().c_str(),
           s.ToString()->c_str());
@@ -598,11 +601,11 @@ void ThreadedWriter::DispatchIO(const IO& io) {
       // That is definite IO error to device. There is not much we can
       // do but ignore the failure. This can lead to corruption of data on
       // disk, but the cache will skip while reading
-      fprintf(stderr, "Error writing data to file. %s\n", s.ToString()->c_str());
+      fprintf(stderr, "Error writing data to file. %s\n",
+              s.ToString()->c_str());
     }
     written += io_size_;
   }
 }
 
 }  // namespace rocksdb
-

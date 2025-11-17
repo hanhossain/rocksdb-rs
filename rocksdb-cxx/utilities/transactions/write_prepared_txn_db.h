@@ -69,23 +69,27 @@ class WritePreparedTxnDB : public PessimisticTransactionDB {
                                 Transaction* old_txn) override;
 
   using TransactionDB::Write;
-  rocksdb_rs::status::Status Write(const WriteOptions& opts, WriteBatch* updates) override;
+  rocksdb_rs::status::Status Write(const WriteOptions& opts,
+                                   WriteBatch* updates) override;
 
   // Optimized version of ::Write that receives more optimization request such
   // as skip_concurrency_control.
   using PessimisticTransactionDB::Write;
-  rocksdb_rs::status::Status Write(const WriteOptions& opts, const TransactionDBWriteOptimizations&,
-               WriteBatch* updates) override;
+  rocksdb_rs::status::Status Write(const WriteOptions& opts,
+                                   const TransactionDBWriteOptimizations&,
+                                   WriteBatch* updates) override;
 
   // Write the batch to the underlying DB and mark it as committed. Could be
   // used by both directly from TxnDB or through a transaction.
-  rocksdb_rs::status::Status WriteInternal(const WriteOptions& write_options, WriteBatch* batch,
-                       size_t batch_cnt, WritePreparedTxn* txn);
+  rocksdb_rs::status::Status WriteInternal(const WriteOptions& write_options,
+                                           WriteBatch* batch, size_t batch_cnt,
+                                           WritePreparedTxn* txn);
 
   using DB::Get;
   virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     PinnableSlice* value) override;
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         PinnableSlice* value) override;
 
   using DB::MultiGet;
   virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
@@ -868,9 +872,10 @@ class AddPreparedCallback : public PreReleaseCallback {
     (void)two_write_queues_;  // to silence unused private field warning
   }
   virtual rocksdb_rs::status::Status Callback(SequenceNumber prepare_seq,
-                          bool is_mem_disabled __attribute__((__unused__)),
-                          uint64_t log_number, size_t index,
-                          size_t total) override {
+                                              bool is_mem_disabled
+                                              __attribute__((__unused__)),
+                                              uint64_t log_number, size_t index,
+                                              size_t total) override {
     assert(index < total);
     // To reduce the cost of lock acquisition competing with the concurrent
     // prepare requests, lock on the first callback and unlock on the last.
@@ -932,9 +937,10 @@ class WritePreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
   }
 
   virtual rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
-                          bool is_mem_disabled __attribute__((__unused__)),
-                          uint64_t, size_t /*index*/,
-                          size_t /*total*/) override {
+                                              bool is_mem_disabled
+                                              __attribute__((__unused__)),
+                                              uint64_t, size_t /*index*/,
+                                              size_t /*total*/) override {
     // Always commit from the 2nd queue
     assert(!db_impl_->immutable_db_options().two_write_queues ||
            is_mem_disabled);
@@ -1023,8 +1029,10 @@ class WritePreparedRollbackPreReleaseCallback : public PreReleaseCallback {
     assert(prep_batch_cnt_ > 0);
   }
 
-  rocksdb_rs::status::Status Callback(SequenceNumber commit_seq, bool is_mem_disabled, uint64_t,
-                  size_t /*index*/, size_t /*total*/) override {
+  rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
+                                      bool is_mem_disabled, uint64_t,
+                                      size_t /*index*/,
+                                      size_t /*total*/) override {
     // Always commit from the 2nd queue
     assert(is_mem_disabled);  // implies the 2nd queue
     assert(db_impl_->immutable_db_options().two_write_queues);
@@ -1060,10 +1068,17 @@ struct SubBatchCounter : public WriteBatch::Handler {
   size_t BatchCount() { return batches_; }
   void AddKey(const uint32_t cf, const Slice& key);
   void InitWithComp(const uint32_t cf);
-  rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_OK(); }
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
-  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
-  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
+  rocksdb_rs::status::Status MarkNoop(bool) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
+                                   const Slice&) override {
     AddKey(cf, key);
     return rocksdb_rs::status::Status_OK();
   }
@@ -1071,16 +1086,22 @@ struct SubBatchCounter : public WriteBatch::Handler {
     AddKey(cf, key);
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf,
+                                            const Slice& key) override {
     AddKey(cf, key);
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
+                                     const Slice&) override {
     AddKey(cf, key);
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
-  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
   Handler::OptionState WriteAfterCommit() const override {
     return Handler::OptionState::kDisabled;
   }

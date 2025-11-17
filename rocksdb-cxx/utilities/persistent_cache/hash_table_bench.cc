@@ -287,9 +287,8 @@ int main(int argc, char** argv) {
   printf("Micro benchmarking std::unordered_map \n");
   {
     rocksdb::SimpleImpl impl;
-    rocksdb::HashTableBenchmark _(
-        &impl, FLAGS_nsec, FLAGS_nthread_write, FLAGS_nthread_read,
-        FLAGS_nthread_erase);
+    rocksdb::HashTableBenchmark _(&impl, FLAGS_nsec, FLAGS_nthread_write,
+                                  FLAGS_nthread_read, FLAGS_nthread_erase);
   }
   //
   // Micro benchmark scalable hash table
@@ -297,9 +296,8 @@ int main(int argc, char** argv) {
   printf("Micro benchmarking scalable hash map \n");
   {
     rocksdb::GranularLockImpl impl;
-    rocksdb::HashTableBenchmark _(
-        &impl, FLAGS_nsec, FLAGS_nthread_write, FLAGS_nthread_read,
-        FLAGS_nthread_erase);
+    rocksdb::HashTableBenchmark _(&impl, FLAGS_nsec, FLAGS_nthread_write,
+                                  FLAGS_nthread_read, FLAGS_nthread_erase);
   }
 
   return 0;

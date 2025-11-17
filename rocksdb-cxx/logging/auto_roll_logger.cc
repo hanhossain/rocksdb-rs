@@ -43,14 +43,16 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
       cached_now_access_count(0),
       call_NowMicros_every_N_records_(100),
       mutex_() {
-  rocksdb_rs::status::Status s = fs->GetAbsolutePath(dbname, io_options_, &db_absolute_path_,
-                                 &io_context_).status();
+  rocksdb_rs::status::Status s =
+      fs->GetAbsolutePath(dbname, io_options_, &db_absolute_path_, &io_context_)
+          .status();
   if (s.IsNotSupported()) {
     db_absolute_path_ = dbname;
   } else {
     status_.copy_from(s);
   }
-  log_fname_ = static_cast<std::string>(InfoLogFileName(dbname_, db_absolute_path_, db_log_dir_));
+  log_fname_ = static_cast<std::string>(
+      InfoLogFileName(dbname_, db_absolute_path_, db_log_dir_));
   if (fs_->FileExists(log_fname_, io_options_, &io_context_).ok()) {
     RollLogFile();
   }
@@ -63,7 +65,8 @@ AutoRollLogger::AutoRollLogger(const std::shared_ptr<FileSystem>& fs,
 
 rocksdb_rs::status::Status AutoRollLogger::ResetLogger() {
   TEST_SYNC_POINT("AutoRollLogger::ResetLogger:BeforeNewLogger");
-  status_ = fs_->NewLogger(log_fname_, io_options_, &logger_, &io_context_).status();
+  status_ =
+      fs_->NewLogger(log_fname_, io_options_, &logger_, &io_context_).status();
   TEST_SYNC_POINT("AutoRollLogger::ResetLogger:AfterNewLogger");
 
   if (!status_.ok()) {
@@ -92,8 +95,8 @@ void AutoRollLogger::RollLogFile() {
   uint64_t now = clock_->NowMicros();
   std::string old_fname;
   do {
-    old_fname =
-        static_cast<std::string>(OldInfoLogFileName(dbname_, now, db_absolute_path_, db_log_dir_));
+    old_fname = static_cast<std::string>(
+        OldInfoLogFileName(dbname_, now, db_absolute_path_, db_log_dir_));
     now++;
   } while (fs_->FileExists(old_fname, io_options_, &io_context_).ok());
   // Wait for logger_ reference count to turn to 1 as it might be pinned by
@@ -108,7 +111,9 @@ void AutoRollLogger::RollLogFile() {
   if (logger_) {
     logger_->Close();
   }
-  rocksdb_rs::status::Status s = fs_->RenameFile(log_fname_, old_fname, io_options_, &io_context_).status();
+  rocksdb_rs::status::Status s =
+      fs_->RenameFile(log_fname_, old_fname, io_options_, &io_context_)
+          .status();
   if (!s.ok()) {
     // What should we do on error?
   }
@@ -153,7 +158,8 @@ rocksdb_rs::status::Status AutoRollLogger::TrimOldLogFiles() {
   // the queue feels safer.
   while (!old_log_files_.empty() && old_log_files_.size() >= kKeepLogFileNum) {
     rocksdb_rs::status::Status s =
-        fs_->DeleteFile(old_log_files_.front(), io_options_, &io_context_).status();
+        fs_->DeleteFile(old_log_files_.front(), io_options_, &io_context_)
+            .status();
     // Remove the file from the tracking anyway. It's possible that
     // DB cleaned up the old log file, or people cleaned it up manually.
     old_log_files_.pop();
@@ -272,9 +278,9 @@ bool AutoRollLogger::LogExpired() {
   return cached_now >= ctime_ + kLogFileTimeToRoll;
 }
 
-rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
-                               const DBOptions& options,
-                               std::shared_ptr<Logger>* logger) {
+rocksdb_rs::status::Status CreateLoggerFromOptions(
+    const std::string& dbname, const DBOptions& options,
+    std::shared_ptr<Logger>* logger) {
   if (options.info_log) {
     *logger = options.info_log;
     return rocksdb_rs::status::Status_OK();
@@ -282,13 +288,14 @@ rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
 
   Env* env = options.env;
   std::string db_absolute_path;
-  rocksdb_rs::status::Status s = env->GetAbsolutePath(dbname, &db_absolute_path);
+  rocksdb_rs::status::Status s =
+      env->GetAbsolutePath(dbname, &db_absolute_path);
   TEST_SYNC_POINT_CALLBACK("rocksdb::CreateLoggerFromOptions:AfterGetPath", &s);
   if (!s.ok()) {
     return s;
   }
-  std::string fname =
-      static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, options.db_log_dir));
+  std::string fname = static_cast<std::string>(
+      InfoLogFileName(dbname, db_absolute_path, options.db_log_dir));
 
   const auto& clock = env->GetSystemClock();
   // In case it does not exist.
@@ -330,9 +337,9 @@ rocksdb_rs::status::Status CreateLoggerFromOptions(const std::string& dbname,
   // Open a log file in the same directory as the db
   s = env->FileExists(fname);
   if (s.ok()) {
-    s = env->RenameFile(
-        fname, static_cast<std::string>(OldInfoLogFileName(dbname, clock->NowMicros(), db_absolute_path,
-                                  options.db_log_dir)));
+    s = env->RenameFile(fname, static_cast<std::string>(OldInfoLogFileName(
+                                   dbname, clock->NowMicros(), db_absolute_path,
+                                   options.db_log_dir)));
 
     // The operation sequence of "FileExists -> Rename" is not atomic. It's
     // possible that FileExists returns OK but file gets deleted before Rename.

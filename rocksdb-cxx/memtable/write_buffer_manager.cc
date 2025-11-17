@@ -13,10 +13,9 @@
 
 #include "cache/cache_reservation_manager.h"
 #include "db/db_impl/db_impl.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/cache.h"
 #include "util/coding.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 WriteBufferManager::WriteBufferManager(size_t _buffer_size,
@@ -33,8 +32,8 @@ WriteBufferManager::WriteBufferManager(size_t _buffer_size,
     // Memtable's memory usage tends to fluctuate frequently
     // therefore we set delayed_decrease = true to save some dummy entry
     // insertion on memory increase right after memory decrease
-    cache_res_mgr_ = std::make_shared<
-        CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kWriteBuffer>>(
+    cache_res_mgr_ = std::make_shared<CacheReservationManagerImpl<
+        rocksdb_rs::cache::CacheEntryRole::kWriteBuffer>>(
         cache, true /* delayed_decrease */);
   }
 }
@@ -74,7 +73,8 @@ void WriteBufferManager::ReserveMemWithCache(size_t mem) {
 
   size_t new_mem_used = memory_used_.load(std::memory_order_relaxed) + mem;
   memory_used_.store(new_mem_used, std::memory_order_relaxed);
-  rocksdb_rs::status::Status s = cache_res_mgr_->UpdateCacheReservation(new_mem_used);
+  rocksdb_rs::status::Status s =
+      cache_res_mgr_->UpdateCacheReservation(new_mem_used);
 
   // We absorb the error since WriteBufferManager is not able to handle
   // this failure properly. Ideallly we should prevent this allocation
@@ -106,7 +106,8 @@ void WriteBufferManager::FreeMemWithCache(size_t mem) {
   std::lock_guard<std::mutex> lock(cache_res_mgr_mu_);
   size_t new_mem_used = memory_used_.load(std::memory_order_relaxed) - mem;
   memory_used_.store(new_mem_used, std::memory_order_relaxed);
-  rocksdb_rs::status::Status s = cache_res_mgr_->UpdateCacheReservation(new_mem_used);
+  rocksdb_rs::status::Status s =
+      cache_res_mgr_->UpdateCacheReservation(new_mem_used);
 }
 
 void WriteBufferManager::BeginWriteStall(StallInterface* wbm_stall) {

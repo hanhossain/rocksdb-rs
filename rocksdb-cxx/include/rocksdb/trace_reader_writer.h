@@ -42,11 +42,11 @@ class TraceReader {
 
 // Factory methods to write/read traces to/from a file.
 // The implementations may not be thread-safe.
-rocksdb_rs::status::Status NewFileTraceWriter(Env* env, const EnvOptions& env_options,
-                          const std::string& trace_filename,
-                          std::unique_ptr<TraceWriter>* trace_writer);
-rocksdb_rs::status::Status NewFileTraceReader(Env* env, const EnvOptions& env_options,
-                          const std::string& trace_filename,
-                          std::unique_ptr<TraceReader>* trace_reader);
+rocksdb_rs::status::Status NewFileTraceWriter(
+    Env* env, const EnvOptions& env_options, const std::string& trace_filename,
+    std::unique_ptr<TraceWriter>* trace_writer);
+rocksdb_rs::status::Status NewFileTraceReader(
+    Env* env, const EnvOptions& env_options, const std::string& trace_filename,
+    std::unique_ptr<TraceReader>* trace_reader);
 
 }  // namespace rocksdb

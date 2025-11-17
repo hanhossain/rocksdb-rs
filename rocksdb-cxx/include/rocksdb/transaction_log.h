@@ -8,11 +8,10 @@
 #include <memory>
 #include <vector>
 
-#include "rocksdb/types.h"
-#include "rocksdb/write_batch.h"
-
 #include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb-rs/src/transaction_log.rs.h"
+#include "rocksdb/types.h"
+#include "rocksdb/write_batch.h"
 
 namespace rocksdb {
 

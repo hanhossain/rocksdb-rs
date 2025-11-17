@@ -14,9 +14,8 @@
 #include <string>
 #include <vector>
 
-#include "rocksdb/customizable.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/customizable.h"
 
 namespace rocksdb {
 
@@ -118,9 +117,9 @@ class FileChecksumList {
 
   // Given the file_number, it searches if the file checksum information is
   // stored.
-  virtual rocksdb_rs::status::Status SearchOneFileChecksum(uint64_t file_number,
-                                       std::string* checksum,
-                                       std::string* checksum_func_name) = 0;
+  virtual rocksdb_rs::status::Status SearchOneFileChecksum(
+      uint64_t file_number, std::string* checksum,
+      std::string* checksum_func_name) = 0;
 
   // Insert the checksum information of one file to the FileChecksumList.
   virtual rocksdb_rs::status::Status InsertOneFileChecksum(
@@ -128,7 +127,8 @@ class FileChecksumList {
       const std::string& checksum_func_name) = 0;
 
   // Remove the checksum information of one SST file.
-  virtual rocksdb_rs::status::Status RemoveOneFileChecksum(uint64_t file_number) = 0;
+  virtual rocksdb_rs::status::Status RemoveOneFileChecksum(
+      uint64_t file_number) = 0;
 };
 
 // Create a new file checksum list.

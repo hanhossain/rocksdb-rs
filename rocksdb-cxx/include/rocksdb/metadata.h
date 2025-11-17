@@ -32,7 +32,8 @@ struct FileStorageInfo {
   // a number (e.g. CURRENT)
   uint64_t file_number = 0;
   // The type of the file as part of a DB.
-  rocksdb_rs::types::FileType file_type = rocksdb_rs::types::FileType::kTempFile;
+  rocksdb_rs::types::FileType file_type =
+      rocksdb_rs::types::FileType::kTempFile;
 
   // File size in bytes. See also `trim_to_size`.
   uint64_t size = 0;

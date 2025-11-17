@@ -12,12 +12,11 @@
 #include <vector>
 
 #include "db/write_batch_internal.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/write_batch.h"
 #include "util/coding.h"
 #include "util/hash_containers.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -56,7 +55,8 @@ class UserDefinedTimestampSizeRecord {
     for (int i = 0; i < num_of_entries; i++) {
       uint32_t cf_id = 0;
       uint16_t ts_sz = 0;
-      if (!rocksdb_rs::coding::GetFixed32(*src, cf_id) || !rocksdb_rs::coding::GetFixed16(*src, ts_sz)) {
+      if (!rocksdb_rs::coding::GetFixed32(*src, cf_id) ||
+          !rocksdb_rs::coding::GetFixed16(*src, ts_sz)) {
         return rocksdb_rs::status::Status_Corruption(
             "Error decoding user-defined timestamp size record entry");
       }
@@ -115,33 +115,47 @@ class TimestampRecoveryHandler : public WriteBatch::Handler {
   TimestampRecoveryHandler& operator=(const TimestampRecoveryHandler&) = delete;
   TimestampRecoveryHandler& operator=(TimestampRecoveryHandler&&) = delete;
 
-  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override;
+  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
+                                   const Slice& value) override;
 
   rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override;
 
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override;
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf,
+                                            const Slice& key) override;
 
   rocksdb_rs::status::Status DeleteRangeCF(uint32_t cf, const Slice& begin_key,
-                       const Slice& end_key) override;
+                                           const Slice& end_key) override;
 
-  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override;
+  rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
+                                     const Slice& value) override;
 
   rocksdb_rs::status::Status PutBlobIndexCF(uint32_t cf, const Slice& key,
-                        const Slice& value) override;
+                                            const Slice& value) override;
 
-  rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
-
-  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
-
-  rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
-
-  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+  rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status MarkRollback(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
-  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status MarkCommit(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&,
+                                                     const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+
+  rocksdb_rs::status::Status MarkRollback(const Slice&) override {
+    return rocksdb_rs::status::Status_OK();
+  }
+
+  rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   std::unique_ptr<WriteBatch>&& TransferNewBatch() {
     assert(new_batch_diff_from_orig_batch_);
@@ -150,9 +164,8 @@ class TimestampRecoveryHandler : public WriteBatch::Handler {
   }
 
  private:
-  rocksdb_rs::status::Status ReconcileTimestampDiscrepancy(uint32_t cf, const Slice& key,
-                                       std::string* new_key_buf,
-                                       Slice* new_key);
+  rocksdb_rs::status::Status ReconcileTimestampDiscrepancy(
+      uint32_t cf, const Slice& key, std::string* new_key_buf, Slice* new_key);
 
   // Mapping from column family id to user-defined timestamp size for all
   // running column families including the ones with zero timestamp size.

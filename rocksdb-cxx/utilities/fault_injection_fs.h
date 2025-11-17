@@ -63,32 +63,36 @@ class TestFSWritableFile : public FSWritableFile {
                               std::unique_ptr<FSWritableFile>&& f,
                               FaultInjectionTestFS* fs);
   virtual ~TestFSWritableFile();
-  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions&,
-                          IODebugContext*) override;
-  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
-                          const DataVerificationInfo& verification_info,
-                          IODebugContext* dbg) override;
-  virtual rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& options,
-                            IODebugContext* dbg) override {
+  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data,
+                                                 const IOOptions&,
+                                                 IODebugContext*) override;
+  virtual rocksdb_rs::io_status::IOStatus Append(
+      const Slice& data, const IOOptions& options,
+      const DataVerificationInfo& verification_info,
+      IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Truncate(
+      uint64_t size, const IOOptions& options, IODebugContext* dbg) override {
     return target_->Truncate(size, options, dbg);
   }
   virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
-                         IODebugContext* dbg) override;
-  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions&, IODebugContext*) override;
-  virtual rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
-  virtual rocksdb_rs::io_status::IOStatus RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/,
-                             const IOOptions& options,
-                             IODebugContext* dbg) override;
+                                                IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions&,
+                                                IODebugContext*) override;
+  virtual rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
+                                               IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus RangeSync(
+      uint64_t /*offset*/, uint64_t /*nbytes*/, const IOOptions& options,
+      IODebugContext* dbg) override;
   virtual bool IsSyncThreadSafe() const override { return true; }
-  virtual rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
-                                    const IOOptions& options,
-                                    IODebugContext* dbg) override {
+  virtual rocksdb_rs::io_status::IOStatus PositionedAppend(
+      const Slice& data, uint64_t offset, const IOOptions& options,
+      IODebugContext* dbg) override {
     return target_->PositionedAppend(data, offset, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
-                            const IOOptions& options,
-                            const DataVerificationInfo& verification_info,
-                            IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus PositionedAppend(
+      const Slice& data, uint64_t offset, const IOOptions& options,
+      const DataVerificationInfo& verification_info,
+      IODebugContext* dbg) override;
   virtual size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
@@ -113,14 +117,19 @@ class TestFSRandomRWFile : public FSRandomRWFile {
                               std::unique_ptr<FSRandomRWFile>&& f,
                               FaultInjectionTestFS* fs);
   virtual ~TestFSRandomRWFile();
-  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
-                 IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                Slice* result, char* scratch,
-                IODebugContext* dbg) const override;
-  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data,
+                                        const IOOptions& options,
+                                        IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                       const IOOptions& options, Slice* result,
+                                       char* scratch,
+                                       IODebugContext* dbg) const override;
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
+                                        IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options,
+                                        IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
+                                       IODebugContext* dbg) override;
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
@@ -138,15 +147,18 @@ class TestFSRandomAccessFile : public FSRandomAccessFile {
                                   std::unique_ptr<FSRandomAccessFile>&& f,
                                   FaultInjectionTestFS* fs);
   ~TestFSRandomAccessFile() override {}
-  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                Slice* result, char* scratch,
-                IODebugContext* dbg) const override;
-  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
-                     std::function<void(const FSReadRequest&, void*)> cb,
-                     void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
-                     IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
-                     const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                       const IOOptions& options, Slice* result,
+                                       char* scratch,
+                                       IODebugContext* dbg) const override;
+  rocksdb_rs::io_status::IOStatus ReadAsync(
+      FSReadRequest& req, const IOOptions& opts,
+      std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
+      void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs,
+                                            size_t num_reqs,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override;
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
@@ -164,11 +176,13 @@ class TestFSSequentialFile : public FSSequentialFileOwnerWrapper {
   explicit TestFSSequentialFile(std::unique_ptr<FSSequentialFile>&& f,
                                 FaultInjectionTestFS* fs)
       : FSSequentialFileOwnerWrapper(std::move(f)), fs_(fs) {}
-  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options, Slice* result,
-                char* scratch, IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
-                          Slice* result, char* scratch,
-                          IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options,
+                                       Slice* result, char* scratch,
+                                       IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n,
+                                                 const IOOptions& options,
+                                                 Slice* result, char* scratch,
+                                                 IODebugContext* dbg) override;
 
  private:
   FaultInjectionTestFS* fs_;
@@ -182,10 +196,10 @@ class TestFSDirectory : public FSDirectory {
   ~TestFSDirectory() {}
 
   virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
-                         IODebugContext* dbg) override;
+                                                IODebugContext* dbg) override;
 
   virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
-                         IODebugContext* dbg) override;
+                                                IODebugContext* dbg) override;
 
   virtual rocksdb_rs::io_status::IOStatus FsyncWithDirOptions(
       const IOOptions& options, IODebugContext* dbg,
@@ -216,50 +230,49 @@ class FaultInjectionTestFS : public FileSystemWrapper {
   static const char* kClassName() { return "FaultInjectionTestFS"; }
   const char* Name() const override { return kClassName(); }
 
-  rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name, const IOOptions& options,
-                        std::unique_ptr<FSDirectory>* result,
-                        IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewDirectory(
+      const std::string& name, const IOOptions& options,
+      std::unique_ptr<FSDirectory>* result, IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname,
-                           const FileOptions& file_opts,
-                           std::unique_ptr<FSWritableFile>* result,
-                           IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewWritableFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus ReopenWritableFile(const std::string& fname,
-                              const FileOptions& file_opts,
-                              std::unique_ptr<FSWritableFile>* result,
-                              IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus ReopenWritableFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus NewRandomRWFile(const std::string& fname,
-                           const FileOptions& file_opts,
-                           std::unique_ptr<FSRandomRWFile>* result,
-                           IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewRandomRWFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSRandomRWFile>* result, IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
-                               const FileOptions& file_opts,
-                               std::unique_ptr<FSRandomAccessFile>* result,
-                               IODebugContext* dbg) override;
-  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& f, const FileOptions& file_opts,
-                             std::unique_ptr<FSSequentialFile>* r,
-                             IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSRandomAccessFile>* result,
+      IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(
+      const std::string& f, const FileOptions& file_opts,
+      std::unique_ptr<FSSequentialFile>* r, IODebugContext* dbg) override;
 
-  virtual rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& f, const IOOptions& options,
-                              IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus DeleteFile(
+      const std::string& f, const IOOptions& options,
+      IODebugContext* dbg) override;
 
-  virtual rocksdb_rs::io_status::IOStatus RenameFile(const std::string& s, const std::string& t,
-                              const IOOptions& options,
-                              IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus RenameFile(
+      const std::string& s, const std::string& t, const IOOptions& options,
+      IODebugContext* dbg) override;
 
-  virtual rocksdb_rs::io_status::IOStatus LinkFile(const std::string& src, const std::string& target,
-                            const IOOptions& options,
-                            IODebugContext* dbg) override;
+  virtual rocksdb_rs::io_status::IOStatus LinkFile(
+      const std::string& src, const std::string& target,
+      const IOOptions& options, IODebugContext* dbg) override;
 
 // Undef to eliminate clash on Windows
 #undef GetFreeSpace
-  virtual rocksdb_rs::io_status::IOStatus GetFreeSpace(const std::string& path,
-                                const IOOptions& options, uint64_t* disk_free,
-                                IODebugContext* dbg) override {
-    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
+  virtual rocksdb_rs::io_status::IOStatus GetFreeSpace(
+      const std::string& path, const IOOptions& options, uint64_t* disk_free,
+      IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus io_s =
+        rocksdb_rs::io_status::IOStatus_new();
     if (!IsFilesystemActive() &&
         error_.subcode() == rocksdb_rs::status::SubCode::kNoSpace) {
       *disk_free = 0;
@@ -270,9 +283,10 @@ class FaultInjectionTestFS : public FileSystemWrapper {
   }
 
   virtual rocksdb_rs::io_status::IOStatus Poll(std::vector<void*>& io_handles,
-                        size_t min_completions) override;
+                                               size_t min_completions) override;
 
-  virtual rocksdb_rs::io_status::IOStatus AbortIO(std::vector<void*>& io_handles) override;
+  virtual rocksdb_rs::io_status::IOStatus AbortIO(
+      std::vector<void*>& io_handles) override;
 
   void WritableFileClosed(const FSFileState& state);
 
@@ -284,8 +298,8 @@ class FaultInjectionTestFS : public FileSystemWrapper {
 
   rocksdb_rs::io_status::IOStatus DropRandomUnsyncedFileData(Random* rnd);
 
-  rocksdb_rs::io_status::IOStatus DeleteFilesCreatedAfterLastDirSync(const IOOptions& options,
-                                              IODebugContext* dbg);
+  rocksdb_rs::io_status::IOStatus DeleteFilesCreatedAfterLastDirSync(
+      const IOOptions& options, IODebugContext* dbg);
 
   void ResetState();
 
@@ -317,7 +331,8 @@ class FaultInjectionTestFS : public FileSystemWrapper {
     if (filesystem_writable_) {
       return true;
     }
-    rocksdb_rs::types::FileType file_type = rocksdb_rs::types::FileType::kTempFile;
+    rocksdb_rs::types::FileType file_type =
+        rocksdb_rs::types::FileType::kTempFile;
     uint64_t file_number = 0;
     if (!TryParseFileName(file_name, &file_number, &file_type)) {
       return false;
@@ -326,14 +341,18 @@ class FaultInjectionTestFS : public FileSystemWrapper {
            skip_direct_writable_types_.end();
   }
   void SetFilesystemActiveNoLock(
-      bool active, rocksdb_rs::io_status::IOStatus error = rocksdb_rs::io_status::IOStatus_Corruption("Not active")) {
+      bool active,
+      rocksdb_rs::io_status::IOStatus error =
+          rocksdb_rs::io_status::IOStatus_Corruption("Not active")) {
     filesystem_active_ = active;
     if (!active) {
       error_ = error.Clone();
     }
   }
   void SetFilesystemActive(
-      bool active, rocksdb_rs::io_status::IOStatus error = rocksdb_rs::io_status::IOStatus_Corruption("Not active")) {
+      bool active,
+      rocksdb_rs::io_status::IOStatus error =
+          rocksdb_rs::io_status::IOStatus_Corruption("Not active")) {
     MutexLock l(&mutex_);
     SetFilesystemActiveNoLock(active, error.Clone());
   }
@@ -420,9 +439,10 @@ class FaultInjectionTestFS : public FileSystemWrapper {
   // 1/one_in probability). For write error, we can specify the error we
   // want to inject. Types decides the file types we want to inject the
   // error (e.g., Wal files, SST files), which is empty by default.
-  void SetRandomWriteError(uint32_t seed, int one_in, rocksdb_rs::io_status::IOStatus error,
-                           bool inject_for_all_file_types,
-                           const std::vector<rocksdb_rs::types::FileType>& types) {
+  void SetRandomWriteError(
+      uint32_t seed, int one_in, rocksdb_rs::io_status::IOStatus error,
+      bool inject_for_all_file_types,
+      const std::vector<rocksdb_rs::types::FileType>& types) {
     MutexLock l(&mutex_);
     Random tmp_rand(seed);
     error_ = error.Clone();
@@ -432,7 +452,8 @@ class FaultInjectionTestFS : public FileSystemWrapper {
     write_error_allowed_types_ = types;
   }
 
-  void SetSkipDirectWritableTypes(const std::set<rocksdb_rs::types::FileType>& types) {
+  void SetSkipDirectWritableTypes(
+      const std::set<rocksdb_rs::types::FileType>& types) {
     MutexLock l(&mutex_);
     skip_direct_writable_types_ = types;
   }
@@ -451,7 +472,8 @@ class FaultInjectionTestFS : public FileSystemWrapper {
 
   // Inject an write error with randomlized parameter and the predefined
   // error type. Only the allowed file types will inject the write error
-  rocksdb_rs::io_status::IOStatus InjectWriteError(const std::string& file_name);
+  rocksdb_rs::io_status::IOStatus InjectWriteError(
+      const std::string& file_name);
 
   // Ingest error to metadata operations.
   rocksdb_rs::io_status::IOStatus InjectMetadataWriteError();
@@ -462,10 +484,9 @@ class FaultInjectionTestFS : public FileSystemWrapper {
   // its always an IOError.
   // fault_injected returns whether a fault is injected. It is needed
   // because some fault is inected with IOStatus to be OK.
-  rocksdb_rs::io_status::IOStatus InjectThreadSpecificReadError(ErrorOperation op, Slice* slice,
-                                         bool direct_io, char* scratch,
-                                         bool need_count_increase,
-                                         bool* fault_injected);
+  rocksdb_rs::io_status::IOStatus InjectThreadSpecificReadError(
+      ErrorOperation op, Slice* slice, bool direct_io, char* scratch,
+      bool need_count_increase, bool* fault_injected);
 
   // Get the count of how many times we injected since the previous call
   int GetAndResetErrorCount() {
@@ -533,7 +554,8 @@ class FaultInjectionTestFS : public FileSystemWrapper {
   bool filesystem_active_;    // Record flushes, syncs, writes
   bool filesystem_writable_;  // Bypass FaultInjectionTestFS and go directly
                               // to underlying FS for writable files
-  rocksdb_rs::io_status::IOStatus error_ = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus error_ =
+      rocksdb_rs::io_status::IOStatus_new();
 
   enum ErrorType : int {
     kErrorTypeStatus = 0,

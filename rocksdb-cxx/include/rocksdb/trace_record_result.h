@@ -8,10 +8,9 @@
 #include <string>
 #include <vector>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/trace_record.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -36,13 +35,17 @@ class TraceRecordResult {
    public:
     virtual ~Handler() = default;
 
-    virtual rocksdb_rs::status::Status Handle(const StatusOnlyTraceExecutionResult& result) = 0;
+    virtual rocksdb_rs::status::Status Handle(
+        const StatusOnlyTraceExecutionResult& result) = 0;
 
-    virtual rocksdb_rs::status::Status Handle(const SingleValueTraceExecutionResult& result) = 0;
+    virtual rocksdb_rs::status::Status Handle(
+        const SingleValueTraceExecutionResult& result) = 0;
 
-    virtual rocksdb_rs::status::Status Handle(const MultiValuesTraceExecutionResult& result) = 0;
+    virtual rocksdb_rs::status::Status Handle(
+        const MultiValuesTraceExecutionResult& result) = 0;
 
-    virtual rocksdb_rs::status::Status Handle(const IteratorTraceExecutionResult& result) = 0;
+    virtual rocksdb_rs::status::Status Handle(
+        const IteratorTraceExecutionResult& result) = 0;
   };
 
   // Accept the handler.
@@ -83,7 +86,8 @@ class TraceExecutionResult : public TraceRecordResult {
 // Example operation: DB::Write()
 class StatusOnlyTraceExecutionResult : public TraceExecutionResult {
  public:
-  StatusOnlyTraceExecutionResult(rocksdb_rs::status::Status status, uint64_t start_timestamp,
+  StatusOnlyTraceExecutionResult(rocksdb_rs::status::Status status,
+                                 uint64_t start_timestamp,
                                  uint64_t end_timestamp, TraceType trace_type);
 
   virtual ~StatusOnlyTraceExecutionResult() override = default;
@@ -101,12 +105,13 @@ class StatusOnlyTraceExecutionResult : public TraceExecutionResult {
 // Example operation: DB::Get()
 class SingleValueTraceExecutionResult : public TraceExecutionResult {
  public:
-  SingleValueTraceExecutionResult(rocksdb_rs::status::Status status, const std::string& value,
+  SingleValueTraceExecutionResult(rocksdb_rs::status::Status status,
+                                  const std::string& value,
                                   uint64_t start_timestamp,
                                   uint64_t end_timestamp, TraceType trace_type);
 
-  SingleValueTraceExecutionResult(rocksdb_rs::status::Status status, std::string&& value,
-                                  uint64_t start_timestamp,
+  SingleValueTraceExecutionResult(rocksdb_rs::status::Status status,
+                                  std::string&& value, uint64_t start_timestamp,
                                   uint64_t end_timestamp, TraceType trace_type);
 
   virtual ~SingleValueTraceExecutionResult() override;
@@ -128,10 +133,10 @@ class SingleValueTraceExecutionResult : public TraceExecutionResult {
 // Example operation: DB::MultiGet()
 class MultiValuesTraceExecutionResult : public TraceExecutionResult {
  public:
-  MultiValuesTraceExecutionResult(rust::Vec<rocksdb_rs::status::Status> multi_status,
-                                  std::vector<std::string> values,
-                                  uint64_t start_timestamp,
-                                  uint64_t end_timestamp, TraceType trace_type);
+  MultiValuesTraceExecutionResult(
+      rust::Vec<rocksdb_rs::status::Status> multi_status,
+      std::vector<std::string> values, uint64_t start_timestamp,
+      uint64_t end_timestamp, TraceType trace_type);
 
   virtual ~MultiValuesTraceExecutionResult() override;
 
@@ -152,9 +157,10 @@ class MultiValuesTraceExecutionResult : public TraceExecutionResult {
 // Example operations: Iterator::Seek(), Iterator::SeekForPrev()
 class IteratorTraceExecutionResult : public TraceExecutionResult {
  public:
-  IteratorTraceExecutionResult(bool valid, rocksdb_rs::status::Status status, PinnableSlice&& key,
-                               PinnableSlice&& value, uint64_t start_timestamp,
-                               uint64_t end_timestamp, TraceType trace_type);
+  IteratorTraceExecutionResult(bool valid, rocksdb_rs::status::Status status,
+                               PinnableSlice&& key, PinnableSlice&& value,
+                               uint64_t start_timestamp, uint64_t end_timestamp,
+                               TraceType trace_type);
 
   IteratorTraceExecutionResult(bool valid, rocksdb_rs::status::Status status,
                                const std::string& key, const std::string& value,

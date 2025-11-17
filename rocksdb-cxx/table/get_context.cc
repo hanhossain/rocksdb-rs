@@ -26,7 +26,8 @@ void appendToReplayLog(std::string* replay_log, ValueType type, Slice value) {
     if (replay_log->empty()) {
       // Optimization: in the common case of only one operation in the
       // log, we allocate the exact amount of space needed.
-      replay_log->reserve(1 + rocksdb_rs::coding::VarintLength(value.size()) + value.size());
+      replay_log->reserve(1 + rocksdb_rs::coding::VarintLength(value.size()) +
+                          value.size());
     }
     replay_log->push_back(type);
     PutLengthPrefixedSlice(replay_log, value);
@@ -502,8 +503,9 @@ void GetContext::MergeWithEntity(Slice entity) {
     Slice value_of_default;
 
     {
-      const rocksdb_rs::status::Status s = WideColumnSerialization::GetValueOfDefaultColumn(
-          entity, value_of_default);
+      const rocksdb_rs::status::Status s =
+          WideColumnSerialization::GetValueOfDefaultColumn(entity,
+                                                           value_of_default);
       if (!s.ok()) {
         state_ = kCorrupt;
         return;
@@ -554,7 +556,8 @@ void GetContext::MergeWithEntity(Slice entity) {
 
   {
     assert(columns_);
-    const rocksdb_rs::status::Status s = columns_->SetWideColumnValue(std::move(result));
+    const rocksdb_rs::status::Status s =
+        columns_->SetWideColumnValue(std::move(result));
     if (!s.ok()) {
       state_ = kCorrupt;
       return;

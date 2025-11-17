@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "db/version_edit.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/options.h"
 #include "rocksdb/table.h"
 #include "rocksdb/table_properties.h"
@@ -18,8 +19,6 @@
 #include "table/plain/plain_table_index.h"
 #include "table/plain/plain_table_key_coding.h"
 #include "table/table_builder.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -65,7 +64,9 @@ class PlainTableBuilder : public TableBuilder {
   rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   // Return non-ok iff some error happens during IO.
-  rocksdb_rs::io_status::IOStatus io_status() const override { return io_status_.Clone(); }
+  rocksdb_rs::io_status::IOStatus io_status() const override {
+    return io_status_.Clone();
+  }
 
   // Finish building the table.  Stops using the file passed to the
   // constructor after this function returns.
@@ -123,7 +124,8 @@ class PlainTableBuilder : public TableBuilder {
   uint32_t bloom_bits_per_key_;
   size_t huge_page_tlb_size_;
   rocksdb_rs::status::Status status_;
-  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus io_status_ =
+      rocksdb_rs::io_status::IOStatus_new();
   TableProperties properties_;
   PlainTableKeyEncoder encoder_;
 
@@ -159,4 +161,3 @@ class PlainTableBuilder : public TableBuilder {
 };
 
 }  // namespace rocksdb
-

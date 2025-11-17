@@ -79,15 +79,17 @@ void FilePrefetchBuffer::CalculateOffsetAndLen(size_t alignment,
   }
 }
 
-rocksdb_rs::status::Status FilePrefetchBuffer::Read(const IOOptions& opts,
-                                RandomAccessFileReader* reader,
-                                Env::IOPriority rate_limiter_priority,
-                                uint64_t read_len, uint64_t chunk_len,
-                                uint64_t rounddown_start, uint32_t index) {
+rocksdb_rs::status::Status FilePrefetchBuffer::Read(
+    const IOOptions& opts, RandomAccessFileReader* reader,
+    Env::IOPriority rate_limiter_priority, uint64_t read_len,
+    uint64_t chunk_len, uint64_t rounddown_start, uint32_t index) {
   Slice result;
-  rocksdb_rs::status::Status s = reader->Read(opts, rounddown_start + chunk_len, read_len, &result,
-                          bufs_[index].buffer_.BufferStart() + chunk_len,
-                          /*aligned_buf=*/nullptr, rate_limiter_priority).status();
+  rocksdb_rs::status::Status s =
+      reader
+          ->Read(opts, rounddown_start + chunk_len, read_len, &result,
+                 bufs_[index].buffer_.BufferStart() + chunk_len,
+                 /*aligned_buf=*/nullptr, rate_limiter_priority)
+          .status();
 #ifndef NDEBUG
   if (result.size() < read_len) {
     // Fake an IO error to force db_stress fault injection to ignore
@@ -105,10 +107,9 @@ rocksdb_rs::status::Status FilePrefetchBuffer::Read(const IOOptions& opts,
   return s;
 }
 
-rocksdb_rs::status::Status FilePrefetchBuffer::ReadAsync(const IOOptions& opts,
-                                     RandomAccessFileReader* reader,
-                                     uint64_t read_len,
-                                     uint64_t rounddown_start, uint32_t index) {
+rocksdb_rs::status::Status FilePrefetchBuffer::ReadAsync(
+    const IOOptions& opts, RandomAccessFileReader* reader, uint64_t read_len,
+    uint64_t rounddown_start, uint32_t index) {
   TEST_SYNC_POINT("FilePrefetchBuffer::ReadAsync");
   // callback for async read request.
   auto fp = std::bind(&FilePrefetchBuffer::PrefetchAsyncCallback, this,
@@ -122,19 +123,20 @@ rocksdb_rs::status::Status FilePrefetchBuffer::ReadAsync(const IOOptions& opts,
   bufs_[index].async_req_len_ = req.len;
 
   rocksdb_rs::status::Status s =
-      reader->ReadAsync(req, opts, fp, &(bufs_[index].pos_),
-                        &(bufs_[index].io_handle_), &(bufs_[index].del_fn_),
-                        /*aligned_buf=*/nullptr).status();
+      reader
+          ->ReadAsync(req, opts, fp, &(bufs_[index].pos_),
+                      &(bufs_[index].io_handle_), &(bufs_[index].del_fn_),
+                      /*aligned_buf=*/nullptr)
+          .status();
   if (s.ok()) {
     bufs_[index].async_read_in_progress_ = true;
   }
   return s;
 }
 
-rocksdb_rs::status::Status FilePrefetchBuffer::Prefetch(const IOOptions& opts,
-                                    RandomAccessFileReader* reader,
-                                    uint64_t offset, size_t n,
-                                    Env::IOPriority rate_limiter_priority) {
+rocksdb_rs::status::Status FilePrefetchBuffer::Prefetch(
+    const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
+    size_t n, Env::IOPriority rate_limiter_priority) {
   if (!enable_ || reader == nullptr) {
     return rocksdb_rs::status::Status_OK();
   }
@@ -159,8 +161,9 @@ rocksdb_rs::status::Status FilePrefetchBuffer::Prefetch(const IOOptions& opts,
                         true /*refit_tail*/, chunk_len);
   size_t read_len = static_cast<size_t>(roundup_len - chunk_len);
 
-  rocksdb_rs::status::Status s = Read(opts, reader, rate_limiter_priority, read_len, chunk_len,
-                  rounddown_offset, curr_);
+  rocksdb_rs::status::Status s =
+      Read(opts, reader, rate_limiter_priority, read_len, chunk_len,
+           rounddown_offset, curr_);
   if (usage_ == FilePrefetchBufferUsage::kTableOpenPrefetchTail && s.ok()) {
     RecordInHistogram(stats_, TABLE_OPEN_PREFETCH_TAIL_READ_BYTES, read_len);
   }
@@ -605,12 +608,10 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsyncInternal(
   return s;
 }
 
-bool FilePrefetchBuffer::TryReadFromCache(const IOOptions& opts,
-                                          RandomAccessFileReader* reader,
-                                          uint64_t offset, size_t n,
-                                          Slice* result, rocksdb_rs::status::Status* status,
-                                          Env::IOPriority rate_limiter_priority,
-                                          bool for_compaction /* = false */) {
+bool FilePrefetchBuffer::TryReadFromCache(
+    const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
+    size_t n, Slice* result, rocksdb_rs::status::Status* status,
+    Env::IOPriority rate_limiter_priority, bool for_compaction /* = false */) {
   bool ret = TryReadFromCacheUntracked(opts, reader, offset, n, result, status,
                                        rate_limiter_priority, for_compaction);
   if (usage_ == FilePrefetchBufferUsage::kTableOpenPrefetchTail && enable_) {
@@ -810,10 +811,9 @@ void FilePrefetchBuffer::PrefetchAsyncCallback(const FSReadRequest& req,
   }
 }
 
-rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& opts,
-                                         RandomAccessFileReader* reader,
-                                         uint64_t offset, size_t n,
-                                         Slice* result) {
+rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(
+    const IOOptions& opts, RandomAccessFileReader* reader, uint64_t offset,
+    size_t n, Slice* result) {
   assert(reader != nullptr);
   if (!enable_) {
     return rocksdb_rs::status::Status_NotSupported();
@@ -945,7 +945,8 @@ rocksdb_rs::status::Status FilePrefetchBuffer::PrefetchAsync(const IOOptions& op
     }
     readahead_size_ = std::min(max_readahead_size_, readahead_size_ * 2);
   }
-  return (data_found ? rocksdb_rs::status::Status_OK() : rocksdb_rs::status::Status_TryAgain());
+  return (data_found ? rocksdb_rs::status::Status_OK()
+                     : rocksdb_rs::status::Status_TryAgain());
 }
 
 }  // namespace rocksdb

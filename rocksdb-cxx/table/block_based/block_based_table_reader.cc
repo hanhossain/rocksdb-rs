@@ -88,7 +88,7 @@ CacheAllocationPtr CopyBufferToHeap(MemoryAllocator* allocator, Slice& buf) {
 // before implicit specialization).
 // This makes it possible to keep the template definitions in the .cc file.
 #define INSTANTIATE_RETRIEVE_BLOCK(T)                                         \
-  template rocksdb_rs::status::Status BlockBasedTable::RetrieveBlock<T>(                          \
+  template rocksdb_rs::status::Status BlockBasedTable::RetrieveBlock<T>(      \
       FilePrefetchBuffer * prefetch_buffer, const ReadOptions& ro,            \
       const BlockHandle& handle, const UncompressionDict& uncompression_dict, \
       CachableEntry<T>* out_parsed_block, GetContext* get_context,            \
@@ -424,9 +424,9 @@ bool IsFeatureSupported(const TableProperties& table_properties,
 }
 
 // Caller has to ensure seqno is not nullptr.
-rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_properties,
-                               SequenceNumber largest_seqno,
-                               SequenceNumber* seqno) {
+rocksdb_rs::status::Status GetGlobalSequenceNumber(
+    const TableProperties& table_properties, SequenceNumber largest_seqno,
+    SequenceNumber* seqno) {
   const auto& props = table_properties.user_collected_properties;
   const auto version_pos = props.find(ExternalSstFilePropertyNames::kVersion);
   const auto seqno_pos = props.find(ExternalSstFilePropertyNames::kGlobalSeqno);
@@ -445,7 +445,8 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
     return rocksdb_rs::status::Status_OK();
   }
 
-  uint32_t version = rocksdb_rs::coding_lean::DecodeFixed32(version_pos->second.c_str());
+  uint32_t version =
+      rocksdb_rs::coding_lean::DecodeFixed32(version_pos->second.c_str());
   if (version < 2) {
     if (seqno_pos != props.end() || version != 1) {
       std::array<char, 200> msg_buf;
@@ -464,7 +465,8 @@ rocksdb_rs::status::Status GetGlobalSequenceNumber(const TableProperties& table_
   // SST is external.
   SequenceNumber global_seqno(0);
   if (seqno_pos != props.end()) {
-    global_seqno = rocksdb_rs::coding_lean::DecodeFixed64(seqno_pos->second.c_str());
+    global_seqno =
+        rocksdb_rs::coding_lean::DecodeFixed64(seqno_pos->second.c_str());
   }
   // SstTableReader open table reader with kMaxSequenceNumber as largest_seqno
   // to denote it is unknown.
@@ -569,7 +571,8 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
     TailPrefetchStats* tail_prefetch_stats,
     BlockCacheTracer* const block_cache_tracer,
     size_t max_file_size_for_l0_meta_pin, const std::string& cur_db_session_id,
-    uint64_t cur_file_num, rocksdb_rs::unique_id::UniqueId64x2 expected_unique_id,
+    uint64_t cur_file_num,
+    rocksdb_rs::unique_id::UniqueId64x2 expected_unique_id,
     const bool user_defined_timestamps_persisted) {
   table_reader->reset();
 
@@ -671,9 +674,12 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
   bool blocks_definitely_zstd_compressed =
       rep->table_properties &&
       (rep->table_properties->compression_name ==
-           CompressionTypeToString(rocksdb_rs::compression_type::CompressionType::kZSTD) ||
+           CompressionTypeToString(
+               rocksdb_rs::compression_type::CompressionType::kZSTD) ||
        rep->table_properties->compression_name ==
-           CompressionTypeToString(rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression));
+           CompressionTypeToString(
+               rocksdb_rs::compression_type::CompressionType::
+                   kZSTDNotFinalCompression));
   rep->create_context = BlockCreateContext(
       &rep->table_options, rep->ioptions.stats,
       blocks_definitely_zstd_compressed, block_protection_bytes_per_key,
@@ -684,19 +690,21 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
   if (expected_unique_id != rocksdb_rs::unique_id::UniqueId64x2_null()) {
     auto props = rep->table_properties;
     if (!props) {
-      return rocksdb_rs::status::Status_Corruption("Missing table properties on file " +
-                                std::to_string(cur_file_num) +
-                                " with known unique ID");
+      return rocksdb_rs::status::Status_Corruption(
+          "Missing table properties on file " + std::to_string(cur_file_num) +
+          " with known unique ID");
     }
     rocksdb_rs::unique_id::UniqueId64x2 actual_unique_id{};
-    s = actual_unique_id.get_sst_internal_unique_id(props->db_id, props->db_session_id, props->orig_file_number, true);
+    s = actual_unique_id.get_sst_internal_unique_id(
+        props->db_id, props->db_session_id, props->orig_file_number, true);
     assert(s.ok());  // because force=true
     if (expected_unique_id != actual_unique_id) {
       return rocksdb_rs::status::Status_Corruption(
           "Mismatch in unique ID on table file " +
-          std::to_string(cur_file_num) +
-          ". Expected: " + std::string(expected_unique_id.to_internal_human_string()) +
-          " Actual: " + std::string(actual_unique_id.to_internal_human_string()));
+          std::to_string(cur_file_num) + ". Expected: " +
+          std::string(expected_unique_id.to_internal_human_string()) +
+          " Actual: " +
+          std::string(actual_unique_id.to_internal_human_string()));
     }
     TEST_SYNC_POINT_CALLBACK("BlockBasedTable::Open::PassedVerifyUniqueId",
                              &actual_unique_id);
@@ -790,7 +798,8 @@ rocksdb_rs::status::Status BlockBasedTable::Open(
     if (s.IsMemoryLimit()) {
       s = rocksdb_rs::status::Status_MemoryLimit(
           "Can't allocate " +
-          static_cast<std::string>(CacheEntryRole_ToCamelString(rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader)) +
+          static_cast<std::string>(CacheEntryRole_ToCamelString(
+              rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader)) +
           " due to memory limit based on "
           "cache capacity for memory allocation");
     }
@@ -888,7 +897,8 @@ rocksdb_rs::status::Status BlockBasedTable::ReadPropertiesBlock(
     const ReadOptions& ro, FilePrefetchBuffer* prefetch_buffer,
     InternalIterator* meta_iter, const SequenceNumber largest_seqno) {
   BlockHandle handle;
-  rocksdb_rs::status::Status s = FindOptionalMetaBlock(meta_iter, kPropertiesBlockName, &handle);
+  rocksdb_rs::status::Status s =
+      FindOptionalMetaBlock(meta_iter, kPropertiesBlockName, &handle);
 
   if (!s.ok()) {
     ROCKS_LOG_WARN(rep_->ioptions.logger,
@@ -914,7 +924,8 @@ rocksdb_rs::status::Status BlockBasedTable::ReadPropertiesBlock(
       rep_->table_properties = std::move(table_properties);
       rep_->blocks_maybe_compressed =
           rep_->table_properties->compression_name !=
-          CompressionTypeToString(rocksdb_rs::compression_type::CompressionType::kNoCompression);
+          CompressionTypeToString(
+              rocksdb_rs::compression_type::CompressionType::kNoCompression);
     }
   } else {
     ROCKS_LOG_ERROR(rep_->ioptions.logger,
@@ -943,7 +954,8 @@ rocksdb_rs::status::Status BlockBasedTable::ReadPropertiesBlock(
     auto index_type_pos = props.find(BlockBasedTablePropertyNames::kIndexType);
     if (index_type_pos != props.end()) {
       rep_->index_type = static_cast<BlockBasedTableOptions::IndexType>(
-          rocksdb_rs::coding_lean::DecodeFixed32(index_type_pos->second.c_str()));
+          rocksdb_rs::coding_lean::DecodeFixed32(
+              index_type_pos->second.c_str()));
     }
     auto min_ts_pos = props.find("rocksdb.timestamp_min");
     if (min_ts_pos != props.end()) {
@@ -972,7 +984,8 @@ rocksdb_rs::status::Status BlockBasedTable::ReadRangeDelBlock(
     const InternalKeyComparator& internal_comparator,
     BlockCacheLookupContext* lookup_context) {
   BlockHandle range_del_handle;
-  rocksdb_rs::status::Status s = FindOptionalMetaBlock(meta_iter, kRangeDelBlockName, &range_del_handle);
+  rocksdb_rs::status::Status s =
+      FindOptionalMetaBlock(meta_iter, kRangeDelBlockName, &range_del_handle);
   if (!s.ok()) {
     ROCKS_LOG_WARN(
         rep_->ioptions.logger,
@@ -1084,8 +1097,8 @@ rocksdb_rs::status::Status BlockBasedTable::PrefetchIndexAndFilterBlocks(
          rep_->index_type == BlockBasedTableOptions::kTwoLevelIndexSearch);
 
   // Find compression dictionary handle
-  rocksdb_rs::status::Status s = FindOptionalMetaBlock(meta_iter, kCompressionDictBlockName,
-                                   &rep_->compression_dict_handle);
+  rocksdb_rs::status::Status s = FindOptionalMetaBlock(
+      meta_iter, kCompressionDictBlockName, &rep_->compression_dict_handle);
   if (!s.ok()) {
     return s;
   }
@@ -1305,7 +1318,8 @@ Cache::Priority BlockBasedTable::GetCachePriority() const {
 }
 
 template <typename TBlocklike>
-WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> BlockBasedTable::GetDataBlockFromCache(
+WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike>
+BlockBasedTable::GetDataBlockFromCache(
     const Slice& cache_key, BlockCacheInterface<TBlocklike> block_cache,
     CachableEntry<TBlocklike>* out_parsed_block,
     GetContext* get_context) const {
@@ -1345,7 +1359,8 @@ WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> BlockBasedTable::GetD
 }
 
 template <typename TBlocklike>
-WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> BlockBasedTable::PutDataBlockToCache(
+WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike>
+BlockBasedTable::PutDataBlockToCache(
     const Slice& cache_key, BlockCacheInterface<TBlocklike> block_cache,
     CachableEntry<TBlocklike>* out_parsed_block, BlockContents&& block_contents,
     rocksdb_rs::compression_type::CompressionType block_comp_type,
@@ -1360,7 +1375,8 @@ WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> BlockBasedTable::PutD
   Statistics* statistics = ioptions.stats;
 
   std::unique_ptr<TBlocklike> block_holder;
-  if (block_comp_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+  if (block_comp_type !=
+      rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     // Retrieve the uncompressed contents into a new buffer
     BlockContents uncompressed_block_contents;
     UncompressionContext context(block_comp_type);
@@ -1687,18 +1703,20 @@ void BlockBasedTable::FinishTraceRecord(
       /*referenced_key=*/"", referenced_data_size,
       lookup_context.num_keys_in_block, does_referenced_key_exist);
   // TODO: Should handle status here?
-  block_cache_tracer_
-      ->WriteBlockAccess(access_record, block_key, rep_->cf_name_for_tracing(),
-                         referenced_key);
+  block_cache_tracer_->WriteBlockAccess(
+      access_record, block_key, rep_->cf_name_for_tracing(), referenced_key);
 }
 
 template <typename TBlocklike /*, auto*/>
-WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> BlockBasedTable::RetrieveBlock(
-    FilePrefetchBuffer* prefetch_buffer, const ReadOptions& ro,
-    const BlockHandle& handle, const UncompressionDict& uncompression_dict,
-    CachableEntry<TBlocklike>* out_parsed_block, GetContext* get_context,
-    BlockCacheLookupContext* lookup_context, bool for_compaction,
-    bool use_cache, bool async_read) const {
+WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike>
+BlockBasedTable::RetrieveBlock(FilePrefetchBuffer* prefetch_buffer,
+                               const ReadOptions& ro, const BlockHandle& handle,
+                               const UncompressionDict& uncompression_dict,
+                               CachableEntry<TBlocklike>* out_parsed_block,
+                               GetContext* get_context,
+                               BlockCacheLookupContext* lookup_context,
+                               bool for_compaction, bool use_cache,
+                               bool async_read) const {
   assert(out_parsed_block);
   assert(out_parsed_block->IsEmpty());
 
@@ -2008,8 +2026,8 @@ void BlockBasedTable::FullFilterKeysMayMatch(
   }
 }
 
-rocksdb_rs::status::Status BlockBasedTable::ApproximateKeyAnchors(const ReadOptions& read_options,
-                                              std::vector<Anchor>& anchors) {
+rocksdb_rs::status::Status BlockBasedTable::ApproximateKeyAnchors(
+    const ReadOptions& read_options, std::vector<Anchor>& anchors) {
   // We iterator the whole index block here. More efficient implementation
   // is possible if we push this operation into IndexReader. For example, we
   // can directly sample from restart block entries in the index block and
@@ -2082,10 +2100,9 @@ bool BlockBasedTable::TimestampMayMatch(const ReadOptions& read_options) const {
   return true;
 }
 
-rocksdb_rs::status::Status BlockBasedTable::Get(const ReadOptions& read_options, const Slice& key,
-                            GetContext* get_context,
-                            const SliceTransform* prefix_extractor,
-                            bool skip_filters) {
+rocksdb_rs::status::Status BlockBasedTable::Get(
+    const ReadOptions& read_options, const Slice& key, GetContext* get_context,
+    const SliceTransform* prefix_extractor, bool skip_filters) {
   // Similar to Bloom filter !may_match
   // If timestamp is beyond the range of the table, skip
   if (!TimestampMayMatch(read_options)) {
@@ -2249,9 +2266,9 @@ rocksdb_rs::status::Status BlockBasedTable::Get(const ReadOptions& read_options,
   return s;
 }
 
-rocksdb_rs::status::Status BlockBasedTable::MultiGetFilter(const ReadOptions& read_options,
-                                       const SliceTransform* prefix_extractor,
-                                       MultiGetRange* mget_range) {
+rocksdb_rs::status::Status BlockBasedTable::MultiGetFilter(
+    const ReadOptions& read_options, const SliceTransform* prefix_extractor,
+    MultiGetRange* mget_range) {
   if (mget_range->empty()) {
     // Caller should ensure non-empty (performance bug)
     assert(false);
@@ -2279,9 +2296,9 @@ rocksdb_rs::status::Status BlockBasedTable::MultiGetFilter(const ReadOptions& re
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlockBasedTable::Prefetch(const ReadOptions& read_options,
-                                 const Slice* const begin,
-                                 const Slice* const end) {
+rocksdb_rs::status::Status BlockBasedTable::Prefetch(
+    const ReadOptions& read_options, const Slice* const begin,
+    const Slice* const end) {
   auto& comparator = rep_->internal_comparator;
   UserComparatorWrapper user_comparator(comparator.user_comparator());
   // pre-condition
@@ -2341,8 +2358,8 @@ rocksdb_rs::status::Status BlockBasedTable::Prefetch(const ReadOptions& read_opt
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlockBasedTable::VerifyChecksum(const ReadOptions& read_options,
-                                       TableReaderCaller caller) {
+rocksdb_rs::status::Status BlockBasedTable::VerifyChecksum(
+    const ReadOptions& read_options, TableReaderCaller caller) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // Check Meta blocks
   std::unique_ptr<Block> metaindex;
@@ -2484,7 +2501,8 @@ rocksdb_rs::status::Status BlockBasedTable::VerifyChecksumInMetaBlocks(
               false /* decompress */, false /*maybe_compressed*/,
               GetBlockTypeForMetaBlockByName(meta_block_name),
               UncompressionDict::GetEmptyDict(), rep_->persistent_cache_options)
-              .ReadBlockContents().status();
+              .ReadBlockContents()
+              .status();
     }
     if (!s.ok()) {
       break;
@@ -2777,8 +2795,8 @@ rocksdb_rs::status::Status BlockBasedTable::DumpTable(WritableFile* out_file) {
   std::unique_ptr<InternalIterator> metaindex_iter;
   // TODO: plumb Env::IOActivity
   const ReadOptions ro;
-  rocksdb_rs::status::Status s = ReadMetaIndexBlock(ro, nullptr /* prefetch_buffer */, &metaindex,
-                                &metaindex_iter);
+  rocksdb_rs::status::Status s = ReadMetaIndexBlock(
+      ro, nullptr /* prefetch_buffer */, &metaindex, &metaindex_iter);
   if (s.ok()) {
     for (metaindex_iter->SeekToFirst(); metaindex_iter->Valid();
          metaindex_iter->Next()) {
@@ -2877,7 +2895,8 @@ rocksdb_rs::status::Status BlockBasedTable::DumpTable(WritableFile* out_file) {
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlockBasedTable::DumpIndexBlock(std::ostream& out_stream) {
+rocksdb_rs::status::Status BlockBasedTable::DumpIndexBlock(
+    std::ostream& out_stream) {
   out_stream << "Index Details:\n"
                 "--------------------------------------\n";
   // TODO: plumb Env::IOActivity
@@ -2930,7 +2949,8 @@ rocksdb_rs::status::Status BlockBasedTable::DumpIndexBlock(std::ostream& out_str
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlockBasedTable::DumpDataBlocks(std::ostream& out_stream) {
+rocksdb_rs::status::Status BlockBasedTable::DumpDataBlocks(
+    std::ostream& out_stream) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   std::unique_ptr<InternalIteratorBase<IndexValue>> blockhandles_iter(

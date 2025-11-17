@@ -7,6 +7,7 @@
 
 #include <set>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/filter_policy.h"
 #include "table/block_based/block_based_table_reader.h"
 #include "table/block_based/filter_policy_internal.h"
@@ -17,8 +18,6 @@
 #include "util/coding.h"
 #include "util/hash.h"
 #include "util/string_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 

@@ -17,6 +17,7 @@ int main() {
 #include <map>
 #include <vector>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/trace_reader_writer.h"
@@ -25,8 +26,6 @@ int main() {
 #include "test_util/testutil.h"
 #include "tools/block_cache_analyzer/block_cache_trace_analyzer.h"
 #include "trace_replay/block_cache_tracer.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -204,8 +203,7 @@ class BlockCacheTracerTest : public testing::Test {
       argv[argc++] = arg_buffer + cursor;
       cursor += static_cast<int>(arg.size()) + 1;
     }
-    ASSERT_EQ(0,
-              rocksdb::block_cache_trace_analyzer_tool(argc, argv));
+    ASSERT_EQ(0, rocksdb::block_cache_trace_analyzer_tool(argc, argv));
   }
 
   Env* env_;
@@ -667,7 +665,8 @@ TEST_F(BlockCacheTracerTest, MixedBlocks) {
         /*is_block_cache_human_readable_trace=*/false,
         /*simulator=*/nullptr);
     // The analyzer ends when it detects an incomplete access record.
-    ASSERT_TRUE(rocksdb_rs::status::Status_Incomplete("").eq(analyzer.Analyze()));
+    ASSERT_TRUE(
+        rocksdb_rs::status::Status_Incomplete("").eq(analyzer.Analyze()));
     const uint64_t expected_num_cfs = 1;
     std::vector<uint64_t> expected_fds{kSSTStoringOddKeys, kSSTStoringEvenKeys};
     const std::vector<TraceType> expected_types{
@@ -776,7 +775,8 @@ TEST_F(BlockCacheTracerTest, MultiGetWithNullReferenceKey) {
         /*is_human_readable_trace_file=*/false,
         /*cache_simulator=*/nullptr);
     // The analyzer ends when it detects an incomplete access record.
-    ASSERT_TRUE(rocksdb_rs::status::Status_Incomplete("").eq(analyzer.Analyze()));
+    ASSERT_TRUE(
+        rocksdb_rs::status::Status_Incomplete("").eq(analyzer.Analyze()));
 
     ASSERT_OK(env_->DeleteFile(human_readable_trace_file_path));
   }

@@ -33,16 +33,16 @@ struct ConfigOptions;
 // including data loss, unreported corruption, deadlocks, and more.
 class SliceTransform : public Customizable {
  public:
-  virtual ~SliceTransform(){};
+  virtual ~SliceTransform() {};
 
   // Return the name of this transformation.
   virtual const char* Name() const override = 0;
   static const char* Type() { return "SliceTransform"; }
 
   // Creates and configures a new SliceTransform from the input options and id.
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& id,
-                                 std::shared_ptr<const SliceTransform>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& id,
+      std::shared_ptr<const SliceTransform>* result);
 
   // Returns a string representation of this SliceTransform, representing the ID
   // and any additional properties.

@@ -101,7 +101,7 @@ class Slice final {
   }
 
   std::unique_ptr<std::string> ToUniquePtrString() const {
-      return std::make_unique<std::string>(data_, size_);
+    return std::make_unique<std::string>(data_, size_);
   }
 
   // Decodes the current slice interpreted as an hexadecimal string into result,
@@ -152,13 +152,9 @@ class PinnableSlice : public Cleanable {
   PinnableSlice& operator=(PinnableSlice&& other);
 
   // cast to Slice
-  explicit operator const Slice&() const {
-    return slice_;
-  }
+  explicit operator const Slice&() const { return slice_; }
 
-  explicit operator Slice() const {
-    return slice_;
-  }
+  explicit operator Slice() const { return slice_; }
 
   // No copy constructor and copy assignment allowed.
   PinnableSlice(PinnableSlice&) = delete;
@@ -237,21 +233,13 @@ class PinnableSlice : public Cleanable {
 
   bool empty() const { return slice_.size_ == 0; }
 
-  void clear() {
-    slice_.clear();
-  }
+  void clear() { slice_.clear(); }
 
-  std::string ToString(bool hex = false) const {
-    return slice_.ToString(hex);
-  }
+  std::string ToString(bool hex = false) const { return slice_.ToString(hex); }
 
-  Slice* as_slice_ptr_mut() {
-    return &slice_;
-  }
+  Slice* as_slice_ptr_mut() { return &slice_; }
 
-  const Slice& as_slice() const {
-    return slice_;
-  }
+  const Slice& as_slice() const { return slice_; }
 
  private:
   friend class PinnableSlice4Test;

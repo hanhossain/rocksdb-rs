@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/sst_file_reader.h"
 
 #include "db/arena_wrapped_db_iter.h"
@@ -47,7 +46,8 @@ rocksdb_rs::status::Status SstFileReader::Open(const std::string& file_path) {
   FileOptions fopts(r->soptions);
   const auto& fs = r->options.env->GetFileSystem();
 
-  s = fs->GetFileSize(file_path, fopts.io_options, &file_size, nullptr).status();
+  s = fs->GetFileSize(file_path, fopts.io_options, &file_size, nullptr)
+          .status();
   if (s.ok()) {
     s = fs->NewRandomAccessFile(file_path, fopts, &file, nullptr).status();
   }
@@ -92,7 +92,8 @@ std::shared_ptr<const TableProperties> SstFileReader::GetTableProperties()
   return rep_->table_reader->GetTableProperties();
 }
 
-rocksdb_rs::status::Status SstFileReader::VerifyChecksum(const ReadOptions& read_options) {
+rocksdb_rs::status::Status SstFileReader::VerifyChecksum(
+    const ReadOptions& read_options) {
   assert(read_options.io_activity == Env::IOActivity::kUnknown);
   return rep_->table_reader->VerifyChecksum(read_options,
                                             TableReaderCaller::kSSTFileReader);

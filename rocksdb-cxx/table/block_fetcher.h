@@ -66,13 +66,13 @@ class BlockFetcher {
         cache_options_(cache_options),
         memory_allocator_(memory_allocator),
         memory_allocator_compressed_(memory_allocator_compressed),
-        for_compaction_(for_compaction) {
-  }
+        for_compaction_(for_compaction) {}
 
   rocksdb_rs::io_status::IOStatus ReadBlockContents();
   rocksdb_rs::io_status::IOStatus ReadAsyncBlockContents();
 
-  inline rocksdb_rs::compression_type::CompressionType get_compression_type() const {
+  inline rocksdb_rs::compression_type::CompressionType get_compression_type()
+      const {
     return compression_type_;
   }
   inline size_t GetBlockSizeWithTrailer() const {
@@ -112,7 +112,8 @@ class BlockFetcher {
   const PersistentCacheOptions& cache_options_;
   MemoryAllocator* memory_allocator_;
   MemoryAllocator* memory_allocator_compressed_;
-  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus io_status_ =
+      rocksdb_rs::io_status::IOStatus_new();
   Slice slice_;
   char* used_buf_ = nullptr;
   AlignedBuf direct_io_buf_;

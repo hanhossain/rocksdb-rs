@@ -912,7 +912,8 @@ void MergingIterator::SeekImpl(const Slice& target, size_t starting_level,
 // == ITERATOR
 //
 // REQUIRES:
-// - min heap is currently not empty, and iter is in Direction::kForward direction.
+// - min heap is currently not empty, and iter is in Direction::kForward
+// direction.
 // - minHeap_ top is not DELETE_RANGE_START (so that `active_` is current).
 bool MergingIterator::SkipNextDeleted() {
   // 3 types of keys:
@@ -1170,7 +1171,8 @@ void MergingIterator::SeekForPrevImpl(const Slice& target,
 
 // See more in comments above SkipNextDeleted().
 // REQUIRES:
-// - max heap is currently not empty, and iter is in Direction::kReverse direction.
+// - max heap is currently not empty, and iter is in Direction::kReverse
+// direction.
 // - maxHeap_ top is not DELETE_RANGE_END (so that `active_` is current).
 bool MergingIterator::SkipPrevDeleted() {
   // 3 types of keys:

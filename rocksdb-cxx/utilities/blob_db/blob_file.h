@@ -52,7 +52,8 @@ class BlobFile {
   uint32_t column_family_id_{std::numeric_limits<uint32_t>::max()};
 
   // Compression type of blobs in the file
-  rocksdb_rs::compression_type::CompressionType compression_{rocksdb_rs::compression_type::CompressionType::kNoCompression};
+  rocksdb_rs::compression_type::CompressionType compression_{
+      rocksdb_rs::compression_type::CompressionType::kNoCompression};
 
   // If true, the keys in this file all has TTL. Otherwise all keys don't
   // have TTL.
@@ -109,8 +110,8 @@ class BlobFile {
 
   BlobFile(const BlobDBImpl* parent, const std::string& bdir, uint64_t fnum,
            Logger* info_log, uint32_t column_family_id,
-           rocksdb_rs::compression_type::CompressionType compression, bool has_ttl,
-           const ExpirationRange& expiration_range);
+           rocksdb_rs::compression_type::CompressionType compression,
+           bool has_ttl, const ExpirationRange& expiration_range);
 
   ~BlobFile();
 
@@ -201,7 +202,9 @@ class BlobFile {
 
   void SetHasTTL(bool has_ttl) { has_ttl_ = has_ttl; }
 
-  rocksdb_rs::compression_type::CompressionType GetCompressionType() const { return compression_; }
+  rocksdb_rs::compression_type::CompressionType GetCompressionType() const {
+    return compression_;
+  }
 
   std::shared_ptr<BlobLogWriter> GetWriter() const { return log_writer_; }
 
@@ -209,11 +212,11 @@ class BlobFile {
   // malform or incomplete. If footer is malform or incomplete, set
   // footer_valid_ to false and return Status_OK.
   rocksdb_rs::status::Status ReadMetadata(const std::shared_ptr<FileSystem>& fs,
-                      const FileOptions& file_options);
+                                          const FileOptions& file_options);
 
-  rocksdb_rs::status::Status GetReader(Env* env, const FileOptions& file_options,
-                   std::shared_ptr<RandomAccessFileReader>* reader,
-                   bool* fresh_open);
+  rocksdb_rs::status::Status GetReader(
+      Env* env, const FileOptions& file_options,
+      std::shared_ptr<RandomAccessFileReader>* reader, bool* fresh_open);
 
  private:
   rocksdb_rs::status::Status ReadFooter(BlobLogFooter* footer);

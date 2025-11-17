@@ -17,7 +17,8 @@ class LineFileReader {
  private:
   std::array<char, 8192> buf_;
   SequentialFileReader sfr_;
-  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus io_status_ =
+      rocksdb_rs::io_status::IOStatus_new();
   const char* buf_begin_ = buf_.data();
   const char* buf_end_ = buf_.data();
   size_t line_number_ = 0;
@@ -29,10 +30,10 @@ class LineFileReader {
   explicit LineFileReader(Args&&... args)
       : sfr_(std::forward<Args&&>(args)...) {}
 
-  static rocksdb_rs::io_status::IOStatus Create(const std::shared_ptr<FileSystem>& fs,
-                         const std::string& fname, const FileOptions& file_opts,
-                         std::unique_ptr<LineFileReader>* reader,
-                         IODebugContext* dbg, RateLimiter* rate_limiter);
+  static rocksdb_rs::io_status::IOStatus Create(
+      const std::shared_ptr<FileSystem>& fs, const std::string& fname,
+      const FileOptions& file_opts, std::unique_ptr<LineFileReader>* reader,
+      IODebugContext* dbg, RateLimiter* rate_limiter);
 
   LineFileReader(const LineFileReader&) = delete;
   LineFileReader& operator=(const LineFileReader&) = delete;
@@ -54,7 +55,9 @@ class LineFileReader {
   // Returns any error encountered during read. The error is considered
   // permanent and no retry or recovery is attempted with the same
   // LineFileReader.
-  const rocksdb_rs::io_status::IOStatus& GetStatus() const { return io_status_; }
+  const rocksdb_rs::io_status::IOStatus& GetStatus() const {
+    return io_status_;
+  }
 };
 
 }  // namespace rocksdb

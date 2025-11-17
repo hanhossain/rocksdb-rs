@@ -98,9 +98,10 @@ class TableReader {
 
   // Now try to return approximately 128 anchor keys.
   // The last one tends to be the largest key.
-  virtual rocksdb_rs::status::Status ApproximateKeyAnchors(const ReadOptions& /*read_options*/,
-                                       std::vector<Anchor>& /*anchors*/) {
-    return rocksdb_rs::status::Status_NotSupported("ApproximateKeyAnchors() not supported.");
+  virtual rocksdb_rs::status::Status ApproximateKeyAnchors(
+      const ReadOptions& /*read_options*/, std::vector<Anchor>& /*anchors*/) {
+    return rocksdb_rs::status::Status_NotSupported(
+        "ApproximateKeyAnchors() not supported.");
   }
 
   // Set up the table for Compaction. Might change some parameters with
@@ -126,17 +127,19 @@ class TableReader {
   // key is the key to search for
   // skip_filters: disables checking the bloom filters even if they exist. This
   //               option is effective only for block-based table format.
-  virtual rocksdb_rs::status::Status Get(const ReadOptions& readOptions, const Slice& key,
-                     GetContext* get_context,
-                     const SliceTransform* prefix_extractor,
-                     bool skip_filters = false) = 0;
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& readOptions,
+                                         const Slice& key,
+                                         GetContext* get_context,
+                                         const SliceTransform* prefix_extractor,
+                                         bool skip_filters = false) = 0;
 
   // Use bloom filters in the table file, if present, to filter out keys. The
   // mget_range will be updated to skip keys that get a negative result from
   // the filter lookup.
-  virtual rocksdb_rs::status::Status MultiGetFilter(const ReadOptions& /*readOptions*/,
-                                const SliceTransform* /*prefix_extractor*/,
-                                MultiGetContext::Range* /*mget_range*/) {
+  virtual rocksdb_rs::status::Status MultiGetFilter(
+      const ReadOptions& /*readOptions*/,
+      const SliceTransform* /*prefix_extractor*/,
+      MultiGetContext::Range* /*mget_range*/) {
     return rocksdb_rs::status::Status_NotSupported();
   }
 
@@ -162,9 +165,9 @@ class TableReader {
   // Prefetch data corresponding to a give range of keys
   // Typically this functionality is required for table implementations that
   // persists the data on a non volatile storage medium like disk/SSD
-  virtual rocksdb_rs::status::Status Prefetch(const ReadOptions& /* read_options */,
-                          const Slice* begin = nullptr,
-                          const Slice* end = nullptr) {
+  virtual rocksdb_rs::status::Status Prefetch(
+      const ReadOptions& /* read_options */, const Slice* begin = nullptr,
+      const Slice* end = nullptr) {
     (void)begin;
     (void)end;
     // Default implementation is NOOP.
@@ -178,9 +181,10 @@ class TableReader {
   }
 
   // check whether there is corruption in this db file
-  virtual rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& /*read_options*/,
-                                TableReaderCaller /*caller*/) {
-    return rocksdb_rs::status::Status_NotSupported("VerifyChecksum() not supported");
+  virtual rocksdb_rs::status::Status VerifyChecksum(
+      const ReadOptions& /*read_options*/, TableReaderCaller /*caller*/) {
+    return rocksdb_rs::status::Status_NotSupported(
+        "VerifyChecksum() not supported");
   }
 };
 

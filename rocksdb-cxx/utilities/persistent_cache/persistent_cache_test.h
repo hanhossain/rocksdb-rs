@@ -8,7 +8,6 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 #pragma once
 
-
 #include <functional>
 #include <limits>
 #include <list>
@@ -134,7 +133,8 @@ class PersistentCacheTierTest : public testing::Test {
       auto k = prefix + PaddedNumber(i, /*count=*/8);
       Slice key(k);
       while (true) {
-        rocksdb_rs::status::Status status = cache_->Insert(key, data, sizeof(data));
+        rocksdb_rs::status::Status status =
+            cache_->Insert(key, data, sizeof(data));
         if (status.ok()) {
           break;
         }
@@ -281,4 +281,3 @@ class PersistentCacheDBTest : public DBTestBase {
 };
 
 }  // namespace rocksdb
-

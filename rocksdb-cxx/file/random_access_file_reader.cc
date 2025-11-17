@@ -72,7 +72,8 @@ rocksdb_rs::io_status::IOStatus RandomAccessFileReader::Create(
     const FileOptions& file_opts,
     std::unique_ptr<RandomAccessFileReader>* reader, IODebugContext* dbg) {
   std::unique_ptr<FSRandomAccessFile> file;
-  rocksdb_rs::io_status::IOStatus io_s = fs->NewRandomAccessFile(fname, file_opts, &file, dbg);
+  rocksdb_rs::io_status::IOStatus io_s =
+      fs->NewRandomAccessFile(fname, file_opts, &file, dbg);
   if (io_s.ok()) {
     reader->reset(new RandomAccessFileReader(std::move(file), fname));
   }
@@ -330,7 +331,6 @@ rocksdb_rs::io_status::IOStatus RandomAccessFileReader::MultiRead(
         } else if (!TryMerge(&aligned_reqs.back(), r)) {
           // head + n
           aligned_reqs.push_back(std::move(r));
-
         }
       }
       TEST_SYNC_POINT_CALLBACK("RandomAccessFileReader::MultiRead:AlignedReqs",
@@ -440,8 +440,8 @@ rocksdb_rs::io_status::IOStatus RandomAccessFileReader::MultiRead(
   return io_s;
 }
 
-rocksdb_rs::io_status::IOStatus RandomAccessFileReader::PrepareIOOptions(const ReadOptions& ro,
-                                                  IOOptions& opts) const {
+rocksdb_rs::io_status::IOStatus RandomAccessFileReader::PrepareIOOptions(
+    const ReadOptions& ro, IOOptions& opts) const {
   if (clock_ != nullptr) {
     return PrepareIOFromReadOptions(ro, clock_, opts);
   } else {

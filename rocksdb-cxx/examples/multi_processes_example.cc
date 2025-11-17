@@ -46,8 +46,8 @@ using rocksdb::Iterator;
 using rocksdb::Options;
 using rocksdb::ReadOptions;
 using rocksdb::Slice;
-using rocksdb_rs::status::Status;
 using rocksdb::WriteOptions;
+using rocksdb_rs::status::Status;
 
 const std::string kDBPath = "/tmp/rocksdb_multi_processes_example";
 const std::string kPrimaryStatusFile =
@@ -266,7 +266,8 @@ void RunSecondary() {
   Options options;
   options.create_if_missing = false;
   options.max_open_files = -1;
-  rocksdb_rs::status::Status s = DB::OpenAsSecondary(options, kDBPath, kSecondaryPath, &db);
+  rocksdb_rs::status::Status s =
+      DB::OpenAsSecondary(options, kDBPath, kSecondaryPath, &db);
   if (!s.ok()) {
     fprintf(stderr, "[process %ld] Failed to open in secondary mode: %s\n",
             my_pid, s.ToString().c_str());

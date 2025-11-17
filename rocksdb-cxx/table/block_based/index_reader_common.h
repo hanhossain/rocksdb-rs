@@ -25,12 +25,11 @@ class BlockBasedTable::IndexReaderCommon : public BlockBasedTable::IndexReader {
   }
 
  protected:
-  static rocksdb_rs::status::Status ReadIndexBlock(const BlockBasedTable* table,
-                               FilePrefetchBuffer* prefetch_buffer,
-                               const ReadOptions& read_options, bool use_cache,
-                               GetContext* get_context,
-                               BlockCacheLookupContext* lookup_context,
-                               CachableEntry<Block>* index_block);
+  static rocksdb_rs::status::Status ReadIndexBlock(
+      const BlockBasedTable* table, FilePrefetchBuffer* prefetch_buffer,
+      const ReadOptions& read_options, bool use_cache, GetContext* get_context,
+      BlockCacheLookupContext* lookup_context,
+      CachableEntry<Block>* index_block);
 
   const BlockBasedTable* table() const { return table_; }
 
@@ -71,10 +70,10 @@ class BlockBasedTable::IndexReaderCommon : public BlockBasedTable::IndexReader {
     return table_->get_rep()->user_defined_timestamps_persisted;
   }
 
-  rocksdb_rs::status::Status GetOrReadIndexBlock(bool no_io, GetContext* get_context,
-                             BlockCacheLookupContext* lookup_context,
-                             CachableEntry<Block>* index_block,
-                             const ReadOptions& read_options) const;
+  rocksdb_rs::status::Status GetOrReadIndexBlock(
+      bool no_io, GetContext* get_context,
+      BlockCacheLookupContext* lookup_context,
+      CachableEntry<Block>* index_block, const ReadOptions& read_options) const;
 
   size_t ApproximateIndexBlockMemoryUsage() const {
     assert(!index_block_.GetOwnValue() || index_block_.GetValue() != nullptr);

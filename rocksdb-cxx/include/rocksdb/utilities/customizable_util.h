@@ -17,11 +17,10 @@
 #include <unordered_map>
 
 #include "options/configurable_helper.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/utilities/object_registry.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 // Creates a new shared customizable instance object based on the
@@ -50,7 +49,8 @@ static rocksdb_rs::status::Status NewSharedObject(
     const std::unordered_map<std::string, std::string>& opt_map,
     std::shared_ptr<T>* result) {
   if (!id.empty()) {
-    rocksdb_rs::status::Status status = config_options.registry->NewSharedObject(id, result);
+    rocksdb_rs::status::Status status =
+        config_options.registry->NewSharedObject(id, result);
     if (config_options.ignore_unsupported_options && status.IsNotSupported()) {
       status = rocksdb_rs::status::Status_OK();
     } else if (status.ok()) {
@@ -139,14 +139,14 @@ static rocksdb_rs::status::Status NewManagedObject(
 // name-value pairs to create and initailize the object
 // @param result The newly created instance.
 template <typename T>
-static rocksdb_rs::status::Status LoadSharedObject(const ConfigOptions& config_options,
-                               const std::string& value,
-                               std::shared_ptr<T>* result) {
+static rocksdb_rs::status::Status LoadSharedObject(
+    const ConfigOptions& config_options, const std::string& value,
+    std::shared_ptr<T>* result) {
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
 
-  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, result->get(),
-                                              value, &id, &opt_map);
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(
+      config_options, result->get(), value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else {
@@ -181,13 +181,13 @@ static rocksdb_rs::status::Status LoadSharedObject(const ConfigOptions& config_o
 // name-value pairs to create and initailize the object
 // @param result The newly created instance.
 template <typename T>
-static rocksdb_rs::status::Status LoadManagedObject(const ConfigOptions& config_options,
-                                const std::string& value,
-                                std::shared_ptr<T>* result) {
+static rocksdb_rs::status::Status LoadManagedObject(
+    const ConfigOptions& config_options, const std::string& value,
+    std::shared_ptr<T>* result) {
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, nullptr, value,
-                                              &id, &opt_map);
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(
+      config_options, nullptr, value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else if (value.empty()) {  // No Id and no options.  Clear the object
@@ -246,13 +246,13 @@ static rocksdb_rs::status::Status NewUniqueObject(
 // name-value pairs to create and initailize the object
 // @param result The newly created instance.
 template <typename T>
-static rocksdb_rs::status::Status LoadUniqueObject(const ConfigOptions& config_options,
-                               const std::string& value,
-                               std::unique_ptr<T>* result) {
+static rocksdb_rs::status::Status LoadUniqueObject(
+    const ConfigOptions& config_options, const std::string& value,
+    std::unique_ptr<T>* result) {
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, result->get(),
-                                              value, &id, &opt_map);
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(
+      config_options, result->get(), value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else {
@@ -307,12 +307,12 @@ static rocksdb_rs::status::Status NewStaticObject(
 // name-value pairs to create and initailize the object
 // @param result The newly created instance.
 template <typename T>
-static rocksdb_rs::status::Status LoadStaticObject(const ConfigOptions& config_options,
-                               const std::string& value, T** result) {
+static rocksdb_rs::status::Status LoadStaticObject(
+    const ConfigOptions& config_options, const std::string& value, T** result) {
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, *result, value,
-                                              &id, &opt_map);
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(
+      config_options, *result, value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else {

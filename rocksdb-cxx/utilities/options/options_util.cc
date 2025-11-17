@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/utilities/options_util.h"
 
 #include "file/filename.h"
@@ -13,13 +12,14 @@
 #include "table/block_based/block_based_table_factory.h"
 
 namespace rocksdb {
-rocksdb_rs::status::Status LoadOptionsFromFile(const ConfigOptions& config_options,
-                           const std::string& file_name, DBOptions* db_options,
-                           std::vector<ColumnFamilyDescriptor>* cf_descs,
-                           std::shared_ptr<Cache>* cache) {
+rocksdb_rs::status::Status LoadOptionsFromFile(
+    const ConfigOptions& config_options, const std::string& file_name,
+    DBOptions* db_options, std::vector<ColumnFamilyDescriptor>* cf_descs,
+    std::shared_ptr<Cache>* cache) {
   RocksDBOptionsParser parser;
   const auto& fs = config_options.env->GetFileSystem();
-  rocksdb_rs::status::Status s = parser.Parse(config_options, file_name, fs.get());
+  rocksdb_rs::status::Status s =
+      parser.Parse(config_options, file_name, fs.get());
   if (!s.ok()) {
     return s;
   }
@@ -42,24 +42,25 @@ rocksdb_rs::status::Status LoadOptionsFromFile(const ConfigOptions& config_optio
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, Env* env,
-                                std::string* options_file_name) {
+rocksdb_rs::status::Status GetLatestOptionsFileName(
+    const std::string& dbpath, Env* env, std::string* options_file_name) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   std::string latest_file_name;
   uint64_t latest_time_stamp = 0;
   std::vector<std::string> file_names;
   s = env->GetChildren(dbpath, &file_names);
   if (s.IsNotFound()) {
-    return rocksdb_rs::status::Status_NotFound(rocksdb_rs::status::SubCode::kPathNotFound,
-                            "No options files found in the DB directory.",
-                            dbpath);
+    return rocksdb_rs::status::Status_NotFound(
+        rocksdb_rs::status::SubCode::kPathNotFound,
+        "No options files found in the DB directory.", dbpath);
   } else if (!s.ok()) {
     return s;
   }
   for (auto& file_name : file_names) {
     uint64_t time_stamp;
     rocksdb_rs::types::FileType type;
-    if (rocksdb_rs::filename::ParseFileName(file_name, &time_stamp, &type) && type == rocksdb_rs::types::FileType::kOptionsFile) {
+    if (rocksdb_rs::filename::ParseFileName(file_name, &time_stamp, &type) &&
+        type == rocksdb_rs::types::FileType::kOptionsFile) {
       if (time_stamp > latest_time_stamp) {
         latest_time_stamp = time_stamp;
         latest_file_name = file_name;
@@ -67,18 +68,18 @@ rocksdb_rs::status::Status GetLatestOptionsFileName(const std::string& dbpath, E
     }
   }
   if (latest_file_name.size() == 0) {
-    return rocksdb_rs::status::Status_NotFound(rocksdb_rs::status::SubCode::kPathNotFound,
-                            "No options files found in the DB directory.",
-                            dbpath);
+    return rocksdb_rs::status::Status_NotFound(
+        rocksdb_rs::status::SubCode::kPathNotFound,
+        "No options files found in the DB directory.", dbpath);
   }
   *options_file_name = latest_file_name;
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status LoadLatestOptions(const ConfigOptions& config_options,
-                         const std::string& dbpath, DBOptions* db_options,
-                         std::vector<ColumnFamilyDescriptor>* cf_descs,
-                         std::shared_ptr<Cache>* cache) {
+rocksdb_rs::status::Status LoadLatestOptions(
+    const ConfigOptions& config_options, const std::string& dbpath,
+    DBOptions* db_options, std::vector<ColumnFamilyDescriptor>* cf_descs,
+    std::shared_ptr<Cache>* cache) {
   std::string options_file_name;
   rocksdb_rs::status::Status s =
       GetLatestOptionsFileName(dbpath, config_options.env, &options_file_name);

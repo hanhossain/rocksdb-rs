@@ -40,12 +40,15 @@ class LockManager {
   // Attempt to lock a key or a key range.  If OK status is returned, the caller
   // is responsible for calling UnLock() on this key.
   virtual rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn,
-                         ColumnFamilyId column_family_id,
-                         const std::string& key, Env* env, bool exclusive) = 0;
+                                             ColumnFamilyId column_family_id,
+                                             const std::string& key, Env* env,
+                                             bool exclusive) = 0;
   // The range [start, end] are inclusive at both sides.
   virtual rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn,
-                         ColumnFamilyId column_family_id, const Endpoint& start,
-                         const Endpoint& end, Env* env, bool exclusive) = 0;
+                                             ColumnFamilyId column_family_id,
+                                             const Endpoint& start,
+                                             const Endpoint& end, Env* env,
+                                             bool exclusive) = 0;
 
   // Unlock a key or a range locked by TryLock().  txn must be the same
   // Transaction that locked this key.
@@ -77,4 +80,3 @@ std::shared_ptr<LockManager> NewLockManager(PessimisticTransactionDB* db,
                                             const TransactionDBOptions& opt);
 
 }  // namespace rocksdb
-

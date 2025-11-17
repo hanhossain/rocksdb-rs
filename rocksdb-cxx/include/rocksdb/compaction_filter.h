@@ -167,9 +167,9 @@ class CompactionFilter : public Customizable {
 
   virtual ~CompactionFilter() {}
   static const char* Type() { return "CompactionFilter"; }
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& name,
-                                 const CompactionFilter** result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& name,
+      const CompactionFilter** result);
 
   // The table file creation process invokes this method before adding a kv to
   // the table file. A return value of false indicates that the kv should be

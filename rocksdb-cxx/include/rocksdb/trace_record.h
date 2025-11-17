@@ -9,9 +9,8 @@
 #include <string>
 #include <vector>
 
-#include "rocksdb/slice.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/slice.h"
 
 namespace rocksdb {
 
@@ -66,22 +65,26 @@ class TraceRecord {
    public:
     virtual ~Handler() = default;
 
-    virtual rocksdb_rs::status::Status Handle(const WriteQueryTraceRecord& record,
-                          std::unique_ptr<TraceRecordResult>* result) = 0;
+    virtual rocksdb_rs::status::Status Handle(
+        const WriteQueryTraceRecord& record,
+        std::unique_ptr<TraceRecordResult>* result) = 0;
 
-    virtual rocksdb_rs::status::Status Handle(const GetQueryTraceRecord& record,
-                          std::unique_ptr<TraceRecordResult>* result) = 0;
+    virtual rocksdb_rs::status::Status Handle(
+        const GetQueryTraceRecord& record,
+        std::unique_ptr<TraceRecordResult>* result) = 0;
 
-    virtual rocksdb_rs::status::Status Handle(const IteratorSeekQueryTraceRecord& record,
-                          std::unique_ptr<TraceRecordResult>* result) = 0;
+    virtual rocksdb_rs::status::Status Handle(
+        const IteratorSeekQueryTraceRecord& record,
+        std::unique_ptr<TraceRecordResult>* result) = 0;
 
-    virtual rocksdb_rs::status::Status Handle(const MultiGetQueryTraceRecord& record,
-                          std::unique_ptr<TraceRecordResult>* result) = 0;
+    virtual rocksdb_rs::status::Status Handle(
+        const MultiGetQueryTraceRecord& record,
+        std::unique_ptr<TraceRecordResult>* result) = 0;
   };
 
   // Accept the handler and report the corresponding result in `result`.
-  virtual rocksdb_rs::status::Status Accept(Handler* handler,
-                        std::unique_ptr<TraceRecordResult>* result) = 0;
+  virtual rocksdb_rs::status::Status Accept(
+      Handler* handler, std::unique_ptr<TraceRecordResult>* result) = 0;
 
   // Create a handler for the exeution of TraceRecord.
   static Handler* NewExecutionHandler(
@@ -111,8 +114,8 @@ class WriteQueryTraceRecord : public QueryTraceRecord {
   // rep string for the WriteBatch.
   virtual Slice GetWriteBatchRep() const;
 
-  rocksdb_rs::status::Status Accept(Handler* handler,
-                std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Accept(
+      Handler* handler, std::unique_ptr<TraceRecordResult>* result) override;
 
  private:
   PinnableSlice rep_;
@@ -137,8 +140,8 @@ class GetQueryTraceRecord : public QueryTraceRecord {
   // Key to get.
   virtual Slice GetKey() const;
 
-  rocksdb_rs::status::Status Accept(Handler* handler,
-                std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Accept(
+      Handler* handler, std::unique_ptr<TraceRecordResult>* result) override;
 
  private:
   uint32_t cf_id_;
@@ -207,8 +210,8 @@ class IteratorSeekQueryTraceRecord : public IteratorQueryTraceRecord {
   // Key to seek to.
   virtual Slice GetKey() const;
 
-  rocksdb_rs::status::Status Accept(Handler* handler,
-                std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Accept(
+      Handler* handler, std::unique_ptr<TraceRecordResult>* result) override;
 
  private:
   SeekType type_;
@@ -237,8 +240,8 @@ class MultiGetQueryTraceRecord : public QueryTraceRecord {
   // Keys to get.
   virtual std::vector<Slice> GetKeys() const;
 
-  rocksdb_rs::status::Status Accept(Handler* handler,
-                std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Accept(
+      Handler* handler, std::unique_ptr<TraceRecordResult>* result) override;
 
  private:
   std::vector<uint32_t> cf_ids_;

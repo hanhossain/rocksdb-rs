@@ -18,7 +18,6 @@
 #include "test_util/testharness.h"
 #include "util/string_util.h"
 
-
 namespace rocksdb {
 
 class DeleteSchedulerTest : public testing::Test {
@@ -725,4 +724,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

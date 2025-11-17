@@ -24,8 +24,10 @@ class RangeLockManagerBase : public LockManager {
   // Geting a point lock is reduced to getting a range lock on a single-point
   // range
   using LockManager::TryLock;
-  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, ColumnFamilyId column_family_id,
-                 const std::string& key, Env* env, bool exclusive) override {
+  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn,
+                                     ColumnFamilyId column_family_id,
+                                     const std::string& key, Env* env,
+                                     bool exclusive) override {
     Endpoint endp(key.data(), key.size(), false);
     return TryLock(txn, column_family_id, endp, endp, env, exclusive);
   }

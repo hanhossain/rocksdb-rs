@@ -121,8 +121,9 @@ class TransactionTestBase : public ::testing::Test {
     return s;
   }
 
-  rocksdb_rs::status::Status ReOpenNoDelete(std::vector<ColumnFamilyDescriptor>& cfs,
-                        std::vector<ColumnFamilyHandle*>* handles) {
+  rocksdb_rs::status::Status ReOpenNoDelete(
+      std::vector<ColumnFamilyDescriptor>& cfs,
+      std::vector<ColumnFamilyHandle*>* handles) {
     for (auto h : *handles) {
       delete h;
     }
@@ -157,8 +158,9 @@ class TransactionTestBase : public ::testing::Test {
     return s;
   }
 
-  rocksdb_rs::status::Status OpenWithStackableDB(std::vector<ColumnFamilyDescriptor>& cfs,
-                             std::vector<ColumnFamilyHandle*>* handles) {
+  rocksdb_rs::status::Status OpenWithStackableDB(
+      std::vector<ColumnFamilyDescriptor>& cfs,
+      std::vector<ColumnFamilyHandle*>* handles) {
     std::vector<size_t> compaction_enabled_cf_indices;
     TransactionDB::PrepareWrap(&options, &cfs, &compaction_enabled_cf_indices);
     DB* root_db = nullptr;
@@ -169,8 +171,9 @@ class TransactionTestBase : public ::testing::Test {
     const bool use_batch_per_txn =
         txn_db_options.write_policy == WRITE_COMMITTED ||
         txn_db_options.write_policy == WRITE_PREPARED;
-    rocksdb_rs::status::Status s = DBImpl::Open(options_copy, dbname, cfs, handles, &root_db,
-                            use_seq_per_batch, use_batch_per_txn);
+    rocksdb_rs::status::Status s =
+        DBImpl::Open(options_copy, dbname, cfs, handles, &root_db,
+                     use_seq_per_batch, use_batch_per_txn);
     auto stackable_db = std::make_unique<StackableDB>(root_db);
     if (s.ok()) {
       assert(root_db != nullptr);
@@ -199,8 +202,9 @@ class TransactionTestBase : public ::testing::Test {
     const bool use_batch_per_txn =
         txn_db_options.write_policy == WRITE_COMMITTED ||
         txn_db_options.write_policy == WRITE_PREPARED;
-    rocksdb_rs::status::Status s = DBImpl::Open(options_copy, dbname, column_families, &handles,
-                            &root_db, use_seq_per_batch, use_batch_per_txn);
+    rocksdb_rs::status::Status s =
+        DBImpl::Open(options_copy, dbname, column_families, &handles, &root_db,
+                     use_seq_per_batch, use_batch_per_txn);
     if (!s.ok()) {
       delete root_db;
       return s;
@@ -485,7 +489,8 @@ class TransactionTest
  public:
   TransactionTest()
       : TransactionTestBase(std::get<0>(GetParam()), std::get<1>(GetParam()),
-                            std::get<2>(GetParam()), std::get<3>(GetParam())){};
+                            std::get<2>(GetParam()),
+                            std::get<3>(GetParam())) {};
 };
 
 class TransactionStressTest : public TransactionTest {};
@@ -531,8 +536,10 @@ class WriteCommittedTxnWithTsTest
     }
   }
 
-  rocksdb_rs::status::Status GetFromDb(ReadOptions read_opts, ColumnFamilyHandle* column_family,
-                   const Slice& key, TxnTimestamp ts, std::string* value) {
+  rocksdb_rs::status::Status GetFromDb(ReadOptions read_opts,
+                                       ColumnFamilyHandle* column_family,
+                                       const Slice& key, TxnTimestamp ts,
+                                       std::string* value) {
     std::string ts_buf;
     rocksdb_rs::coding::PutFixed64(ts_buf, ts);
     Slice ts_slc = ts_buf;

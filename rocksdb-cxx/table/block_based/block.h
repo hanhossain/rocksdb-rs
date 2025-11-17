@@ -320,7 +320,7 @@ class Block {
 template <class TValue>
 class BlockIter : public InternalIteratorBase<TValue> {
  public:
-    BlockIter() : data_(nullptr), status_(rocksdb_rs::status::Status_new()) {}
+  BlockIter() : data_(nullptr), status_(rocksdb_rs::status::Status_new()) {}
 
   // Makes Valid() return false, status() return `s`, and Seek()/Prev()/etc do
   // nothing. Calls cleanup functions.
@@ -658,7 +658,8 @@ class BlockIter : public InternalIteratorBase<TValue> {
 
   uint32_t GetRestartPoint(uint32_t index) const {
     assert(index < num_restarts_);
-    return rocksdb_rs::coding_lean::DecodeFixed32(data_ + restarts_ + index * sizeof(uint32_t));
+    return rocksdb_rs::coding_lean::DecodeFixed32(data_ + restarts_ +
+                                                  index * sizeof(uint32_t));
   }
 
   void SeekToRestartPoint(uint32_t index) {

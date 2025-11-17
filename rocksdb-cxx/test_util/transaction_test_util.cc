@@ -290,10 +290,9 @@ bool RandomTransactionInserter::DoInsert(DB* db, Transaction* txn,
 }
 
 // Verify that the sum of the keys in each set are equal
-rocksdb_rs::status::Status RandomTransactionInserter::Verify(DB* db, uint16_t num_sets,
-                                         uint64_t num_keys_per_set,
-                                         bool take_snapshot, Random64* rand,
-                                         uint64_t delay_ms) {
+rocksdb_rs::status::Status RandomTransactionInserter::Verify(
+    DB* db, uint16_t num_sets, uint64_t num_keys_per_set, bool take_snapshot,
+    Random64* rand, uint64_t delay_ms) {
   // delay_ms is the delay between taking a snapshot and doing the reads. It
   // emulates reads from a long-running backup job.
   assert(delay_ms == 0 || take_snapshot);
@@ -332,8 +331,9 @@ rocksdb_rs::status::Status RandomTransactionInserter::Verify(DB* db, uint16_t nu
         uint64_t int_value = 0;
         bool unexpected_error = false;
         const bool FOR_UPDATE = false;
-        rocksdb_rs::status::Status s = DBGet(db, nullptr, roptions, set_i, k, FOR_UPDATE,
-                         &int_value, &dont_care, &unexpected_error);
+        rocksdb_rs::status::Status s =
+            DBGet(db, nullptr, roptions, set_i, k, FOR_UPDATE, &int_value,
+                  &dont_care, &unexpected_error);
         assert(s.ok());
         assert(!unexpected_error);
         total += int_value;
@@ -397,4 +397,3 @@ rocksdb_rs::status::Status RandomTransactionInserter::Verify(DB* db, uint16_t nu
 }
 
 }  // namespace rocksdb
-

@@ -100,7 +100,7 @@ struct StandardKeyGen {
   const std::string& operator*() {
     // Use multiplication to mix things up a little in the key
     rocksdb_rs::coding_lean::EncodeFixed64(&str_[str_.size() - 8],
-                                     id_ * uint64_t{0x1500000001});
+                                           id_ * uint64_t{0x1500000001});
     return str_;
   }
 
@@ -408,8 +408,7 @@ TYPED_TEST(RibbonTypeParamTest, CompactnessAndBacktrackAndFpRate) {
   IMPORT_RIBBON_TYPES_AND_SETTINGS(TypeParam);
   IMPORT_RIBBON_IMPL_TYPES(TypeParam);
   using KeyGen = typename TypeParam::KeyGen;
-  using ConfigHelper =
-      rocksdb::ribbon::BandingConfigHelper<TypeParam>;
+  using ConfigHelper = rocksdb::ribbon::BandingConfigHelper<TypeParam>;
 
   if (sizeof(CoeffRow) < 8) {
     ROCKSDB_GTEST_BYPASS("Not fully supported");
@@ -704,8 +703,8 @@ TYPED_TEST(RibbonTypeParamTest, CompactnessAndBacktrackAndFpRate) {
       Index fp_count = 0;
       cur = other_keys_begin;
       {
-        rocksdb::StopWatchNano timer(
-            rocksdb::SystemClock::Default().get(), true);
+        rocksdb::StopWatchNano timer(rocksdb::SystemClock::Default().get(),
+                                     true);
         while (cur != other_keys_end) {
           bool fp = soln.FilterQuery(*cur, hasher);
           fp_count += fp ? 1 : 0;
@@ -733,8 +732,8 @@ TYPED_TEST(RibbonTypeParamTest, CompactnessAndBacktrackAndFpRate) {
       if (test_interleaved) {
         Index ifp_count = 0;
         cur = other_keys_begin;
-        rocksdb::StopWatchNano timer(
-            rocksdb::SystemClock::Default().get(), true);
+        rocksdb::StopWatchNano timer(rocksdb::SystemClock::Default().get(),
+                                     true);
         while (cur != other_keys_end) {
           ifp_count += isoln.FilterQuery(*cur, hasher) ? 1 : 0;
           ++cur;
@@ -767,13 +766,13 @@ TYPED_TEST(RibbonTypeParamTest, CompactnessAndBacktrackAndFpRate) {
       if (ibytes >= /* minimum Bloom impl bytes*/ 64) {
         Index bfp_count = 0;
         cur = other_keys_begin;
-        rocksdb::StopWatchNano timer(
-            rocksdb::SystemClock::Default().get(), true);
+        rocksdb::StopWatchNano timer(rocksdb::SystemClock::Default().get(),
+                                     true);
         while (cur != other_keys_end) {
           uint64_t h = hasher.GetHash(*cur);
           uint32_t h1 = rocksdb::Lower32of64(h);
-          uint32_t h2 = sizeof(Hash) >= 8 ? rocksdb::Upper32of64(h)
-                                          : h1 * 0x9e3779b9;
+          uint32_t h2 =
+              sizeof(Hash) >= 8 ? rocksdb::Upper32of64(h) : h1 * 0x9e3779b9;
           bfp_count +=
               rocksdb::FastLocalBloomImpl::HashMayMatch(
                   h1, h2, static_cast<uint32_t>(ibytes), 6, idata.get())
@@ -1061,7 +1060,7 @@ struct PhsfInputGen {
   const std::pair<std::string, uint8_t>& operator*() {
     // Use multiplication to mix things up a little in the key
     rocksdb_rs::coding_lean::EncodeFixed64(&val_.first[val_.first.size() - 8],
-                                     id_ * uint64_t{0x1500000001});
+                                           id_ * uint64_t{0x1500000001});
     // Occasionally repeat values etc.
     val_.second = static_cast<uint8_t>(id_ * 7 / 8);
     return val_;

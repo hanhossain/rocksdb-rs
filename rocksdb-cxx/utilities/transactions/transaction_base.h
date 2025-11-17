@@ -5,12 +5,12 @@
 
 #pragma once
 
-
 #include <stack>
 #include <string>
 #include <vector>
 
 #include "db/write_batch_internal.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/snapshot.h"
@@ -21,8 +21,6 @@
 #include "util/autovector.h"
 #include "utilities/transactions/lock/lock_tracker.h"
 #include "utilities/transactions/transaction_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -42,10 +40,10 @@ class TransactionBaseImpl : public Transaction {
   // returns non-OK, the Put/Merge/Delete/GetForUpdate will be failed.
   // do_validate will be false if called from PutUntracked, DeleteUntracked,
   // MergeUntracked, or GetForUpdate(do_validate=false)
-  virtual rocksdb_rs::status::Status TryLock(ColumnFamilyHandle* column_family, const Slice& key,
-                         bool read_only, bool exclusive,
-                         const bool do_validate = true,
-                         const bool assume_tracked = false) = 0;
+  virtual rocksdb_rs::status::Status TryLock(
+      ColumnFamilyHandle* column_family, const Slice& key, bool read_only,
+      bool exclusive, const bool do_validate = true,
+      const bool assume_tracked = false) = 0;
 
   void SetSavePoint() override;
 
@@ -54,31 +52,38 @@ class TransactionBaseImpl : public Transaction {
   rocksdb_rs::status::Status PopSavePoint() override;
 
   using Transaction::Get;
-  rocksdb_rs::status::Status Get(const ReadOptions& options, ColumnFamilyHandle* column_family,
-             const Slice& key, std::string* value) override;
+  rocksdb_rs::status::Status Get(const ReadOptions& options,
+                                 ColumnFamilyHandle* column_family,
+                                 const Slice& key, std::string* value) override;
 
-  rocksdb_rs::status::Status Get(const ReadOptions& options, ColumnFamilyHandle* column_family,
-             const Slice& key, PinnableSlice* value) override;
+  rocksdb_rs::status::Status Get(const ReadOptions& options,
+                                 ColumnFamilyHandle* column_family,
+                                 const Slice& key,
+                                 PinnableSlice* value) override;
 
   rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
-             std::string* value) override {
+                                 std::string* value) override {
     return Get(options, db_->DefaultColumnFamily(), key, value);
   }
 
   using Transaction::GetForUpdate;
   rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
-                      ColumnFamilyHandle* column_family, const Slice& key,
-                      std::string* value, bool exclusive,
-                      const bool do_validate) override;
+                                          ColumnFamilyHandle* column_family,
+                                          const Slice& key, std::string* value,
+                                          bool exclusive,
+                                          const bool do_validate) override;
 
   rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
-                      ColumnFamilyHandle* column_family, const Slice& key,
-                      PinnableSlice* pinnable_val, bool exclusive,
-                      const bool do_validate) override;
+                                          ColumnFamilyHandle* column_family,
+                                          const Slice& key,
+                                          PinnableSlice* pinnable_val,
+                                          bool exclusive,
+                                          const bool do_validate) override;
 
-  rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options, const Slice& key,
-                      std::string* value, bool exclusive,
-                      const bool do_validate) override {
+  rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
+                                          const Slice& key, std::string* value,
+                                          bool exclusive,
+                                          const bool do_validate) override {
     return GetForUpdate(options, db_->DefaultColumnFamily(), key, value,
                         exclusive, do_validate);
   }
@@ -90,9 +95,9 @@ class TransactionBaseImpl : public Transaction {
       const std::vector<Slice>& keys,
       std::vector<std::string>* values) override;
 
-  rust::Vec<rocksdb_rs::status::Status> MultiGet(const ReadOptions& options,
-                               const std::vector<Slice>& keys,
-                               std::vector<std::string>* values) override {
+  rust::Vec<rocksdb_rs::status::Status> MultiGet(
+      const ReadOptions& options, const std::vector<Slice>& keys,
+      std::vector<std::string>* values) override {
     return MultiGet(options,
                     std::vector<ColumnFamilyHandle*>(
                         keys.size(), db_->DefaultColumnFamily()),
@@ -101,7 +106,8 @@ class TransactionBaseImpl : public Transaction {
 
   void MultiGet(const ReadOptions& options, ColumnFamilyHandle* column_family,
                 const size_t num_keys, const Slice* keys, PinnableSlice* values,
-                rocksdb_rs::status::Status* statuses, const bool sorted_input = false) override;
+                rocksdb_rs::status::Status* statuses,
+                const bool sorted_input = false) override;
 
   using Transaction::MultiGetForUpdate;
   rust::Vec<rocksdb_rs::status::Status> MultiGetForUpdate(
@@ -123,74 +129,93 @@ class TransactionBaseImpl : public Transaction {
   Iterator* GetIterator(const ReadOptions& read_options,
                         ColumnFamilyHandle* column_family) override;
 
-  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
-             const Slice& value, const bool assume_tracked = false) override;
-  rocksdb_rs::status::Status Put(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                 const Slice& key, const Slice& value,
+                                 const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Put(const Slice& key,
+                                 const Slice& value) override {
     return Put(nullptr, key, value);
   }
 
-  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
-             const SliceParts& value,
-             const bool assume_tracked = false) override;
-  rocksdb_rs::status::Status Put(const SliceParts& key, const SliceParts& value) override {
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                 const SliceParts& key, const SliceParts& value,
+                                 const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Put(const SliceParts& key,
+                                 const SliceParts& value) override {
     return Put(nullptr, key, value);
   }
 
-  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
-               const Slice& value, const bool assume_tracked = false) override;
-  rocksdb_rs::status::Status Merge(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family,
+                                   const Slice& key, const Slice& value,
+                                   const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Merge(const Slice& key,
+                                   const Slice& value) override {
     return Merge(nullptr, key, value);
   }
 
-  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
-                const bool assume_tracked = false) override;
-  rocksdb_rs::status::Status Delete(const Slice& key) override { return Delete(nullptr, key); }
-  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const SliceParts& key,
-                const bool assume_tracked = false) override;
-  rocksdb_rs::status::Status Delete(const SliceParts& key) override { return Delete(nullptr, key); }
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
+                                    const Slice& key,
+                                    const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Delete(const Slice& key) override {
+    return Delete(nullptr, key);
+  }
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
+                                    const SliceParts& key,
+                                    const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Delete(const SliceParts& key) override {
+    return Delete(nullptr, key);
+  }
 
-  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family, const Slice& key,
-                      const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status SingleDelete(
+      ColumnFamilyHandle* column_family, const Slice& key,
+      const bool assume_tracked = false) override;
   rocksdb_rs::status::Status SingleDelete(const Slice& key) override {
     return SingleDelete(nullptr, key);
   }
-  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family, const SliceParts& key,
-                      const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status SingleDelete(
+      ColumnFamilyHandle* column_family, const SliceParts& key,
+      const bool assume_tracked = false) override;
   rocksdb_rs::status::Status SingleDelete(const SliceParts& key) override {
     return SingleDelete(nullptr, key);
   }
 
-  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family, const Slice& key,
-                      const Slice& value) override;
-  rocksdb_rs::status::Status PutUntracked(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family,
+                                          const Slice& key,
+                                          const Slice& value) override;
+  rocksdb_rs::status::Status PutUntracked(const Slice& key,
+                                          const Slice& value) override {
     return PutUntracked(nullptr, key, value);
   }
 
-  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family, const SliceParts& key,
-                      const SliceParts& value) override;
-  rocksdb_rs::status::Status PutUntracked(const SliceParts& key, const SliceParts& value) override {
+  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family,
+                                          const SliceParts& key,
+                                          const SliceParts& value) override;
+  rocksdb_rs::status::Status PutUntracked(const SliceParts& key,
+                                          const SliceParts& value) override {
     return PutUntracked(nullptr, key, value);
   }
 
-  rocksdb_rs::status::Status MergeUntracked(ColumnFamilyHandle* column_family, const Slice& key,
-                        const Slice& value) override;
-  rocksdb_rs::status::Status MergeUntracked(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status MergeUntracked(ColumnFamilyHandle* column_family,
+                                            const Slice& key,
+                                            const Slice& value) override;
+  rocksdb_rs::status::Status MergeUntracked(const Slice& key,
+                                            const Slice& value) override {
     return MergeUntracked(nullptr, key, value);
   }
 
   rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
-                         const Slice& key) override;
+                                             const Slice& key) override;
   rocksdb_rs::status::Status DeleteUntracked(const Slice& key) override {
     return DeleteUntracked(nullptr, key);
   }
   rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
-                         const SliceParts& key) override;
+                                             const SliceParts& key) override;
   rocksdb_rs::status::Status DeleteUntracked(const SliceParts& key) override {
     return DeleteUntracked(nullptr, key);
   }
 
-  rocksdb_rs::status::Status SingleDeleteUntracked(ColumnFamilyHandle* column_family,
-                               const Slice& key) override;
+  rocksdb_rs::status::Status SingleDeleteUntracked(
+      ColumnFamilyHandle* column_family, const Slice& key) override;
   rocksdb_rs::status::Status SingleDeleteUntracked(const Slice& key) override {
     return SingleDeleteUntracked(nullptr, key);
   }
@@ -199,8 +224,7 @@ class TransactionBaseImpl : public Transaction {
 
   WriteBatchWithIndex* GetWriteBatch() override;
 
-  virtual void SetLockTimeout(int64_t /*timeout*/) override { /* Do nothing */
-  }
+  virtual void SetLockTimeout(int64_t /*timeout*/) override { /* Do nothing */ }
 
   const Snapshot* GetSnapshot() const override {
     // will return nullptr when there is no snapshot
@@ -254,7 +278,8 @@ class TransactionBaseImpl : public Transaction {
 
   // iterates over the given batch and makes the appropriate inserts.
   // used for rebuilding prepared transactions after recovery.
-  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(WriteBatch* src_batch) override;
+  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(
+      WriteBatch* src_batch) override;
 
   WriteBatch* GetCommitTimeWriteBatch() override;
 
@@ -372,12 +397,13 @@ class TransactionBaseImpl : public Transaction {
   // a notification through the TransactionNotifier interface
   std::shared_ptr<TransactionNotifier> snapshot_notifier_ = nullptr;
 
-  rocksdb_rs::status::Status TryLock(ColumnFamilyHandle* column_family, const SliceParts& key,
-                 bool read_only, bool exclusive, const bool do_validate = true,
-                 const bool assume_tracked = false);
+  rocksdb_rs::status::Status TryLock(ColumnFamilyHandle* column_family,
+                                     const SliceParts& key, bool read_only,
+                                     bool exclusive,
+                                     const bool do_validate = true,
+                                     const bool assume_tracked = false);
 
   void SetSnapshotInternal(const Snapshot* snapshot);
 };
 
 }  // namespace rocksdb
-

@@ -3,18 +3,18 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-#include "cache/cache_key.h"
-#include "table/block_based/block_based_table_reader.h"
+#include "utilities/cache_dump_load_impl.h"
 
+#include "cache/cache_key.h"
 #include "file/writable_file_writer.h"
 #include "port/lang.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/utilities/ldb_cmd.h"
+#include "table/block_based/block_based_table_reader.h"
 #include "table/format.h"
 #include "util/crc32c.h"
-#include "utilities/cache_dump_load_impl.h"
 
 using rocksdb_rs::cache::CacheEntryRole;
 
@@ -24,7 +24,8 @@ namespace rocksdb {
 // DBs and we may only want to dump out the blocks belonging to certain DB(s).
 // Therefore, a filter is need to decide if the key of the block satisfy the
 // requirement.
-rocksdb_rs::status::Status CacheDumperImpl::SetDumpFilter(std::vector<DB*> db_list) {
+rocksdb_rs::status::Status CacheDumperImpl::SetDumpFilter(
+    std::vector<DB*> db_list) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   for (size_t i = 0; i < db_list.size(); i++) {
     assert(i < db_list.size());
@@ -61,11 +62,13 @@ rocksdb_rs::io_status::IOStatus CacheDumperImpl::DumpCacheEntriesToWriter() {
     return rocksdb_rs::io_status::IOStatus_InvalidArgument("Cache is null");
   }
   if (writer_ == nullptr) {
-    return rocksdb_rs::io_status::IOStatus_InvalidArgument("CacheDumpWriter is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(
+        "CacheDumpWriter is null");
   }
   // Set the system clock
   if (options_.clock == nullptr) {
-    return rocksdb_rs::io_status::IOStatus_InvalidArgument("System clock is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(
+        "System clock is null");
   }
   clock_ = options_.clock;
 
@@ -152,7 +155,8 @@ CacheDumperImpl::DumpOneBlockCallBack(std::string& buf) {
     // FIXME: reduce copying
     size_t len = helper->size_cb(value);
     buf.assign(len, '\0');
-    rocksdb_rs::status::Status s = helper->saveto_cb(value, /*start*/ 0, len, buf.data());
+    rocksdb_rs::status::Status s =
+        helper->saveto_cb(value, /*start*/ 0, len, buf.data());
 
     if (s.ok()) {
       // Write it out
@@ -169,8 +173,8 @@ CacheDumperImpl::DumpOneBlockCallBack(std::string& buf) {
 // the dump unit metadata.
 // First, we write the metadata first, which is a fixed size string. Then, we
 // Append the dump unit string to the writer.
-rocksdb_rs::io_status::IOStatus CacheDumperImpl::WriteBlock(CacheDumpUnitType type, const Slice& key,
-                                     const Slice& value) {
+rocksdb_rs::io_status::IOStatus CacheDumperImpl::WriteBlock(
+    CacheDumpUnitType type, const Slice& key, const Slice& value) {
   uint64_t timestamp = clock_->NowMicros();
   uint32_t value_checksum = crc32c::Value(value.data(), value.size());
 
@@ -235,15 +239,18 @@ rocksdb_rs::io_status::IOStatus CacheDumperImpl::WriteFooter() {
 // This is the main function to restore the cache entries to secondary cache.
 // First, we check if all the arguments are valid. Then, we read the block
 // sequentially from the reader and insert them to the secondary cache.
-rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
+rocksdb_rs::io_status::IOStatus
+CacheDumpedLoaderImpl::RestoreCacheEntriesToSecondaryCache() {
   // TODO: remove this line when options are used in the loader
   (void)options_;
   // Step 1: we check if all the arguments are valid
   if (secondary_cache_ == nullptr) {
-    return rocksdb_rs::io_status::IOStatus_InvalidArgument("Secondary Cache is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(
+        "Secondary Cache is null");
   }
   if (reader_ == nullptr) {
-    return rocksdb_rs::io_status::IOStatus_InvalidArgument("CacheDumpReader is null");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(
+        "CacheDumpReader is null");
   }
 
   // Step 2: read the header
@@ -274,7 +281,8 @@ rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSeco
     // (There is no block trailer here compatible with block-based SST file.)
     Slice content =
         Slice(static_cast<char*>(dump_unit.value), dump_unit.value_len);
-    rocksdb_rs::status::Status s = secondary_cache_->InsertSaved(dump_unit.key, content);
+    rocksdb_rs::status::Status s =
+        secondary_cache_->InsertSaved(dump_unit.key, content);
     if (!s.ok()) {
       io_s = rocksdb_rs::io_status::IOStatus_new(std::move(s));
     }
@@ -288,8 +296,8 @@ rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::RestoreCacheEntriesToSeco
 
 // Read and copy the dump unit metadata to std::string data, decode and create
 // the unit metadata based on the string
-rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadDumpUnitMeta(std::string* data,
-                                                 DumpUnitMeta* unit_meta) {
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadDumpUnitMeta(
+    std::string* data, DumpUnitMeta* unit_meta) {
   assert(reader_ != nullptr);
   assert(data != nullptr);
   assert(unit_meta != nullptr);
@@ -303,8 +311,8 @@ rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadDumpUnitMeta(std::str
 
 // Read and copy the dump unit to std::string data, decode and create the unit
 // based on the string
-rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadDumpUnit(size_t len, std::string* data,
-                                             DumpUnit* unit) {
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadDumpUnit(
+    size_t len, std::string* data, DumpUnit* unit) {
   assert(reader_ != nullptr);
   assert(data != nullptr);
   assert(unit != nullptr);
@@ -317,16 +325,18 @@ rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadDumpUnit(size_t len, 
         "The data being read out does not match the size stored in metadata!");
   }
   Slice block;
-  return rocksdb_rs::io_status::IOStatus_new(CacheDumperHelper::DecodeDumpUnit(*data, unit));
+  return rocksdb_rs::io_status::IOStatus_new(
+      CacheDumperHelper::DecodeDumpUnit(*data, unit));
 }
 
 // Read the header
-rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadHeader(std::string* data,
-                                           DumpUnit* dump_unit) {
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadHeader(
+    std::string* data, DumpUnit* dump_unit) {
   DumpUnitMeta header_meta;
   header_meta.reset();
   std::string meta_string;
-  rocksdb_rs::io_status::IOStatus io_s = ReadDumpUnitMeta(&meta_string, &header_meta);
+  rocksdb_rs::io_status::IOStatus io_s =
+      ReadDumpUnitMeta(&meta_string, &header_meta);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -337,19 +347,21 @@ rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadHeader(std::string* d
   }
   uint32_t unit_checksum = crc32c::Value(data->data(), data->size());
   if (unit_checksum != header_meta.dump_unit_checksum) {
-    return rocksdb_rs::io_status::IOStatus_Corruption("Read header unit corrupted!");
+    return rocksdb_rs::io_status::IOStatus_Corruption(
+        "Read header unit corrupted!");
   }
   return io_s;
 }
 
 // Read the blocks after header is read out
-rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadCacheBlock(std::string* data,
-                                               DumpUnit* dump_unit) {
+rocksdb_rs::io_status::IOStatus CacheDumpedLoaderImpl::ReadCacheBlock(
+    std::string* data, DumpUnit* dump_unit) {
   // According to the write process, we read the dump_unit_metadata first
   DumpUnitMeta unit_meta;
   unit_meta.reset();
   std::string unit_string;
-  rocksdb_rs::io_status::IOStatus io_s = ReadDumpUnitMeta(&unit_string, &unit_meta);
+  rocksdb_rs::io_status::IOStatus io_s =
+      ReadDumpUnitMeta(&unit_string, &unit_meta);
   if (!io_s.ok()) {
     return io_s;
   }

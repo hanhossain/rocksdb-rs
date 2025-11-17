@@ -1515,10 +1515,9 @@ TEST_P(OptimisticTransactionTest, UndoGetForUpdateTest) {
 }
 
 namespace {
-rocksdb_rs::status::Status OptimisticTransactionStressTestInserter(OptimisticTransactionDB* db,
-                                               const size_t num_transactions,
-                                               const size_t num_sets,
-                                               const size_t num_keys_per_set) {
+rocksdb_rs::status::Status OptimisticTransactionStressTestInserter(
+    OptimisticTransactionDB* db, const size_t num_transactions,
+    const size_t num_sets, const size_t num_keys_per_set) {
   size_t seed = std::hash<std::thread::id>()(std::this_thread::get_id());
   Random64 _rand(seed);
   WriteOptions write_options;
@@ -1543,9 +1542,10 @@ rocksdb_rs::status::Status OptimisticTransactionStressTestInserter(OptimisticTra
   // Make sure at least some of the transactions succeeded.  It's ok if
   // some failed due to write-conflicts.
   if (inserter.GetFailureCount() > num_transactions / 2) {
-    return rocksdb_rs::status::Status_TryAgain("Too many transactions failed! " +
-                            std::to_string(inserter.GetFailureCount()) + " / " +
-                            std::to_string(num_transactions));
+    return rocksdb_rs::status::Status_TryAgain(
+        "Too many transactions failed! " +
+        std::to_string(inserter.GetFailureCount()) + " / " +
+        std::to_string(num_transactions));
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -1579,7 +1579,8 @@ TEST_P(OptimisticTransactionTest, OptimisticTransactionStressTest) {
   }
 
   // Verify that data is consistent
-  rocksdb_rs::status::Status s = RandomTransactionInserter::Verify(txn_db.get(), num_sets);
+  rocksdb_rs::status::Status s =
+      RandomTransactionInserter::Verify(txn_db.get(), num_sets);
   ASSERT_OK(s);
 }
 
@@ -1622,7 +1623,8 @@ TEST_P(OptimisticTransactionTest, TimestampedSnapshotSetCommitTs) {
   std::unique_ptr<Transaction> txn(txn_db->BeginTransaction(WriteOptions()));
   ASSERT_OK(txn->Put("a", "v"));
   std::shared_ptr<const Snapshot> snapshot;
-  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot(nullptr, /*ts=*/100, &snapshot);
+  rocksdb_rs::status::Status s =
+      txn->CommitAndTryCreateSnapshot(nullptr, /*ts=*/100, &snapshot);
   ASSERT_TRUE(s.IsNotSupported());
 }
 

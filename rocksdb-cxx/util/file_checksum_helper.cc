@@ -28,7 +28,8 @@ rocksdb_rs::status::Status FileChecksumListImpl::GetAllFileChecksums(
     std::vector<std::string>* checksum_func_names) {
   if (file_numbers == nullptr || checksums == nullptr ||
       checksum_func_names == nullptr) {
-    return rocksdb_rs::status::Status_InvalidArgument("Pointer has not been initiated");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Pointer has not been initiated");
   }
 
   for (auto i : checksum_map_) {
@@ -43,7 +44,8 @@ rocksdb_rs::status::Status FileChecksumListImpl::SearchOneFileChecksum(
     uint64_t file_number, std::string* checksum,
     std::string* checksum_func_name) {
   if (checksum == nullptr || checksum_func_name == nullptr) {
-    return rocksdb_rs::status::Status_InvalidArgument("Pointer has not been initiated");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Pointer has not been initiated");
   }
 
   auto it = checksum_map_.find(file_number);
@@ -70,7 +72,8 @@ rocksdb_rs::status::Status FileChecksumListImpl::InsertOneFileChecksum(
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status FileChecksumListImpl::RemoveOneFileChecksum(uint64_t file_number) {
+rocksdb_rs::status::Status FileChecksumListImpl::RemoveOneFileChecksum(
+    uint64_t file_number) {
   auto it = checksum_map_.find(file_number);
   if (it == checksum_map_.end()) {
     return rocksdb_rs::status::Status_NotFound();
@@ -91,11 +94,12 @@ std::shared_ptr<FileChecksumGenFactory> GetFileChecksumGenCrc32cFactory() {
   return default_crc32c_gen_factory;
 }
 
-rocksdb_rs::status::Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
-                                    uint64_t manifest_file_size,
-                                    FileChecksumList* checksum_list) {
+rocksdb_rs::status::Status GetFileChecksumsFromManifest(
+    Env* src_env, const std::string& abs_path, uint64_t manifest_file_size,
+    FileChecksumList* checksum_list) {
   if (checksum_list == nullptr) {
-    return rocksdb_rs::status::Status_InvalidArgument("checksum_list is nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "checksum_list is nullptr");
   }
   assert(checksum_list);
   // TODO: plumb Env::IOActivity
@@ -109,7 +113,8 @@ rocksdb_rs::status::Status GetFileChecksumsFromManifest(Env* src_env, const std:
     const std::shared_ptr<FileSystem>& fs = src_env->GetFileSystem();
     s = fs->NewSequentialFile(abs_path,
                               fs->OptimizeForManifestRead(FileOptions()), &file,
-                              nullptr /* dbg */).status();
+                              nullptr /* dbg */)
+            .status();
     if (!s.ok()) {
       return s;
     }
@@ -118,7 +123,8 @@ rocksdb_rs::status::Status GetFileChecksumsFromManifest(Env* src_env, const std:
 
   struct LogReporter : public log::Reader::Reporter {
     rocksdb_rs::status::Status* status_ptr;
-    virtual void Corruption(size_t /*bytes*/, const rocksdb_rs::status::Status& st) override {
+    virtual void Corruption(size_t /*bytes*/,
+                            const rocksdb_rs::status::Status& st) override {
       if (status_ptr->ok()) {
         status_ptr->copy_from(st);
       }
@@ -163,7 +169,8 @@ rocksdb_rs::status::Status FileChecksumGenFactory::CreateFromString(
     *result = GetFileChecksumGenCrc32cFactory();
     return rocksdb_rs::status::Status_OK();
   } else {
-    rocksdb_rs::status::Status s = LoadSharedObject<FileChecksumGenFactory>(options, value, result);
+    rocksdb_rs::status::Status s =
+        LoadSharedObject<FileChecksumGenFactory>(options, value, result);
     return s;
   }
 }

@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/transaction_db_mutex_impl.h"
 
 #include <chrono>
@@ -11,9 +10,8 @@
 #include <functional>
 #include <mutex>
 
-#include "rocksdb/utilities/transaction_db_mutex.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/utilities/transaction_db_mutex.h"
 
 namespace rocksdb {
 
@@ -39,10 +37,11 @@ class TransactionDBCondVarImpl : public TransactionDBCondVar {
   TransactionDBCondVarImpl() {}
   ~TransactionDBCondVarImpl() override {}
 
-  rocksdb_rs::status::Status Wait(std::shared_ptr<TransactionDBMutex> mutex) override;
+  rocksdb_rs::status::Status Wait(
+      std::shared_ptr<TransactionDBMutex> mutex) override;
 
   rocksdb_rs::status::Status WaitFor(std::shared_ptr<TransactionDBMutex> mutex,
-                 int64_t timeout_time) override;
+                                     int64_t timeout_time) override;
 
   void Notify() override { cv_.notify_one(); }
 
@@ -67,7 +66,8 @@ rocksdb_rs::status::Status TransactionDBMutexImpl::Lock() {
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_time) {
+rocksdb_rs::status::Status TransactionDBMutexImpl::TryLockFor(
+    int64_t timeout_time) {
   bool locked = true;
 
   if (timeout_time == 0) {
@@ -85,7 +85,8 @@ rocksdb_rs::status::Status TransactionDBMutexImpl::TryLockFor(int64_t timeout_ti
 
   if (!locked) {
     // timeout acquiring mutex
-    return rocksdb_rs::status::Status_TimedOut(rocksdb_rs::status::SubCode::kMutexTimeout);
+    return rocksdb_rs::status::Status_TimedOut(
+        rocksdb_rs::status::SubCode::kMutexTimeout);
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -120,7 +121,8 @@ rocksdb_rs::status::Status TransactionDBCondVarImpl::WaitFor(
 
     // Check if the wait stopped due to timing out.
     if (cv_status == std::cv_status::timeout) {
-      s = rocksdb_rs::status::Status_TimedOut(rocksdb_rs::status::SubCode::kMutexTimeout);
+      s = rocksdb_rs::status::Status_TimedOut(
+          rocksdb_rs::status::SubCode::kMutexTimeout);
     }
   }
 
@@ -132,4 +134,3 @@ rocksdb_rs::status::Status TransactionDBCondVarImpl::WaitFor(
 }
 
 }  // namespace rocksdb
-

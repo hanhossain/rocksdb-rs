@@ -56,7 +56,8 @@ TEST_P(MemoryAllocatorTest, CreateAllocator) {
   config_options.ignore_unknown_options = false;
   config_options.ignore_unsupported_options = false;
   std::shared_ptr<MemoryAllocator> orig, copy;
-  rocksdb_rs::status::Status s = MemoryAllocator::CreateFromString(config_options, id_, &orig);
+  rocksdb_rs::status::Status s =
+      MemoryAllocator::CreateFromString(config_options, id_, &orig);
   if (!IsSupported()) {
     ASSERT_TRUE(s.IsNotSupported());
   } else {
@@ -131,7 +132,8 @@ class CreateMemoryAllocatorTest : public testing::Test {
 TEST_F(CreateMemoryAllocatorTest, JemallocOptionsTest) {
   std::shared_ptr<MemoryAllocator> allocator;
   std::string id = std::string("id=") + JemallocNodumpAllocator::kClassName();
-  rocksdb_rs::status::Status s = MemoryAllocator::CreateFromString(config_options_, id, &allocator);
+  rocksdb_rs::status::Status s =
+      MemoryAllocator::CreateFromString(config_options_, id, &allocator);
   if (!JemallocNodumpAllocator::IsSupported()) {
     ASSERT_NOK(s);
     ROCKSDB_GTEST_BYPASS("JEMALLOC not supported");
@@ -225,7 +227,6 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(std::make_tuple(JemallocNodumpAllocator::kClassName(),
                                       JemallocNodumpAllocator::IsSupported())));
 #endif  // ROCKSDB_JEMALLOC
-
 
 }  // namespace rocksdb
 

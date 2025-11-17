@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
@@ -18,8 +19,6 @@
 #include "rocksdb/slice_transform.h"
 #include "rocksdb/table.h"
 #include "util/string_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -75,7 +74,8 @@ class SanityTest {
         return s;
       }
       if (result != v) {
-        return rocksdb_rs::status::Status_Corruption("Unexpected value for key " + k);
+        return rocksdb_rs::status::Status_Corruption(
+            "Unexpected value for key " + k);
       }
     }
     return rocksdb_rs::status::Status_OK();
@@ -131,7 +131,8 @@ class SanityTestZlibCompression : public SanityTest {
  public:
   explicit SanityTestZlibCompression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
+    options_.compression =
+        rocksdb_rs::compression_type::CompressionType::kZlibCompression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "ZlibCompression"; }
@@ -144,7 +145,8 @@ class SanityTestZlibCompressionVersion2 : public SanityTest {
  public:
   explicit SanityTestZlibCompressionVersion2(const std::string& path)
       : SanityTest(path) {
-    options_.compression = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
+    options_.compression =
+        rocksdb_rs::compression_type::CompressionType::kZlibCompression;
     BlockBasedTableOptions table_options;
 #if ROCKSDB_MAJOR > 3 || (ROCKSDB_MAJOR == 3 && ROCKSDB_MINOR >= 10)
     table_options.format_version = 2;
@@ -164,7 +166,8 @@ class SanityTestLZ4Compression : public SanityTest {
  public:
   explicit SanityTestLZ4Compression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+    options_.compression =
+        rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "LZ4Compression"; }
@@ -177,7 +180,8 @@ class SanityTestLZ4HCCompression : public SanityTest {
  public:
   explicit SanityTestLZ4HCCompression(const std::string& path)
       : SanityTest(path) {
-    options_.compression = rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression;
+    options_.compression =
+        rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression;
   }
   virtual Options GetOptions() const override { return options_; }
   virtual std::string Name() const override { return "LZ4HCCompression"; }

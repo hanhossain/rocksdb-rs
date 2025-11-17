@@ -61,7 +61,8 @@ class FullFilterBlockBuilder : public FilterBlockBuilder {
     filter_bits_builder_.reset();
   }
 
-  virtual rocksdb_rs::status::Status MaybePostVerifyFilter(const Slice& filter_content) override {
+  virtual rocksdb_rs::status::Status MaybePostVerifyFilter(
+      const Slice& filter_content) override {
     return filter_bits_builder_->MaybePostVerify(filter_content);
   }
 

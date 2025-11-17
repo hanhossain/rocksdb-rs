@@ -4,7 +4,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/utilities/env_mirror.h"
 
 #include "env/mock_env.h"
@@ -39,7 +38,8 @@ TEST_F(EnvMirrorTest, Basics) {
   ASSERT_OK(env_->CreateDir("/dir"));
 
   // Check that the directory is empty.
-  ASSERT_EQ(rocksdb_rs::status::Status_NotFound(), env_->FileExists("/dir/non_existent"));
+  ASSERT_EQ(rocksdb_rs::status::Status_NotFound(),
+            env_->FileExists("/dir/non_existent"));
   ASSERT_TRUE(!env_->GetFileSize("/dir/non_existent", &file_size).ok());
   ASSERT_OK(env_->GetChildren("/dir", &children));
   ASSERT_EQ(0U, children.size());
@@ -213,4 +213,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

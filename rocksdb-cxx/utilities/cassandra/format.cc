@@ -71,11 +71,9 @@ std::shared_ptr<Column> Column::Deserialize(const char* src,
   offset += sizeof(mask);
   int8_t index = rocksdb::cassandra::Deserialize<int8_t>(src, offset);
   offset += sizeof(index);
-  int64_t timestamp =
-      rocksdb::cassandra::Deserialize<int64_t>(src, offset);
+  int64_t timestamp = rocksdb::cassandra::Deserialize<int64_t>(src, offset);
   offset += sizeof(timestamp);
-  int32_t value_size =
-      rocksdb::cassandra::Deserialize<int32_t>(src, offset);
+  int32_t value_size = rocksdb::cassandra::Deserialize<int32_t>(src, offset);
   offset += sizeof(value_size);
   return std::make_shared<Column>(mask, index, timestamp, value_size,
                                   src + offset);
@@ -126,11 +124,9 @@ std::shared_ptr<ExpiringColumn> ExpiringColumn::Deserialize(
   offset += sizeof(mask);
   int8_t index = rocksdb::cassandra::Deserialize<int8_t>(src, offset);
   offset += sizeof(index);
-  int64_t timestamp =
-      rocksdb::cassandra::Deserialize<int64_t>(src, offset);
+  int64_t timestamp = rocksdb::cassandra::Deserialize<int64_t>(src, offset);
   offset += sizeof(timestamp);
-  int32_t value_size =
-      rocksdb::cassandra::Deserialize<int32_t>(src, offset);
+  int32_t value_size = rocksdb::cassandra::Deserialize<int32_t>(src, offset);
   offset += sizeof(value_size);
   const char* value = src + offset;
   offset += value_size;

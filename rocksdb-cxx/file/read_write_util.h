@@ -21,9 +21,9 @@ namespace rocksdb {
 // fname   : the file name.
 // result  : output arg. A WritableFile based on `fname` returned.
 // options : the Env Options.
-extern rocksdb_rs::io_status::IOStatus NewWritableFile(FileSystem* fs, const std::string& fname,
-                                std::unique_ptr<FSWritableFile>* result,
-                                const FileOptions& options);
+extern rocksdb_rs::io_status::IOStatus NewWritableFile(
+    FileSystem* fs, const std::string& fname,
+    std::unique_ptr<FSWritableFile>* result, const FileOptions& options);
 
 #ifndef NDEBUG
 bool IsFileSectorAligned(const size_t off, size_t sector_size);

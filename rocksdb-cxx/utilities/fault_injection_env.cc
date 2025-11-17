@@ -30,10 +30,12 @@ std::string GetDirName(const std::string filename) {
 }
 
 // A basic file truncation function suitable for this test.
-rocksdb_rs::status::Status Truncate(Env* env, const std::string& filename, uint64_t length) {
+rocksdb_rs::status::Status Truncate(Env* env, const std::string& filename,
+                                    uint64_t length) {
   std::unique_ptr<SequentialFile> orig_file;
   const EnvOptions options;
-  rocksdb_rs::status::Status s = env->NewSequentialFile(filename, &orig_file, options);
+  rocksdb_rs::status::Status s =
+      env->NewSequentialFile(filename, &orig_file, options);
   if (!s.ok()) {
     fprintf(stderr, "Cannot open file %s for truncation: %s\n",
             filename.c_str(), s.ToString()->c_str());
@@ -90,7 +92,8 @@ rocksdb_rs::status::Status FileState::DropUnsyncedData(Env* env) const {
   return Truncate(env, filename_, sync_pos);
 }
 
-rocksdb_rs::status::Status FileState::DropRandomUnsyncedData(Env* env, Random* rand) const {
+rocksdb_rs::status::Status FileState::DropRandomUnsyncedData(
+    Env* env, Random* rand) const {
   ssize_t sync_pos = pos_at_last_sync_ == -1 ? 0 : pos_at_last_sync_;
   assert(pos_ >= sync_pos);
   int range = static_cast<int>(pos_ - sync_pos);
@@ -121,8 +124,9 @@ TestRandomAccessFile::TestRandomAccessFile(
   assert(env_);
 }
 
-rocksdb_rs::status::Status TestRandomAccessFile::Read(uint64_t offset, size_t n, Slice* result,
-                                  char* scratch) const {
+rocksdb_rs::status::Status TestRandomAccessFile::Read(uint64_t offset, size_t n,
+                                                      Slice* result,
+                                                      char* scratch) const {
   assert(env_);
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
@@ -132,7 +136,8 @@ rocksdb_rs::status::Status TestRandomAccessFile::Read(uint64_t offset, size_t n,
   return target_->Read(offset, n, result, scratch);
 }
 
-rocksdb_rs::status::Status TestRandomAccessFile::Prefetch(uint64_t offset, size_t n) {
+rocksdb_rs::status::Status TestRandomAccessFile::Prefetch(uint64_t offset,
+                                                          size_t n) {
   assert(env_);
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
@@ -142,7 +147,8 @@ rocksdb_rs::status::Status TestRandomAccessFile::Prefetch(uint64_t offset, size_
   return target_->Prefetch(offset, n);
 }
 
-rocksdb_rs::status::Status TestRandomAccessFile::MultiRead(ReadRequest* reqs, size_t num_reqs) {
+rocksdb_rs::status::Status TestRandomAccessFile::MultiRead(ReadRequest* reqs,
+                                                           size_t num_reqs) {
   assert(env_);
   if (!env_->IsFilesystemActive()) {
     const rocksdb_rs::status::Status s = env_->GetError();
@@ -207,7 +213,8 @@ rocksdb_rs::status::Status TestWritableFile::Flush() {
 
 rocksdb_rs::status::Status TestWritableFile::Sync() {
   if (!env_->IsFilesystemActive()) {
-    return rocksdb_rs::status::Status_IOError("FaultInjectionTestEnv: not active");
+    return rocksdb_rs::status::Status_IOError(
+        "FaultInjectionTestEnv: not active");
   }
   // No need to actual sync.
   state_.pos_at_last_sync_ = state_.pos_;
@@ -228,15 +235,17 @@ TestRandomRWFile::~TestRandomRWFile() {
   }
 }
 
-rocksdb_rs::status::Status TestRandomRWFile::Write(uint64_t offset, const Slice& data) {
+rocksdb_rs::status::Status TestRandomRWFile::Write(uint64_t offset,
+                                                   const Slice& data) {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
   }
   return target_->Write(offset, data);
 }
 
-rocksdb_rs::status::Status TestRandomRWFile::Read(uint64_t offset, size_t n, Slice* result,
-                              char* scratch) const {
+rocksdb_rs::status::Status TestRandomRWFile::Read(uint64_t offset, size_t n,
+                                                  Slice* result,
+                                                  char* scratch) const {
   if (!env_->IsFilesystemActive()) {
     return env_->GetError();
   }
@@ -262,8 +271,8 @@ rocksdb_rs::status::Status TestRandomRWFile::Sync() {
   return target_->Sync();
 }
 
-rocksdb_rs::status::Status FaultInjectionTestEnv::NewDirectory(const std::string& name,
-                                           std::unique_ptr<Directory>* result) {
+rocksdb_rs::status::Status FaultInjectionTestEnv::NewDirectory(
+    const std::string& name, std::unique_ptr<Directory>* result) {
   std::unique_ptr<Directory> r;
   rocksdb_rs::status::Status s = target()->NewDirectory(name, &r);
   assert(s.ok());
@@ -363,7 +372,8 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::NewRandomRWFile(
   if (!IsFilesystemActive()) {
     return GetError();
   }
-  rocksdb_rs::status::Status s = target()->NewRandomRWFile(fname, result, soptions);
+  rocksdb_rs::status::Status s =
+      target()->NewRandomRWFile(fname, result, soptions);
   if (s.ok()) {
     result->reset(new TestRandomRWFile(fname, std::move(*result), this));
     // WritableFileWriter* file is opened
@@ -386,7 +396,8 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::NewRandomAccessFile(
   }
 
   assert(target());
-  const rocksdb_rs::status::Status s = target()->NewRandomAccessFile(fname, result, soptions);
+  const rocksdb_rs::status::Status s =
+      target()->NewRandomAccessFile(fname, result, soptions);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -397,7 +408,8 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::NewRandomAccessFile(
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status FaultInjectionTestEnv::DeleteFile(const std::string& f) {
+rocksdb_rs::status::Status FaultInjectionTestEnv::DeleteFile(
+    const std::string& f) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
@@ -408,8 +420,8 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::DeleteFile(const std::string& 
   return s;
 }
 
-rocksdb_rs::status::Status FaultInjectionTestEnv::RenameFile(const std::string& s,
-                                         const std::string& t) {
+rocksdb_rs::status::Status FaultInjectionTestEnv::RenameFile(
+    const std::string& s, const std::string& t) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
@@ -434,8 +446,8 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::RenameFile(const std::string& 
   return ret;
 }
 
-rocksdb_rs::status::Status FaultInjectionTestEnv::LinkFile(const std::string& s,
-                                       const std::string& t) {
+rocksdb_rs::status::Status FaultInjectionTestEnv::LinkFile(
+    const std::string& s, const std::string& t) {
   if (!IsFilesystemActive()) {
     return GetError();
   }
@@ -513,13 +525,15 @@ rocksdb_rs::status::Status FaultInjectionTestEnv::DropUnsyncedFileData() {
   });
 }
 
-rocksdb_rs::status::Status FaultInjectionTestEnv::DropRandomUnsyncedFileData(Random* rnd) {
+rocksdb_rs::status::Status FaultInjectionTestEnv::DropRandomUnsyncedFileData(
+    Random* rnd) {
   return DropFileData([&](Env* env, const FileState& state) {
     return state.DropRandomUnsyncedData(env, rnd);
   });
 }
 
-rocksdb_rs::status::Status FaultInjectionTestEnv::DeleteFilesCreatedAfterLastDirSync() {
+rocksdb_rs::status::Status
+FaultInjectionTestEnv::DeleteFilesCreatedAfterLastDirSync() {
   // Because DeleteFile access this container make a copy to avoid deadlock
   std::map<std::string, std::set<std::string>> map_copy;
   {

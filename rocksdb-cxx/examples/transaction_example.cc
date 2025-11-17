@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
 #include "rocksdb/slice.h"
@@ -13,13 +12,13 @@
 using rocksdb::Options;
 using rocksdb::ReadOptions;
 using rocksdb::Snapshot;
-using rocksdb_rs::status::Status;
-using rocksdb_rs::status::SubCode;
 using rocksdb::Transaction;
 using rocksdb::TransactionDB;
 using rocksdb::TransactionDBOptions;
 using rocksdb::TransactionOptions;
 using rocksdb::WriteOptions;
+using rocksdb_rs::status::Status;
+using rocksdb_rs::status::SubCode;
 
 #if defined(OS_WIN)
 std::string kDBPath = "C:\\Windows\\TEMP\\rocksdb_transaction_example";
@@ -34,7 +33,8 @@ int main() {
   options.create_if_missing = true;
   TransactionDB* txn_db;
 
-  rocksdb_rs::status::Status s = TransactionDB::Open(options, txn_db_options, kDBPath, &txn_db);
+  rocksdb_rs::status::Status s =
+      TransactionDB::Open(options, txn_db_options, kDBPath, &txn_db);
   assert(s.ok());
 
   WriteOptions write_options;
@@ -194,4 +194,3 @@ int main() {
   rocksdb::DestroyDB(kDBPath, options);
   return 0;
 }
-

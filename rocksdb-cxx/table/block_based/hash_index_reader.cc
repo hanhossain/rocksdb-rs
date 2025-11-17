@@ -12,13 +12,12 @@
 #include "table/meta_blocks.h"
 
 namespace rocksdb {
-rocksdb_rs::status::Status HashIndexReader::Create(const BlockBasedTable* table,
-                               const ReadOptions& ro,
-                               FilePrefetchBuffer* prefetch_buffer,
-                               InternalIterator* meta_index_iter,
-                               bool use_cache, bool prefetch, bool pin,
-                               BlockCacheLookupContext* lookup_context,
-                               std::unique_ptr<IndexReader>* index_reader) {
+rocksdb_rs::status::Status HashIndexReader::Create(
+    const BlockBasedTable* table, const ReadOptions& ro,
+    FilePrefetchBuffer* prefetch_buffer, InternalIterator* meta_index_iter,
+    bool use_cache, bool prefetch, bool pin,
+    BlockCacheLookupContext* lookup_context,
+    std::unique_ptr<IndexReader>* index_reader) {
   assert(table != nullptr);
   assert(index_reader != nullptr);
   assert(!pin || prefetch);
@@ -116,8 +115,8 @@ InternalIteratorBase<IndexValue>* HashIndexReader::NewIterator(
   const BlockBasedTable::Rep* rep = table()->get_rep();
   const bool no_io = (read_options.read_tier == kBlockCacheTier);
   CachableEntry<Block> index_block;
-  const rocksdb_rs::status::Status s = GetOrReadIndexBlock(no_io, get_context, lookup_context,
-                                       &index_block, read_options);
+  const rocksdb_rs::status::Status s = GetOrReadIndexBlock(
+      no_io, get_context, lookup_context, &index_block, read_options);
   if (!s.ok()) {
     if (iter != nullptr) {
       iter->Invalidate(s);

@@ -96,10 +96,10 @@ struct toku_cond_t {
 
 #if defined(TOKU_PTHREAD_DEBUG)
 #define TOKU_COND_INITIALIZER \
-  { .pcond = PTHREAD_COND_INITIALIZER, .psi_cond = nullptr, .instr_key_id = 0 }
+  {.pcond = PTHREAD_COND_INITIALIZER, .psi_cond = nullptr, .instr_key_id = 0}
 #else
 #define TOKU_COND_INITIALIZER \
-  { .pcond = PTHREAD_COND_INITIALIZER, .psi_cond = nullptr }
+  {.pcond = PTHREAD_COND_INITIALIZER, .psi_cond = nullptr}
 #endif  // defined(TOKU_PTHREAD_DEBUG)
 
 struct toku_pthread_rwlock_t {
@@ -126,31 +126,36 @@ typedef struct toku_mutex_aligned {
 // cleanly with -Wmissing-field-initializers
 
 #define ZERO_MUTEX_INITIALIZER \
-  {}
+  {                            \
+  }
 
 #if defined(TOKU_PTHREAD_DEBUG)
-#define TOKU_MUTEX_INITIALIZER                                             \
-  {                                                                        \
-    .pmutex = PTHREAD_MUTEX_INITIALIZER, .psi_mutex = nullptr, .owner = 0, \
-    .locked = false, .valid = true, .instr_key_id = 0                      \
-  }
+#define TOKU_MUTEX_INITIALIZER          \
+  {.pmutex = PTHREAD_MUTEX_INITIALIZER, \
+   .psi_mutex = nullptr,                \
+   .owner = 0,                          \
+   .locked = false,                     \
+   .valid = true,                       \
+   .instr_key_id = 0}
 #else
 #define TOKU_MUTEX_INITIALIZER \
-  { .pmutex = PTHREAD_MUTEX_INITIALIZER, .psi_mutex = nullptr }
+  {.pmutex = PTHREAD_MUTEX_INITIALIZER, .psi_mutex = nullptr}
 #endif  // defined(TOKU_PTHREAD_DEBUG)
 
 // Darwin doesn't provide adaptive mutexes
 #if defined(__APPLE__)
 #define TOKU_MUTEX_ADAPTIVE PTHREAD_MUTEX_DEFAULT
 #if defined(TOKU_PTHREAD_DEBUG)
-#define TOKU_ADAPTIVE_MUTEX_INITIALIZER                                    \
-  {                                                                        \
-    .pmutex = PTHREAD_MUTEX_INITIALIZER, .psi_mutex = nullptr, .owner = 0, \
-    .locked = false, .valid = true, .instr_key_id = 0                      \
-  }
+#define TOKU_ADAPTIVE_MUTEX_INITIALIZER \
+  {.pmutex = PTHREAD_MUTEX_INITIALIZER, \
+   .psi_mutex = nullptr,                \
+   .owner = 0,                          \
+   .locked = false,                     \
+   .valid = true,                       \
+   .instr_key_id = 0}
 #else
 #define TOKU_ADAPTIVE_MUTEX_INITIALIZER \
-  { .pmutex = PTHREAD_MUTEX_INITIALIZER, .psi_mutex = nullptr }
+  {.pmutex = PTHREAD_MUTEX_INITIALIZER, .psi_mutex = nullptr}
 #endif  // defined(TOKU_PTHREAD_DEBUG)
 #else   // __FreeBSD__, __linux__, at least
 #if defined(__GLIBC__)
@@ -160,14 +165,16 @@ typedef struct toku_mutex_aligned {
 #define TOKU_MUTEX_ADAPTIVE PTHREAD_MUTEX_DEFAULT
 #endif
 #if defined(TOKU_PTHREAD_DEBUG)
-#define TOKU_ADAPTIVE_MUTEX_INITIALIZER                                    \
-  {                                                                        \
-    .pmutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP, .psi_mutex = nullptr, \
-    .owner = 0, .locked = false, .valid = true, .instr_key_id = 0          \
-  }
+#define TOKU_ADAPTIVE_MUTEX_INITIALIZER             \
+  {.pmutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP, \
+   .psi_mutex = nullptr,                            \
+   .owner = 0,                                      \
+   .locked = false,                                 \
+   .valid = true,                                   \
+   .instr_key_id = 0}
 #else
 #define TOKU_ADAPTIVE_MUTEX_INITIALIZER \
-  { .pmutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP, .psi_mutex = nullptr }
+  {.pmutex = PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP, .psi_mutex = nullptr}
 #endif  // defined(TOKU_PTHREAD_DEBUG)
 #endif  // defined(__APPLE__)
 
@@ -175,16 +182,13 @@ typedef struct toku_mutex_aligned {
 // C++ will fill out all missing values with zeroes if you provide at least one
 // zero, but it needs the right amount of nesting.
 #if defined(__FreeBSD__)
-#define ZERO_COND_INITIALIZER \
-  { 0 }
+#define ZERO_COND_INITIALIZER {0}
 #elif defined(__APPLE__)
-#define ZERO_COND_INITIALIZER \
-  {                           \
-    { 0 }                     \
-  }
+#define ZERO_COND_INITIALIZER {{0}}
 #else  // __linux__, at least
 #define ZERO_COND_INITIALIZER \
-  {}
+  {                           \
+  }
 #endif
 
 static inline void toku_mutexattr_init(toku_pthread_mutexattr_t *attr) {

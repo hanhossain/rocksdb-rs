@@ -41,7 +41,8 @@ class PartitionedFilterBlockBuilder : public FullFilterBlockBuilder {
   size_t EstimateEntriesAdded() override;
 
   virtual Slice Finish(
-      const BlockHandle& last_partition_block_handle, rocksdb_rs::status::Status* status,
+      const BlockHandle& last_partition_block_handle,
+      rocksdb_rs::status::Status* status,
       std::unique_ptr<const char[]>* filter_data = nullptr) override;
 
   virtual void ResetFilterBitsBuilder() override {
@@ -167,8 +168,9 @@ class PartitionedFilterBlockReader
                          BlockCacheLookupContext* lookup_context,
                          const ReadOptions& read_options,
                          FilterManyFunction filter_function) const;
-  rocksdb_rs::status::Status CacheDependencies(const ReadOptions& ro, bool pin,
-                           FilePrefetchBuffer* tail_prefetch_buffer) override;
+  rocksdb_rs::status::Status CacheDependencies(
+      const ReadOptions& ro, bool pin,
+      FilePrefetchBuffer* tail_prefetch_buffer) override;
 
   const InternalKeyComparator* internal_comparator() const;
   bool index_key_includes_seq() const;

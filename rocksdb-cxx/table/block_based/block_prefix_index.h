@@ -7,7 +7,6 @@
 #include <stdint.h>
 
 #include "db/dbformat.h"
-
 #include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
@@ -38,9 +37,9 @@ class BlockPrefixIndex {
   // underlying prefix extractor
   // @params prefixes: a sequence of prefixes.
   // @params prefix_meta: contains the "metadata" to of the prefixes.
-  static rocksdb_rs::status::Status Create(const SliceTransform* hash_key_extractor,
-                       const Slice& prefixes, const Slice& prefix_meta,
-                       BlockPrefixIndex** prefix_index);
+  static rocksdb_rs::status::Status Create(
+      const SliceTransform* hash_key_extractor, const Slice& prefixes,
+      const Slice& prefix_meta, BlockPrefixIndex** prefix_index);
 
   ~BlockPrefixIndex() {
     delete[] buckets_;

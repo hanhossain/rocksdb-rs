@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "util/math.h"
 #include "rocksdb-rs/src/coding_lean.rs.h"
+#include "util/math.h"
 
 #ifdef TEST_UINT128_COMPAT
 #undef HAVE_UINT128_EXTENSION

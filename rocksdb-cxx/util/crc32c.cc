@@ -246,7 +246,8 @@ static const uint32_t table3_[256] = {
 
 // Used to fetch a naturally-aligned 32-bit word in little endian byte-order
 static inline uint32_t LE_LOAD32(const uint8_t* p) {
-  return rocksdb_rs::coding_lean::DecodeFixed32(reinterpret_cast<const char*>(p));
+  return rocksdb_rs::coding_lean::DecodeFixed32(
+      reinterpret_cast<const char*>(p));
 }
 #endif  // !__SSE4_2__
 
@@ -262,7 +263,8 @@ static inline void DefaultCRC32(uint64_t* l, uint8_t const** p) {
   *l = table3_[c & 0xff] ^ table2_[(c >> 8) & 0xff] ^
        table1_[(c >> 16) & 0xff] ^ table0_[c >> 24];
 #elif defined(__LP64__) || defined(_WIN64)
-  *l = _mm_crc32_u64(*l, rocksdb_rs::coding_lean::DecodeFixed64(reinterpret_cast<const char*>(*p)));
+  *l = _mm_crc32_u64(*l, rocksdb_rs::coding_lean::DecodeFixed64(
+                             reinterpret_cast<const char*>(*p)));
   *p += 8;
 #else
   *l = _mm_crc32_u32(static_cast<unsigned int>(*l), LE_LOAD32(*p));

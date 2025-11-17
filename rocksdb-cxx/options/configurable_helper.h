@@ -81,10 +81,9 @@ class ConfigurableHelper {
   //      equivalent.
   // @param value The new value for this option.
   // @param See ConfigureOptions for the possible return values
-  static rocksdb_rs::status::Status ConfigureSingleOption(const ConfigOptions& config_options,
-                                      Configurable& configurable,
-                                      const std::string& name,
-                                      const std::string& value);
+  static rocksdb_rs::status::Status ConfigureSingleOption(
+      const ConfigOptions& config_options, Configurable& configurable,
+      const std::string& name, const std::string& value);
 
   // Configures the option referenced by opt_info for this configurable
   // This method configures the option based on opt_info for the input
@@ -101,12 +100,10 @@ class ConfigurableHelper {
   //      equivalent.
   // @param value The new value for this option.
   // @param See ConfigureOptions for the possible return values
-  static rocksdb_rs::status::Status ConfigureOption(const ConfigOptions& config_options,
-                                Configurable& configurable,
-                                const OptionTypeInfo& opt_info,
-                                const std::string& opt_name,
-                                const std::string& name,
-                                const std::string& value, void* opt_ptr);
+  static rocksdb_rs::status::Status ConfigureOption(
+      const ConfigOptions& config_options, Configurable& configurable,
+      const OptionTypeInfo& opt_info, const std::string& opt_name,
+      const std::string& name, const std::string& value, void* opt_ptr);
 
   // Returns the value of the option associated with the input name
   // This method is the functional inverse of ConfigureOption
@@ -120,9 +117,9 @@ class ConfigurableHelper {
   // @return NotFound If the name is not valid for this object.
   // @param InvalidArgument If the name is valid for this object but
   //      its value cannot be serialized.
-  static rocksdb_rs::status::Status GetOption(const ConfigOptions& config_options,
-                          const Configurable& configurable,
-                          const std::string& name, std::string* value);
+  static rocksdb_rs::status::Status GetOption(
+      const ConfigOptions& config_options, const Configurable& configurable,
+      const std::string& name, std::string* value);
 
   // Serializes the input Configurable into the output result.
   // This is the inverse of ConfigureOptions
@@ -133,18 +130,16 @@ class ConfigurableHelper {
   // @return OK If the options for this object wer successfully serialized.
   // @return InvalidArgument If one or more of the options could not be
   // serialized.
-  static rocksdb_rs::status::Status SerializeOptions(const ConfigOptions& config_options,
-                                 const Configurable& configurable,
-                                 const std::string& prefix,
-                                 std::string* result);
+  static rocksdb_rs::status::Status SerializeOptions(
+      const ConfigOptions& config_options, const Configurable& configurable,
+      const std::string& prefix, std::string* result);
 
   // Internal method to list the option names for this object.
   // Classes may override this value to change its behavior.
   // @see ListOptions for more details
-  static rocksdb_rs::status::Status ListOptions(const ConfigOptions& config_options,
-                            const Configurable& configurable,
-                            const std::string& prefix,
-                            std::unordered_set<std::string>* result);
+  static rocksdb_rs::status::Status ListOptions(
+      const ConfigOptions& config_options, const Configurable& configurable,
+      const std::string& prefix, std::unordered_set<std::string>* result);
 
   // Checks to see if the two configurables are equivalent to one other.
   // This method assumes that the two objects are of the same class.
@@ -164,7 +159,8 @@ class ConfigurableHelper {
   // This method traverses the types in the input options vector.  If an entry
   // matching name is found, that entry, opt_name, and pointer are returned.
   // @param options  The vector of options to search through
-  // @param name     The name of the option to search for in the rocksdb_rs::utilities::options_type::OptionType map
+  // @param name     The name of the option to search for in the
+  // rocksdb_rs::utilities::options_type::OptionType map
   // @param opt_name If the name was found, this value is set to the option name
   //                 associated with the input name/type.
   // @param opt_ptr  If the name was found, this value is set to the option

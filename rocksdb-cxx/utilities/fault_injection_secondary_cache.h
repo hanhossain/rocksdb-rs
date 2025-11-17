@@ -31,8 +31,9 @@ class FaultInjectionSecondaryCache : public SecondaryCache {
 
   const char* Name() const override { return "FaultInjectionSecondaryCache"; }
 
-  rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
-                const Cache::CacheItemHelper* helper) override;
+  rocksdb_rs::status::Status Insert(
+      const Slice& key, Cache::ObjectPtr value,
+      const Cache::CacheItemHelper* helper) override;
 
   std::unique_ptr<SecondaryCacheResultHandle> Lookup(
       const Slice& key, const Cache::CacheItemHelper* helper,

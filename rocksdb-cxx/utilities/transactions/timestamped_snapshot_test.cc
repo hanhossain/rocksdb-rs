@@ -76,7 +76,8 @@ TEST_P(TimestampedSnapshotWithTsSanityCheck, SetCommitTs) {
   ASSERT_OK(txn->Put("a", "v"));
   ASSERT_OK(txn->Prepare());
   std::shared_ptr<const Snapshot> snapshot;
-  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot(nullptr, 10, &snapshot);
+  rocksdb_rs::status::Status s =
+      txn->CommitAndTryCreateSnapshot(nullptr, 10, &snapshot);
   ASSERT_TRUE(s.IsNotSupported());
   ASSERT_OK(txn->Rollback());
 
@@ -174,7 +175,8 @@ TEST_P(TransactionTest, CreateSnapshotWhenCommit) {
   std::shared_ptr<const Snapshot> snapshot;
   constexpr TxnTimestamp timestamp = 1;
   auto notifier = std::make_shared<TsCheckingTxnNotifier>();
-  rocksdb_rs::status::Status s = txn->CommitAndTryCreateSnapshot(notifier, timestamp, &snapshot);
+  rocksdb_rs::status::Status s =
+      txn->CommitAndTryCreateSnapshot(notifier, timestamp, &snapshot);
   ASSERT_OK(s);
   ASSERT_LT(notifier->prev_snapshot_ts(), kMaxTxnTimestamp);
   assert(snapshot);
@@ -380,8 +382,8 @@ TEST_P(TransactionTest, MultipleTimestampedSnapshots) {
     ASSERT_EQ(snapshots[i], snapshot);
 
     std::vector<std::shared_ptr<const Snapshot> > tmp_snapshots;
-    rocksdb_rs::status::Status s = db->GetTimestampedSnapshots(max_ts, start_ts + i * ts_delta,
-                                           tmp_snapshots);
+    rocksdb_rs::status::Status s = db->GetTimestampedSnapshots(
+        max_ts, start_ts + i * ts_delta, tmp_snapshots);
     ASSERT_TRUE(s.IsInvalidArgument());
     ASSERT_TRUE(tmp_snapshots.empty());
 
@@ -402,7 +404,8 @@ TEST_P(TransactionTest, MultipleTimestampedSnapshots) {
 
   {
     std::vector<std::shared_ptr<const Snapshot> > tmp_snapshots;
-    const rocksdb_rs::status::Status s = db->GetAllTimestampedSnapshots(tmp_snapshots);
+    const rocksdb_rs::status::Status s =
+        db->GetAllTimestampedSnapshots(tmp_snapshots);
     ASSERT_OK(s);
     ASSERT_EQ(snapshots, tmp_snapshots);
 
@@ -430,7 +433,8 @@ TEST_P(TransactionTest, MultipleTimestampedSnapshots) {
     }
 
     std::vector<std::shared_ptr<const Snapshot> > tmp_snapshots;
-    const rocksdb_rs::status::Status s = db->GetAllTimestampedSnapshots(tmp_snapshots);
+    const rocksdb_rs::status::Status s =
+        db->GetAllTimestampedSnapshots(tmp_snapshots);
     ASSERT_OK(s);
     ASSERT_EQ(snapshots1, tmp_snapshots);
   }

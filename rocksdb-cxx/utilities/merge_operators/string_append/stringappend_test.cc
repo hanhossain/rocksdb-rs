@@ -165,8 +165,7 @@ TEST_P(StringAppendOperatorTest, IteratorTest) {
   slists.Append("k2", "a3");
 
   std::string res;
-  std::unique_ptr<rocksdb::Iterator> it(
-      db_->NewIterator(ReadOptions()));
+  std::unique_ptr<rocksdb::Iterator> it(db_->NewIterator(ReadOptions()));
   std::string k1("k1");
   std::string k2("k2");
   bool first = true;

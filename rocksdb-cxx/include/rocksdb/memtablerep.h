@@ -297,12 +297,12 @@ class MemTableRepFactory : public Customizable {
   ~MemTableRepFactory() override {}
 
   static const char* Type() { return "MemTableRepFactory"; }
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& id,
-                                 std::unique_ptr<MemTableRepFactory>* factory);
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& id,
-                                 std::shared_ptr<MemTableRepFactory>* factory);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& id,
+      std::unique_ptr<MemTableRepFactory>* factory);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& id,
+      std::shared_ptr<MemTableRepFactory>* factory);
 
   virtual MemTableRep* CreateMemTableRep(const MemTableRep::KeyComparator&,
                                          Allocator*, const SliceTransform*,

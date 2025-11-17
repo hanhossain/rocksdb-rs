@@ -148,11 +148,8 @@ using rocksdb::BloomLikeFilterPolicy;
 using rocksdb::BuiltinFilterBitsBuilder;
 using rocksdb::CachableEntry;
 using rocksdb::Cache;
-using rocksdb_rs::cache::CacheEntryRole;
 using rocksdb::CacheEntryRoleOptions;
-using rocksdb_rs::coding_lean::EncodeFixed32;
 using rocksdb::Env;
-using rocksdb_rs::util::fastrange::FastRange32;
 using rocksdb::FilterBitsReader;
 using rocksdb::FilterBuildingContext;
 using rocksdb::FilterPolicy;
@@ -166,9 +163,12 @@ using rocksdb::PlainTableBloomV1;
 using rocksdb::Random32;
 using rocksdb::Slice;
 using rocksdb::static_cast_with_check;
-using rocksdb_rs::status::Status;
 using rocksdb::StderrLogger;
 using rocksdb::mock::MockBlockBasedTableTester;
+using rocksdb_rs::cache::CacheEntryRole;
+using rocksdb_rs::coding_lean::EncodeFixed32;
+using rocksdb_rs::status::Status;
+using rocksdb_rs::util::fastrange::FastRange32;
 
 struct KeyMaker {
   KeyMaker(size_t avg_size)
@@ -226,7 +226,8 @@ struct FilterInfo {
   uint32_t filter_id_ = 0;
   std::unique_ptr<const char[]> owner_;
   Slice filter_;
-  rocksdb_rs::status::Status filter_construction_status = rocksdb_rs::status::Status_OK();
+  rocksdb_rs::status::Status filter_construction_status =
+      rocksdb_rs::status::Status_OK();
   uint32_t keys_added_ = 0;
   std::unique_ptr<FilterBitsReader> reader_;
   std::unique_ptr<FullFilterBlockReader> full_block_reader_;
@@ -245,8 +246,9 @@ enum class TestMode {
 };
 
 static const std::vector<TestMode> allTestModes = {
-    TestMode::kSingleFilter,   TestMode::kBatchPrepared,      TestMode::kBatchUnprepared,
-    TestMode::kFiftyOneFilter, TestMode::kEightyTwentyFilter, TestMode::kRandomFilter,
+    TestMode::kSingleFilter,       TestMode::kBatchPrepared,
+    TestMode::kBatchUnprepared,    TestMode::kFiftyOneFilter,
+    TestMode::kEightyTwentyFilter, TestMode::kRandomFilter,
 };
 
 static const std::vector<TestMode> quickTestModes = {
@@ -411,8 +413,7 @@ void FilterBench::Go() {
     max_mem = static_cast<size_t>(1024 * 1024 * working_mem_size_mb);
   }
 
-  rocksdb::StopWatchNano timer(
-      rocksdb::SystemClock::Default().get(), true);
+  rocksdb::StopWatchNano timer(rocksdb::SystemClock::Default().get(), true);
 
   infos_.clear();
   while ((working_mem_size_mb == 0 || total_size < max_mem) &&
@@ -659,8 +660,7 @@ double FilterBench::RandomQueryTest(uint32_t inside_threshold, bool dry_run,
     batch_slice_ptrs[i] = &batch_slices[i];
   }
 
-  rocksdb::StopWatchNano timer(
-      rocksdb::SystemClock::Default().get(), true);
+  rocksdb::StopWatchNano timer(rocksdb::SystemClock::Default().get(), true);
 
   for (uint64_t q = 0; q < max_queries; q += batch_size) {
     bool inside_this_time = random_.Next() <= inside_threshold;

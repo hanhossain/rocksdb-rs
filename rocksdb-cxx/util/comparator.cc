@@ -336,17 +336,17 @@ static int RegisterBuiltinComparators(ObjectLibrary& library,
   return 3;
 }
 
-rocksdb_rs::status::Status Comparator::CreateFromString(const ConfigOptions& config_options,
-                                    const std::string& value,
-                                    const Comparator** result) {
+rocksdb_rs::status::Status Comparator::CreateFromString(
+    const ConfigOptions& config_options, const std::string& value,
+    const Comparator** result) {
   static std::once_flag once;
   std::call_once(once, [&]() {
     RegisterBuiltinComparators(*(ObjectLibrary::Default().get()), "");
   });
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, *result, value,
-                                              &id, &opt_map);
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(
+      config_options, *result, value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   }

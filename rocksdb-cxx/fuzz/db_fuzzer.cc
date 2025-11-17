@@ -34,8 +34,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   rocksdb::DB* db;
   rocksdb::Options options;
   options.create_if_missing = true;
-  rocksdb_rs::status::Status status =
-      rocksdb::DB::Open(options, db_path, &db);
+  rocksdb_rs::status::Status status = rocksdb::DB::Open(options, db_path, &db);
   if (!status.ok()) {
     return 0;
   }
@@ -71,8 +70,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         break;
       }
       case kIterator: {
-        rocksdb::Iterator* it =
-            db->NewIterator(rocksdb::ReadOptions());
+        rocksdb::Iterator* it = db->NewIterator(rocksdb::ReadOptions());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
         }
         delete it;
@@ -100,8 +98,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
       case kColumn: {
         rocksdb::ColumnFamilyHandle* cf;
         rocksdb_rs::status::Status s;
-        s = db->CreateColumnFamily(rocksdb::ColumnFamilyOptions(),
-                                   "new_cf", &cf);
+        s = db->CreateColumnFamily(rocksdb::ColumnFamilyOptions(), "new_cf",
+                                   &cf);
         s = db->DestroyColumnFamilyHandle(cf);
         db->Close();
         delete db;
@@ -110,24 +108,21 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         std::vector<rocksdb::ColumnFamilyDescriptor> column_families;
         // have to open default column family
         column_families.push_back(rocksdb::ColumnFamilyDescriptor(
-            rocksdb::kDefaultColumnFamilyName,
-            rocksdb::ColumnFamilyOptions()));
+            rocksdb::kDefaultColumnFamilyName, rocksdb::ColumnFamilyOptions()));
         // open the new one, too
         column_families.push_back(rocksdb::ColumnFamilyDescriptor(
             "new_cf", rocksdb::ColumnFamilyOptions()));
         std::vector<rocksdb::ColumnFamilyHandle*> handles;
-        s = rocksdb::DB::Open(rocksdb::DBOptions(), db_path,
-                                        column_families, &handles, &db);
+        s = rocksdb::DB::Open(rocksdb::DBOptions(), db_path, column_families,
+                              &handles, &db);
 
         if (s.ok()) {
           std::string key1 = fuzzed_data.ConsumeRandomLengthString();
           std::string val1 = fuzzed_data.ConsumeRandomLengthString();
           std::string key2 = fuzzed_data.ConsumeRandomLengthString();
-          s = db->Put(rocksdb::WriteOptions(), handles[1], key1,
-                      val1);
+          s = db->Put(rocksdb::WriteOptions(), handles[1], key1, val1);
           std::string value;
-          s = db->Get(rocksdb::ReadOptions(), handles[1], key2,
-                      &value);
+          s = db->Get(rocksdb::ReadOptions(), handles[1], key2, &value);
           s = db->DropColumnFamily(handles[1]);
           for (auto handle : handles) {
             s = db->DestroyColumnFamilyHandle(handle);

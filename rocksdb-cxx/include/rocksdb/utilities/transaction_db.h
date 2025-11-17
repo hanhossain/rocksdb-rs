@@ -375,9 +375,9 @@ class TransactionDB : public StackableDB {
   // Optimized version of ::Write that receives more optimization request such
   // as skip_concurrency_control.
   using StackableDB::Write;
-  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts,
-                       const TransactionDBWriteOptimizations&,
-                       WriteBatch* updates) {
+  virtual rocksdb_rs::status::Status Write(
+      const WriteOptions& opts, const TransactionDBWriteOptimizations&,
+      WriteBatch* updates) {
     // The default implementation ignores TransactionDBWriteOptimizations and
     // falls back to the un-optimized version of ::Write
     return Write(opts, updates);
@@ -390,23 +390,24 @@ class TransactionDB : public StackableDB {
   // WRITE_PREPARED or WRITE_UNPREPARED , `skip_duplicate_key_check` must
   // additionally be set.
   using StackableDB::DeleteRange;
-  virtual rocksdb_rs::status::Status DeleteRange(const WriteOptions&, ColumnFamilyHandle*,
-                             const Slice&, const Slice&) override {
+  virtual rocksdb_rs::status::Status DeleteRange(const WriteOptions&,
+                                                 ColumnFamilyHandle*,
+                                                 const Slice&,
+                                                 const Slice&) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
   // Open a TransactionDB similar to DB::Open().
   // Internally call PrepareWrap() and WrapDB()
   // If the return status is not ok, then dbptr is set to nullptr.
-  static rocksdb_rs::status::Status Open(const Options& options,
-                     const TransactionDBOptions& txn_db_options,
-                     const std::string& dbname, TransactionDB** dbptr);
+  static rocksdb_rs::status::Status Open(
+      const Options& options, const TransactionDBOptions& txn_db_options,
+      const std::string& dbname, TransactionDB** dbptr);
 
-  static rocksdb_rs::status::Status Open(const DBOptions& db_options,
-                     const TransactionDBOptions& txn_db_options,
-                     const std::string& dbname,
-                     const std::vector<ColumnFamilyDescriptor>& column_families,
-                     std::vector<ColumnFamilyHandle*>* handles,
-                     TransactionDB** dbptr);
+  static rocksdb_rs::status::Status Open(
+      const DBOptions& db_options, const TransactionDBOptions& txn_db_options,
+      const std::string& dbname,
+      const std::vector<ColumnFamilyDescriptor>& column_families,
+      std::vector<ColumnFamilyHandle*>* handles, TransactionDB** dbptr);
   // Note: PrepareWrap() may change parameters, make copies before the
   // invocation if needed.
   static void PrepareWrap(DBOptions* db_options,
@@ -416,10 +417,10 @@ class TransactionDB : public StackableDB {
   // input db parameter might or might not be deleted as a result of the
   // failure. If it is properly deleted it will be set to nullptr. If the return
   // status is ok, the ownership of db is transferred to dbptr.
-  static rocksdb_rs::status::Status WrapDB(DB* db, const TransactionDBOptions& txn_db_options,
-                       const std::vector<size_t>& compaction_enabled_cf_indices,
-                       const std::vector<ColumnFamilyHandle*>& handles,
-                       TransactionDB** dbptr);
+  static rocksdb_rs::status::Status WrapDB(
+      DB* db, const TransactionDBOptions& txn_db_options,
+      const std::vector<size_t>& compaction_enabled_cf_indices,
+      const std::vector<ColumnFamilyHandle*>& handles, TransactionDB** dbptr);
   // If the return status is not ok, then dbptr will bet set to nullptr. The
   // input db parameter might or might not be deleted as a result of the
   // failure. If it is properly deleted it will be set to nullptr. If the return
@@ -503,4 +504,3 @@ class TransactionDB : public StackableDB {
 };
 
 }  // namespace rocksdb
-

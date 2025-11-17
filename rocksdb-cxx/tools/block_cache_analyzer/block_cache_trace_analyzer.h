@@ -104,9 +104,10 @@ struct BlockAccessInfo {
         num_referenced_key_exist_in_block++;
         if (referenced_data_size > block_size && block_size != 0) {
           ParsedInternalKey internal_key;
-          rocksdb_rs::status::Status s = ParseInternalKey(access.referenced_key, &internal_key,
-                                      false /* log_err_key */);  // TODO
-          assert(s.ok());                                        // TODO
+          rocksdb_rs::status::Status s =
+              ParseInternalKey(access.referenced_key, &internal_key,
+                               false /* log_err_key */);  // TODO
+          assert(s.ok());                                 // TODO
         }
       } else {
         non_exist_key_num_access_map[access.referenced_key][access.caller]++;

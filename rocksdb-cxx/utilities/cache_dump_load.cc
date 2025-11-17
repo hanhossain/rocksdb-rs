@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/utilities/cache_dump_load.h"
 
 #include "file/writable_file_writer.h"
@@ -16,13 +15,12 @@
 
 namespace rocksdb {
 
-rocksdb_rs::io_status::IOStatus NewToFileCacheDumpWriter(const std::shared_ptr<FileSystem>& fs,
-                                  const FileOptions& file_opts,
-                                  const std::string& file_name,
-                                  std::unique_ptr<CacheDumpWriter>* writer) {
+rocksdb_rs::io_status::IOStatus NewToFileCacheDumpWriter(
+    const std::shared_ptr<FileSystem>& fs, const FileOptions& file_opts,
+    const std::string& file_name, std::unique_ptr<CacheDumpWriter>* writer) {
   std::unique_ptr<WritableFileWriter> file_writer;
-  rocksdb_rs::io_status::IOStatus io_s = WritableFileWriter::Create(fs, file_name, file_opts,
-                                             &file_writer, nullptr);
+  rocksdb_rs::io_status::IOStatus io_s = WritableFileWriter::Create(
+      fs, file_name, file_opts, &file_writer, nullptr);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -30,13 +28,12 @@ rocksdb_rs::io_status::IOStatus NewToFileCacheDumpWriter(const std::shared_ptr<F
   return io_s;
 }
 
-rocksdb_rs::io_status::IOStatus NewFromFileCacheDumpReader(const std::shared_ptr<FileSystem>& fs,
-                                    const FileOptions& file_opts,
-                                    const std::string& file_name,
-                                    std::unique_ptr<CacheDumpReader>* reader) {
+rocksdb_rs::io_status::IOStatus NewFromFileCacheDumpReader(
+    const std::shared_ptr<FileSystem>& fs, const FileOptions& file_opts,
+    const std::string& file_name, std::unique_ptr<CacheDumpReader>* reader) {
   std::unique_ptr<RandomAccessFileReader> file_reader;
-  rocksdb_rs::io_status::IOStatus io_s = RandomAccessFileReader::Create(fs, file_name, file_opts,
-                                                 &file_reader, nullptr);
+  rocksdb_rs::io_status::IOStatus io_s = RandomAccessFileReader::Create(
+      fs, file_name, file_opts, &file_reader, nullptr);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -44,10 +41,10 @@ rocksdb_rs::io_status::IOStatus NewFromFileCacheDumpReader(const std::shared_ptr
   return io_s;
 }
 
-rocksdb_rs::status::Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
-                             const std::shared_ptr<Cache>& cache,
-                             std::unique_ptr<CacheDumpWriter>&& writer,
-                             std::unique_ptr<CacheDumper>* cache_dumper) {
+rocksdb_rs::status::Status NewDefaultCacheDumper(
+    const CacheDumpOptions& dump_options, const std::shared_ptr<Cache>& cache,
+    std::unique_ptr<CacheDumpWriter>&& writer,
+    std::unique_ptr<CacheDumper>* cache_dumper) {
   cache_dumper->reset(
       new CacheDumperImpl(dump_options, cache, std::move(writer)));
   return rocksdb_rs::status::Status_OK();

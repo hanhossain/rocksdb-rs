@@ -336,9 +336,9 @@ static int RegisterBuiltinStatistics(ObjectLibrary& library,
   return 1;
 }
 
-rocksdb_rs::status::Status Statistics::CreateFromString(const ConfigOptions& config_options,
-                                    const std::string& id,
-                                    std::shared_ptr<Statistics>* result) {
+rocksdb_rs::status::Status Statistics::CreateFromString(
+    const ConfigOptions& config_options, const std::string& id,
+    std::shared_ptr<Statistics>* result) {
   static std::once_flag once;
   std::call_once(once, [&]() {
     RegisterBuiltinStatistics(*(ObjectLibrary::Default().get()), "");
@@ -355,9 +355,12 @@ rocksdb_rs::status::Status Statistics::CreateFromString(const ConfigOptions& con
 }
 
 static std::unordered_map<std::string, OptionTypeInfo> stats_type_info = {
-    {"inner", OptionTypeInfo::AsCustomSharedPtr<Statistics>(
-                  0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowFromNull,
-                  rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever)},
+    {"inner",
+     OptionTypeInfo::AsCustomSharedPtr<Statistics>(
+         0,
+         rocksdb_rs::utilities::options_type::OptionVerificationType::
+             kByNameAllowFromNull,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever)},
 };
 
 StatisticsImpl::StatisticsImpl(std::shared_ptr<Statistics> stats)

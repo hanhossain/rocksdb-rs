@@ -327,13 +327,11 @@ class SkipListRep : public MemTableRep {
     if (lookahead_ > 0) {
       void* mem =
           arena ? arena->AllocateAligned(sizeof(SkipListRep::LookaheadIterator))
-                :
-                operator new(sizeof(SkipListRep::LookaheadIterator));
+                : operator new(sizeof(SkipListRep::LookaheadIterator));
       return new (mem) SkipListRep::LookaheadIterator(*this);
     } else {
       void* mem = arena ? arena->AllocateAligned(sizeof(SkipListRep::Iterator))
-                        :
-                        operator new(sizeof(SkipListRep::Iterator));
+                        : operator new(sizeof(SkipListRep::Iterator));
       return new (mem) SkipListRep::Iterator(&skip_list_);
     }
   }
@@ -342,8 +340,10 @@ class SkipListRep : public MemTableRep {
 
 static std::unordered_map<std::string, OptionTypeInfo> skiplist_factory_info = {
     {"lookahead",
-     {0, rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-      rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize /*Since it is part of the ID*/}},
+     {0, rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::
+          kDontSerialize /*Since it is part of the ID*/}},
 };
 
 SkipListFactory::SkipListFactory(size_t lookahead) : lookahead_(lookahead) {

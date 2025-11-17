@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/db_dump_tool.h"
 
 #include <cinttypes>
@@ -32,8 +31,7 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
 
   // Open the database
   options.create_if_missing = false;
-  status = rocksdb::DB::OpenForReadOnly(options, dump_options.db_path,
-                                                  &dbptr);
+  status = rocksdb::DB::OpenForReadOnly(options, dump_options.db_path, &dbptr);
   if (!status.ok()) {
     std::cerr << "Unable to open database '" << dump_options.db_path
               << "' for reading: " << *status.ToString() << std::endl;
@@ -109,7 +107,8 @@ bool DbDumpTool::Run(const DumpOptions& dump_options,
     }
 
     char valsize[4];
-    rocksdb_rs::coding_lean::EncodeFixed32(valsize, (uint32_t)it->value().size());
+    rocksdb_rs::coding_lean::EncodeFixed32(valsize,
+                                           (uint32_t)it->value().size());
     rocksdb::Slice valsizeslice(valsize, 4);
     status = dumpfile->Append(valsizeslice);
     if (!status.ok()) {
@@ -176,7 +175,8 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
   uint32_t infosize = rocksdb_rs::coding_lean::DecodeFixed32(slice.data());
   status = dumpfile->Skip(infosize);
   if (!status.ok()) {
-    std::cerr << "Unable to skip info blob: " << *status.ToString() << std::endl;
+    std::cerr << "Unable to skip info blob: " << *status.ToString()
+              << std::endl;
     return false;
   }
 
@@ -245,8 +245,7 @@ bool DbUndumpTool::Run(const UndumpOptions& undump_options,
   }
 
   if (undump_options.compact_db) {
-    status = db->CompactRange(rocksdb::CompactRangeOptions(), nullptr,
-                              nullptr);
+    status = db->CompactRange(rocksdb::CompactRangeOptions(), nullptr, nullptr);
     if (!status.ok()) {
       fprintf(stderr,
               "Unable to compact the database after loading the dumped file\n");

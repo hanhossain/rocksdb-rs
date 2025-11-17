@@ -7,9 +7,8 @@
 
 #include <array>
 
-#include "rocksdb/unique_id.h"
-
 #include "rocksdb-rs/src/unique_id.rs.h"
+#include "rocksdb/unique_id.h"
 
 namespace rocksdb {
 // Helper for GetUniqueIdFromTableProperties. External unique ids go through

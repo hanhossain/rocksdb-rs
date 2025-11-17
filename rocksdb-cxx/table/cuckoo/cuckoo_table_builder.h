@@ -13,12 +13,11 @@
 
 #include "db/version_edit.h"
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/table.h"
 #include "rocksdb/table_properties.h"
 #include "table/table_builder.h"
 #include "util/autovector.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -49,7 +48,9 @@ class CuckooTableBuilder : public TableBuilder {
   rocksdb_rs::status::Status status() const override { return status_.Clone(); }
 
   // Return non-ok iff some error happens during IO.
-  rocksdb_rs::io_status::IOStatus io_status() const override { return io_status_.Clone(); }
+  rocksdb_rs::io_status::IOStatus io_status() const override {
+    return io_status_.Clone();
+  }
 
   // Finish building the table.  Stops using the file passed to the
   // constructor after this function returns.
@@ -120,7 +121,8 @@ class CuckooTableBuilder : public TableBuilder {
   // Number of keys that contain value (non-deletion op)
   uint64_t num_values_;
   rocksdb_rs::status::Status status_;
-  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus io_status_ =
+      rocksdb_rs::io_status::IOStatus_new();
   TableProperties properties_;
   const Comparator* ucomp_;
   bool use_module_hash_;
@@ -134,4 +136,3 @@ class CuckooTableBuilder : public TableBuilder {
 };
 
 }  // namespace rocksdb
-

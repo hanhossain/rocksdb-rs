@@ -22,12 +22,11 @@
 #include <string>
 #include <unordered_map>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/env.h"
 #include "rocksdb/options.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -120,7 +119,8 @@ struct CacheEntryRoleOptions {
 
 struct CacheUsageOptions {
   CacheEntryRoleOptions options;
-  std::map<rocksdb_rs::cache::CacheEntryRole, CacheEntryRoleOptions> options_overrides;
+  std::map<rocksdb_rs::cache::CacheEntryRole, CacheEntryRoleOptions>
+      options_overrides;
 };
 
 // For advanced user only
@@ -303,11 +303,11 @@ struct BlockBasedTableOptions {
   // `cache_usage_options` allows users to specify the default
   // options (`cache_usage_options.options`) and the overriding
   // options (`cache_usage_options.options_overrides`)
-  // for different `rocksdb_rs::cache::CacheEntryRole` under various features related to cache
-  // usage.
+  // for different `rocksdb_rs::cache::CacheEntryRole` under various features
+  // related to cache usage.
   //
-  // For a certain `rocksdb_rs::cache::CacheEntryRole role` and a certain feature `f` of
-  // `CacheEntryRoleOptions`:
+  // For a certain `rocksdb_rs::cache::CacheEntryRole role` and a certain
+  // feature `f` of `CacheEntryRoleOptions`:
   // 1. If `options_overrides` has an entry for `role` and
   // `options_overrides[role].f != kFallback`, we use
   // `options_overrides[role].f`
@@ -320,9 +320,9 @@ struct BlockBasedTableOptions {
   //
   // 1. Memory charging to block cache (`CacheEntryRoleOptions::charged`)
   // Memory charging is a feature of accounting memory usage of specific area
-  // (represented by `rocksdb_rs::cache::CacheEntryRole`) toward usage in block cache (if
-  // available), by updating a dynamical charge to the block cache loosely based
-  // on the actual memory usage of that area.
+  // (represented by `rocksdb_rs::cache::CacheEntryRole`) toward usage in block
+  // cache (if available), by updating a dynamical charge to the block cache
+  // loosely based on the actual memory usage of that area.
   //
   // (a) rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer
   // (i) If kEnabled:
@@ -672,7 +672,6 @@ struct BlockBasedTablePropertyNames {
 extern TableFactory* NewBlockBasedTableFactory(
     const BlockBasedTableOptions& table_options = BlockBasedTableOptions());
 
-
 enum EncodingType : char {
   // Always write full keys without any special encoding.
   kPlain,
@@ -828,7 +827,6 @@ struct CuckooTableOptions {
 extern TableFactory* NewCuckooTableFactory(
     const CuckooTableOptions& table_options = CuckooTableOptions());
 
-
 class RandomAccessFileReader;
 
 // A base class for table factories.
@@ -842,9 +840,9 @@ class TableFactory : public Customizable {
   static const char* kCuckooTableName() { return "CuckooTable"; };
 
   // Creates and configures a new TableFactory from the input options and id.
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& id,
-                                 std::shared_ptr<TableFactory>* factory);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& id,
+      std::shared_ptr<TableFactory>* factory);
 
   static const char* Type() { return "TableFactory"; }
 
@@ -923,6 +921,5 @@ extern TableFactory* NewAdaptiveTableFactory(
     std::shared_ptr<TableFactory> block_based_table_factory = nullptr,
     std::shared_ptr<TableFactory> plain_table_factory = nullptr,
     std::shared_ptr<TableFactory> cuckoo_table_factory = nullptr);
-
 
 }  // namespace rocksdb

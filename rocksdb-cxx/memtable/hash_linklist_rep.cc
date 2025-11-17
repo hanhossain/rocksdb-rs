@@ -4,7 +4,6 @@
 //  (found in the LICENSE.Apache file in the root directory).
 //
 
-
 #include <algorithm>
 #include <atomic>
 
@@ -850,23 +849,29 @@ struct HashLinkListRepOptions {
 
 static std::unordered_map<std::string, OptionTypeInfo> hash_linklist_info = {
     {"bucket_count",
-     {offsetof(struct HashLinkListRepOptions, bucket_count), rocksdb_rs::utilities::options_type::OptionType::kSizeT,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct HashLinkListRepOptions, bucket_count),
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"threshold",
      {offsetof(struct HashLinkListRepOptions, threshold_use_skiplist),
-      rocksdb_rs::utilities::options_type::OptionType::kUInt32T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kUInt32T,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"huge_page_size",
      {offsetof(struct HashLinkListRepOptions, huge_page_tlb_size),
-      rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"logging_threshold",
      {offsetof(struct HashLinkListRepOptions, bucket_entries_logging_threshold),
-      rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"log_when_flash",
      {offsetof(struct HashLinkListRepOptions, if_log_bucket_dist_when_flash),
-      rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 

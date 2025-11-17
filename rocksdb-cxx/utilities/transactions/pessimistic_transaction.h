@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include <algorithm>
 #include <atomic>
 #include <mutex>
@@ -15,6 +14,7 @@
 #include <vector>
 
 #include "db/write_callback.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/snapshot.h"
@@ -25,8 +25,6 @@
 #include "util/autovector.h"
 #include "utilities/transactions/transaction_base.h"
 #include "utilities/transactions/transaction_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -116,9 +114,9 @@ class PessimisticTransaction : public TransactionBaseImpl {
 
   int64_t GetDeadlockDetectDepth() const { return deadlock_detect_depth_; }
 
-  virtual rocksdb_rs::status::Status GetRangeLock(ColumnFamilyHandle* column_family,
-                              const Endpoint& start_key,
-                              const Endpoint& end_key) override;
+  virtual rocksdb_rs::status::Status GetRangeLock(
+      ColumnFamilyHandle* column_family, const Endpoint& start_key,
+      const Endpoint& end_key) override;
 
  protected:
   // Refer to
@@ -134,8 +132,8 @@ class PessimisticTransaction : public TransactionBaseImpl {
 
   // batch_cnt if non-zero is the number of sub-batches. A sub-batch is a batch
   // with no duplicate keys. If zero, then the number of sub-batches is unknown.
-  virtual rocksdb_rs::status::Status CommitBatchInternal(WriteBatch* batch,
-                                     size_t batch_cnt = 0) = 0;
+  virtual rocksdb_rs::status::Status CommitBatchInternal(
+      WriteBatch* batch, size_t batch_cnt = 0) = 0;
 
   virtual rocksdb_rs::status::Status CommitInternal() = 0;
 
@@ -143,11 +141,13 @@ class PessimisticTransaction : public TransactionBaseImpl {
 
   virtual void Initialize(const TransactionOptions& txn_options);
 
-  rocksdb_rs::status::Status LockBatch(WriteBatch* batch, LockTracker* keys_to_unlock);
+  rocksdb_rs::status::Status LockBatch(WriteBatch* batch,
+                                       LockTracker* keys_to_unlock);
 
-  rocksdb_rs::status::Status TryLock(ColumnFamilyHandle* column_family, const Slice& key,
-                 bool read_only, bool exclusive, const bool do_validate = true,
-                 const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status TryLock(
+      ColumnFamilyHandle* column_family, const Slice& key, bool read_only,
+      bool exclusive, const bool do_validate = true,
+      const bool assume_tracked = false) override;
 
   void Clear() override;
 
@@ -205,9 +205,9 @@ class PessimisticTransaction : public TransactionBaseImpl {
   // Refer to TransactionOptions::skip_concurrency_control
   bool skip_concurrency_control_;
 
-  virtual rocksdb_rs::status::Status ValidateSnapshot(ColumnFamilyHandle* column_family,
-                                  const Slice& key,
-                                  SequenceNumber* tracked_at_seq);
+  virtual rocksdb_rs::status::Status ValidateSnapshot(
+      ColumnFamilyHandle* column_family, const Slice& key,
+      SequenceNumber* tracked_at_seq);
 
   void UnlockGetForUpdate(ColumnFamilyHandle* column_family,
                           const Slice& key) override;
@@ -225,77 +225,92 @@ class WriteCommittedTxn : public PessimisticTransaction {
 
   using TransactionBaseImpl::GetForUpdate;
   rocksdb_rs::status::Status GetForUpdate(const ReadOptions& read_options,
-                      ColumnFamilyHandle* column_family, const Slice& key,
-                      std::string* value, bool exclusive,
-                      const bool do_validate) override;
+                                          ColumnFamilyHandle* column_family,
+                                          const Slice& key, std::string* value,
+                                          bool exclusive,
+                                          const bool do_validate) override;
   rocksdb_rs::status::Status GetForUpdate(const ReadOptions& read_options,
-                      ColumnFamilyHandle* column_family, const Slice& key,
-                      PinnableSlice* pinnable_val, bool exclusive,
-                      const bool do_validate) override;
+                                          ColumnFamilyHandle* column_family,
+                                          const Slice& key,
+                                          PinnableSlice* pinnable_val,
+                                          bool exclusive,
+                                          const bool do_validate) override;
 
   using TransactionBaseImpl::Put;
   // `key` does NOT include timestamp even when it's enabled.
-  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
-             const Slice& value, const bool assume_tracked = false) override;
-  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
-             const SliceParts& value,
-             const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                 const Slice& key, const Slice& value,
+                                 const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                 const SliceParts& key, const SliceParts& value,
+                                 const bool assume_tracked = false) override;
 
   using TransactionBaseImpl::PutUntracked;
-  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family, const Slice& key,
-                      const Slice& value) override;
-  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family, const SliceParts& key,
-                      const SliceParts& value) override;
+  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family,
+                                          const Slice& key,
+                                          const Slice& value) override;
+  rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family,
+                                          const SliceParts& key,
+                                          const SliceParts& value) override;
 
   using TransactionBaseImpl::Delete;
   // `key` does NOT include timestamp even when it's enabled.
-  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
-                const bool assume_tracked = false) override;
-  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const SliceParts& key,
-                const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
+                                    const Slice& key,
+                                    const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
+                                    const SliceParts& key,
+                                    const bool assume_tracked = false) override;
 
   using TransactionBaseImpl::DeleteUntracked;
   rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
-                         const Slice& key) override;
+                                             const Slice& key) override;
   rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
-                         const SliceParts& key) override;
+                                             const SliceParts& key) override;
 
   using TransactionBaseImpl::SingleDelete;
   // `key` does NOT include timestamp even when it's enabled.
-  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family, const Slice& key,
-                      const bool assume_tracked = false) override;
-  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family, const SliceParts& key,
-                      const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status SingleDelete(
+      ColumnFamilyHandle* column_family, const Slice& key,
+      const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status SingleDelete(
+      ColumnFamilyHandle* column_family, const SliceParts& key,
+      const bool assume_tracked = false) override;
 
   using TransactionBaseImpl::SingleDeleteUntracked;
-  rocksdb_rs::status::Status SingleDeleteUntracked(ColumnFamilyHandle* column_family,
-                               const Slice& key) override;
+  rocksdb_rs::status::Status SingleDeleteUntracked(
+      ColumnFamilyHandle* column_family, const Slice& key) override;
 
   using TransactionBaseImpl::Merge;
-  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
-               const Slice& value, const bool assume_tracked = false) override;
+  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family,
+                                   const Slice& key, const Slice& value,
+                                   const bool assume_tracked = false) override;
 
-  rocksdb_rs::status::Status SetReadTimestampForValidation(TxnTimestamp ts) override;
+  rocksdb_rs::status::Status SetReadTimestampForValidation(
+      TxnTimestamp ts) override;
   rocksdb_rs::status::Status SetCommitTimestamp(TxnTimestamp ts) override;
   TxnTimestamp GetCommitTimestamp() const override { return commit_timestamp_; }
 
  private:
   template <typename TValue>
   rocksdb_rs::status::Status GetForUpdateImpl(const ReadOptions& read_options,
-                          ColumnFamilyHandle* column_family, const Slice& key,
-                          TValue* value, bool exclusive,
-                          const bool do_validate);
+                                              ColumnFamilyHandle* column_family,
+                                              const Slice& key, TValue* value,
+                                              bool exclusive,
+                                              const bool do_validate);
 
   template <typename TKey, typename TOperation>
-  rocksdb_rs::status::Status Operate(ColumnFamilyHandle* column_family, const TKey& key,
-                 const bool do_validate, const bool assume_tracked,
-                 TOperation&& operation);
+  rocksdb_rs::status::Status Operate(ColumnFamilyHandle* column_family,
+                                     const TKey& key, const bool do_validate,
+                                     const bool assume_tracked,
+                                     TOperation&& operation);
 
   rocksdb_rs::status::Status PrepareInternal() override;
 
   rocksdb_rs::status::Status CommitWithoutPrepareInternal() override;
 
-  rocksdb_rs::status::Status CommitBatchInternal(WriteBatch* batch, size_t batch_cnt) override;
+  rocksdb_rs::status::Status CommitBatchInternal(WriteBatch* batch,
+                                                 size_t batch_cnt) override;
 
   rocksdb_rs::status::Status CommitInternal() override;
 
@@ -309,4 +324,3 @@ class WriteCommittedTxn : public PessimisticTransaction {
 };
 
 }  // namespace rocksdb
-

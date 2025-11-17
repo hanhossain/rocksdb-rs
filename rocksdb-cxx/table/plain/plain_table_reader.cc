@@ -3,7 +3,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-
 #include "table/plain/plain_table_reader.h"
 
 #include <string>
@@ -42,7 +41,8 @@ namespace {
 // Safely getting a uint32_t element from a char array, where, starting from
 // `base`, every 4 bytes are considered as an fixed 32 bit integer.
 inline uint32_t GetFixed32Element(const char* base, size_t offset) {
-  return rocksdb_rs::coding_lean::DecodeFixed32(base + offset * sizeof(uint32_t));
+  return rocksdb_rs::coding_lean::DecodeFixed32(base +
+                                                offset * sizeof(uint32_t));
 }
 }  // namespace
 
@@ -118,7 +118,8 @@ rocksdb_rs::status::Status PlainTableReader::Open(
     bool full_scan_mode, const bool immortal_table,
     const SliceTransform* prefix_extractor) {
   if (file_size > PlainTableIndex::kMaxFileSize) {
-    return rocksdb_rs::status::Status_NotSupported("File is too large for PlainTableReader!");
+    return rocksdb_rs::status::Status_NotSupported(
+        "File is too large for PlainTableReader!");
   }
 
   std::unique_ptr<TableProperties> props;
@@ -152,8 +153,9 @@ rocksdb_rs::status::Status PlainTableReader::Open(
   auto encoding_type_prop =
       user_props.find(PlainTablePropertyNames::kEncodingType);
   if (encoding_type_prop != user_props.end()) {
-    encoding_type = static_cast<EncodingType>(
-        rocksdb_rs::coding_lean::DecodeFixed32(encoding_type_prop->second.c_str()));
+    encoding_type =
+        static_cast<EncodingType>(rocksdb_rs::coding_lean::DecodeFixed32(
+            encoding_type_prop->second.c_str()));
   }
 
   std::unique_ptr<PlainTableReader> new_reader(new PlainTableReader(
@@ -224,7 +226,8 @@ rocksdb_rs::status::Status PlainTableReader::PopulateIndexRecordList(
     ParsedInternalKey key;
     Slice value_slice;
     bool seekable = false;
-    rocksdb_rs::status::Status s = Next(&decoder, &pos, &key, nullptr, &value_slice, &seekable);
+    rocksdb_rs::status::Status s =
+        Next(&decoder, &pos, &key, nullptr, &value_slice, &seekable);
     if (!s.ok()) {
       return s;
     }
@@ -249,7 +252,8 @@ rocksdb_rs::status::Status PlainTableReader::PopulateIndexRecordList(
     index_builder->AddKeyPrefix(GetPrefix(key), key_offset);
 
     if (!seekable && is_first_record) {
-      return rocksdb_rs::status::Status_Corruption("Key for a prefix is not seekable");
+      return rocksdb_rs::status::Status_Corruption(
+          "Key for a prefix is not seekable");
     }
 
     is_first_record = false;
@@ -280,18 +284,18 @@ void PlainTableReader::FillBloom(const std::vector<uint32_t>& prefix_hashes) {
 rocksdb_rs::status::Status PlainTableReader::MmapDataIfNeeded() {
   if (file_info_.is_mmap_mode) {
     // Get mmapped memory.
-    return file_info_.file->Read(
-        IOOptions(), 0, static_cast<size_t>(file_size_), &file_info_.file_data,
-        nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
+    return file_info_.file
+        ->Read(IOOptions(), 0, static_cast<size_t>(file_size_),
+               &file_info_.file_data, nullptr, nullptr,
+               Env::IO_TOTAL /* rate_limiter_priority */)
+        .status();
   }
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status PlainTableReader::PopulateIndex(TableProperties* props,
-                                       int bloom_bits_per_key,
-                                       double hash_table_ratio,
-                                       size_t index_sparseness,
-                                       size_t huge_page_tlb_size) {
+rocksdb_rs::status::Status PlainTableReader::PopulateIndex(
+    TableProperties* props, int bloom_bits_per_key, double hash_table_ratio,
+    size_t index_sparseness, size_t huge_page_tlb_size) {
   assert(props != nullptr);
 
   BlockContents index_block_contents;
@@ -425,10 +429,9 @@ rocksdb_rs::status::Status PlainTableReader::PopulateIndex(TableProperties* prop
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status PlainTableReader::GetOffset(PlainTableKeyDecoder* decoder,
-                                   const Slice& target, const Slice& prefix,
-                                   uint32_t prefix_hash, bool& prefix_matched,
-                                   uint32_t* offset) const {
+rocksdb_rs::status::Status PlainTableReader::GetOffset(
+    PlainTableKeyDecoder* decoder, const Slice& target, const Slice& prefix,
+    uint32_t prefix_hash, bool& prefix_matched, uint32_t* offset) const {
   prefix_matched = false;
   uint32_t prefix_index_offset;
   auto res = index_.GetOffset(prefix_hash, &prefix_index_offset);
@@ -448,8 +451,8 @@ rocksdb_rs::status::Status PlainTableReader::GetOffset(PlainTableKeyDecoder* dec
   uint32_t high = upper_bound;
   ParsedInternalKey mid_key;
   ParsedInternalKey parsed_target;
-  rocksdb_rs::status::Status s = ParseInternalKey(target, &parsed_target,
-                              false /* log_err_key */);  // TODO
+  rocksdb_rs::status::Status s = ParseInternalKey(
+      target, &parsed_target, false /* log_err_key */);  // TODO
   if (!s.ok()) return s;
 
   // The key is between [low, high). Do a binary search between it.
@@ -516,10 +519,12 @@ bool PlainTableReader::MatchBloom(uint32_t hash) const {
   }
 }
 
-rocksdb_rs::status::Status PlainTableReader::Next(PlainTableKeyDecoder* decoder, uint32_t* offset,
-                              ParsedInternalKey* parsed_key,
-                              Slice* internal_key, Slice* value,
-                              bool* seekable) const {
+rocksdb_rs::status::Status PlainTableReader::Next(PlainTableKeyDecoder* decoder,
+                                                  uint32_t* offset,
+                                                  ParsedInternalKey* parsed_key,
+                                                  Slice* internal_key,
+                                                  Slice* value,
+                                                  bool* seekable) const {
   if (*offset == file_info_.data_end_offset) {
     *offset = file_info_.data_end_offset;
     return rocksdb_rs::status::Status_OK();
@@ -530,8 +535,8 @@ rocksdb_rs::status::Status PlainTableReader::Next(PlainTableKeyDecoder* decoder,
   }
 
   uint32_t bytes_read;
-  rocksdb_rs::status::Status s = decoder->NextKey(*offset, parsed_key, internal_key, value,
-                              &bytes_read, seekable);
+  rocksdb_rs::status::Status s = decoder->NextKey(
+      *offset, parsed_key, internal_key, value, &bytes_read, seekable);
   if (!s.ok()) {
     return s;
   }
@@ -546,17 +551,16 @@ void PlainTableReader::Prepare(const Slice& target) {
   }
 }
 
-rocksdb_rs::status::Status PlainTableReader::Get(const ReadOptions& /*ro*/, const Slice& target,
-                             GetContext* get_context,
-                             const SliceTransform* /* prefix_extractor */,
-                             bool /*skip_filters*/) {
+rocksdb_rs::status::Status PlainTableReader::Get(
+    const ReadOptions& /*ro*/, const Slice& target, GetContext* get_context,
+    const SliceTransform* /* prefix_extractor */, bool /*skip_filters*/) {
   // Check bloom filter first.
   Slice prefix_slice;
   uint32_t prefix_hash;
   if (IsTotalOrderMode()) {
     if (full_scan_mode_) {
-      status_ =
-          rocksdb_rs::status::Status_InvalidArgument("Get() is not allowed in full scan mode.");
+      status_ = rocksdb_rs::status::Status_InvalidArgument(
+          "Get() is not allowed in full scan mode.");
     }
     // Match whole user key for bloom filter check.
     if (!MatchBloom(GetSliceHash(ExtractUserKey(target)))) {
@@ -577,8 +581,8 @@ rocksdb_rs::status::Status PlainTableReader::Get(const ReadOptions& /*ro*/, cons
   bool prefix_match;
   PlainTableKeyDecoder decoder(&file_info_, encoding_type_, user_key_len_,
                                prefix_extractor_);
-  rocksdb_rs::status::Status s = GetOffset(&decoder, target, prefix_slice, prefix_hash,
-                       prefix_match, &offset);
+  rocksdb_rs::status::Status s = GetOffset(&decoder, target, prefix_slice,
+                                           prefix_hash, prefix_match, &offset);
 
   if (!s.ok()) {
     return s;
@@ -658,7 +662,8 @@ void PlainTableIterator::SeekToFirst() {
 
 void PlainTableIterator::SeekToLast() {
   assert(false);
-  status_ = rocksdb_rs::status::Status_NotSupported("SeekToLast() is not supported in PlainTable");
+  status_ = rocksdb_rs::status::Status_NotSupported(
+      "SeekToLast() is not supported in PlainTable");
   next_offset_ = offset_ = table_->file_info_.data_end_offset;
 }
 
@@ -679,8 +684,8 @@ void PlainTableIterator::Seek(const Slice& target) {
   // total Seek(). assert failure.
   if (table_->IsTotalOrderMode()) {
     if (table_->full_scan_mode_) {
-      status_ =
-          rocksdb_rs::status::Status_InvalidArgument("Seek() is not allowed in full scan mode.");
+      status_ = rocksdb_rs::status::Status_InvalidArgument(
+          "Seek() is not allowed in full scan mode.");
       offset_ = next_offset_ = table_->file_info_.data_end_offset;
       return;
     } else if (table_->GetIndexSize() > 1) {
@@ -733,8 +738,8 @@ void PlainTableIterator::Seek(const Slice& target) {
 
 void PlainTableIterator::SeekForPrev(const Slice& /*target*/) {
   assert(false);
-  status_ =
-      rocksdb_rs::status::Status_NotSupported("SeekForPrev() is not supported in PlainTable");
+  status_ = rocksdb_rs::status::Status_NotSupported(
+      "SeekForPrev() is not supported in PlainTable");
   offset_ = next_offset_ = table_->file_info_.data_end_offset;
 }
 
@@ -763,6 +768,8 @@ Slice PlainTableIterator::value() const {
   return value_;
 }
 
-rocksdb_rs::status::Status PlainTableIterator::status() const { return status_.Clone(); }
+rocksdb_rs::status::Status PlainTableIterator::status() const {
+  return status_.Clone();
+}
 
 }  // namespace rocksdb

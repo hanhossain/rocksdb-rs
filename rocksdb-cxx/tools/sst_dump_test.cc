@@ -113,7 +113,8 @@ class SSTDumpToolTest : public testing::Test {
     tb.reset(opts.table_factory->NewTableBuilder(
         TableBuilderOptions(
             imoptions, moptions, ikc, &int_tbl_prop_collector_factories,
-            rocksdb_rs::compression_type::CompressionType::kNoCompression, CompressionOptions(),
+            rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            CompressionOptions(),
             TablePropertiesCollectorFactory::Context::kUnknownColumnFamily,
             column_family_name, unknown_level),
         file_writer.get()));
@@ -183,8 +184,7 @@ TEST_F(SSTDumpToolTest, SstDumpReverseBytewiseComparator) {
   opts.env = env();
   opts.comparator = ReverseBytewiseComparator();
   BlockBasedTableOptions table_opts;
-  table_opts.filter_policy.reset(
-      rocksdb::NewBloomFilterPolicy(10, false));
+  table_opts.filter_policy.reset(rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path =
       MakeFilePath("rocksdb_sst_reverse_bytewise_comparator.sst");
@@ -207,8 +207,7 @@ TEST_F(SSTDumpToolTest, SstDumpComparatorWithU64Ts) {
   opts.env = env();
   opts.comparator = test::BytewiseComparatorWithU64TsWrapper();
   BlockBasedTableOptions table_opts;
-  table_opts.filter_policy.reset(
-      rocksdb::NewBloomFilterPolicy(10, false));
+  table_opts.filter_policy.reset(rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path =
       MakeFilePath("rocksdb_sst_comparator_with_u64_ts.sst");
@@ -230,8 +229,7 @@ TEST_F(SSTDumpToolTest, FilterBlock) {
   Options opts;
   opts.env = env();
   BlockBasedTableOptions table_opts;
-  table_opts.filter_policy.reset(
-      rocksdb::NewBloomFilterPolicy(10, true));
+  table_opts.filter_policy.reset(rocksdb::NewBloomFilterPolicy(10, true));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path = MakeFilePath("rocksdb_sst_test.sst");
   createSST(opts, file_path);
@@ -252,8 +250,7 @@ TEST_F(SSTDumpToolTest, FullFilterBlock) {
   Options opts;
   opts.env = env();
   BlockBasedTableOptions table_opts;
-  table_opts.filter_policy.reset(
-      rocksdb::NewBloomFilterPolicy(10, false));
+  table_opts.filter_policy.reset(rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path = MakeFilePath("rocksdb_sst_test.sst");
   createSST(opts, file_path);
@@ -274,8 +271,7 @@ TEST_F(SSTDumpToolTest, GetProperties) {
   Options opts;
   opts.env = env();
   BlockBasedTableOptions table_opts;
-  table_opts.filter_policy.reset(
-      rocksdb::NewBloomFilterPolicy(10, false));
+  table_opts.filter_policy.reset(rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path = MakeFilePath("rocksdb_sst_test.sst");
   createSST(opts, file_path);
@@ -296,8 +292,7 @@ TEST_F(SSTDumpToolTest, CompressedSizes) {
   Options opts;
   opts.env = env();
   BlockBasedTableOptions table_opts;
-  table_opts.filter_policy.reset(
-      rocksdb::NewBloomFilterPolicy(10, false));
+  table_opts.filter_policy.reset(rocksdb::NewBloomFilterPolicy(10, false));
   opts.table_factory.reset(new BlockBasedTableFactory(table_opts));
   std::string file_path = MakeFilePath("rocksdb_sst_test.sst");
   createSST(opts, file_path);
@@ -468,4 +463,3 @@ int main(int argc, char** argv) {
   RegisterCustomObjects(argc, argv);
   return RUN_ALL_TESTS();
 }
-

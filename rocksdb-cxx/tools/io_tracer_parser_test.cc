@@ -15,14 +15,13 @@ int main() {
 #include <string>
 #include <vector>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/trace_reader_writer.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 #include "tools/io_tracer_parser_tool.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 

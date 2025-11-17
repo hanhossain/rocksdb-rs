@@ -5,7 +5,6 @@
 //
 #pragma once
 
-
 #include <atomic>
 #include <limits>
 #include <sstream>
@@ -50,10 +49,11 @@ class VolatileCacheTier : public PersistentCacheTier {
 
   // insert to cache
   rocksdb_rs::status::Status Insert(const Slice& page_key, const char* data,
-                const size_t size) override;
+                                    const size_t size) override;
   // lookup key in cache
-  rocksdb_rs::status::Status Lookup(const Slice& page_key, std::unique_ptr<char[]>* data,
-                size_t* size) override;
+  rocksdb_rs::status::Status Lookup(const Slice& page_key,
+                                    std::unique_ptr<char[]>* data,
+                                    size_t* size) override;
 
   // is compressed cache ?
   bool IsCompressed() override { return is_compressed_; }
@@ -136,4 +136,3 @@ class VolatileCacheTier : public PersistentCacheTier {
 };
 
 }  // namespace rocksdb
-

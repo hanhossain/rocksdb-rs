@@ -7,7 +7,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-
 #include "rocksdb/utilities/write_batch_with_index.h"
 
 #include <map>
@@ -49,7 +48,7 @@ struct Entry {
 struct TestHandler : public WriteBatch::Handler {
   std::map<uint32_t, std::vector<Entry>> seen;
   rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
-               const Slice& value) override {
+                                   const Slice& value) override {
     Entry e;
     e.key = key.ToString();
     e.value = value.ToString();
@@ -57,8 +56,9 @@ struct TestHandler : public WriteBatch::Handler {
     seen[column_family_id].push_back(e);
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
-                 const Slice& value) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id,
+                                     const Slice& key,
+                                     const Slice& value) override {
     Entry e;
     e.key = key.ToString();
     e.value = value.ToString();
@@ -67,7 +67,8 @@ struct TestHandler : public WriteBatch::Handler {
     return rocksdb_rs::status::Status_OK();
   }
   void LogData(const Slice& /*blob*/) override {}
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
+                                      const Slice& key) override {
     Entry e;
     e.key = key.ToString();
     e.value = "";
@@ -108,7 +109,9 @@ class KVIter : public Iterator {
   }
   Slice key() const override { return iter_->first; }
   Slice value() const override { return iter_->second; }
-  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status status() const override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
  private:
   const KVMap* const map_;
@@ -279,7 +282,9 @@ class WBWIBaseTest : public testing::Test {
     return result;
   }
 
-  virtual rocksdb_rs::status::Status OpenDB() { return DB::Open(options_, dbname_, &db_); }
+  virtual rocksdb_rs::status::Status OpenDB() {
+    return DB::Open(options_, dbname_, &db_);
+  }
 
   void ReleaseSnapshot() {
     if (read_opts_.snapshot != nullptr) {
@@ -1263,7 +1268,8 @@ TEST_P(WriteBatchWithIndexTest, TestGetFromBatchAndDB) {
   ASSERT_OK(batch_->GetFromBatchAndDB(db_, read_opts_, "a", &value));
   ASSERT_EQ("batch_->a", value);
 
-  rocksdb_rs::status::Status s = batch_->GetFromBatchAndDB(db_, read_opts_, "b", &value);
+  rocksdb_rs::status::Status s =
+      batch_->GetFromBatchAndDB(db_, read_opts_, "b", &value);
   ASSERT_TRUE(s.IsNotFound());
 
   ASSERT_OK(batch_->GetFromBatchAndDB(db_, read_opts_, "c", &value));
@@ -1887,7 +1893,8 @@ TEST_P(WriteBatchWithIndexTest, MultiGetTest) {
     key_slices.emplace_back(keys[i]);
   }
   std::vector<PinnableSlice> values(keys.size());
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   batch_->MultiGetFromBatchAndDB(db_, read_opts_, cf0, key_slices.size(),
                                  key_slices.data(), values.data(),
@@ -1961,7 +1968,8 @@ TEST_P(WriteBatchWithIndexTest, MultiGetTest2) {
 
   Random rnd(301);
   std::vector<PinnableSlice> values(keys_per_pass);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys_per_pass);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys_per_pass);
   for (int pass = 0; pass < 40; pass++) {
     std::vector<Slice> key_slices;
     for (size_t i = 0; i < keys_per_pass; i++) {
@@ -1992,7 +2000,7 @@ TEST_P(WriteBatchWithIndexTest, MultiGetTest2) {
         case 4:  // 400-400 Put+ Merge
           ASSERT_OK(statuses[i]);
           ASSERT_EQ(values[i].ToString(), key_slices[i].ToString() + "," +
-                                   key_slices[i].ToString() + "m");
+                                              key_slices[i].ToString() + "m");
           break;
         case 5:  // Merge only
           ASSERT_OK(statuses[i]);
@@ -2004,8 +2012,8 @@ TEST_P(WriteBatchWithIndexTest, MultiGetTest2) {
         default:
           assert(false);
       }  // end switch
-    }    // End for each key
-  }      // end for passes
+    }  // End for each key
+  }  // end for passes
 }
 
 // This test has merges, but the merge does not play into the final result
@@ -2160,7 +2168,8 @@ TEST_P(WriteBatchWithIndexTest, GetAfterMergePut) {
   ASSERT_OK(db_->Put(write_opts_, "key", "orig"));
 
   ASSERT_OK(batch_->Merge("key", "aa"));  // Merging aa under key
-  rocksdb_rs::status::Status s = batch_->GetFromBatch(cf0, options_, "key", &value);
+  rocksdb_rs::status::Status s =
+      batch_->GetFromBatch(cf0, options_, "key", &value);
   ASSERT_EQ(s.code(), rocksdb_rs::status::Code::kMergeInProgress);
   ASSERT_OK(batch_->GetFromBatchAndDB(db_, read_opts_, "key", &value));
   ASSERT_EQ(value, "orig,aa");
@@ -2190,7 +2199,8 @@ TEST_P(WriteBatchWithIndexTest, GetAfterMergeDelete) {
   ColumnFamilyHandle* cf0 = db_->DefaultColumnFamily();
 
   ASSERT_OK(batch_->Merge("key", "aa"));  // Merging aa under key
-  rocksdb_rs::status::Status s = batch_->GetFromBatch(cf0, options_, "key", &value);
+  rocksdb_rs::status::Status s =
+      batch_->GetFromBatch(cf0, options_, "key", &value);
   ASSERT_EQ(s.code(), rocksdb_rs::status::Code::kMergeInProgress);
   ASSERT_OK(batch_->GetFromBatchAndDB(db_, read_opts_, "key", &value));
   ASSERT_EQ(value, "aa");
@@ -2273,7 +2283,8 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
     std::array<Slice, num_keys> keys{{Slice(), Slice()}};
     std::array<PinnableSlice, num_keys> pinnable_vals{
         {PinnableSlice(), PinnableSlice()}};
-    std::array<rocksdb_rs::status::Status, num_keys> statuses{{rocksdb_rs::status::Status_new(), rocksdb_rs::status::Status_new()}};
+    std::array<rocksdb_rs::status::Status, num_keys> statuses{
+        {rocksdb_rs::status::Status_new(), rocksdb_rs::status::Status_new()}};
     constexpr bool sorted_input = false;
     batch_->MultiGetFromBatchAndDB(/*db=*/nullptr, ReadOptions(), &cf2,
                                    num_keys, keys.data(), pinnable_vals.data(),
@@ -2297,7 +2308,8 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
   for (uint32_t i = 0; i < kMaxKey; ++i) {
     std::string key;
     rocksdb_rs::coding::PutFixed32(key, i);
-    rocksdb_rs::status::Status s = batch_->Put(&cf2, key, "value" + std::to_string(i));
+    rocksdb_rs::status::Status s =
+        batch_->Put(&cf2, key, "value" + std::to_string(i));
     ASSERT_OK(s);
   }
 
@@ -2311,7 +2323,8 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
     std::string value;
     std::string key;
     rocksdb_rs::coding::PutFixed32(key, i);
-    rocksdb_rs::status::Status s = batch_->GetFromBatch(&cf2, Options(), key, &value);
+    rocksdb_rs::status::Status s =
+        batch_->GetFromBatch(&cf2, Options(), key, &value);
     ASSERT_OK(s);
     ASSERT_EQ("value" + std::to_string(i), value);
   }
@@ -2351,7 +2364,8 @@ TEST_P(WriteBatchWithIndexTest, ColumnFamilyWithTimestamp) {
     std::string value;
     std::string key;
     rocksdb_rs::coding::PutFixed32(key, i);
-    rocksdb_rs::status::Status s = batch_->GetFromBatch(&cf2, Options(), key, &value);
+    rocksdb_rs::status::Status s =
+        batch_->GetFromBatch(&cf2, Options(), key, &value);
     ASSERT_TRUE(s.IsNotFound());
   }
 
@@ -2392,7 +2406,8 @@ TEST_P(WriteBatchWithIndexTest, IndexNoTs) {
   }
   {
     std::string value;
-    rocksdb_rs::status::Status s = wbwi.GetFromBatch(&cf, options_, "a", &value);
+    rocksdb_rs::status::Status s =
+        wbwi.GetFromBatch(&cf, options_, "a", &value);
     ASSERT_OK(s);
     ASSERT_EQ("a1", value);
   }
@@ -2406,4 +2421,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

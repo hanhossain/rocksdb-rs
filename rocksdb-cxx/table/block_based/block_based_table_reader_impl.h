@@ -147,10 +147,9 @@ TBlockIter* BlockBasedTable::NewDataBlockIterator(
 // If input_iter is null, new a iterator
 // If input_iter is not null, update this iter and return it
 template <typename TBlockIter>
-TBlockIter* BlockBasedTable::NewDataBlockIterator(const ReadOptions& ro,
-                                                  CachableEntry<Block>& block,
-                                                  TBlockIter* input_iter,
-                                                  rocksdb_rs::status::Status s) const {
+TBlockIter* BlockBasedTable::NewDataBlockIterator(
+    const ReadOptions& ro, CachableEntry<Block>& block, TBlockIter* input_iter,
+    rocksdb_rs::status::Status s) const {
   PERF_TIMER_GUARD(new_table_block_iter_nanos);
 
   TBlockIter* iter = input_iter != nullptr ? input_iter : new TBlockIter;

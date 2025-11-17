@@ -29,9 +29,7 @@
 #include "util/string_util.h"
 
 namespace rocksdb {
-ConfigOptions::ConfigOptions()
-    : registry(ObjectRegistry::NewInstance())
-{
+ConfigOptions::ConfigOptions() : registry(ObjectRegistry::NewInstance()) {
   env = Env::Default();
 }
 
@@ -40,7 +38,7 @@ ConfigOptions::ConfigOptions(const DBOptions& db_opts) : env(db_opts.env) {
 }
 
 rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                       const ColumnFamilyOptions& cf_opts) {
+                                           const ColumnFamilyOptions& cf_opts) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   auto db_cfg = DBOptionsAsConfigurable(db_opts);
   auto cf_cfg = CFOptionsAsConfigurable(cf_opts);
@@ -351,40 +349,59 @@ std::unordered_map<std::string, ChecksumType>
 
 std::unordered_map<std::string, rocksdb_rs::compression_type::CompressionType>
     OptionsHelper::compression_type_string_map = {
-        {"kNoCompression", rocksdb_rs::compression_type::CompressionType::kNoCompression},
-        {"kSnappyCompression", rocksdb_rs::compression_type::CompressionType::kSnappyCompression},
-        {"kZlibCompression", rocksdb_rs::compression_type::CompressionType::kZlibCompression},
-        {"kBZip2Compression", rocksdb_rs::compression_type::CompressionType::kBZip2Compression},
-        {"kLZ4Compression", rocksdb_rs::compression_type::CompressionType::kLZ4Compression},
-        {"kLZ4HCCompression", rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression},
-        {"kXpressCompression", rocksdb_rs::compression_type::CompressionType::kXpressCompression},
+        {"kNoCompression",
+         rocksdb_rs::compression_type::CompressionType::kNoCompression},
+        {"kSnappyCompression",
+         rocksdb_rs::compression_type::CompressionType::kSnappyCompression},
+        {"kZlibCompression",
+         rocksdb_rs::compression_type::CompressionType::kZlibCompression},
+        {"kBZip2Compression",
+         rocksdb_rs::compression_type::CompressionType::kBZip2Compression},
+        {"kLZ4Compression",
+         rocksdb_rs::compression_type::CompressionType::kLZ4Compression},
+        {"kLZ4HCCompression",
+         rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression},
+        {"kXpressCompression",
+         rocksdb_rs::compression_type::CompressionType::kXpressCompression},
         {"kZSTD", rocksdb_rs::compression_type::CompressionType::kZSTD},
-        {"kZSTDNotFinalCompression", rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression},
-        {"kDisableCompressionOption", rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption}};
+        {"kZSTDNotFinalCompression",
+         rocksdb_rs::compression_type::CompressionType::
+             kZSTDNotFinalCompression},
+        {"kDisableCompressionOption",
+         rocksdb_rs::compression_type::CompressionType::
+             kDisableCompressionOption}};
 
-std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedCompressions() {
+std::vector<rocksdb_rs::compression_type::CompressionType>
+GetSupportedCompressions() {
   // std::set internally to deduplicate potential name aliases
-  std::set<rocksdb_rs::compression_type::CompressionType> supported_compressions;
+  std::set<rocksdb_rs::compression_type::CompressionType>
+      supported_compressions;
   for (const auto& comp_to_name : OptionsHelper::compression_type_string_map) {
     rocksdb_rs::compression_type::CompressionType t = comp_to_name.second;
-    if (t != rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption && CompressionTypeSupported(t)) {
+    if (t != rocksdb_rs::compression_type::CompressionType::
+                 kDisableCompressionOption &&
+        CompressionTypeSupported(t)) {
       supported_compressions.insert(t);
     }
   }
-  return std::vector<rocksdb_rs::compression_type::CompressionType>(supported_compressions.begin(),
-                                      supported_compressions.end());
+  return std::vector<rocksdb_rs::compression_type::CompressionType>(
+      supported_compressions.begin(), supported_compressions.end());
 }
 
-std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedDictCompressions() {
-  std::set<rocksdb_rs::compression_type::CompressionType> dict_compression_types;
+std::vector<rocksdb_rs::compression_type::CompressionType>
+GetSupportedDictCompressions() {
+  std::set<rocksdb_rs::compression_type::CompressionType>
+      dict_compression_types;
   for (const auto& comp_to_name : OptionsHelper::compression_type_string_map) {
     rocksdb_rs::compression_type::CompressionType t = comp_to_name.second;
-    if (t != rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption && DictCompressionTypeSupported(t)) {
+    if (t != rocksdb_rs::compression_type::CompressionType::
+                 kDisableCompressionOption &&
+        DictCompressionTypeSupported(t)) {
       dict_compression_types.insert(t);
     }
   }
-  return std::vector<rocksdb_rs::compression_type::CompressionType>(dict_compression_types.begin(),
-                                      dict_compression_types.end());
+  return std::vector<rocksdb_rs::compression_type::CompressionType>(
+      dict_compression_types.begin(), dict_compression_types.end());
 }
 
 std::vector<ChecksumType> GetSupportedChecksums() {
@@ -396,8 +413,10 @@ std::vector<ChecksumType> GetSupportedChecksums() {
                                    checksum_types.end());
 }
 
-static bool ParseOptionHelper(void* opt_address, const rocksdb_rs::utilities::options_type::OptionType& opt_type,
-                              const std::string& value) {
+static bool ParseOptionHelper(
+    void* opt_address,
+    const rocksdb_rs::utilities::options_type::OptionType& opt_type,
+    const std::string& value) {
   switch (opt_type) {
     case rocksdb_rs::utilities::options_type::OptionType::kBoolean:
       *static_cast<bool*>(opt_address) = ParseBoolean("", value);
@@ -442,7 +461,8 @@ static bool ParseOptionHelper(void* opt_address, const rocksdb_rs::utilities::op
     case rocksdb_rs::utilities::options_type::OptionType::kCompressionType:
       return ParseEnum<rocksdb_rs::compression_type::CompressionType>(
           compression_type_string_map, value,
-          static_cast<rocksdb_rs::compression_type::CompressionType*>(opt_address));
+          static_cast<rocksdb_rs::compression_type::CompressionType*>(
+              opt_address));
     case rocksdb_rs::utilities::options_type::OptionType::kChecksumType:
       return ParseEnum<ChecksumType>(checksum_type_string_map, value,
                                      static_cast<ChecksumType*>(opt_address));
@@ -468,9 +488,10 @@ static bool ParseOptionHelper(void* opt_address, const rocksdb_rs::utilities::op
   return true;
 }
 
-bool SerializeSingleOptionHelper(const void* opt_address,
-                                 const rocksdb_rs::utilities::options_type::OptionType opt_type,
-                                 std::string* value) {
+bool SerializeSingleOptionHelper(
+    const void* opt_address,
+    const rocksdb_rs::utilities::options_type::OptionType opt_type,
+    std::string* value) {
   assert(value);
   switch (opt_type) {
     case rocksdb_rs::utilities::options_type::OptionType::kBoolean:
@@ -482,13 +503,11 @@ bool SerializeSingleOptionHelper(const void* opt_address,
     case rocksdb_rs::utilities::options_type::OptionType::kInt32T:
       *value = std::to_string(*(static_cast<const int32_t*>(opt_address)));
       break;
-    case rocksdb_rs::utilities::options_type::OptionType::kInt64T:
-      {
-        int64_t v;
-        GetUnaligned(static_cast<const int64_t*>(opt_address), &v);
-        *value = std::to_string(v);
-      }
-      break;
+    case rocksdb_rs::utilities::options_type::OptionType::kInt64T: {
+      int64_t v;
+      GetUnaligned(static_cast<const int64_t*>(opt_address), &v);
+      *value = std::to_string(v);
+    } break;
     case rocksdb_rs::utilities::options_type::OptionType::kUInt:
       *value = std::to_string(*(static_cast<const unsigned int*>(opt_address)));
       break;
@@ -498,20 +517,16 @@ bool SerializeSingleOptionHelper(const void* opt_address,
     case rocksdb_rs::utilities::options_type::OptionType::kUInt32T:
       *value = std::to_string(*(static_cast<const uint32_t*>(opt_address)));
       break;
-    case rocksdb_rs::utilities::options_type::OptionType::kUInt64T:
-      {
-        uint64_t v;
-        GetUnaligned(static_cast<const uint64_t*>(opt_address), &v);
-        *value = std::to_string(v);
-      }
-      break;
-    case rocksdb_rs::utilities::options_type::OptionType::kSizeT:
-      {
-        size_t v;
-        GetUnaligned(static_cast<const size_t*>(opt_address), &v);
-        *value = std::to_string(v);
-      }
-      break;
+    case rocksdb_rs::utilities::options_type::OptionType::kUInt64T: {
+      uint64_t v;
+      GetUnaligned(static_cast<const uint64_t*>(opt_address), &v);
+      *value = std::to_string(v);
+    } break;
+    case rocksdb_rs::utilities::options_type::OptionType::kSizeT: {
+      size_t v;
+      GetUnaligned(static_cast<const size_t*>(opt_address), &v);
+      *value = std::to_string(v);
+    } break;
     case rocksdb_rs::utilities::options_type::OptionType::kDouble:
       *value = std::to_string(*(static_cast<const double*>(opt_address)));
       break;
@@ -530,7 +545,9 @@ bool SerializeSingleOptionHelper(const void* opt_address,
     case rocksdb_rs::utilities::options_type::OptionType::kCompressionType:
       return SerializeEnum<rocksdb_rs::compression_type::CompressionType>(
           compression_type_string_map,
-          *(static_cast<const rocksdb_rs::compression_type::CompressionType*>(opt_address)), value);
+          *(static_cast<const rocksdb_rs::compression_type::CompressionType*>(
+              opt_address)),
+          value);
       break;
     case rocksdb_rs::utilities::options_type::OptionType::kChecksumType:
       return SerializeEnum<ChecksumType>(
@@ -565,16 +582,17 @@ rocksdb_rs::status::Status ConfigureFromMap(
     const ConfigOptions& config_options,
     const std::unordered_map<std::string, std::string>& opt_map,
     const std::string& option_name, Configurable* config, T* new_opts) {
-  rocksdb_rs::status::Status s = config->ConfigureFromMap(config_options, opt_map);
+  rocksdb_rs::status::Status s =
+      config->ConfigureFromMap(config_options, opt_map);
   if (s.ok()) {
     *new_opts = *(config->GetOptions<T>(option_name));
   }
   return s;
 }
 
-
-rocksdb_rs::status::Status StringToMap(const std::string& opts_str,
-                   std::unordered_map<std::string, std::string>* opts_map) {
+rocksdb_rs::status::Status StringToMap(
+    const std::string& opts_str,
+    std::unordered_map<std::string, std::string>* opts_map) {
   assert(opts_map);
   // Example:
   //   opts_str = "write_buffer_size=1024;max_write_buffer_number=2;"
@@ -589,9 +607,11 @@ rocksdb_rs::status::Status StringToMap(const std::string& opts_str,
   while (pos < opts.size()) {
     size_t eq_pos = opts.find_first_of("={};", pos);
     if (eq_pos == std::string::npos) {
-      return rocksdb_rs::status::Status_InvalidArgument("Mismatched key value pair, '=' expected");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Mismatched key value pair, '=' expected");
     } else if (opts[eq_pos] != '=') {
-      return rocksdb_rs::status::Status_InvalidArgument("Unexpected char in key");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Unexpected char in key");
     }
 
     std::string key = trim(opts.substr(pos, eq_pos - pos));
@@ -600,7 +620,8 @@ rocksdb_rs::status::Status StringToMap(const std::string& opts_str,
     }
 
     std::string value;
-    rocksdb_rs::status::Status s = OptionTypeInfo::NextToken(opts, ';', eq_pos + 1, &pos, &value);
+    rocksdb_rs::status::Status s =
+        OptionTypeInfo::NextToken(opts, ';', eq_pos + 1, &pos, &value);
     if (!s.ok()) {
       return s;
     } else {
@@ -616,49 +637,49 @@ rocksdb_rs::status::Status StringToMap(const std::string& opts_str,
   return rocksdb_rs::status::Status_OK();
 }
 
-
-rocksdb_rs::status::Status GetStringFromDBOptions(std::string* opt_string,
-                              const DBOptions& db_options,
-                              const std::string& delimiter) {
+rocksdb_rs::status::Status GetStringFromDBOptions(
+    std::string* opt_string, const DBOptions& db_options,
+    const std::string& delimiter) {
   ConfigOptions config_options(db_options);
   config_options.delimiter = delimiter;
   return GetStringFromDBOptions(config_options, db_options, opt_string);
 }
 
-rocksdb_rs::status::Status GetStringFromDBOptions(const ConfigOptions& config_options,
-                              const DBOptions& db_options,
-                              std::string* opt_string) {
+rocksdb_rs::status::Status GetStringFromDBOptions(
+    const ConfigOptions& config_options, const DBOptions& db_options,
+    std::string* opt_string) {
   assert(opt_string);
   opt_string->clear();
   auto config = DBOptionsAsConfigurable(db_options);
   return config->GetOptionString(config_options, opt_string);
 }
 
-
-rocksdb_rs::status::Status GetStringFromColumnFamilyOptions(std::string* opt_string,
-                                        const ColumnFamilyOptions& cf_options,
-                                        const std::string& delimiter) {
+rocksdb_rs::status::Status GetStringFromColumnFamilyOptions(
+    std::string* opt_string, const ColumnFamilyOptions& cf_options,
+    const std::string& delimiter) {
   ConfigOptions config_options;
   config_options.delimiter = delimiter;
   return GetStringFromColumnFamilyOptions(config_options, cf_options,
                                           opt_string);
 }
 
-rocksdb_rs::status::Status GetStringFromColumnFamilyOptions(const ConfigOptions& config_options,
-                                        const ColumnFamilyOptions& cf_options,
-                                        std::string* opt_string) {
+rocksdb_rs::status::Status GetStringFromColumnFamilyOptions(
+    const ConfigOptions& config_options, const ColumnFamilyOptions& cf_options,
+    std::string* opt_string) {
   const auto config = CFOptionsAsConfigurable(cf_options);
   return config->GetOptionString(config_options, opt_string);
 }
 
-rocksdb_rs::status::Status GetStringFromCompressionType(std::string* compression_str,
-                                    rocksdb_rs::compression_type::CompressionType compression_type) {
-  bool ok = SerializeEnum<rocksdb_rs::compression_type::CompressionType>(compression_type_string_map,
-                                           compression_type, compression_str);
+rocksdb_rs::status::Status GetStringFromCompressionType(
+    std::string* compression_str,
+    rocksdb_rs::compression_type::CompressionType compression_type) {
+  bool ok = SerializeEnum<rocksdb_rs::compression_type::CompressionType>(
+      compression_type_string_map, compression_type, compression_str);
   if (ok) {
     return rocksdb_rs::status::Status_OK();
   } else {
-    return rocksdb_rs::status::Status_InvalidArgument("Invalid compression types");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Invalid compression types");
   }
 }
 
@@ -683,10 +704,10 @@ rocksdb_rs::status::Status GetColumnFamilyOptionsFromMap(
   }
 }
 
-rocksdb_rs::status::Status GetColumnFamilyOptionsFromString(const ConfigOptions& config_options,
-                                        const ColumnFamilyOptions& base_options,
-                                        const std::string& opts_str,
-                                        ColumnFamilyOptions* new_options) {
+rocksdb_rs::status::Status GetColumnFamilyOptionsFromString(
+    const ConfigOptions& config_options,
+    const ColumnFamilyOptions& base_options, const std::string& opts_str,
+    ColumnFamilyOptions* new_options) {
   std::unordered_map<std::string, std::string> opts_map;
   rocksdb_rs::status::Status s = StringToMap(opts_str, &opts_map);
   if (!s.ok()) {
@@ -704,9 +725,9 @@ rocksdb_rs::status::Status GetDBOptionsFromMap(
   assert(new_options);
   *new_options = base_options;
   auto config = DBOptionsAsConfigurable(base_options);
-  rocksdb_rs::status::Status s = ConfigureFromMap<DBOptions>(config_options, opts_map,
-                                         OptionsHelper::kDBOptionsName,
-                                         config.get(), new_options);
+  rocksdb_rs::status::Status s = ConfigureFromMap<DBOptions>(
+      config_options, opts_map, OptionsHelper::kDBOptionsName, config.get(),
+      new_options);
   // Translate any errors (NotFound, NotSupported, to InvalidArgument
   if (s.ok() || s.IsInvalidArgument()) {
     return s;
@@ -715,10 +736,9 @@ rocksdb_rs::status::Status GetDBOptionsFromMap(
   }
 }
 
-rocksdb_rs::status::Status GetDBOptionsFromString(const ConfigOptions& config_options,
-                              const DBOptions& base_options,
-                              const std::string& opts_str,
-                              DBOptions* new_options) {
+rocksdb_rs::status::Status GetDBOptionsFromString(
+    const ConfigOptions& config_options, const DBOptions& base_options,
+    const std::string& opts_str, DBOptions* new_options) {
   std::unordered_map<std::string, std::string> opts_map;
   rocksdb_rs::status::Status s = StringToMap(opts_str, &opts_map);
   if (!s.ok()) {
@@ -730,7 +750,8 @@ rocksdb_rs::status::Status GetDBOptionsFromString(const ConfigOptions& config_op
 }
 
 rocksdb_rs::status::Status GetOptionsFromString(const Options& base_options,
-                            const std::string& opts_str, Options* new_options) {
+                                                const std::string& opts_str,
+                                                Options* new_options) {
   ConfigOptions config_options(base_options);
   config_options.input_strings_escaped = false;
   config_options.ignore_unknown_options = false;
@@ -739,9 +760,9 @@ rocksdb_rs::status::Status GetOptionsFromString(const Options& base_options,
                               new_options);
 }
 
-rocksdb_rs::status::Status GetOptionsFromString(const ConfigOptions& config_options,
-                            const Options& base_options,
-                            const std::string& opts_str, Options* new_options) {
+rocksdb_rs::status::Status GetOptionsFromString(
+    const ConfigOptions& config_options, const Options& base_options,
+    const std::string& opts_str, Options* new_options) {
   ColumnFamilyOptions new_cf_options;
   std::unordered_map<std::string, std::string> unused_opts;
   std::unordered_map<std::string, std::string> opts_map;
@@ -812,8 +833,10 @@ std::unordered_map<std::string, PrepopulateBlobCache>
         {"kDisable", PrepopulateBlobCache::kDisable},
         {"kFlushOnly", PrepopulateBlobCache::kFlushOnly}};
 
-rocksdb_rs::status::Status OptionTypeInfo::NextToken(const std::string& opts, char delimiter,
-                                 size_t pos, size_t* end, std::string* token) {
+rocksdb_rs::status::Status OptionTypeInfo::NextToken(const std::string& opts,
+                                                     char delimiter, size_t pos,
+                                                     size_t* end,
+                                                     std::string* token) {
   while (pos < opts.size() && isspace(opts[pos])) {
     ++pos;
   }
@@ -846,7 +869,8 @@ rocksdb_rs::status::Status OptionTypeInfo::NextToken(const std::string& opts, ch
         ++pos;
       }
       if (pos < opts.size() && opts[pos] != delimiter) {
-        return rocksdb_rs::status::Status_InvalidArgument("Unexpected chars after nested options");
+        return rocksdb_rs::status::Status_InvalidArgument(
+            "Unexpected chars after nested options");
       }
       *end = pos;
     } else {
@@ -865,9 +889,9 @@ rocksdb_rs::status::Status OptionTypeInfo::NextToken(const std::string& opts, ch
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_options,
-                             const std::string& opt_name,
-                             const std::string& value, void* opt_ptr) const {
+rocksdb_rs::status::Status OptionTypeInfo::Parse(
+    const ConfigOptions& config_options, const std::string& opt_name,
+    const std::string& value, void* opt_ptr) const {
   if (IsDeprecated()) {
     return rocksdb_rs::status::Status_OK();
   }
@@ -877,7 +901,8 @@ rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_opt
                                        : value;
 
     if (opt_ptr == nullptr) {
-      return rocksdb_rs::status::Status_NotFound("Could not find option", opt_name);
+      return rocksdb_rs::status::Status_NotFound("Could not find option",
+                                                 opt_name);
     } else if (parse_func_ != nullptr) {
       ConfigOptions copy = config_options;
       copy.invoke_prepare_options = false;
@@ -891,7 +916,8 @@ rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_opt
       if (opt_value.empty()) {
         return rocksdb_rs::status::Status_OK();
       } else if (config == nullptr) {
-        return rocksdb_rs::status::Status_NotFound("Could not find configurable: ", opt_name);
+        return rocksdb_rs::status::Status_NotFound(
+            "Could not find configurable: ", opt_name);
       } else {
         ConfigOptions copy = config_options;
         copy.ignore_unknown_options = false;
@@ -903,14 +929,15 @@ rocksdb_rs::status::Status OptionTypeInfo::Parse(const ConfigOptions& config_opt
         }
       }
     } else if (IsByName()) {
-      return rocksdb_rs::status::Status_NotSupported("Deserializing the option " + opt_name +
-                                  " is not supported");
+      return rocksdb_rs::status::Status_NotSupported(
+          "Deserializing the option " + opt_name + " is not supported");
     } else {
-      return rocksdb_rs::status::Status_InvalidArgument("Error parsing:", opt_name);
+      return rocksdb_rs::status::Status_InvalidArgument("Error parsing:",
+                                                        opt_name);
     }
   } catch (std::exception& e) {
-    return rocksdb_rs::status::Status_InvalidArgument("Error parsing " + opt_name + ":" +
-                                   std::string(e.what()));
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Error parsing " + opt_name + ":" + std::string(e.what()));
   }
 }
 
@@ -944,7 +971,8 @@ rocksdb_rs::status::Status OptionTypeInfo::ParseType(
     } else if (unused != nullptr) {
       (*unused)[opts_iter.first] = opts_iter.second;
     } else if (!config_options.ignore_unknown_options) {
-      return rocksdb_rs::status::Status_NotFound("Unrecognized option", opts_iter.first);
+      return rocksdb_rs::status::Status_NotFound("Unrecognized option",
+                                                 opts_iter.first);
     }
   }
   return rocksdb_rs::status::Status_OK();
@@ -973,7 +1001,8 @@ rocksdb_rs::status::Status OptionTypeInfo::ParseStruct(
     if (opt_info != nullptr) {
       status = opt_info->Parse(config_options, elem_name, opt_value, opt_addr);
     } else {
-      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option", opt_name);
+      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option",
+                                                          opt_name);
     }
   } else {
     // This option represents a field in the struct (e.g. field)
@@ -982,23 +1011,24 @@ rocksdb_rs::status::Status OptionTypeInfo::ParseStruct(
     if (opt_info != nullptr) {
       status = opt_info->Parse(config_options, elem_name, opt_value, opt_addr);
     } else {
-      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option",
-                                       struct_name + "." + opt_name);
+      status = rocksdb_rs::status::Status_InvalidArgument(
+          "Unrecognized option", struct_name + "." + opt_name);
     }
   }
   return status;
 }
 
-rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config_options,
-                                 const std::string& opt_name,
-                                 const void* const opt_ptr,
-                                 std::string* opt_value) const {
+rocksdb_rs::status::Status OptionTypeInfo::Serialize(
+    const ConfigOptions& config_options, const std::string& opt_name,
+    const void* const opt_ptr, std::string* opt_value) const {
   // If the option is no longer used in rocksdb and marked as deprecated,
   // we skip it in the serialization.
   if (opt_ptr == nullptr || IsDeprecated()) {
     return rocksdb_rs::status::Status_OK();
-  } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize)) {
-    return rocksdb_rs::status::Status_NotSupported("Cannot serialize option: ", opt_name);
+  } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::
+                           kDontSerialize)) {
+    return rocksdb_rs::status::Status_NotSupported("Cannot serialize option: ",
+                                                   opt_name);
   } else if (serialize_func_ != nullptr) {
     const void* opt_addr = GetOffset(opt_ptr);
     return serialize_func_(config_options, opt_name, opt_addr, opt_value);
@@ -1016,7 +1046,8 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
       } else {
         *opt_value = "";
       }
-    } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::kStringNameOnly) &&
+    } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionTypeFlags::
+                             kStringNameOnly) &&
                !config_options.IsDetailed()) {
       if (!config_options.mutable_options_only || IsMutable()) {
         *opt_value = custom->GetId();
@@ -1052,7 +1083,8 @@ rocksdb_rs::status::Status OptionTypeInfo::Serialize(const ConfigOptions& config
                                          opt_value)) {
     return rocksdb_rs::status::Status_OK();
   } else {
-    return rocksdb_rs::status::Status_InvalidArgument("Cannot serialize option: ", opt_name);
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Cannot serialize option: ", opt_name);
   }
 }
 
@@ -1105,14 +1137,16 @@ rocksdb_rs::status::Status OptionTypeInfo::SerializeStruct(
     if (opt_info != nullptr) {
       status = opt_info->Serialize(config_options, elem_name, opt_addr, value);
     } else {
-      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option", opt_name);
+      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option",
+                                                          opt_name);
     }
   } else {
     // This option represents a field in the struct (e.g. field)
     std::string elem_name;
     const auto opt_info = Find(opt_name, *struct_map, &elem_name);
     if (opt_info == nullptr) {
-      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option", opt_name);
+      status = rocksdb_rs::status::Status_InvalidArgument("Unrecognized option",
+                                                          opt_name);
     } else if (opt_info->ShouldSerialize()) {
       status = opt_info->Serialize(config_options, opt_name + "." + elem_name,
                                    opt_addr, value);
@@ -1130,8 +1164,9 @@ static bool AreEqualDoubles(const double a, const double b) {
   return (fabs(a - b) < 0.00001);
 }
 
-static bool AreOptionsEqual(rocksdb_rs::utilities::options_type::OptionType type, const void* this_offset,
-                            const void* that_offset) {
+static bool AreOptionsEqual(
+    rocksdb_rs::utilities::options_type::OptionType type,
+    const void* this_offset, const void* that_offset) {
   switch (type) {
     case rocksdb_rs::utilities::options_type::OptionType::kBoolean:
       return IsOptionEqual<bool>(this_offset, that_offset);
@@ -1175,7 +1210,8 @@ static bool AreOptionsEqual(rocksdb_rs::utilities::options_type::OptionType type
     case rocksdb_rs::utilities::options_type::OptionType::kCompactionPri:
       return IsOptionEqual<CompactionPri>(this_offset, that_offset);
     case rocksdb_rs::utilities::options_type::OptionType::kCompressionType:
-      return IsOptionEqual<rocksdb_rs::compression_type::CompressionType>(this_offset, that_offset);
+      return IsOptionEqual<rocksdb_rs::compression_type::CompressionType>(
+          this_offset, that_offset);
     case rocksdb_rs::utilities::options_type::OptionType::kChecksumType:
       return IsOptionEqual<ChecksumType>(this_offset, that_offset);
     case rocksdb_rs::utilities::options_type::OptionType::kEncodingType:
@@ -1346,11 +1382,13 @@ bool OptionTypeInfo::AreEqualByName(const ConfigOptions& config_options,
     return false;
   } else if (!Serialize(config_options, opt_name, opt_ptr, &this_value).ok()) {
     return false;
-  } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowFromNull)) {
+  } else if (IsEnabled(rocksdb_rs::utilities::options_type::
+                           OptionVerificationType::kByNameAllowFromNull)) {
     if (that_value == kNullptrString) {
       return true;
     }
-  } else if (IsEnabled(rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowNull)) {
+  } else if (IsEnabled(rocksdb_rs::utilities::options_type::
+                           OptionVerificationType::kByNameAllowNull)) {
     if (that_value == kNullptrString) {
       return true;
     }
@@ -1358,8 +1396,9 @@ bool OptionTypeInfo::AreEqualByName(const ConfigOptions& config_options,
   return (this_value == that_value);
 }
 
-rocksdb_rs::status::Status OptionTypeInfo::Prepare(const ConfigOptions& config_options,
-                               const std::string& name, void* opt_ptr) const {
+rocksdb_rs::status::Status OptionTypeInfo::Prepare(
+    const ConfigOptions& config_options, const std::string& name,
+    void* opt_ptr) const {
   if (ShouldPrepare()) {
     if (prepare_func_ != nullptr) {
       void* opt_addr = GetOffset(opt_ptr);
@@ -1369,17 +1408,17 @@ rocksdb_rs::status::Status OptionTypeInfo::Prepare(const ConfigOptions& config_o
       if (config != nullptr) {
         return config->PrepareOptions(config_options);
       } else if (!CanBeNull()) {
-        return rocksdb_rs::status::Status_NotFound("Missing configurable object", name);
+        return rocksdb_rs::status::Status_NotFound(
+            "Missing configurable object", name);
       }
     }
   }
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status OptionTypeInfo::Validate(const DBOptions& db_opts,
-                                const ColumnFamilyOptions& cf_opts,
-                                const std::string& name,
-                                const void* opt_ptr) const {
+rocksdb_rs::status::Status OptionTypeInfo::Validate(
+    const DBOptions& db_opts, const ColumnFamilyOptions& cf_opts,
+    const std::string& name, const void* opt_ptr) const {
   if (ShouldValidate()) {
     if (validate_func_ != nullptr) {
       const void* opt_addr = GetOffset(opt_ptr);
@@ -1389,7 +1428,8 @@ rocksdb_rs::status::Status OptionTypeInfo::Validate(const DBOptions& db_opts,
       if (config != nullptr) {
         return config->ValidateOptions(db_opts, cf_opts);
       } else if (!CanBeNull()) {
-        return rocksdb_rs::status::Status_NotFound("Missing configurable object", name);
+        return rocksdb_rs::status::Status_NotFound(
+            "Missing configurable object", name);
       }
     }
   }

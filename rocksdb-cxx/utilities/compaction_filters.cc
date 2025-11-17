@@ -24,9 +24,9 @@ static int RegisterBuiltinCompactionFilters(ObjectLibrary& library,
       });
   return 1;
 }
-rocksdb_rs::status::Status CompactionFilter::CreateFromString(const ConfigOptions& config_options,
-                                          const std::string& value,
-                                          const CompactionFilter** result) {
+rocksdb_rs::status::Status CompactionFilter::CreateFromString(
+    const ConfigOptions& config_options, const std::string& value,
+    const CompactionFilter** result) {
   static std::once_flag once;
   std::call_once(once, [&]() {
     RegisterBuiltinCompactionFilters(*(ObjectLibrary::Default().get()), "");

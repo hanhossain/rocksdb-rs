@@ -76,7 +76,8 @@ rocksdb_rs::status::Status UncompressionDictReader::ReadUncompressionDictionary(
   return s.Clone();
 }
 
-rocksdb_rs::status::Status UncompressionDictReader::GetOrReadUncompressionDictionary(
+rocksdb_rs::status::Status
+UncompressionDictReader::GetOrReadUncompressionDictionary(
     FilePrefetchBuffer* prefetch_buffer, const ReadOptions& ro, bool no_io,
     bool verify_checksums, GetContext* get_context,
     BlockCacheLookupContext* lookup_context,

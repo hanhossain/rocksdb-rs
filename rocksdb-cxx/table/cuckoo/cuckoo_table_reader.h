@@ -39,9 +39,10 @@ class CuckooTableReader : public TableReader {
 
   rocksdb_rs::status::Status status() const { return status_.Clone(); }
 
-  rocksdb_rs::status::Status Get(const ReadOptions& readOptions, const Slice& key,
-             GetContext* get_context, const SliceTransform* prefix_extractor,
-             bool skip_filters = false) override;
+  rocksdb_rs::status::Status Get(const ReadOptions& readOptions,
+                                 const Slice& key, GetContext* get_context,
+                                 const SliceTransform* prefix_extractor,
+                                 bool skip_filters = false) override;
 
   // Returns a new iterator over table contents
   // compaction_readahead_size: its value will only be used if for_compaction =

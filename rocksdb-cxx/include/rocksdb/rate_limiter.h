@@ -9,10 +9,9 @@
 
 #pragma once
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/statistics.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 

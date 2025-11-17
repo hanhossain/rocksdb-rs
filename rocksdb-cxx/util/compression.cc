@@ -7,10 +7,10 @@
 
 namespace rocksdb {
 
-StreamingCompress* StreamingCompress::Create(rocksdb_rs::compression_type::CompressionType compression_type,
-                                             const CompressionOptions& opts,
-                                             uint32_t compress_format_version,
-                                             size_t max_output_len) {
+StreamingCompress* StreamingCompress::Create(
+    rocksdb_rs::compression_type::CompressionType compression_type,
+    const CompressionOptions& opts, uint32_t compress_format_version,
+    size_t max_output_len) {
   switch (compression_type) {
     case rocksdb_rs::compression_type::CompressionType::kZSTD: {
       if (!ZSTD_Streaming_Supported()) {
@@ -25,8 +25,8 @@ StreamingCompress* StreamingCompress::Create(rocksdb_rs::compression_type::Compr
 }
 
 StreamingUncompress* StreamingUncompress::Create(
-    rocksdb_rs::compression_type::CompressionType compression_type, uint32_t compress_format_version,
-    size_t max_output_len) {
+    rocksdb_rs::compression_type::CompressionType compression_type,
+    uint32_t compress_format_version, size_t max_output_len) {
   switch (compression_type) {
     case rocksdb_rs::compression_type::CompressionType::kZSTD: {
       if (!ZSTD_Streaming_Supported()) {

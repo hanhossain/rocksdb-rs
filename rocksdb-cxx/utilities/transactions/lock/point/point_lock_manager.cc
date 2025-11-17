@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/lock/point/point_lock_manager.h"
 
 #include <algorithm>
@@ -116,7 +115,8 @@ PointLockManager::PointLockManager(PessimisticTransactionDB* txn_db,
 
 size_t LockMap::GetStripe(const std::string& key) const {
   assert(num_stripes_ > 0);
-  return rocksdb_rs::util::fastrange::FastRange64(GetSliceNPHash64(key), num_stripes_);
+  return rocksdb_rs::util::fastrange::FastRange64(GetSliceNPHash64(key),
+                                                  num_stripes_);
 }
 
 void PointLockManager::AddColumnFamily(const ColumnFamilyHandle* cf) {
@@ -222,10 +222,9 @@ bool PointLockManager::IsLockExpired(TransactionID txn_id,
   return expired;
 }
 
-rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* txn,
-                                 ColumnFamilyId column_family_id,
-                                 const std::string& key, Env* env,
-                                 bool exclusive) {
+rocksdb_rs::status::Status PointLockManager::TryLock(
+    PessimisticTransaction* txn, ColumnFamilyId column_family_id,
+    const std::string& key, Env* env, bool exclusive) {
   // Lookup lock map for this column family id
   std::shared_ptr<LockMap> lock_map_ptr = GetLockMap(column_family_id);
   LockMap* lock_map = lock_map_ptr.get();
@@ -305,7 +304,8 @@ rocksdb_rs::status::Status PointLockManager::AcquireWithTimeout(
         if (txn->IsDeadlockDetect()) {
           if (IncrementWaiters(txn, wait_ids, key, column_family_id,
                                lock_info.exclusive, env)) {
-            result = rocksdb_rs::status::Status_Busy(rocksdb_rs::status::SubCode::kDeadlock);
+            result = rocksdb_rs::status::Status_Busy(
+                rocksdb_rs::status::SubCode::kDeadlock);
             stripe->stripe_mutex->UnLock();
             return result;
           }
@@ -472,11 +472,10 @@ bool PointLockManager::IncrementWaiters(
 // Sets *expire_time to the expiration time in microseconds
 //  or 0 if no expiration.
 // REQUIRED:  Stripe mutex must be held.
-rocksdb_rs::status::Status PointLockManager::AcquireLocked(LockMap* lock_map, LockMapStripe* stripe,
-                                       const std::string& key, Env* env,
-                                       const LockInfo& txn_lock_info,
-                                       uint64_t* expire_time,
-                                       autovector<TransactionID>* txn_ids) {
+rocksdb_rs::status::Status PointLockManager::AcquireLocked(
+    LockMap* lock_map, LockMapStripe* stripe, const std::string& key, Env* env,
+    const LockInfo& txn_lock_info, uint64_t* expire_time,
+    autovector<TransactionID>* txn_ids) {
   assert(txn_lock_info.txn_ids.size() == 1);
 
   rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
@@ -505,7 +504,8 @@ rocksdb_rs::status::Status PointLockManager::AcquireLocked(LockMap* lock_map, Lo
           lock_info.expiration_time = txn_lock_info.expiration_time;
           // lock_cnt does not change
         } else {
-          result = rocksdb_rs::status::Status_TimedOut(rocksdb_rs::status::SubCode::kLockTimeout);
+          result = rocksdb_rs::status::Status_TimedOut(
+              rocksdb_rs::status::SubCode::kLockTimeout);
           *txn_ids = lock_info.txn_ids;
         }
       }
@@ -523,7 +523,8 @@ rocksdb_rs::status::Status PointLockManager::AcquireLocked(LockMap* lock_map, Lo
     // Check lock limit
     if (max_num_locks_ > 0 &&
         lock_map->lock_cnt.load(std::memory_order_acquire) >= max_num_locks_) {
-      result = rocksdb_rs::status::Status_Busy(rocksdb_rs::status::SubCode::kLockLimit);
+      result = rocksdb_rs::status::Status_Busy(
+          rocksdb_rs::status::SubCode::kLockLimit);
     } else {
       // acquire lock
       stripe->keys.emplace(key, txn_lock_info);
@@ -700,11 +701,10 @@ PointLockManager::RangeLockStatus PointLockManager::GetRangeLockStatus() {
   return {};
 }
 
-rocksdb_rs::status::Status PointLockManager::TryLock(PessimisticTransaction* /* txn */,
-                                 ColumnFamilyId /* cf_id */,
-                                 const Endpoint& /* start */,
-                                 const Endpoint& /* end */, Env* /* env */,
-                                 bool /* exclusive */) {
+rocksdb_rs::status::Status PointLockManager::TryLock(
+    PessimisticTransaction* /* txn */, ColumnFamilyId /* cf_id */,
+    const Endpoint& /* start */, const Endpoint& /* end */, Env* /* env */,
+    bool /* exclusive */) {
   return rocksdb_rs::status::Status_NotSupported(
       "PointLockManager does not support range locking");
 }

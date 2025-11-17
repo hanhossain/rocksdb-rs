@@ -29,8 +29,8 @@ BlobFile::BlobFile(const BlobDBImpl* p, const std::string& bdir, uint64_t fn,
 
 BlobFile::BlobFile(const BlobDBImpl* p, const std::string& bdir, uint64_t fn,
                    Logger* info_log, uint32_t column_family_id,
-                   rocksdb_rs::compression_type::CompressionType compression, bool has_ttl,
-                   const ExpirationRange& expiration_range)
+                   rocksdb_rs::compression_type::CompressionType compression,
+                   bool has_ttl, const ExpirationRange& expiration_range)
     : parent_(p),
       path_to_dir_(bdir),
       file_number_(fn),
@@ -56,7 +56,8 @@ BlobFile::~BlobFile() {
 uint32_t BlobFile::GetColumnFamilyId() const { return column_family_id_; }
 
 std::string BlobFile::PathName() const {
-  return static_cast<std::string>(rocksdb_rs::filename::BlobFileName(path_to_dir_, file_number_));
+  return static_cast<std::string>(
+      rocksdb_rs::filename::BlobFileName(path_to_dir_, file_number_));
 }
 
 std::string BlobFile::DumpState() const {
@@ -78,7 +79,8 @@ void BlobFile::MarkObsolete(SequenceNumber sequence) {
   obsolete_.store(true);
 }
 
-rocksdb_rs::status::Status BlobFile::WriteFooterAndCloseLocked(SequenceNumber sequence) {
+rocksdb_rs::status::Status BlobFile::WriteFooterAndCloseLocked(
+    SequenceNumber sequence) {
   BlobLogFooter footer;
   footer.blob_count = blob_count_;
   if (HasTTL()) {
@@ -86,8 +88,9 @@ rocksdb_rs::status::Status BlobFile::WriteFooterAndCloseLocked(SequenceNumber se
   }
 
   // this will close the file and reset the Writable File Pointer.
-  rocksdb_rs::status::Status s = log_writer_->AppendFooter(footer, /* checksum_method */ nullptr,
-                                       /* checksum_value */ nullptr);
+  rocksdb_rs::status::Status s =
+      log_writer_->AppendFooter(footer, /* checksum_method */ nullptr,
+                                /* checksum_value */ nullptr);
   if (s.ok()) {
     closed_ = true;
     immutable_sequence_ = sequence;
@@ -100,7 +103,8 @@ rocksdb_rs::status::Status BlobFile::WriteFooterAndCloseLocked(SequenceNumber se
 
 rocksdb_rs::status::Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   if (file_size_ < (BlobLogHeader::kSize + BlobLogFooter::kSize)) {
-    return rocksdb_rs::status::Status_IOError("File does not have footer", PathName());
+    return rocksdb_rs::status::Status_IOError("File does not have footer",
+                                              PathName());
   }
 
   uint64_t footer_offset = file_size_ - BlobLogFooter::kSize;
@@ -113,14 +117,17 @@ rocksdb_rs::status::Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // TODO: rate limit reading footers from blob files.
   if (ra_file_reader_->use_direct_io()) {
-    s = ra_file_reader_->Read(IOOptions(), footer_offset, BlobLogFooter::kSize,
-                              &result, nullptr, &aligned_buf,
-                              Env::IO_TOTAL /* rate_limiter_priority */).status();
+    s = ra_file_reader_
+            ->Read(IOOptions(), footer_offset, BlobLogFooter::kSize, &result,
+                   nullptr, &aligned_buf,
+                   Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
   } else {
     buf.reserve(BlobLogFooter::kSize + 10);
-    s = ra_file_reader_->Read(IOOptions(), footer_offset, BlobLogFooter::kSize,
-                              &result, &buf[0], nullptr,
-                              Env::IO_TOTAL /* rate_limiter_priority */).status();
+    s = ra_file_reader_
+            ->Read(IOOptions(), footer_offset, BlobLogFooter::kSize, &result,
+                   &buf[0], nullptr, Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
   }
   if (!s.ok()) return s;
   if (result.size() != BlobLogFooter::kSize) {
@@ -132,7 +139,8 @@ rocksdb_rs::status::Status BlobFile::ReadFooter(BlobLogFooter* bf) {
   return s;
 }
 
-rocksdb_rs::status::Status BlobFile::SetFromFooterLocked(const BlobLogFooter& footer) {
+rocksdb_rs::status::Status BlobFile::SetFromFooterLocked(
+    const BlobLogFooter& footer) {
   blob_count_ = footer.blob_count;
   expiration_range_ = footer.expiration_range;
   closed_ = true;
@@ -152,9 +160,9 @@ void BlobFile::CloseRandomAccessLocked() {
   last_access_ = -1;
 }
 
-rocksdb_rs::status::Status BlobFile::GetReader(Env* env, const FileOptions& file_options,
-                           std::shared_ptr<RandomAccessFileReader>* reader,
-                           bool* fresh_open) {
+rocksdb_rs::status::Status BlobFile::GetReader(
+    Env* env, const FileOptions& file_options,
+    std::shared_ptr<RandomAccessFileReader>* reader, bool* fresh_open) {
   assert(reader != nullptr);
   assert(fresh_open != nullptr);
   *fresh_open = false;
@@ -180,8 +188,9 @@ rocksdb_rs::status::Status BlobFile::GetReader(Env* env, const FileOptions& file
   }
 
   std::unique_ptr<FSRandomAccessFile> rfile;
-  s = env->GetFileSystem()->NewRandomAccessFile(PathName(), file_options,
-                                                &rfile, nullptr).status();
+  s = env->GetFileSystem()
+          ->NewRandomAccessFile(PathName(), file_options, &rfile, nullptr)
+          .status();
   if (!s.ok()) {
     ROCKS_LOG_ERROR(info_log_,
                     "Failed to open blob file for random-read: %s status: '%s'"
@@ -198,13 +207,14 @@ rocksdb_rs::status::Status BlobFile::GetReader(Env* env, const FileOptions& file
   return s;
 }
 
-rocksdb_rs::status::Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
-                              const FileOptions& file_options) {
+rocksdb_rs::status::Status BlobFile::ReadMetadata(
+    const std::shared_ptr<FileSystem>& fs, const FileOptions& file_options) {
   assert(Immutable());
   // Get file size.
   uint64_t file_size = 0;
   rocksdb_rs::status::Status s =
-      fs->GetFileSize(PathName(), file_options.io_options, &file_size, nullptr).status();
+      fs->GetFileSize(PathName(), file_options.io_options, &file_size, nullptr)
+          .status();
   if (s.ok()) {
     file_size_ = file_size;
   } else {
@@ -217,13 +227,15 @@ rocksdb_rs::status::Status BlobFile::ReadMetadata(const std::shared_ptr<FileSyst
     ROCKS_LOG_ERROR(
         info_log_, "Incomplete blob file blob file %" PRIu64 ", size: %" PRIu64,
         file_number_, file_size);
-    return rocksdb_rs::status::Status_Corruption("Incomplete blob file header.");
+    return rocksdb_rs::status::Status_Corruption(
+        "Incomplete blob file header.");
   }
 
   // Create file reader.
   std::unique_ptr<RandomAccessFileReader> file_reader;
   s = RandomAccessFileReader::Create(fs, PathName(), file_options, &file_reader,
-                                     nullptr).status();
+                                     nullptr)
+          .status();
   if (!s.ok()) {
     ROCKS_LOG_ERROR(info_log_,
                     "Failed to open blob file %" PRIu64 ", status: %s",
@@ -237,14 +249,17 @@ rocksdb_rs::status::Status BlobFile::ReadMetadata(const std::shared_ptr<FileSyst
   Slice header_slice;
   // TODO: rate limit reading headers from blob files.
   if (file_reader->use_direct_io()) {
-    s = file_reader->Read(IOOptions(), 0, BlobLogHeader::kSize, &header_slice,
-                          nullptr, &aligned_buf,
-                          Env::IO_TOTAL /* rate_limiter_priority */).status();
+    s = file_reader
+            ->Read(IOOptions(), 0, BlobLogHeader::kSize, &header_slice, nullptr,
+                   &aligned_buf, Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
   } else {
     header_buf.reserve(BlobLogHeader::kSize);
-    s = file_reader->Read(IOOptions(), 0, BlobLogHeader::kSize, &header_slice,
-                          &header_buf[0], nullptr,
-                          Env::IO_TOTAL /* rate_limiter_priority */).status();
+    s = file_reader
+            ->Read(IOOptions(), 0, BlobLogHeader::kSize, &header_slice,
+                   &header_buf[0], nullptr,
+                   Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
   }
   if (!s.ok()) {
     ROCKS_LOG_ERROR(
@@ -279,15 +294,18 @@ rocksdb_rs::status::Status BlobFile::ReadMetadata(const std::shared_ptr<FileSyst
   Slice footer_slice;
   // TODO: rate limit reading footers from blob files.
   if (file_reader->use_direct_io()) {
-    s = file_reader->Read(IOOptions(), file_size - BlobLogFooter::kSize,
-                          BlobLogFooter::kSize, &footer_slice, nullptr,
-                          &aligned_buf,
-                          Env::IO_TOTAL /* rate_limiter_priority */).status();
+    s = file_reader
+            ->Read(IOOptions(), file_size - BlobLogFooter::kSize,
+                   BlobLogFooter::kSize, &footer_slice, nullptr, &aligned_buf,
+                   Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
   } else {
     footer_buf.reserve(BlobLogFooter::kSize);
-    s = file_reader->Read(IOOptions(), file_size - BlobLogFooter::kSize,
-                          BlobLogFooter::kSize, &footer_slice, &footer_buf[0],
-                          nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
+    s = file_reader
+            ->Read(IOOptions(), file_size - BlobLogFooter::kSize,
+                   BlobLogFooter::kSize, &footer_slice, &footer_buf[0], nullptr,
+                   Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
   }
   if (!s.ok()) {
     ROCKS_LOG_ERROR(

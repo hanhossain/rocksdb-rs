@@ -27,7 +27,8 @@ rocksdb_rs::io_status::IOStatus SequentialFileReader::Create(
     const FileOptions& file_opts, std::unique_ptr<SequentialFileReader>* reader,
     IODebugContext* dbg, RateLimiter* rate_limiter) {
   std::unique_ptr<FSSequentialFile> file;
-  rocksdb_rs::io_status::IOStatus io_s = fs->NewSequentialFile(fname, file_opts, &file, dbg);
+  rocksdb_rs::io_status::IOStatus io_s =
+      fs->NewSequentialFile(fname, file_opts, &file, dbg);
   if (io_s.ok()) {
     reader->reset(new SequentialFileReader(std::move(file), fname, nullptr, {},
                                            rate_limiter));
@@ -35,8 +36,9 @@ rocksdb_rs::io_status::IOStatus SequentialFileReader::Create(
   return io_s;
 }
 
-rocksdb_rs::io_status::IOStatus SequentialFileReader::Read(size_t n, Slice* result, char* scratch,
-                                    Env::IOPriority rate_limiter_priority) {
+rocksdb_rs::io_status::IOStatus SequentialFileReader::Read(
+    size_t n, Slice* result, char* scratch,
+    Env::IOPriority rate_limiter_priority) {
   rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (use_direct_io()) {
     //
@@ -124,7 +126,8 @@ rocksdb_rs::io_status::IOStatus SequentialFileReader::Read(size_t n, Slice* resu
       if (ShouldNotifyListeners()) {
         auto finish_ts = FileOperationInfo::FinishNow();
         size_t offset = offset_.fetch_add(tmp.size());
-        NotifyOnFileReadFinish(offset, tmp.size(), start_ts, finish_ts, io_s.status());
+        NotifyOnFileReadFinish(offset, tmp.size(), start_ts, finish_ts,
+                               io_s.status());
       }
       read += tmp.size();
       if (!io_s.ok() || tmp.size() < allowed) {
@@ -168,8 +171,9 @@ class ReadaheadSequentialFile : public FSSequentialFile {
 
   ReadaheadSequentialFile& operator=(const ReadaheadSequentialFile&) = delete;
 
-  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& opts, Slice* result, char* scratch,
-                IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& opts,
+                                       Slice* result, char* scratch,
+                                       IODebugContext* dbg) override {
     std::unique_lock<std::mutex> lk(lock_);
 
     size_t cached_len = 0;
@@ -234,13 +238,15 @@ class ReadaheadSequentialFile : public FSSequentialFile {
     return s;
   }
 
-  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& opts,
-                          Slice* result, char* scratch,
-                          IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n,
+                                                 const IOOptions& opts,
+                                                 Slice* result, char* scratch,
+                                                 IODebugContext* dbg) override {
     return file_->PositionedRead(offset, n, opts, result, scratch, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset,
+                                                  size_t length) override {
     std::unique_lock<std::mutex> lk(lock_);
     buffer_.Clear();
     return file_->InvalidateCache(offset, length);
@@ -270,14 +276,16 @@ class ReadaheadSequentialFile : public FSSequentialFile {
   // Reads into buffer_ the next n bytes from file_.
   // Can actually read less if EOF was reached.
   // Returns the status of the read operastion on the file.
-  rocksdb_rs::io_status::IOStatus ReadIntoBuffer(size_t n, const IOOptions& opts,
-                          IODebugContext* dbg) {
+  rocksdb_rs::io_status::IOStatus ReadIntoBuffer(size_t n,
+                                                 const IOOptions& opts,
+                                                 IODebugContext* dbg) {
     if (n > buffer_.Capacity()) {
       n = buffer_.Capacity();
     }
     assert(IsFileSectorAligned(n, alignment_));
     Slice result;
-    rocksdb_rs::io_status::IOStatus s = file_->Read(n, opts, &result, buffer_.BufferStart(), dbg);
+    rocksdb_rs::io_status::IOStatus s =
+        file_->Read(n, opts, &result, buffer_.BufferStart(), dbg);
     if (s.ok()) {
       buffer_offset_ = read_offset_;
       buffer_.Size(result.size());

@@ -3,14 +3,14 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-#include "util/stop_watch.h"
+#include "tools/simulated_hybrid_file_system.h"
 
 #include <algorithm>
 #include <sstream>
 #include <string>
 
 #include "rocksdb/rate_limiter.h"
-#include "tools/simulated_hybrid_file_system.h"
+#include "util/stop_watch.h"
 
 namespace rocksdb {
 
@@ -52,7 +52,8 @@ SimulatedHybridFileSystem::SimulatedHybridFileSystem(
       metadata_file_name_(metadata_file_name),
       name_("SimulatedHybridFileSystem: " + std::string(target()->Name())),
       is_full_fs_warm_(is_full_fs_warm) {
-  rocksdb_rs::io_status::IOStatus s = base->FileExists(metadata_file_name, IOOptions(), nullptr);
+  rocksdb_rs::io_status::IOStatus s =
+      base->FileExists(metadata_file_name, IOOptions(), nullptr);
   if (s.IsNotFound()) {
     return;
   }
@@ -86,7 +87,8 @@ SimulatedHybridFileSystem::~SimulatedHybridFileSystem() {
     metadata += f;
     metadata += "\n";
   }
-  rocksdb_rs::io_status::IOStatus s = WriteStringToFile(target(), metadata, metadata_file_name_, true);
+  rocksdb_rs::io_status::IOStatus s =
+      WriteStringToFile(target(), metadata, metadata_file_name_, true);
   if (!s.ok()) {
     fprintf(stderr, "Error writing to file %s: %s", metadata_file_name_.c_str(),
             s.ToString()->c_str());
@@ -106,7 +108,8 @@ rocksdb_rs::io_status::IOStatus SimulatedHybridFileSystem::NewRandomAccessFile(
     }
     assert(temperature == file_opts.temperature);
   }
-  rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s =
+      target()->NewRandomAccessFile(fname, file_opts, result, dbg);
   result->reset(
       new SimulatedHybridRaf(std::move(*result), rate_limiter_, temperature));
   return s;
@@ -120,16 +123,16 @@ rocksdb_rs::io_status::IOStatus SimulatedHybridFileSystem::NewWritableFile(
     warm_file_set_.insert(fname);
   }
 
-  rocksdb_rs::io_status::IOStatus s = target()->NewWritableFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus s =
+      target()->NewWritableFile(fname, file_opts, result, dbg);
   if (file_opts.temperature == Temperature::kWarm || is_full_fs_warm_) {
     result->reset(new SimulatedWritableFile(std::move(*result), rate_limiter_));
   }
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus SimulatedHybridFileSystem::DeleteFile(const std::string& fname,
-                                               const IOOptions& options,
-                                               IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus SimulatedHybridFileSystem::DeleteFile(
+    const std::string& fname, const IOOptions& options, IODebugContext* dbg) {
   {
     const std::lock_guard<std::mutex> lock(mutex_);
     warm_file_set_.erase(fname);
@@ -137,18 +140,18 @@ rocksdb_rs::io_status::IOStatus SimulatedHybridFileSystem::DeleteFile(const std:
   return target()->DeleteFile(fname, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::Read(uint64_t offset, size_t n,
-                                  const IOOptions& options, Slice* result,
-                                  char* scratch, IODebugContext* dbg) const {
+rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::Read(
+    uint64_t offset, size_t n, const IOOptions& options, Slice* result,
+    char* scratch, IODebugContext* dbg) const {
   if (temperature_ == Temperature::kWarm) {
     SimulateIOWait(n);
   }
   return target()->Read(offset, n, options, result, scratch, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::MultiRead(FSReadRequest* reqs, size_t num_reqs,
-                                       const IOOptions& options,
-                                       IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::MultiRead(
+    FSReadRequest* reqs, size_t num_reqs, const IOOptions& options,
+    IODebugContext* dbg) {
   if (temperature_ == Temperature::kWarm) {
     for (size_t i = 0; i < num_reqs; i++) {
       SimulateIOWait(reqs[i].len);
@@ -157,9 +160,8 @@ rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::MultiRead(FSReadRequest* req
   return target()->MultiRead(reqs, num_reqs, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::Prefetch(uint64_t offset, size_t n,
-                                      const IOOptions& options,
-                                      IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus SimulatedHybridRaf::Prefetch(
+    uint64_t offset, size_t n, const IOOptions& options, IODebugContext* dbg) {
   if (temperature_ == Temperature::kWarm) {
     SimulateIOWait(n);
   }
@@ -185,8 +187,8 @@ void SimulatedWritableFile::SimulateIOWait(int64_t bytes) const {
   RateLimiterRequest(rate_limiter_.get(), serve_time);
 }
 
-rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Append(const Slice& data, const IOOptions& ioo,
-                                       IODebugContext* idc) {
+rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Append(
+    const Slice& data, const IOOptions& ioo, IODebugContext* idc) {
   if (use_direct_io()) {
     SimulateIOWait(data.size());
   } else {
@@ -206,10 +208,9 @@ rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Append(
   return target()->Append(data, options, verification_info, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus SimulatedWritableFile::PositionedAppend(const Slice& data,
-                                                 uint64_t offset,
-                                                 const IOOptions& options,
-                                                 IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus SimulatedWritableFile::PositionedAppend(
+    const Slice& data, uint64_t offset, const IOOptions& options,
+    IODebugContext* dbg) {
   if (use_direct_io()) {
     SimulateIOWait(data.size());
   } else {
@@ -231,8 +232,8 @@ rocksdb_rs::io_status::IOStatus SimulatedWritableFile::PositionedAppend(
                                     dbg);
 }
 
-rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Sync(const IOOptions& options,
-                                     IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Sync(
+    const IOOptions& options, IODebugContext* dbg) {
   if (unsynced_bytes > 0) {
     SimulateIOWait(unsynced_bytes);
     unsynced_bytes = 0;
@@ -240,4 +241,3 @@ rocksdb_rs::io_status::IOStatus SimulatedWritableFile::Sync(const IOOptions& opt
   return target()->Sync(options, dbg);
 }
 }  // namespace rocksdb
-

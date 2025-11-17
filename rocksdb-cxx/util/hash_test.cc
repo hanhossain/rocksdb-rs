@@ -13,17 +13,14 @@
 #include <type_traits>
 #include <vector>
 
-#include "rocksdb-rs/src/hash.rs.h"
 #include "rocksdb-rs/src/coding_lean.rs.h"
-
+#include "rocksdb-rs/src/hash.rs.h"
 #include "test_util/testharness.h"
 #include "util/coding.h"
 #include "util/hash128.h"
 #include "util/math.h"
 #include "util/math128.h"
 
-using rocksdb_rs::coding_lean::DecodeFixed64;
-using rocksdb_rs::coding_lean::EncodeFixed32;
 using rocksdb::EndianSwapValue;
 using rocksdb::GetSliceHash64;
 using rocksdb::Hash;
@@ -36,6 +33,8 @@ using rocksdb::Slice;
 using rocksdb::Unsigned128;
 using rocksdb::Upper32of64;
 using rocksdb::Upper64of128;
+using rocksdb_rs::coding_lean::DecodeFixed64;
+using rocksdb_rs::coding_lean::EncodeFixed32;
 
 // The hash algorithm is part of the file format, for example for the Bloom
 // filters. Test that the hash values are stable for a set of random strings of
@@ -303,13 +302,17 @@ TEST(HashTest, Hash128Misc) {
       EXPECT_EQ(here, GetSliceHash128(Slice(str.data(), size)));
       {
         uint64_t hi, lo;
-        rocksdb_rs::hash::hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(str.data()), size), hi, lo);
+        rocksdb_rs::hash::hash2x64(
+            rust::Slice(reinterpret_cast<const uint8_t *>(str.data()), size),
+            hi, lo);
         EXPECT_EQ(Lower64of128(here), lo);
         EXPECT_EQ(Upper64of128(here), hi);
       }
       if (size == 16) {
-        const uint64_t in_hi = rocksdb_rs::coding_lean::DecodeFixed64(str.data() + 8);
-        const uint64_t in_lo = rocksdb_rs::coding_lean::DecodeFixed64(str.data());
+        const uint64_t in_hi =
+            rocksdb_rs::coding_lean::DecodeFixed64(str.data() + 8);
+        const uint64_t in_lo =
+            rocksdb_rs::coding_lean::DecodeFixed64(str.data());
         uint64_t hi, lo;
         rocksdb_rs::hash::bijective_hash2x64(in_hi, in_lo, hi, lo);
         EXPECT_EQ(Lower64of128(here), lo);
@@ -333,20 +336,25 @@ TEST(HashTest, Hash128Misc) {
         // Must match seeded Hash2x64
         {
           uint64_t hi, lo;
-          auto slice = rust::Slice(reinterpret_cast<const uint8_t*>(str.data()), size);
+          auto slice =
+              rust::Slice(reinterpret_cast<const uint8_t *>(str.data()), size);
           rocksdb_rs::hash::hash2x64_with_seed(slice, var_seed, hi, lo);
           EXPECT_EQ(Lower64of128(seeded), lo);
           EXPECT_EQ(Upper64of128(seeded), hi);
         }
         if (size == 16) {
-          const uint64_t in_hi = rocksdb_rs::coding_lean::DecodeFixed64(str.data() + 8);
-          const uint64_t in_lo = rocksdb_rs::coding_lean::DecodeFixed64(str.data());
+          const uint64_t in_hi =
+              rocksdb_rs::coding_lean::DecodeFixed64(str.data() + 8);
+          const uint64_t in_lo =
+              rocksdb_rs::coding_lean::DecodeFixed64(str.data());
           uint64_t hi, lo;
-          rocksdb_rs::hash::bijective_hash2x64_with_seed(in_hi, in_lo, var_seed, hi, lo);
+          rocksdb_rs::hash::bijective_hash2x64_with_seed(in_hi, in_lo, var_seed,
+                                                         hi, lo);
           EXPECT_EQ(Lower64of128(seeded), lo);
           EXPECT_EQ(Upper64of128(seeded), hi);
           uint64_t un_hi, un_lo;
-          rocksdb_rs::hash::bijective_unhash2x64_with_seed(hi, lo, var_seed, un_hi, un_lo);
+          rocksdb_rs::hash::bijective_unhash2x64_with_seed(hi, lo, var_seed,
+                                                           un_hi, un_lo);
           EXPECT_EQ(in_lo, un_lo);
           EXPECT_EQ(in_hi, un_hi);
         }

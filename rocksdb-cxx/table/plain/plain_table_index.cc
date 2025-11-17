@@ -22,11 +22,13 @@ inline uint32_t GetBucketIdFromHash(uint32_t hash, uint32_t num_buckets) {
 
 rocksdb_rs::status::Status PlainTableIndex::InitFromRawData(Slice data) {
   if (!GetVarint32(&data, &index_size_)) {
-    return rocksdb_rs::status::Status_Corruption("Couldn't read the index size!");
+    return rocksdb_rs::status::Status_Corruption(
+        "Couldn't read the index size!");
   }
   assert(index_size_ > 0);
   if (!GetVarint32(&data, &num_prefixes_)) {
-    return rocksdb_rs::status::Status_Corruption("Couldn't read the index size!");
+    return rocksdb_rs::status::Status_Corruption(
+        "Couldn't read the index size!");
   }
   sub_index_size_ =
       static_cast<uint32_t>(data.size()) - index_size_ * kOffsetLen;
@@ -161,8 +163,8 @@ Slice PlainTableIndexBuilder::FillIndexes(
       total_allocate_size, huge_page_tlb_size_, ioptions_.logger);
 
   auto temp_ptr = rocksdb_rs::coding::EncodeVarint32(allocated, index_size_);
-  uint32_t* index =
-      reinterpret_cast<uint32_t*>(rocksdb_rs::coding::EncodeVarint32(temp_ptr, num_prefixes_));
+  uint32_t* index = reinterpret_cast<uint32_t*>(
+      rocksdb_rs::coding::EncodeVarint32(temp_ptr, num_prefixes_));
   char* sub_index = reinterpret_cast<char*>(index + index_size_);
 
   uint32_t sub_index_offset = 0;
@@ -182,14 +184,16 @@ Slice PlainTableIndexBuilder::FillIndexes(
         PutUnaligned(index + i,
                      sub_index_offset | PlainTableIndex::kSubIndexMask);
         char* prev_ptr = &sub_index[sub_index_offset];
-        char* cur_ptr = rocksdb_rs::coding::EncodeVarint32(prev_ptr, num_keys_for_bucket);
+        char* cur_ptr =
+            rocksdb_rs::coding::EncodeVarint32(prev_ptr, num_keys_for_bucket);
         sub_index_offset += static_cast<uint32_t>(cur_ptr - prev_ptr);
         char* sub_index_pos = &sub_index[sub_index_offset];
         IndexRecord* record = hash_to_offsets[i];
         int j;
         for (j = num_keys_for_bucket - 1; j >= 0 && record;
              j--, record = record->next) {
-          rocksdb_rs::coding_lean::EncodeFixed32(sub_index_pos + j * sizeof(uint32_t), record->offset);
+          rocksdb_rs::coding_lean::EncodeFixed32(
+              sub_index_pos + j * sizeof(uint32_t), record->offset);
         }
         assert(j == -1 && record == nullptr);
         sub_index_offset += PlainTableIndex::kOffsetLen * num_keys_for_bucket;
@@ -208,4 +212,3 @@ Slice PlainTableIndexBuilder::FillIndexes(
 const std::string PlainTableIndexBuilder::kPlainTableIndexBlock =
     "PlainTableIndexBlock";
 }  // namespace rocksdb
-

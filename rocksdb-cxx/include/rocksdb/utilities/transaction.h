@@ -5,15 +5,13 @@
 
 #pragma once
 
-
 #include <limits>
 #include <string>
 #include <vector>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -293,24 +291,28 @@ class Transaction {
   // in this transaction do not yet belong to any snapshot and will be fetched
   // regardless).
   virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     std::string* value) = 0;
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         std::string* value) = 0;
 
   // An overload of the above method that receives a PinnableSlice
   // For backward compatibility a default implementation is provided
   virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     PinnableSlice* pinnable_val) {
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         PinnableSlice* pinnable_val) {
     assert(pinnable_val != nullptr);
     auto s = Get(options, column_family, key, pinnable_val->GetSelf());
     pinnable_val->PinSelf();
     return s;
   }
 
-  virtual rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
-                     std::string* value) = 0;
-  virtual rocksdb_rs::status::Status Get(const ReadOptions& options, const Slice& key,
-                     PinnableSlice* pinnable_val) {
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
+                                         const Slice& key,
+                                         std::string* value) = 0;
+  virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
+                                         const Slice& key,
+                                         PinnableSlice* pinnable_val) {
     assert(pinnable_val != nullptr);
     auto s = Get(options, key, pinnable_val->GetSelf());
     pinnable_val->PinSelf();
@@ -322,9 +324,9 @@ class Transaction {
       const std::vector<ColumnFamilyHandle*>& column_family,
       const std::vector<Slice>& keys, std::vector<std::string>* values) = 0;
 
-  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(const ReadOptions& options,
-                                       const std::vector<Slice>& keys,
-                                       std::vector<std::string>* values) = 0;
+  virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
+      const ReadOptions& options, const std::vector<Slice>& keys,
+      std::vector<std::string>* values) = 0;
 
   // Batched version of MultiGet - see DBImpl::MultiGet(). Sub-classes are
   // expected to override this with an implementation that calls
@@ -332,7 +334,8 @@ class Transaction {
   virtual void MultiGet(const ReadOptions& options,
                         ColumnFamilyHandle* column_family,
                         const size_t num_keys, const Slice* keys,
-                        PinnableSlice* values, rocksdb_rs::status::Status* statuses,
+                        PinnableSlice* values,
+                        rocksdb_rs::status::Status* statuses,
                         const bool /*sorted_input*/ = false) {
     for (size_t i = 0; i < num_keys; ++i) {
       statuses[i] = Get(options, column_family, keys[i], &values[i]);
@@ -367,19 +370,17 @@ class Transaction {
   //  (See max_write_buffer_size_to_maintain)
   // Status_MergeInProgress() if merge operations cannot be resolved.
   // or other errors if this key could not be read.
-  virtual rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
-                              ColumnFamilyHandle* column_family,
-                              const Slice& key, std::string* value,
-                              bool exclusive = true,
-                              const bool do_validate = true) = 0;
+  virtual rocksdb_rs::status::Status GetForUpdate(
+      const ReadOptions& options, ColumnFamilyHandle* column_family,
+      const Slice& key, std::string* value, bool exclusive = true,
+      const bool do_validate = true) = 0;
 
   // An overload of the above method that receives a PinnableSlice
   // For backward compatibility a default implementation is provided
-  virtual rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options,
-                              ColumnFamilyHandle* column_family,
-                              const Slice& key, PinnableSlice* pinnable_val,
-                              bool exclusive = true,
-                              const bool do_validate = true) {
+  virtual rocksdb_rs::status::Status GetForUpdate(
+      const ReadOptions& options, ColumnFamilyHandle* column_family,
+      const Slice& key, PinnableSlice* pinnable_val, bool exclusive = true,
+      const bool do_validate = true) {
     if (pinnable_val == nullptr) {
       std::string* null_str = nullptr;
       return GetForUpdate(options, column_family, key, null_str, exclusive,
@@ -393,14 +394,15 @@ class Transaction {
   }
 
   // Get a range lock on [start_endpoint; end_endpoint].
-  virtual rocksdb_rs::status::Status GetRangeLock(ColumnFamilyHandle*, const Endpoint&,
-                              const Endpoint&) {
+  virtual rocksdb_rs::status::Status GetRangeLock(ColumnFamilyHandle*,
+                                                  const Endpoint&,
+                                                  const Endpoint&) {
     return rocksdb_rs::status::Status_NotSupported();
   }
 
-  virtual rocksdb_rs::status::Status GetForUpdate(const ReadOptions& options, const Slice& key,
-                              std::string* value, bool exclusive = true,
-                              const bool do_validate = true) = 0;
+  virtual rocksdb_rs::status::Status GetForUpdate(
+      const ReadOptions& options, const Slice& key, std::string* value,
+      bool exclusive = true, const bool do_validate = true) = 0;
 
   virtual rust::Vec<rocksdb_rs::status::Status> MultiGetForUpdate(
       const ReadOptions& options,
@@ -449,34 +451,40 @@ class Transaction {
   // Status_TryAgain() if the memtable history size is not large enough
   //  (See max_write_buffer_size_to_maintain)
   // or other errors on unexpected failures.
-  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
-                     const Slice& value, const bool assume_tracked = false) = 0;
-  virtual rocksdb_rs::status::Status Put(const Slice& key, const Slice& value) = 0;
-  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
-                     const SliceParts& value,
-                     const bool assume_tracked = false) = 0;
-  virtual rocksdb_rs::status::Status Put(const SliceParts& key, const SliceParts& value) = 0;
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                         const Slice& key, const Slice& value,
+                                         const bool assume_tracked = false) = 0;
+  virtual rocksdb_rs::status::Status Put(const Slice& key,
+                                         const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                         const SliceParts& key,
+                                         const SliceParts& value,
+                                         const bool assume_tracked = false) = 0;
+  virtual rocksdb_rs::status::Status Put(const SliceParts& key,
+                                         const SliceParts& value) = 0;
 
-  virtual rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
-                       const Slice& value,
-                       const bool assume_tracked = false) = 0;
-  virtual rocksdb_rs::status::Status Merge(const Slice& key, const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status Merge(
+      ColumnFamilyHandle* column_family, const Slice& key, const Slice& value,
+      const bool assume_tracked = false) = 0;
+  virtual rocksdb_rs::status::Status Merge(const Slice& key,
+                                           const Slice& value) = 0;
 
-  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
-                        const bool assume_tracked = false) = 0;
+  virtual rocksdb_rs::status::Status Delete(
+      ColumnFamilyHandle* column_family, const Slice& key,
+      const bool assume_tracked = false) = 0;
   virtual rocksdb_rs::status::Status Delete(const Slice& key) = 0;
-  virtual rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
-                        const SliceParts& key,
-                        const bool assume_tracked = false) = 0;
+  virtual rocksdb_rs::status::Status Delete(
+      ColumnFamilyHandle* column_family, const SliceParts& key,
+      const bool assume_tracked = false) = 0;
   virtual rocksdb_rs::status::Status Delete(const SliceParts& key) = 0;
 
-  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
-                              const Slice& key,
-                              const bool assume_tracked = false) = 0;
+  virtual rocksdb_rs::status::Status SingleDelete(
+      ColumnFamilyHandle* column_family, const Slice& key,
+      const bool assume_tracked = false) = 0;
   virtual rocksdb_rs::status::Status SingleDelete(const Slice& key) = 0;
-  virtual rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
-                              const SliceParts& key,
-                              const bool assume_tracked = false) = 0;
+  virtual rocksdb_rs::status::Status SingleDelete(
+      ColumnFamilyHandle* column_family, const SliceParts& key,
+      const bool assume_tracked = false) = 0;
   virtual rocksdb_rs::status::Status SingleDelete(const SliceParts& key) = 0;
 
   // PutUntracked() will write a Put to the batch of operations to be committed
@@ -487,30 +495,35 @@ class Transaction {
   // If this Transaction was created on a PessimisticTransactionDB, this
   // function will still acquire locks necessary to make sure this write doesn't
   // cause conflicts in other transactions and may return Status_Busy().
-  virtual rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family,
-                              const Slice& key, const Slice& value) = 0;
-  virtual rocksdb_rs::status::Status PutUntracked(const Slice& key, const Slice& value) = 0;
-  virtual rocksdb_rs::status::Status PutUntracked(ColumnFamilyHandle* column_family,
-                              const SliceParts& key,
-                              const SliceParts& value) = 0;
+  virtual rocksdb_rs::status::Status PutUntracked(
+      ColumnFamilyHandle* column_family, const Slice& key,
+      const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status PutUntracked(const Slice& key,
+                                                  const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status PutUntracked(
+      ColumnFamilyHandle* column_family, const SliceParts& key,
+      const SliceParts& value) = 0;
   virtual rocksdb_rs::status::Status PutUntracked(const SliceParts& key,
-                              const SliceParts& value) = 0;
+                                                  const SliceParts& value) = 0;
 
-  virtual rocksdb_rs::status::Status MergeUntracked(ColumnFamilyHandle* column_family,
-                                const Slice& key, const Slice& value) = 0;
-  virtual rocksdb_rs::status::Status MergeUntracked(const Slice& key, const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status MergeUntracked(
+      ColumnFamilyHandle* column_family, const Slice& key,
+      const Slice& value) = 0;
+  virtual rocksdb_rs::status::Status MergeUntracked(const Slice& key,
+                                                    const Slice& value) = 0;
 
-  virtual rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
-                                 const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status DeleteUntracked(
+      ColumnFamilyHandle* column_family, const Slice& key) = 0;
 
   virtual rocksdb_rs::status::Status DeleteUntracked(const Slice& key) = 0;
-  virtual rocksdb_rs::status::Status DeleteUntracked(ColumnFamilyHandle* column_family,
-                                 const SliceParts& key) = 0;
+  virtual rocksdb_rs::status::Status DeleteUntracked(
+      ColumnFamilyHandle* column_family, const SliceParts& key) = 0;
   virtual rocksdb_rs::status::Status DeleteUntracked(const SliceParts& key) = 0;
-  virtual rocksdb_rs::status::Status SingleDeleteUntracked(ColumnFamilyHandle* column_family,
-                                       const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status SingleDeleteUntracked(
+      ColumnFamilyHandle* column_family, const Slice& key) = 0;
 
-  virtual rocksdb_rs::status::Status SingleDeleteUntracked(const Slice& key) = 0;
+  virtual rocksdb_rs::status::Status SingleDeleteUntracked(
+      const Slice& key) = 0;
 
   // Similar to WriteBatch::PutLogData
   virtual void PutLogData(const Slice& blob) = 0;
@@ -587,7 +600,8 @@ class Transaction {
                                 const Slice& key) = 0;
   virtual void UndoGetForUpdate(const Slice& key) = 0;
 
-  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(WriteBatch* src_batch) = 0;
+  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(
+      WriteBatch* src_batch) = 0;
 
   // Note: data in the commit-time-write-batch bypasses concurrency control,
   // thus should be used with great caution.
@@ -644,7 +658,8 @@ class Transaction {
   // to remain the same across restarts.
   uint64_t GetId() { return id_; }
 
-  virtual rocksdb_rs::status::Status SetReadTimestampForValidation(TxnTimestamp /*ts*/) {
+  virtual rocksdb_rs::status::Status SetReadTimestampForValidation(
+      TxnTimestamp /*ts*/) {
     return rocksdb_rs::status::Status_NotSupported("timestamp not supported");
   }
 

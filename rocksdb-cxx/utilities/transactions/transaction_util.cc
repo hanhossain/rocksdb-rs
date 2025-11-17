@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/transaction_util.h"
 
 #include <cinttypes>
@@ -11,11 +10,10 @@
 #include <vector>
 
 #include "db/db_impl/db_impl.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/utilities/write_batch_with_index.h"
 #include "util/cast_util.h"
 #include "util/string_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -30,8 +28,8 @@ rocksdb_rs::status::Status TransactionUtil::CheckKeyForConflicts(
   SuperVersion* sv = db_impl->GetAndRefSuperVersion(cfd);
 
   if (sv == nullptr) {
-    result = rocksdb_rs::status::Status_InvalidArgument("Could not access column family " +
-                                     cfh->GetName());
+    result = rocksdb_rs::status::Status_InvalidArgument(
+        "Could not access column family " + cfh->GetName());
   }
 
   if (result.ok()) {
@@ -47,13 +45,11 @@ rocksdb_rs::status::Status TransactionUtil::CheckKeyForConflicts(
   return result;
 }
 
-rocksdb_rs::status::Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersion* sv,
-                                 SequenceNumber earliest_seq,
-                                 SequenceNumber snap_seq,
-                                 const std::string& key,
-                                 const std::string* const read_ts,
-                                 bool cache_only, ReadCallback* snap_checker,
-                                 SequenceNumber min_uncommitted) {
+rocksdb_rs::status::Status TransactionUtil::CheckKey(
+    DBImpl* db_impl, SuperVersion* sv, SequenceNumber earliest_seq,
+    SequenceNumber snap_seq, const std::string& key,
+    const std::string* const read_ts, bool cache_only,
+    ReadCallback* snap_checker, SequenceNumber min_uncommitted) {
   // When `min_uncommitted` is provided, keys are not always committed
   // in sequence number order, and `snap_checker` is used to check whether
   // specific sequence number is in the database is visible to the transaction.
@@ -150,9 +146,8 @@ rocksdb_rs::status::Status TransactionUtil::CheckKey(DBImpl* db_impl, SuperVersi
   return result;
 }
 
-rocksdb_rs::status::Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_impl,
-                                              const LockTracker& tracker,
-                                              bool cache_only) {
+rocksdb_rs::status::Status TransactionUtil::CheckKeysForConflicts(
+    DBImpl* db_impl, const LockTracker& tracker, bool cache_only) {
   rocksdb_rs::status::Status result = rocksdb_rs::status::Status_new();
 
   std::unique_ptr<LockTracker::ColumnFamilyIterator> cf_it(
@@ -163,8 +158,8 @@ rocksdb_rs::status::Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_imp
 
     SuperVersion* sv = db_impl->GetAndRefSuperVersion(cf);
     if (sv == nullptr) {
-      result = rocksdb_rs::status::Status_InvalidArgument("Could not access column family " +
-                                       std::to_string(cf));
+      result = rocksdb_rs::status::Status_InvalidArgument(
+          "Could not access column family " + std::to_string(cf));
       break;
     }
 
@@ -202,4 +197,3 @@ rocksdb_rs::status::Status TransactionUtil::CheckKeysForConflicts(DBImpl* db_imp
 }
 
 }  // namespace rocksdb
-

@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/write_unprepared_txn.h"
 
 #include "db/db_impl/db_impl.h"
@@ -99,7 +98,8 @@ void WriteUnpreparedTxn::Initialize(const TransactionOptions& txn_options) {
   untracked_keys_.clear();
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::HandleWrite(std::function<rocksdb_rs::status::Status()> do_write) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::HandleWrite(
+    std::function<rocksdb_rs::status::Status()> do_write) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (active_iterators_.empty()) {
     s = MaybeFlushWriteBatchToDB();
@@ -122,58 +122,59 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::HandleWrite(std::function<rocksdb
   return s;
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::Put(ColumnFamilyHandle* column_family,
-                               const Slice& key, const Slice& value,
-                               const bool assume_tracked) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::Put(
+    ColumnFamilyHandle* column_family, const Slice& key, const Slice& value,
+    const bool assume_tracked) {
   return HandleWrite([&]() {
     return TransactionBaseImpl::Put(column_family, key, value, assume_tracked);
   });
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::Put(ColumnFamilyHandle* column_family,
-                               const SliceParts& key, const SliceParts& value,
-                               const bool assume_tracked) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::Put(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const SliceParts& value, const bool assume_tracked) {
   return HandleWrite([&]() {
     return TransactionBaseImpl::Put(column_family, key, value, assume_tracked);
   });
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::Merge(ColumnFamilyHandle* column_family,
-                                 const Slice& key, const Slice& value,
-                                 const bool assume_tracked) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::Merge(
+    ColumnFamilyHandle* column_family, const Slice& key, const Slice& value,
+    const bool assume_tracked) {
   return HandleWrite([&]() {
     return TransactionBaseImpl::Merge(column_family, key, value,
                                       assume_tracked);
   });
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::Delete(ColumnFamilyHandle* column_family,
-                                  const Slice& key, const bool assume_tracked) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::Delete(
+    ColumnFamilyHandle* column_family, const Slice& key,
+    const bool assume_tracked) {
   return HandleWrite([&]() {
     return TransactionBaseImpl::Delete(column_family, key, assume_tracked);
   });
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::Delete(ColumnFamilyHandle* column_family,
-                                  const SliceParts& key,
-                                  const bool assume_tracked) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::Delete(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const bool assume_tracked) {
   return HandleWrite([&]() {
     return TransactionBaseImpl::Delete(column_family, key, assume_tracked);
   });
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::SingleDelete(ColumnFamilyHandle* column_family,
-                                        const Slice& key,
-                                        const bool assume_tracked) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::SingleDelete(
+    ColumnFamilyHandle* column_family, const Slice& key,
+    const bool assume_tracked) {
   return HandleWrite([&]() {
     return TransactionBaseImpl::SingleDelete(column_family, key,
                                              assume_tracked);
   });
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::SingleDelete(ColumnFamilyHandle* column_family,
-                                        const SliceParts& key,
-                                        const bool assume_tracked) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::SingleDelete(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const bool assume_tracked) {
   return HandleWrite([&]() {
     return TransactionBaseImpl::SingleDelete(column_family, key,
                                              assume_tracked);
@@ -189,7 +190,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::SingleDelete(ColumnFamilyHandle* 
 // recovered transactions do not hold locks on their keys. This follows the
 // implementation in PessimisticTransactionDB::Initialize where we set
 // skip_concurrency_control to true.
-rocksdb_rs::status::Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch* wb) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::RebuildFromWriteBatch(
+    WriteBatch* wb) {
   struct TrackKeyHandler : public WriteBatch::Handler {
     WriteUnpreparedTxn* txn_;
     bool rollback_merge_operands_;
@@ -197,25 +199,29 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch*
     TrackKeyHandler(WriteUnpreparedTxn* txn, bool rollback_merge_operands)
         : txn_(txn), rollback_merge_operands_(rollback_merge_operands) {}
 
-    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
+    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
+                                     const Slice&) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
       return rocksdb_rs::status::Status_OK();
     }
 
-    rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t cf,
+                                        const Slice& key) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
       return rocksdb_rs::status::Status_OK();
     }
 
-    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf,
+                                              const Slice& key) override {
       txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                      false /* read_only */, true /* exclusive */);
       return rocksdb_rs::status::Status_OK();
     }
 
-    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
+                                       const Slice&) override {
       if (rollback_merge_operands_) {
         txn_->TrackKey(cf, key.ToString(), kMaxSequenceNumber,
                        false /* read_only */, true /* exclusive */);
@@ -224,13 +230,17 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RebuildFromWriteBatch(WriteBatch*
     }
 
     // Recovered batches do not contain 2PC markers.
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
+      return rocksdb_rs::status::Status_InvalidArgument();
+    }
 
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
       return rocksdb_rs::status::Status_InvalidArgument();
     }
 
-    rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkNoop(bool) override {
+      return rocksdb_rs::status::Status_InvalidArgument();
+    }
 
     rocksdb_rs::status::Status MarkCommit(const Slice&) override {
       return rocksdb_rs::status::Status_InvalidArgument();
@@ -259,7 +269,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::MaybeFlushWriteBatchToDB() {
   return s;
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDB(bool prepared) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDB(
+    bool prepared) {
   // If the current write batch contains savepoints, then some special handling
   // is required so that RollbackToSavepoint can work.
   //
@@ -273,7 +284,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDB(bool prepared
   return FlushWriteBatchToDBInternal(prepared);
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool prepared) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(
+    bool prepared) {
   if (name_.empty()) {
     assert(!prepared);
 #ifndef NDEBUG
@@ -286,7 +298,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool 
     } else
 #endif
     {
-      return rocksdb_rs::status::Status_InvalidArgument("Cannot write to DB without SetName.");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Cannot write to DB without SetName.");
     }
   }
 
@@ -307,19 +320,23 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool 
       return rocksdb_rs::status::Status_OK();
     }
 
-    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice&) override {
+    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
+                                     const Slice&) override {
       return AddUntrackedKey(cf, key);
     }
 
-    rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t cf,
+                                        const Slice& key) override {
       return AddUntrackedKey(cf, key);
     }
 
-    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf,
+                                              const Slice& key) override {
       return AddUntrackedKey(cf, key);
     }
 
-    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice&) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
+                                       const Slice&) override {
       if (rollback_merge_operands_) {
         return AddUntrackedKey(cf, key);
       }
@@ -328,10 +345,13 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool 
 
     // The only expected 2PC marker is the initial Noop marker.
     rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
-      return empty_batch ? rocksdb_rs::status::Status_OK() : rocksdb_rs::status::Status_InvalidArgument();
+      return empty_batch ? rocksdb_rs::status::Status_OK()
+                         : rocksdb_rs::status::Status_InvalidArgument();
     }
 
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
+      return rocksdb_rs::status::Status_InvalidArgument();
+    }
 
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
       return rocksdb_rs::status::Status_InvalidArgument();
@@ -406,7 +426,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchToDBInternal(bool 
   return s;
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB() {
+rocksdb_rs::status::Status
+WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB() {
   assert(unflushed_save_points_ != nullptr &&
          unflushed_save_points_->size() > 0);
   assert(save_points_ != nullptr && save_points_->size() > 0);
@@ -422,28 +443,35 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB(
         const std::map<uint32_t, ColumnFamilyHandle*>& handles)
         : wb_(wb), handles_(handles) {}
 
-    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& value) override {
+    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
+                                     const Slice& value) override {
       return wb_->Put(handles_.at(cf), key, value);
     }
 
-    rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t cf,
+                                        const Slice& key) override {
       return wb_->Delete(handles_.at(cf), key);
     }
 
-    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf,
+                                              const Slice& key) override {
       return wb_->SingleDelete(handles_.at(cf), key);
     }
 
-    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& value) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
+                                       const Slice& value) override {
       return wb_->Merge(handles_.at(cf), key, value);
     }
 
     // The only expected 2PC marker is the initial Noop marker.
     rocksdb_rs::status::Status MarkNoop(bool empty_batch) override {
-      return empty_batch ? rocksdb_rs::status::Status_OK() : rocksdb_rs::status::Status_InvalidArgument();
+      return empty_batch ? rocksdb_rs::status::Status_OK()
+                         : rocksdb_rs::status::Status_InvalidArgument();
     }
 
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
+      return rocksdb_rs::status::Status_InvalidArgument();
+    }
 
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
       return rocksdb_rs::status::Status_InvalidArgument();
@@ -485,8 +513,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::FlushWriteBatchWithSavePointToDB(
     // since the rewriting into the batch should produce the exact same byte
     // representation. Rebuilding the WriteBatchWithIndex index is still
     // necessary though, and would imply doing two passes over the batch though.
-    rocksdb_rs::status::Status s = WriteBatchInternal::Iterate(wb.GetWriteBatch(), &sp_handler,
-                                           prev_boundary, curr_boundary);
+    rocksdb_rs::status::Status s = WriteBatchInternal::Iterate(
+        wb.GetWriteBatch(), &sp_handler, prev_boundary, curr_boundary);
     if (!s.ok()) {
       return s;
     }
@@ -671,7 +699,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::WriteRollbackKeys(
     auto s = db_impl_->GetImpl(roptions, key, get_impl_options);
 
     if (s.ok()) {
-      s = rollback_batch->Put(cf_handle, key, static_cast<const Slice&>(pinnable_val));
+      s = rollback_batch->Put(cf_handle, key,
+                              static_cast<const Slice&>(pinnable_val));
       assert(s.ok());
     } else if (s.IsNotFound()) {
       if (wupt_db_->ShouldRollbackWithSingleDelete(cf_handle, key)) {
@@ -857,7 +886,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::RollbackToSavePoint() {
              (flushed_save_points_ ? flushed_save_points_->size() : 0) ==
          (save_points_ ? save_points_->size() : 0));
   if (unflushed_save_points_ != nullptr && unflushed_save_points_->size() > 0) {
-    rocksdb_rs::status::Status s = PessimisticTransaction::RollbackToSavePoint();
+    rocksdb_rs::status::Status s =
+        PessimisticTransaction::RollbackToSavePoint();
     assert(!s.IsNotFound());
     unflushed_save_points_->pop_back();
     return s;
@@ -946,7 +976,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxn::PopSavePoint() {
 void WriteUnpreparedTxn::MultiGet(const ReadOptions& options,
                                   ColumnFamilyHandle* column_family,
                                   const size_t num_keys, const Slice* keys,
-                                  PinnableSlice* values, rocksdb_rs::status::Status* statuses,
+                                  PinnableSlice* values,
+                                  rocksdb_rs::status::Status* statuses,
                                   const bool sorted_input) {
   assert(options.io_activity == Env::IOActivity::kUnknown);
   SequenceNumber min_uncommitted, snap_seq;
@@ -966,9 +997,9 @@ void WriteUnpreparedTxn::MultiGet(const ReadOptions& options,
   }
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::Get(const ReadOptions& options,
-                               ColumnFamilyHandle* column_family,
-                               const Slice& key, PinnableSlice* value) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::Get(
+    const ReadOptions& options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* value) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
@@ -1014,9 +1045,9 @@ Iterator* WriteUnpreparedTxn::GetIterator(const ReadOptions& options,
   return iter;
 }
 
-rocksdb_rs::status::Status WriteUnpreparedTxn::ValidateSnapshot(ColumnFamilyHandle* column_family,
-                                            const Slice& key,
-                                            SequenceNumber* tracked_at_seq) {
+rocksdb_rs::status::Status WriteUnpreparedTxn::ValidateSnapshot(
+    ColumnFamilyHandle* column_family, const Slice& key,
+    SequenceNumber* tracked_at_seq) {
   // TODO(lth): Reduce duplicate code with WritePrepared ValidateSnapshot logic.
   assert(snapshot_);
 

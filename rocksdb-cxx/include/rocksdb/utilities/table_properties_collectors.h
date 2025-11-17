@@ -85,4 +85,3 @@ NewCompactOnDeletionCollectorFactory(size_t sliding_window_size,
                                      size_t deletion_trigger,
                                      double deletion_ratio = 0);
 }  // namespace rocksdb
-

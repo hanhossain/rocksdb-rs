@@ -61,7 +61,8 @@ TEST_F(EnvLoggerTest, EmptyLogFile) {
 
   // Check the size of the log file.
   uint64_t file_size;
-  ASSERT_TRUE(env_->GetFileSize(kLogFile, &file_size).eq(rocksdb_rs::status::Status_OK()));
+  ASSERT_TRUE(env_->GetFileSize(kLogFile, &file_size)
+                  .eq(rocksdb_rs::status::Status_OK()));
   ASSERT_EQ(file_size, 0);
   DeleteLogFile();
 }
@@ -102,7 +103,8 @@ TEST_F(EnvLoggerTest, Overwrite) {
 
     // File should be empty.
     uint64_t file_size;
-    ASSERT_TRUE(env_->GetFileSize(kLogFile, &file_size).eq(rocksdb_rs::status::Status_OK()));
+    ASSERT_TRUE(env_->GetFileSize(kLogFile, &file_size)
+                    .eq(rocksdb_rs::status::Status_OK()));
     ASSERT_EQ(file_size, 0);
     ASSERT_EQ(logger->GetLogFileSize(), 0);
     ASSERT_TRUE(logger->Close().eq(rocksdb_rs::status::Status_OK()));

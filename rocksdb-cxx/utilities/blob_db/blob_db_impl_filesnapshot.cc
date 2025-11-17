@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "file/filename.h"
 #include "logging/logging.h"
 #include "util/cast_util.h"
@@ -60,16 +59,17 @@ rocksdb_rs::status::Status BlobDBImpl::EnableFileDeletions(bool force) {
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& ret,
-                                uint64_t* manifest_file_size,
-                                bool flush_memtable) {
+rocksdb_rs::status::Status BlobDBImpl::GetLiveFiles(
+    std::vector<std::string>& ret, uint64_t* manifest_file_size,
+    bool flush_memtable) {
   if (!bdb_options_.path_relative) {
     return rocksdb_rs::status::Status_NotSupported(
         "Not able to get relative blob file path from absolute blob_dir.");
   }
   // Hold a lock in the beginning to avoid updates to base DB during the call
   ReadLock rl(&mutex_);
-  rocksdb_rs::status::Status s = db_->GetLiveFiles(ret, manifest_file_size, flush_memtable);
+  rocksdb_rs::status::Status s =
+      db_->GetLiveFiles(ret, manifest_file_size, flush_memtable);
   if (!s.ok()) {
     return s;
   }
@@ -77,8 +77,8 @@ rocksdb_rs::status::Status BlobDBImpl::GetLiveFiles(std::vector<std::string>& re
   for (auto bfile_pair : blob_files_) {
     auto blob_file = bfile_pair.second;
     // Path should be relative to db_name, but begin with slash.
-    ret.emplace_back(
-        rocksdb_rs::filename::BlobFileName("", bdb_options_.blob_dir, blob_file->BlobFileNumber()));
+    ret.emplace_back(rocksdb_rs::filename::BlobFileName(
+        "", bdb_options_.blob_dir, blob_file->BlobFileNumber()));
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -95,7 +95,9 @@ void BlobDBImpl::GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata) {
     filemetadata.size = blob_file->GetFileSize();
     const uint64_t file_number = blob_file->BlobFileNumber();
     // Path should be relative to db_name, but begin with slash.
-    filemetadata.name = static_cast<std::string>(rocksdb_rs::filename::BlobFileName("", bdb_options_.blob_dir, file_number));
+    filemetadata.name =
+        static_cast<std::string>(rocksdb_rs::filename::BlobFileName(
+            "", bdb_options_.blob_dir, file_number));
     filemetadata.file_number = file_number;
     if (blob_file->HasTTL()) {
       filemetadata.oldest_ancester_time = blob_file->GetExpirationRange().first;

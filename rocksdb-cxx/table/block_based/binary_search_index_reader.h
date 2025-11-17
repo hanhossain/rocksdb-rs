@@ -19,11 +19,11 @@ class BinarySearchIndexReader : public BlockBasedTable::IndexReaderCommon {
   // `BinarySearchIndexReader`.
   // On success, index_reader will be populated; otherwise it will remain
   // unmodified.
-  static rocksdb_rs::status::Status Create(const BlockBasedTable* table, const ReadOptions& ro,
-                       FilePrefetchBuffer* prefetch_buffer, bool use_cache,
-                       bool prefetch, bool pin,
-                       BlockCacheLookupContext* lookup_context,
-                       std::unique_ptr<IndexReader>* index_reader);
+  static rocksdb_rs::status::Status Create(
+      const BlockBasedTable* table, const ReadOptions& ro,
+      FilePrefetchBuffer* prefetch_buffer, bool use_cache, bool prefetch,
+      bool pin, BlockCacheLookupContext* lookup_context,
+      std::unique_ptr<IndexReader>* index_reader);
 
   InternalIteratorBase<IndexValue>* NewIterator(
       const ReadOptions& read_options, bool /* disable_prefix_seek */,

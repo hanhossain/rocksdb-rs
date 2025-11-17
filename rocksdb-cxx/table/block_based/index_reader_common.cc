@@ -34,7 +34,8 @@ rocksdb_rs::status::Status BlockBasedTable::IndexReaderCommon::ReadIndexBlock(
   return s.Clone();
 }
 
-rocksdb_rs::status::Status BlockBasedTable::IndexReaderCommon::GetOrReadIndexBlock(
+rocksdb_rs::status::Status
+BlockBasedTable::IndexReaderCommon::GetOrReadIndexBlock(
     bool no_io, GetContext* get_context,
     BlockCacheLookupContext* lookup_context, CachableEntry<Block>* index_block,
     const ReadOptions& ro) const {

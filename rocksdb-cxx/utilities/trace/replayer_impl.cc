@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/trace/replayer_impl.h"
 
 #include <cmath>
@@ -50,7 +49,8 @@ rocksdb_rs::status::Status ReplayerImpl::Prepare() {
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* record) {
+rocksdb_rs::status::Status ReplayerImpl::Next(
+    std::unique_ptr<TraceRecord>* record) {
   if (!prepared_) {
     return rocksdb_rs::status::Status_Incomplete("Not prepared!");
   }
@@ -72,17 +72,20 @@ rocksdb_rs::status::Status ReplayerImpl::Next(std::unique_ptr<TraceRecord>* reco
   return TracerHelper::DecodeTraceRecord(&trace, trace_file_version_, record);
 }
 
-rocksdb_rs::status::Status ReplayerImpl::Execute(const std::unique_ptr<TraceRecord>& record,
-                             std::unique_ptr<TraceRecordResult>* result) {
+rocksdb_rs::status::Status ReplayerImpl::Execute(
+    const std::unique_ptr<TraceRecord>& record,
+    std::unique_ptr<TraceRecordResult>* result) {
   return record->Accept(exec_handler_.get(), result);
 }
 
 rocksdb_rs::status::Status ReplayerImpl::Replay(
     const ReplayOptions& options,
-    const std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)>&
+    const std::function<void(rocksdb_rs::status::Status,
+                             std::unique_ptr<TraceRecordResult>&&)>&
         result_callback) {
   if (options.fast_forward <= 0.0) {
-    return rocksdb_rs::status::Status_InvalidArgument("Wrong fast forward speed!");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Wrong fast forward speed!");
   }
 
   if (!prepared_) {
@@ -171,7 +174,8 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
     // the first error is also the last error, while in multi-thread replay, the
     // first error may not be the first error in execution, and it may not be
     // the last error in exeution as well.
-    auto error_cb = [&mtx, &bg_s, &last_err_ts](rocksdb_rs::status::Status err, uint64_t err_ts) {
+    auto error_cb = [&mtx, &bg_s, &last_err_ts](rocksdb_rs::status::Status err,
+                                                uint64_t err_ts) {
       std::lock_guard<std::mutex> gd(mtx);
       // Only record the first error.
       if (!err.ok() && !err.IsNotSupported() && err_ts < last_err_ts) {
@@ -225,7 +229,8 @@ rocksdb_rs::status::Status ReplayerImpl::Replay(
       } else {
         // Skip unsupported traces.
         if (result_callback != nullptr) {
-          result_callback(rocksdb_rs::status::Status_NotSupported("Unsupported trace type."),
+          result_callback(rocksdb_rs::status::Status_NotSupported(
+                              "Unsupported trace type."),
                           nullptr);
         }
       }
@@ -287,8 +292,8 @@ void ReplayerImpl::BackgroundWork(void* arg) {
   assert(ra != nullptr);
 
   std::unique_ptr<TraceRecord> record;
-  rocksdb_rs::status::Status s = TracerHelper::DecodeTraceRecord(&(ra->trace_entry),
-                                             ra->trace_file_version, &record);
+  rocksdb_rs::status::Status s = TracerHelper::DecodeTraceRecord(
+      &(ra->trace_entry), ra->trace_file_version, &record);
   if (!s.ok()) {
     // Stop the replay
     if (ra->error_cb != nullptr) {

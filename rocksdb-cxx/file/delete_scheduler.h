@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include <map>
 #include <queue>
 #include <string>
@@ -13,7 +12,6 @@
 
 #include "monitoring/instrumented_mutex.h"
 #include "port/port.h"
-
 #include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
@@ -52,8 +50,9 @@ class DeleteScheduler {
   // Mark file as trash directory and schedule its deletion. If force_bg is
   // set, it forces the file to always be deleted in the background thread,
   // except when rate limiting is disabled
-  rocksdb_rs::status::Status DeleteFile(const std::string& fname, const std::string& dir_to_sync,
-                    const bool force_bg = false);
+  rocksdb_rs::status::Status DeleteFile(const std::string& fname,
+                                        const std::string& dir_to_sync,
+                                        const bool force_bg = false);
 
   // Wait for all files being deleteing in the background to finish or for
   // destructor to be called.
@@ -79,8 +78,9 @@ class DeleteScheduler {
 
   // Check if there are any .trash files in path, and schedule their deletion
   // Or delete immediately if sst_file_manager is nullptr
-  static rocksdb_rs::status::Status CleanupDirectory(Env* env, SstFileManagerImpl* sfm,
-                                 const std::string& path);
+  static rocksdb_rs::status::Status CleanupDirectory(Env* env,
+                                                     SstFileManagerImpl* sfm,
+                                                     const std::string& path);
 
   void SetStatisticsPtr(const std::shared_ptr<Statistics>& stats) {
     InstrumentedMutexLock l(&mu_);
@@ -88,11 +88,13 @@ class DeleteScheduler {
   }
 
  private:
-  rocksdb_rs::status::Status MarkAsTrash(const std::string& file_path, std::string* path_in_trash);
+  rocksdb_rs::status::Status MarkAsTrash(const std::string& file_path,
+                                         std::string* path_in_trash);
 
   rocksdb_rs::status::Status DeleteTrashFile(const std::string& path_in_trash,
-                         const std::string& dir_to_sync,
-                         uint64_t* deleted_bytes, bool* is_complete);
+                                             const std::string& dir_to_sync,
+                                             uint64_t* deleted_bytes,
+                                             bool* is_complete);
 
   void BackgroundEmptyTrash();
 
@@ -145,4 +147,3 @@ class DeleteScheduler {
 };
 
 }  // namespace rocksdb
-

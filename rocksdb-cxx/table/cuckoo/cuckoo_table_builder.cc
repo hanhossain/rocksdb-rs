@@ -89,20 +89,21 @@ CuckooTableBuilder::CuckooTableBuilder(
 
 void CuckooTableBuilder::Add(const Slice& key, const Slice& value) {
   if (num_entries_ >= kMaxVectorIdx - 1) {
-    status_ = rocksdb_rs::status::Status_NotSupported("Number of keys in a file must be < 2^32-1");
+    status_ = rocksdb_rs::status::Status_NotSupported(
+        "Number of keys in a file must be < 2^32-1");
     return;
   }
   ParsedInternalKey ikey;
   rocksdb_rs::status::Status pik_status =
       ParseInternalKey(key, &ikey, false /* log_err_key */);  // TODO
   if (!pik_status.ok()) {
-    status_ = rocksdb_rs::status::Status_Corruption("Unable to parse key into internal key. ",
-                                 pik_status.getState());
+    status_ = rocksdb_rs::status::Status_Corruption(
+        "Unable to parse key into internal key. ", pik_status.getState());
     return;
   }
   if (ikey.type != kTypeDeletion && ikey.type != kTypeValue) {
-    status_ = rocksdb_rs::status::Status_NotSupported("Unsupported key type " +
-                                   std::to_string(ikey.type));
+    status_ = rocksdb_rs::status::Status_NotSupported(
+        "Unsupported key type " + std::to_string(ikey.type));
     return;
   }
 
@@ -118,7 +119,8 @@ void CuckooTableBuilder::Add(const Slice& key, const Slice& value) {
     key_size_ = is_last_level_file_ ? ikey.user_key.size() : key.size();
   }
   if (key_size_ != (is_last_level_file_ ? ikey.user_key.size() : key.size())) {
-    status_ = rocksdb_rs::status::Status_NotSupported("all keys have to be the same size");
+    status_ = rocksdb_rs::status::Status_NotSupported(
+        "all keys have to be the same size");
     return;
   }
 
@@ -128,7 +130,8 @@ void CuckooTableBuilder::Add(const Slice& key, const Slice& value) {
       value_size_ = value.size();
     }
     if (value_size_ != value.size()) {
-      status_ = rocksdb_rs::status::Status_NotSupported("all values have to be the same size");
+      status_ = rocksdb_rs::status::Status_NotSupported(
+          "all values have to be the same size");
       return;
     }
 
@@ -197,7 +200,8 @@ Slice CuckooTableBuilder::GetValue(uint64_t idx) const {
       static_cast<size_t>(value_size_));
 }
 
-rocksdb_rs::status::Status CuckooTableBuilder::MakeHashTable(std::vector<CuckooBucket>* buckets) {
+rocksdb_rs::status::Status CuckooTableBuilder::MakeHashTable(
+    std::vector<CuckooBucket>* buckets) {
   buckets->resize(
       static_cast<size_t>(hash_table_size_ + cuckoo_block_size_ - 1));
   uint32_t make_space_for_key_call_id = 0;
@@ -225,7 +229,8 @@ rocksdb_rs::status::Status CuckooTableBuilder::MakeHashTable(std::vector<CuckooB
           if (ucomp_->Compare(
                   user_key, GetUserKey((*buckets)[static_cast<size_t>(hash_val)]
                                            .vector_idx)) == 0) {
-            return rocksdb_rs::status::Status_NotSupported("Same key is being inserted again.");
+            return rocksdb_rs::status::Status_NotSupported(
+                "Same key is being inserted again.");
           }
           hash_vals.push_back(hash_val);
         }
@@ -236,7 +241,8 @@ rocksdb_rs::status::Status CuckooTableBuilder::MakeHashTable(std::vector<CuckooB
                             &bucket_id)) {
       // Rehash by increashing number of hash tables.
       if (num_hash_func_ >= max_num_hash_func_) {
-        return rocksdb_rs::status::Status_NotSupported("Too many collisions. Unable to hash.");
+        return rocksdb_rs::status::Status_NotSupported(
+            "Too many collisions. Unable to hash.");
       }
       // We don't really need to rehash the entire table because old hashes are
       // still valid and we only increased the number of hash functions.

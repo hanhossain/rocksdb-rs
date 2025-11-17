@@ -21,7 +21,9 @@ namespace rocksdb {
 static std::unordered_map<std::string, OptionTypeInfo> ttl_merge_op_type_info =
     {{"user_operator",
       OptionTypeInfo::AsCustomSharedPtr<MergeOperator>(
-          0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)}};
+          0,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kByName,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)}};
 
 TtlMergeOperator::TtlMergeOperator(
     const std::shared_ptr<MergeOperator>& merge_op, SystemClock* clock)
@@ -136,7 +138,8 @@ bool TtlMergeOperator::PartialMergeMulti(const Slice& key,
   }
 }
 
-rocksdb_rs::status::Status TtlMergeOperator::PrepareOptions(const ConfigOptions& config_options) {
+rocksdb_rs::status::Status TtlMergeOperator::PrepareOptions(
+    const ConfigOptions& config_options) {
   if (clock_ == nullptr) {
     clock_ = config_options.env->GetSystemClock().get();
   }
@@ -149,7 +152,8 @@ rocksdb_rs::status::Status TtlMergeOperator::ValidateOptions(
     return rocksdb_rs::status::Status_InvalidArgument(
         "UserMergeOperator required by TtlMergeOperator");
   } else if (clock_ == nullptr) {
-    return rocksdb_rs::status::Status_InvalidArgument("SystemClock required by TtlMergeOperator");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "SystemClock required by TtlMergeOperator");
   } else {
     return MergeOperator::ValidateOptions(db_opts, cf_opts);
   }
@@ -179,12 +183,16 @@ static std::unordered_map<std::string, OptionTypeInfo> ttl_type_info = {
 static std::unordered_map<std::string, OptionTypeInfo> ttl_cff_type_info = {
     {"user_filter_factory",
      OptionTypeInfo::AsCustomSharedPtr<CompactionFilterFactory>(
-         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowFromNull,
+         0,
+         rocksdb_rs::utilities::options_type::OptionVerificationType::
+             kByNameAllowFromNull,
          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)}};
 static std::unordered_map<std::string, OptionTypeInfo> user_cf_type_info = {
     {"user_filter",
      OptionTypeInfo::AsCustomRawPtr<const CompactionFilter>(
-         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)}};
+         0,
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kByName,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kAllowNull)}};
 
 TtlCompactionFilter::TtlCompactionFilter(
     int32_t ttl, SystemClock* clock, const CompactionFilter* _user_comp_filter,
@@ -334,16 +342,18 @@ void DBWithTTLImpl::RegisterTtlClasses() {
   });
 }
 
-rocksdb_rs::status::Status DBWithTTL::Open(const Options& options, const std::string& dbname,
-                       DBWithTTL** dbptr, int32_t ttl, bool read_only) {
+rocksdb_rs::status::Status DBWithTTL::Open(const Options& options,
+                                           const std::string& dbname,
+                                           DBWithTTL** dbptr, int32_t ttl,
+                                           bool read_only) {
   DBOptions db_options(options);
   ColumnFamilyOptions cf_options(options);
   std::vector<ColumnFamilyDescriptor> column_families;
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   std::vector<ColumnFamilyHandle*> handles;
-  rocksdb_rs::status::Status s = DBWithTTL::Open(db_options, dbname, column_families, &handles,
-                             dbptr, {ttl}, read_only);
+  rocksdb_rs::status::Status s = DBWithTTL::Open(
+      db_options, dbname, column_families, &handles, dbptr, {ttl}, read_only);
   if (s.ok()) {
     assert(handles.size() == 1);
     // i can delete the handle since DBImpl is always holding a reference to
@@ -403,16 +413,17 @@ rocksdb_rs::status::Status DBWithTTLImpl::CreateColumnFamilyWithTtl(
                                        handle);
 }
 
-rocksdb_rs::status::Status DBWithTTLImpl::CreateColumnFamily(const ColumnFamilyOptions& options,
-                                         const std::string& column_family_name,
-                                         ColumnFamilyHandle** handle) {
+rocksdb_rs::status::Status DBWithTTLImpl::CreateColumnFamily(
+    const ColumnFamilyOptions& options, const std::string& column_family_name,
+    ColumnFamilyHandle** handle) {
   return CreateColumnFamilyWithTtl(options, column_family_name, handle, 0);
 }
 
 // Appends the current timestamp to the string.
 // Returns false if could not get the current_time, true if append succeeds
-rocksdb_rs::status::Status DBWithTTLImpl::AppendTS(const Slice& val, std::string* val_with_ts,
-                               SystemClock* clock) {
+rocksdb_rs::status::Status DBWithTTLImpl::AppendTS(const Slice& val,
+                                                   std::string* val_with_ts,
+                                                   SystemClock* clock) {
   val_with_ts->reserve(kTSLength + val.size());
   char ts_string[kTSLength];
   int64_t curtime;
@@ -428,15 +439,19 @@ rocksdb_rs::status::Status DBWithTTLImpl::AppendTS(const Slice& val, std::string
 
 // Returns corruption if the length of the string is lesser than timestamp, or
 // timestamp refers to a time lesser than ttl-feature release time
-rocksdb_rs::status::Status DBWithTTLImpl::SanityCheckTimestamp(const Slice& str) {
+rocksdb_rs::status::Status DBWithTTLImpl::SanityCheckTimestamp(
+    const Slice& str) {
   if (str.size() < kTSLength) {
-    return rocksdb_rs::status::Status_Corruption("Error: value's length less than timestamp's\n");
+    return rocksdb_rs::status::Status_Corruption(
+        "Error: value's length less than timestamp's\n");
   }
   // Checks that TS is not lesser than kMinTimestamp
   // Gaurds against corruption & normal database opened incorrectly in ttl mode
-  int32_t timestamp_value = rocksdb_rs::coding_lean::DecodeFixed32(str.data() + str.size() - kTSLength);
+  int32_t timestamp_value = rocksdb_rs::coding_lean::DecodeFixed32(
+      str.data() + str.size() - kTSLength);
   if (timestamp_value < kMinTimestamp) {
-    return rocksdb_rs::status::Status_Corruption("Error: Timestamp < ttl feature release time!\n");
+    return rocksdb_rs::status::Status_Corruption(
+        "Error: Timestamp < ttl feature release time!\n");
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -455,8 +470,8 @@ bool DBWithTTLImpl::IsStale(const Slice& value, int32_t ttl,
    * for example ttl = 86400 * 365 * 15
    * convert timestamp_value to int64_t
    */
-  int64_t timestamp_value =
-      rocksdb_rs::coding_lean::DecodeFixed32(value.data() + value.size() - kTSLength);
+  int64_t timestamp_value = rocksdb_rs::coding_lean::DecodeFixed32(
+      value.data() + value.size() - kTSLength);
   return (timestamp_value + ttl) < curtime;
 }
 
@@ -481,8 +496,9 @@ rocksdb_rs::status::Status DBWithTTLImpl::StripTS(std::string* str) {
 }
 
 rocksdb_rs::status::Status DBWithTTLImpl::Put(const WriteOptions& options,
-                          ColumnFamilyHandle* column_family, const Slice& key,
-                          const Slice& val) {
+                                              ColumnFamilyHandle* column_family,
+                                              const Slice& key,
+                                              const Slice& val) {
   WriteBatch batch;
   rocksdb_rs::status::Status st = batch.Put(column_family, key, val);
   if (st.ok()) {
@@ -492,8 +508,9 @@ rocksdb_rs::status::Status DBWithTTLImpl::Put(const WriteOptions& options,
 }
 
 rocksdb_rs::status::Status DBWithTTLImpl::Get(const ReadOptions& options,
-                          ColumnFamilyHandle* column_family, const Slice& key,
-                          PinnableSlice* value) {
+                                              ColumnFamilyHandle* column_family,
+                                              const Slice& key,
+                                              PinnableSlice* value) {
   rocksdb_rs::status::Status st = db_->Get(options, column_family, key, value);
   if (!st.ok()) {
     return st;
@@ -536,9 +553,9 @@ bool DBWithTTLImpl::KeyMayExist(const ReadOptions& options,
   return ret;
 }
 
-rocksdb_rs::status::Status DBWithTTLImpl::Merge(const WriteOptions& options,
-                            ColumnFamilyHandle* column_family, const Slice& key,
-                            const Slice& value) {
+rocksdb_rs::status::Status DBWithTTLImpl::Merge(
+    const WriteOptions& options, ColumnFamilyHandle* column_family,
+    const Slice& key, const Slice& value) {
   WriteBatch batch;
   rocksdb_rs::status::Status st = batch.Merge(column_family, key, value);
   if (st.ok()) {
@@ -547,13 +564,15 @@ rocksdb_rs::status::Status DBWithTTLImpl::Merge(const WriteOptions& options,
   return st;
 }
 
-rocksdb_rs::status::Status DBWithTTLImpl::Write(const WriteOptions& opts, WriteBatch* updates) {
+rocksdb_rs::status::Status DBWithTTLImpl::Write(const WriteOptions& opts,
+                                                WriteBatch* updates) {
   class Handler : public WriteBatch::Handler {
    public:
     explicit Handler(SystemClock* clock) : clock_(clock) {}
     WriteBatch updates_ttl;
-    rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
-                 const Slice& value) override {
+    rocksdb_rs::status::Status PutCF(uint32_t column_family_id,
+                                     const Slice& key,
+                                     const Slice& value) override {
       std::string value_with_ts;
       rocksdb_rs::status::Status st = AppendTS(value, &value_with_ts, clock_);
       if (!st.ok()) {
@@ -562,8 +581,9 @@ rocksdb_rs::status::Status DBWithTTLImpl::Write(const WriteOptions& opts, WriteB
       return WriteBatchInternal::Put(&updates_ttl, column_family_id, key,
                                      value_with_ts);
     }
-    rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
-                   const Slice& value) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t column_family_id,
+                                       const Slice& key,
+                                       const Slice& value) override {
       std::string value_with_ts;
       rocksdb_rs::status::Status st = AppendTS(value, &value_with_ts, clock_);
       if (!st.ok()) {
@@ -572,11 +592,13 @@ rocksdb_rs::status::Status DBWithTTLImpl::Write(const WriteOptions& opts, WriteB
       return WriteBatchInternal::Merge(&updates_ttl, column_family_id, key,
                                        value_with_ts);
     }
-    rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
+                                        const Slice& key) override {
       return WriteBatchInternal::Delete(&updates_ttl, column_family_id, key);
     }
-    rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
-                         const Slice& end_key) override {
+    rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id,
+                                             const Slice& begin_key,
+                                             const Slice& end_key) override {
       return WriteBatchInternal::DeleteRange(&updates_ttl, column_family_id,
                                              begin_key, end_key);
     }

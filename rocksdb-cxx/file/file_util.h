@@ -8,6 +8,7 @@
 
 #include "file/filename.h"
 #include "options/db_options.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/sst_file_writer.h"
@@ -15,43 +16,38 @@
 #include "rocksdb/types.h"
 #include "trace_replay/io_tracer.h"
 
-#include "rocksdb-rs/src/status.rs.h"
-
 namespace rocksdb {
 // use_fsync maps to options.use_fsync, which determines the way that
 // the file is synced after copying.
-extern rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
-                         std::unique_ptr<WritableFileWriter>& dest_writer,
-                         uint64_t size, bool use_fsync,
-                         const std::shared_ptr<IOTracer>& io_tracer,
-                         const Temperature temperature);
-extern rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
-                         const std::string& destination, uint64_t size,
-                         bool use_fsync,
-                         const std::shared_ptr<IOTracer>& io_tracer,
-                         const Temperature temperature);
-inline rocksdb_rs::io_status::IOStatus CopyFile(const std::shared_ptr<FileSystem>& fs,
-                         const std::string& source,
-                         const std::string& destination, uint64_t size,
-                         bool use_fsync,
-                         const std::shared_ptr<IOTracer>& io_tracer,
-                         const Temperature temperature) {
+extern rocksdb_rs::io_status::IOStatus CopyFile(
+    FileSystem* fs, const std::string& source,
+    std::unique_ptr<WritableFileWriter>& dest_writer, uint64_t size,
+    bool use_fsync, const std::shared_ptr<IOTracer>& io_tracer,
+    const Temperature temperature);
+extern rocksdb_rs::io_status::IOStatus CopyFile(
+    FileSystem* fs, const std::string& source, const std::string& destination,
+    uint64_t size, bool use_fsync, const std::shared_ptr<IOTracer>& io_tracer,
+    const Temperature temperature);
+inline rocksdb_rs::io_status::IOStatus CopyFile(
+    const std::shared_ptr<FileSystem>& fs, const std::string& source,
+    const std::string& destination, uint64_t size, bool use_fsync,
+    const std::shared_ptr<IOTracer>& io_tracer, const Temperature temperature) {
   return CopyFile(fs.get(), source, destination, size, use_fsync, io_tracer,
                   temperature);
 }
-extern rocksdb_rs::io_status::IOStatus CreateFile(FileSystem* fs, const std::string& destination,
-                           const std::string& contents, bool use_fsync);
+extern rocksdb_rs::io_status::IOStatus CreateFile(
+    FileSystem* fs, const std::string& destination, const std::string& contents,
+    bool use_fsync);
 
-inline rocksdb_rs::io_status::IOStatus CreateFile(const std::shared_ptr<FileSystem>& fs,
-                           const std::string& destination,
-                           const std::string& contents, bool use_fsync) {
+inline rocksdb_rs::io_status::IOStatus CreateFile(
+    const std::shared_ptr<FileSystem>& fs, const std::string& destination,
+    const std::string& contents, bool use_fsync) {
   return CreateFile(fs.get(), destination, contents, use_fsync);
 }
 
-extern rocksdb_rs::status::Status DeleteDBFile(const ImmutableDBOptions* db_options,
-                           const std::string& fname,
-                           const std::string& path_to_sync, const bool force_bg,
-                           const bool force_fg);
+extern rocksdb_rs::status::Status DeleteDBFile(
+    const ImmutableDBOptions* db_options, const std::string& fname,
+    const std::string& path_to_sync, const bool force_bg, const bool force_fg);
 
 extern rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     FileSystem* fs, const std::string& file_path,
@@ -62,8 +58,8 @@ extern rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     std::shared_ptr<IOTracer>& io_tracer, RateLimiter* rate_limiter,
     Env::IOPriority rate_limiter_priority);
 
-inline rocksdb_rs::io_status::IOStatus PrepareIOFromReadOptions(const ReadOptions& ro,
-                                         SystemClock* clock, IOOptions& opts) {
+inline rocksdb_rs::io_status::IOStatus PrepareIOFromReadOptions(
+    const ReadOptions& ro, SystemClock* clock, IOOptions& opts) {
   if (ro.deadline.count()) {
     std::chrono::microseconds now =
         std::chrono::microseconds(clock->NowMicros());

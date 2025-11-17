@@ -22,7 +22,9 @@ namespace {
 class CacheActivityLogger {
  public:
   CacheActivityLogger()
-      : activity_logging_enabled_(false), max_logging_size_(0), bg_status_(rocksdb_rs::status::Status_new()) {}
+      : activity_logging_enabled_(false),
+        max_logging_size_(0),
+        bg_status_(rocksdb_rs::status::Status_new()) {}
 
   ~CacheActivityLogger() {
     MutexLock l(&mutex_);
@@ -30,8 +32,9 @@ class CacheActivityLogger {
     StopLoggingInternal();
   }
 
-  rocksdb_rs::status::Status StartLogging(const std::string& activity_log_file, Env* env,
-                      uint64_t max_logging_size = 0) {
+  rocksdb_rs::status::Status StartLogging(const std::string& activity_log_file,
+                                          Env* env,
+                                          uint64_t max_logging_size = 0) {
     assert(activity_log_file != "");
     assert(env != nullptr);
 
@@ -45,7 +48,8 @@ class CacheActivityLogger {
 
     // Open log file
     status = WritableFileWriter::Create(env->GetFileSystem(), activity_log_file,
-                                        file_opts, &file_writer_, nullptr).status();
+                                        file_opts, &file_writer_, nullptr)
+                 .status();
     if (!status.ok()) {
       return status;
     }
@@ -167,8 +171,9 @@ class SimCacheImpl : public SimCache {
   }
 
   rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
-                const CacheItemHelper* helper, size_t charge, Handle** handle,
-                Priority priority) override {
+                                    const CacheItemHelper* helper,
+                                    size_t charge, Handle** handle,
+                                    Priority priority) override {
     // The handle and value passed in are for real cache, so we pass nullptr
     // to key_only_cache_ for both instead. Also, the deleter function pointer
     // will be called by user to perform some external operation which should
@@ -308,8 +313,9 @@ class SimCacheImpl : public SimCache {
     return oss.str();
   }
 
-  rocksdb_rs::status::Status StartActivityLogging(const std::string& activity_log_file, Env* env,
-                              uint64_t max_logging_size = 0) override {
+  rocksdb_rs::status::Status StartActivityLogging(
+      const std::string& activity_log_file, Env* env,
+      uint64_t max_logging_size = 0) override {
     return cache_activity_logger_.StartLogging(activity_log_file, env,
                                                max_logging_size);
   }

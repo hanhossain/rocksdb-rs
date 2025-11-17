@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "options/options_parser.h"
 
 #include <cmath>
@@ -35,10 +34,10 @@ static const std::string option_file_header =
     "#\n"
     "\n";
 
-rocksdb_rs::status::Status PersistRocksDBOptions(const DBOptions& db_opt,
-                             const std::vector<std::string>& cf_names,
-                             const std::vector<ColumnFamilyOptions>& cf_opts,
-                             const std::string& file_name, FileSystem* fs) {
+rocksdb_rs::status::Status PersistRocksDBOptions(
+    const DBOptions& db_opt, const std::vector<std::string>& cf_names,
+    const std::vector<ColumnFamilyOptions>& cf_opts,
+    const std::string& file_name, FileSystem* fs) {
   ConfigOptions
       config_options;  // Use default for escaped(true) and check (exact)
   config_options.delimiter = "\n  ";
@@ -52,11 +51,11 @@ rocksdb_rs::status::Status PersistRocksDBOptions(const DBOptions& db_opt,
                                file_name, fs);
 }
 
-rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_options_in,
-                             const DBOptions& db_opt,
-                             const std::vector<std::string>& cf_names,
-                             const std::vector<ColumnFamilyOptions>& cf_opts,
-                             const std::string& file_name, FileSystem* fs) {
+rocksdb_rs::status::Status PersistRocksDBOptions(
+    const ConfigOptions& config_options_in, const DBOptions& db_opt,
+    const std::vector<std::string>& cf_names,
+    const std::vector<ColumnFamilyOptions>& cf_opts,
+    const std::string& file_name, FileSystem* fs) {
   ConfigOptions config_options = config_options_in;
   config_options.delimiter = "\n  ";  // Override the default to nl
 
@@ -79,20 +78,27 @@ rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_opt
 
   std::string options_file_content;
 
-  s = writable->Append(
-      option_file_header + "[" + opt_section_titles[kOptionSectionVersion] +
-      "]\n"
-      "  rocksdb_version=" +
-      std::to_string(ROCKSDB_MAJOR) + "." + std::to_string(ROCKSDB_MINOR) +
-      "." + std::to_string(ROCKSDB_PATCH) + "\n").status();
+  s = writable
+          ->Append(option_file_header + "[" +
+                   opt_section_titles[kOptionSectionVersion] +
+                   "]\n"
+                   "  rocksdb_version=" +
+                   std::to_string(ROCKSDB_MAJOR) + "." +
+                   std::to_string(ROCKSDB_MINOR) + "." +
+                   std::to_string(ROCKSDB_PATCH) + "\n")
+          .status();
   if (s.ok()) {
-    s = writable->Append(
-        "  options_file_version=" + std::to_string(ROCKSDB_OPTION_FILE_MAJOR) +
-        "." + std::to_string(ROCKSDB_OPTION_FILE_MINOR) + "\n").status();
+    s = writable
+            ->Append("  options_file_version=" +
+                     std::to_string(ROCKSDB_OPTION_FILE_MAJOR) + "." +
+                     std::to_string(ROCKSDB_OPTION_FILE_MINOR) + "\n")
+            .status();
   }
   if (s.ok()) {
-    s = writable->Append("\n[" + opt_section_titles[kOptionSectionDBOptions] +
-                         "]\n  ").status();
+    s = writable
+            ->Append("\n[" + opt_section_titles[kOptionSectionDBOptions] +
+                     "]\n  ")
+            .status();
   }
 
   if (s.ok()) {
@@ -104,8 +110,10 @@ rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_opt
 
   for (size_t i = 0; s.ok() && i < cf_opts.size(); ++i) {
     // CFOptions section
-    s = writable->Append("\n[" + opt_section_titles[kOptionSectionCFOptions] +
-                         " \"" + EscapeOptionString(cf_names[i]) + "\"]\n  ").status();
+    s = writable
+            ->Append("\n[" + opt_section_titles[kOptionSectionCFOptions] +
+                     " \"" + EscapeOptionString(cf_names[i]) + "\"]\n  ")
+            .status();
     if (s.ok()) {
       s = GetStringFromColumnFamilyOptions(config_options, cf_opts[i],
                                            &options_file_content);
@@ -117,9 +125,11 @@ rocksdb_rs::status::Status PersistRocksDBOptions(const ConfigOptions& config_opt
     auto* tf = cf_opts[i].table_factory.get();
     if (tf != nullptr) {
       if (s.ok()) {
-        s = writable->Append(
-            "[" + opt_section_titles[kOptionSectionTableOptions] + tf->Name() +
-            " \"" + EscapeOptionString(cf_names[i]) + "\"]\n  ").status();
+        s = writable
+                ->Append("[" + opt_section_titles[kOptionSectionTableOptions] +
+                         tf->Name() + " \"" + EscapeOptionString(cf_names[i]) +
+                         "\"]\n  ")
+                .status();
       }
       if (s.ok()) {
         options_file_content.clear();
@@ -171,11 +181,9 @@ bool RocksDBOptionsParser::IsSection(const std::string& line) {
   return true;
 }
 
-rocksdb_rs::status::Status RocksDBOptionsParser::ParseSection(OptionSection* section,
-                                          std::string* title,
-                                          std::string* argument,
-                                          const std::string& line,
-                                          const int line_num) {
+rocksdb_rs::status::Status RocksDBOptionsParser::ParseSection(
+    OptionSection* section, std::string* title, std::string* argument,
+    const std::string& line, const int line_num) {
   *section = kOptionSectionUnknown;
   // A section is of the form [<SectionName> "<SectionArg>"], where
   // "<SectionArg>" is optional.
@@ -210,20 +218,20 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ParseSection(OptionSection* sec
       }
     }
   }
-  return rocksdb_rs::status::Status_InvalidArgument(std::string("Unknown section ") + line);
+  return rocksdb_rs::status::Status_InvalidArgument(
+      std::string("Unknown section ") + line);
 }
 
-rocksdb_rs::status::Status RocksDBOptionsParser::InvalidArgument(const int line_num,
-                                             const std::string& message) {
+rocksdb_rs::status::Status RocksDBOptionsParser::InvalidArgument(
+    const int line_num, const std::string& message) {
   return rocksdb_rs::status::Status_InvalidArgument(
       "[RocksDBOptionsParser Error] ",
       message + " (at line " + std::to_string(line_num) + ")");
 }
 
-rocksdb_rs::status::Status RocksDBOptionsParser::ParseStatement(std::string* name,
-                                            std::string* value,
-                                            const std::string& line,
-                                            const int line_num) {
+rocksdb_rs::status::Status RocksDBOptionsParser::ParseStatement(
+    std::string* name, std::string* value, const std::string& line,
+    const int line_num) {
   size_t eq_pos = line.find("=");
   if (eq_pos == std::string::npos) {
     return InvalidArgument(line_num, "A valid statement must have a '='.");
@@ -239,9 +247,9 @@ rocksdb_rs::status::Status RocksDBOptionsParser::ParseStatement(std::string* nam
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const std::string& file_name, FileSystem* fs,
-                                   bool ignore_unknown_options,
-                                   size_t file_readahead_size) {
+rocksdb_rs::status::Status RocksDBOptionsParser::Parse(
+    const std::string& file_name, FileSystem* fs, bool ignore_unknown_options,
+    size_t file_readahead_size) {
   ConfigOptions
       config_options;  // Use default for escaped(true) and check (exact)
   config_options.ignore_unknown_options = ignore_unknown_options;
@@ -251,15 +259,16 @@ rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const std::string& file_n
   return Parse(config_options, file_name, fs);
 }
 
-rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const ConfigOptions& config_options_in,
-                                   const std::string& file_name,
-                                   FileSystem* fs) {
+rocksdb_rs::status::Status RocksDBOptionsParser::Parse(
+    const ConfigOptions& config_options_in, const std::string& file_name,
+    FileSystem* fs) {
   Reset();
   ConfigOptions config_options = config_options_in;
 
   std::unique_ptr<FSSequentialFile> seq_file;
-  rocksdb_rs::status::Status s = fs->NewSequentialFile(file_name, FileOptions(), &seq_file,
-                                   nullptr).status();
+  rocksdb_rs::status::Status s =
+      fs->NewSequentialFile(file_name, FileOptions(), &seq_file, nullptr)
+          .status();
   if (!s.ok()) {
     return s;
   }
@@ -322,9 +331,9 @@ rocksdb_rs::status::Status RocksDBOptionsParser::Parse(const ConfigOptions& conf
   return ValidityCheck();
 }
 
-rocksdb_rs::status::Status RocksDBOptionsParser::CheckSection(const OptionSection section,
-                                          const std::string& section_arg,
-                                          const int line_num) {
+rocksdb_rs::status::Status RocksDBOptionsParser::CheckSection(
+    const OptionSection section, const std::string& section_arg,
+    const int line_num) {
   if (section == kOptionSectionDBOptions) {
     if (has_db_options_) {
       return InvalidArgument(
@@ -353,9 +362,8 @@ rocksdb_rs::status::Status RocksDBOptionsParser::CheckSection(const OptionSectio
   } else if (section == kOptionSectionTableOptions) {
     if (GetCFOptions(section_arg) == nullptr) {
       return InvalidArgument(
-          line_num, std::string(
-                        "Does not find a matched column family name in "
-                        "TableOptions section.  Column Family Name:") +
+          line_num, std::string("Does not find a matched column family name in "
+                                "TableOptions section.  Column Family Name:") +
                         section_arg);
     }
   } else if (section == kOptionSectionVersion) {
@@ -369,10 +377,9 @@ rocksdb_rs::status::Status RocksDBOptionsParser::CheckSection(const OptionSectio
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status RocksDBOptionsParser::ParseVersionNumber(const std::string& ver_name,
-                                                const std::string& ver_string,
-                                                const int max_count,
-                                                int* version) {
+rocksdb_rs::status::Status RocksDBOptionsParser::ParseVersionNumber(
+    const std::string& ver_name, const std::string& ver_string,
+    const int max_count, int* version) {
   int version_index = 0;
   int current_number = 0;
   int current_digit_count = 0;
@@ -555,7 +562,8 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyRocksDBOptionsFromFile(
   ConfigOptions config_options = config_options_in;
   config_options.invoke_prepare_options =
       false;  // No need to do a prepare for verify
-  if (config_options.sanity_level < ConfigOptions::SanityLevel::kSanityLevelExactMatch) {
+  if (config_options.sanity_level <
+      ConfigOptions::SanityLevel::kSanityLevelExactMatch) {
     // If we are not doing an exact comparison, we should ignore
     // unsupported options, as they may cause the Parse to fail
     // (if the ObjectRegistry is not initialized)
@@ -644,7 +652,8 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyDBOptions(
                           "[RocksDBOptionsParser]: "
                           "failed the verification on DBOptions::%s -- ",
                           mismatch.c_str());
-    rocksdb_rs::status::Status s = base_config->GetOption(config_options, mismatch, &base_value);
+    rocksdb_rs::status::Status s =
+        base_config->GetOption(config_options, mismatch, &base_value);
     if (s.ok()) {
       s = file_config->GetOption(config_options, mismatch, &file_value);
     }
@@ -659,7 +668,8 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyDBOptions(
                "-- Unable to re-serialize an option: %s.\n",
                s.ToString()->c_str());
     }
-    return rocksdb_rs::status::Status_InvalidArgument(Slice(buffer, strlen(buffer)));
+    return rocksdb_rs::status::Status_InvalidArgument(
+        Slice(buffer, strlen(buffer)));
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -678,7 +688,8 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyCFOptions(
     // The options do not match
     const size_t kBufferSize = 2048;
     char buffer[kBufferSize];
-    rocksdb_rs::status::Status s = base_config->GetOption(config_options, mismatch, &base_value);
+    rocksdb_rs::status::Status s =
+        base_config->GetOption(config_options, mismatch, &base_value);
     if (s.ok()) {
       s = file_config->GetOption(config_options, mismatch, &file_value);
       // In file_opt, certain options like MergeOperator may be nullptr due to
@@ -706,7 +717,8 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyCFOptions(
                "--- Unable to re-serialize an option: %s.\n",
                s.ToString()->c_str());
     }
-    return rocksdb_rs::status::Status_InvalidArgument(Slice(buffer, sizeof(buffer)));
+    return rocksdb_rs::status::Status_InvalidArgument(
+        Slice(buffer, sizeof(buffer)));
   }  // For each option
   return rocksdb_rs::status::Status_OK();
 }
@@ -716,16 +728,18 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyTableFactory(
     const TableFactory* file_tf) {
   std::string mismatch;
   if (base_tf && file_tf) {
-    if (config_options.sanity_level > ConfigOptions::SanityLevel::kSanityLevelNone &&
+    if (config_options.sanity_level >
+            ConfigOptions::SanityLevel::kSanityLevelNone &&
         std::string(base_tf->Name()) != std::string(file_tf->Name())) {
       return rocksdb_rs::status::Status_Corruption(
           "[RocksDBOptionsParser]: "
           "failed the verification on TableFactory->Name()");
     } else if (!base_tf->AreEquivalent(config_options, file_tf, &mismatch)) {
-      return rocksdb_rs::status::Status_Corruption(std::string("[RocksDBOptionsParser]:"
-                                            "failed the verification on ") +
-                                    base_tf->Name() + "::",
-                                mismatch);
+      return rocksdb_rs::status::Status_Corruption(
+          std::string("[RocksDBOptionsParser]:"
+                      "failed the verification on ") +
+              base_tf->Name() + "::",
+          mismatch);
     }
   } else {
     // TODO(yhchiang): further support sanity check here
@@ -733,4 +747,3 @@ rocksdb_rs::status::Status RocksDBOptionsParser::VerifyTableFactory(
   return rocksdb_rs::status::Status_OK();
 }
 }  // namespace rocksdb
-

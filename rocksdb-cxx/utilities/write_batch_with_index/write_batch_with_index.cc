@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/utilities/write_batch_with_index.h"
 
 #include <memory>
@@ -315,8 +314,8 @@ Iterator* WriteBatchWithIndex::NewIteratorWithBase(Iterator* base_iterator) {
                                rep->comparator.default_comparator());
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::Put(ColumnFamilyHandle* column_family,
-                                const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status WriteBatchWithIndex::Put(
+    ColumnFamilyHandle* column_family, const Slice& key, const Slice& value) {
   rep->SetLastEntryOffset();
   auto s = rep->write_batch.Put(column_family, key, value);
   if (s.ok()) {
@@ -325,7 +324,8 @@ rocksdb_rs::status::Status WriteBatchWithIndex::Put(ColumnFamilyHandle* column_f
   return s;
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::Put(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status WriteBatchWithIndex::Put(const Slice& key,
+                                                    const Slice& value) {
   rep->SetLastEntryOffset();
   auto s = rep->write_batch.Put(key, value);
   if (s.ok()) {
@@ -334,18 +334,19 @@ rocksdb_rs::status::Status WriteBatchWithIndex::Put(const Slice& key, const Slic
   return s;
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::Put(ColumnFamilyHandle* column_family,
-                                const Slice& /*key*/, const Slice& /*ts*/,
-                                const Slice& /*value*/) {
+rocksdb_rs::status::Status WriteBatchWithIndex::Put(
+    ColumnFamilyHandle* column_family, const Slice& /*key*/,
+    const Slice& /*ts*/, const Slice& /*value*/) {
   if (!column_family) {
-    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "column family handle cannot be nullptr");
   }
   // TODO: support WBWI::Put() with timestamp.
   return rocksdb_rs::status::Status_NotSupported();
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::Delete(ColumnFamilyHandle* column_family,
-                                   const Slice& key) {
+rocksdb_rs::status::Status WriteBatchWithIndex::Delete(
+    ColumnFamilyHandle* column_family, const Slice& key) {
   rep->SetLastEntryOffset();
   auto s = rep->write_batch.Delete(column_family, key);
   if (s.ok()) {
@@ -363,17 +364,19 @@ rocksdb_rs::status::Status WriteBatchWithIndex::Delete(const Slice& key) {
   return s;
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::Delete(ColumnFamilyHandle* column_family,
-                                   const Slice& /*key*/, const Slice& /*ts*/) {
+rocksdb_rs::status::Status WriteBatchWithIndex::Delete(
+    ColumnFamilyHandle* column_family, const Slice& /*key*/,
+    const Slice& /*ts*/) {
   if (!column_family) {
-    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "column family handle cannot be nullptr");
   }
   // TODO: support WBWI::Delete() with timestamp.
   return rocksdb_rs::status::Status_NotSupported();
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::SingleDelete(ColumnFamilyHandle* column_family,
-                                         const Slice& key) {
+rocksdb_rs::status::Status WriteBatchWithIndex::SingleDelete(
+    ColumnFamilyHandle* column_family, const Slice& key) {
   rep->SetLastEntryOffset();
   auto s = rep->write_batch.SingleDelete(column_family, key);
   if (s.ok()) {
@@ -391,18 +394,19 @@ rocksdb_rs::status::Status WriteBatchWithIndex::SingleDelete(const Slice& key) {
   return s;
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::SingleDelete(ColumnFamilyHandle* column_family,
-                                         const Slice& /*key*/,
-                                         const Slice& /*ts*/) {
+rocksdb_rs::status::Status WriteBatchWithIndex::SingleDelete(
+    ColumnFamilyHandle* column_family, const Slice& /*key*/,
+    const Slice& /*ts*/) {
   if (!column_family) {
-    return rocksdb_rs::status::Status_InvalidArgument("column family handle cannot be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "column family handle cannot be nullptr");
   }
   // TODO: support WBWI::SingleDelete() with timestamp.
   return rocksdb_rs::status::Status_NotSupported();
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::Merge(ColumnFamilyHandle* column_family,
-                                  const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status WriteBatchWithIndex::Merge(
+    ColumnFamilyHandle* column_family, const Slice& key, const Slice& value) {
   rep->SetLastEntryOffset();
   auto s = rep->write_batch.Merge(column_family, key, value);
   if (s.ok()) {
@@ -411,7 +415,8 @@ rocksdb_rs::status::Status WriteBatchWithIndex::Merge(ColumnFamilyHandle* column
   return s;
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::Merge(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status WriteBatchWithIndex::Merge(const Slice& key,
+                                                      const Slice& value) {
   rep->SetLastEntryOffset();
   auto s = rep->write_batch.Merge(key, value);
   if (s.ok()) {
@@ -426,9 +431,9 @@ rocksdb_rs::status::Status WriteBatchWithIndex::PutLogData(const Slice& blob) {
 
 void WriteBatchWithIndex::Clear() { rep->Clear(); }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatch(ColumnFamilyHandle* column_family,
-                                         const DBOptions& options,
-                                         const Slice& key, std::string* value) {
+rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatch(
+    ColumnFamilyHandle* column_family, const DBOptions& options,
+    const Slice& key, std::string* value) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   WriteBatchWithIndexInternal wbwii(&options, column_family);
   auto result = wbwii.GetFromBatch(this, key, value, &s);
@@ -452,10 +457,9 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatch(ColumnFamilyHandle*
   return s;
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(DB* db,
-                                              const ReadOptions& read_options,
-                                              const Slice& key,
-                                              std::string* value) {
+rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(
+    DB* db, const ReadOptions& read_options, const Slice& key,
+    std::string* value) {
   assert(value != nullptr);
   PinnableSlice pinnable_val(value);
   assert(!pinnable_val.IsPinned());
@@ -467,19 +471,16 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(DB* db,
   return s;
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(DB* db,
-                                              const ReadOptions& read_options,
-                                              const Slice& key,
-                                              PinnableSlice* pinnable_val) {
+rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(
+    DB* db, const ReadOptions& read_options, const Slice& key,
+    PinnableSlice* pinnable_val) {
   return GetFromBatchAndDB(db, read_options, db->DefaultColumnFamily(), key,
                            pinnable_val);
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(DB* db,
-                                              const ReadOptions& read_options,
-                                              ColumnFamilyHandle* column_family,
-                                              const Slice& key,
-                                              std::string* value) {
+rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(
+    DB* db, const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, std::string* value) {
   assert(value != nullptr);
   PinnableSlice pinnable_val(value);
   assert(!pinnable_val.IsPinned());
@@ -491,11 +492,9 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(DB* db,
   return s;
 }
 
-rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(DB* db,
-                                              const ReadOptions& read_options,
-                                              ColumnFamilyHandle* column_family,
-                                              const Slice& key,
-                                              PinnableSlice* pinnable_val) {
+rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(
+    DB* db, const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* pinnable_val) {
   return GetFromBatchAndDB(db, read_options, column_family, key, pinnable_val,
                            nullptr);
 }
@@ -546,7 +545,8 @@ rocksdb_rs::status::Status WriteBatchWithIndex::GetFromBatchAndDB(
       // Merge result from DB with merges in Batch
       std::string merge_result;
       if (s.ok()) {
-        s = wbwii.MergeKey(key, &static_cast<const Slice&>(*pinnable_val), &merge_result);
+        s = wbwii.MergeKey(key, &static_cast<const Slice&>(*pinnable_val),
+                           &merge_result);
       } else {  // Key not present in db (s.IsNotFound())
         s = wbwii.MergeKey(key, nullptr, &merge_result);
       }
@@ -572,12 +572,14 @@ void WriteBatchWithIndex::MultiGetFromBatchAndDB(
 void WriteBatchWithIndex::MultiGetFromBatchAndDB(
     DB* db, const ReadOptions& read_options, ColumnFamilyHandle* column_family,
     const size_t num_keys, const Slice* keys, PinnableSlice* values,
-    rocksdb_rs::status::Status* statuses, bool sorted_input, ReadCallback* callback) {
+    rocksdb_rs::status::Status* statuses, bool sorted_input,
+    ReadCallback* callback) {
   const Comparator* const ucmp = rep->comparator.GetComparator(column_family);
   size_t ts_sz = ucmp ? ucmp->timestamp_size() : 0;
   if (ts_sz > 0 && !read_options.timestamp) {
     for (size_t i = 0; i < num_keys; ++i) {
-      statuses[i] = rocksdb_rs::status::Status_InvalidArgument("Must specify timestamp");
+      statuses[i] =
+          rocksdb_rs::status::Status_InvalidArgument("Must specify timestamp");
     }
     return;
   }
@@ -643,8 +645,9 @@ void WriteBatchWithIndex::MultiGetFromBatchAndDB(
         std::string merged_value;
         // Merge result from DB with merges in Batch
         if (key.s->ok()) {
-          *key.s = wbwii.MergeKey(*key.key, &static_cast<const Slice&>(*iter->value), merge_result.second,
-                                  &merged_value);
+          *key.s =
+              wbwii.MergeKey(*key.key, &static_cast<const Slice&>(*iter->value),
+                             merge_result.second, &merged_value);
         } else {  // Key not present in db (s.IsNotFound())
           *key.s = wbwii.MergeKey(*key.key, nullptr, merge_result.second,
                                   &merged_value);

@@ -26,7 +26,7 @@
 #include "trace_replay/block_cache_tracer.h"
 
 namespace rocksdb::status {
-    struct Status;
+struct Status;
 }
 
 namespace rocksdb {
@@ -45,8 +45,9 @@ struct TableReaderOptions {
       int _level = -1, BlockCacheTracer* const _block_cache_tracer = nullptr,
       size_t _max_file_size_for_l0_meta_pin = 0,
       const std::string& _cur_db_session_id = "", uint64_t _cur_file_num = 0,
-      rocksdb_rs::unique_id::UniqueId64x2 _unique_id = {}, SequenceNumber _largest_seqno = 0,
-      uint64_t _tail_size = 0, bool _user_defined_timestamps_persisted = true)
+      rocksdb_rs::unique_id::UniqueId64x2 _unique_id = {},
+      SequenceNumber _largest_seqno = 0, uint64_t _tail_size = 0,
+      bool _user_defined_timestamps_persisted = true)
       : ioptions(_ioptions),
         prefix_extractor(_prefix_extractor),
         env_options(_env_options),
@@ -111,7 +112,8 @@ struct TableBuilderOptions {
       const CompressionOptions& _compression_opts, uint32_t _column_family_id,
       const std::string& _column_family_name, int _level,
       bool _is_bottommost = false,
-      rocksdb_rs::types::TableFileCreationReason _reason = rocksdb_rs::types::TableFileCreationReason::kMisc,
+      rocksdb_rs::types::TableFileCreationReason _reason =
+          rocksdb_rs::types::TableFileCreationReason::kMisc,
       const int64_t _oldest_key_time = 0,
       const uint64_t _file_creation_time = 0, const std::string& _db_id = "",
       const std::string& _db_session_id = "",
@@ -229,7 +231,7 @@ class TableBuilder {
   // Set the sequence number to time mapping
   virtual void SetSeqnoTimeTableProperties(
       const std::string& /*encoded_seqno_to_time_mapping*/,
-      uint64_t /*oldest_ancestor_time*/){};
+      uint64_t /*oldest_ancestor_time*/) {};
 };
 
 }  // namespace rocksdb

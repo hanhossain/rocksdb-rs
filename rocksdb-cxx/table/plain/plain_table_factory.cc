@@ -22,31 +22,44 @@
 namespace rocksdb {
 static std::unordered_map<std::string, OptionTypeInfo> plain_table_type_info = {
     {"user_key_len",
-     {offsetof(struct PlainTableOptions, user_key_len), rocksdb_rs::utilities::options_type::OptionType::kUInt32T,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct PlainTableOptions, user_key_len),
+      rocksdb_rs::utilities::options_type::OptionType::kUInt32T,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"bloom_bits_per_key",
-     {offsetof(struct PlainTableOptions, bloom_bits_per_key), rocksdb_rs::utilities::options_type::OptionType::kInt,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct PlainTableOptions, bloom_bits_per_key),
+      rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"hash_table_ratio",
-     {offsetof(struct PlainTableOptions, hash_table_ratio), rocksdb_rs::utilities::options_type::OptionType::kDouble,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct PlainTableOptions, hash_table_ratio),
+      rocksdb_rs::utilities::options_type::OptionType::kDouble,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"index_sparseness",
-     {offsetof(struct PlainTableOptions, index_sparseness), rocksdb_rs::utilities::options_type::OptionType::kSizeT,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct PlainTableOptions, index_sparseness),
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"huge_page_tlb_size",
      {offsetof(struct PlainTableOptions, huge_page_tlb_size),
-      rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"encoding_type",
      {offsetof(struct PlainTableOptions, encoding_type),
-      rocksdb_rs::utilities::options_type::OptionType::kEncodingType, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kEncodingType,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"full_scan_mode",
-     {offsetof(struct PlainTableOptions, full_scan_mode), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct PlainTableOptions, full_scan_mode),
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"store_index_in_file",
      {offsetof(struct PlainTableOptions, store_index_in_file),
-      rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
@@ -122,10 +135,9 @@ std::string PlainTableFactory::GetPrintableOptions() const {
   return ret;
 }
 
-rocksdb_rs::status::Status GetPlainTableOptionsFromString(const ConfigOptions& config_options,
-                                      const PlainTableOptions& table_options,
-                                      const std::string& opts_str,
-                                      PlainTableOptions* new_table_options) {
+rocksdb_rs::status::Status GetPlainTableOptionsFromString(
+    const ConfigOptions& config_options, const PlainTableOptions& table_options,
+    const std::string& opts_str, PlainTableOptions* new_table_options) {
   std::unordered_map<std::string, std::string> opts_map;
   rocksdb_rs::status::Status s = StringToMap(opts_str, &opts_map);
   if (!s.ok()) {
@@ -236,8 +248,8 @@ rocksdb_rs::status::Status MemTableRepFactory::CreateFromString(
   });
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, result->get(),
-                                              value, &id, &opt_map);
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(
+      config_options, result->get(), value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else if (value.empty()) {
@@ -257,7 +269,8 @@ rocksdb_rs::status::Status MemTableRepFactory::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::shared_ptr<MemTableRepFactory>* result) {
   std::unique_ptr<MemTableRepFactory> factory;
-  rocksdb_rs::status::Status s = CreateFromString(config_options, value, &factory);
+  rocksdb_rs::status::Status s =
+      CreateFromString(config_options, value, &factory);
   if (factory && s.ok()) {
     result->reset(factory.release());
   }

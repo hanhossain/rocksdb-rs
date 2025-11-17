@@ -229,7 +229,8 @@ class FileChecksumTestHelper {
 
     // Step 3 verify the checksum
     if (live_files.size() != checksum_list->size()) {
-      return rocksdb_rs::status::Status_Corruption("The number of files does not match!");
+      return rocksdb_rs::status::Status_Corruption(
+          "The number of files does not match!");
     }
     for (size_t i = 0; i < live_files.size(); i++) {
       std::string stored_checksum = "";
@@ -1037,7 +1038,8 @@ TEST_F(LdbCmdTest, UnsafeRemoveSstFile) {
 
   // This time physically delete the file before unsafe_remove
   {
-    std::string f = dbname + "/" + static_cast<std::string>(MakeTableFileName(to_remove));
+    std::string f =
+        dbname + "/" + static_cast<std::string>(MakeTableFileName(to_remove));
     ASSERT_OK(Env::Default()->DeleteFile(f));
   }
 

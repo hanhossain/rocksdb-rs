@@ -5,15 +5,13 @@
 
 #pragma once
 
-
 #include <string>
 
 #include "db/compaction/compaction.h"
 #include "file/delete_scheduler.h"
 #include "port/port.h"
-#include "rocksdb/sst_file_manager.h"
-
 #include "rocksdb/env.h"
+#include "rocksdb/sst_file_manager.h"
 
 namespace rocksdb {
 class ErrorHandler;
@@ -39,14 +37,16 @@ class SstFileManagerImpl : public SstFileManager {
 
   // Overload where size of the file is provided by the caller rather than
   // queried from the filesystem. This is an optimization.
-  rocksdb_rs::status::Status OnAddFile(const std::string& file_path, uint64_t file_size);
+  rocksdb_rs::status::Status OnAddFile(const std::string& file_path,
+                                       uint64_t file_size);
 
   // DB will call OnDeleteFile whenever a sst/blob file is deleted.
   rocksdb_rs::status::Status OnDeleteFile(const std::string& file_path);
 
   // DB will call OnMoveFile whenever a sst/blob file is move to a new path.
-  rocksdb_rs::status::Status OnMoveFile(const std::string& old_path, const std::string& new_path,
-                    uint64_t* file_size = nullptr);
+  rocksdb_rs::status::Status OnMoveFile(const std::string& old_path,
+                                        const std::string& new_path,
+                                        uint64_t* file_size = nullptr);
 
   // Update the maximum allowed space that should be used by RocksDB, if
   // the total size of the SST and blob files exceeds max_allowed_space, writes
@@ -110,7 +110,8 @@ class SstFileManagerImpl : public SstFileManager {
 
   // Set a flag upon encountering disk full. May enqueue the ErrorHandler
   // instance for background polling and recovery
-  void StartErrorRecovery(ErrorHandler* db, rocksdb_rs::status::Status bg_error);
+  void StartErrorRecovery(ErrorHandler* db,
+                          rocksdb_rs::status::Status bg_error);
 
   // Remove the given Errorhandler instance from the recovery queue. Its
   // not guaranteed
@@ -119,9 +120,9 @@ class SstFileManagerImpl : public SstFileManager {
   // Mark file as trash and schedule it's deletion. If force_bg is set, it
   // forces the file to be deleting in the background regardless of DB size,
   // except when rate limited delete is disabled
-  virtual rocksdb_rs::status::Status ScheduleFileDeletion(const std::string& file_path,
-                                      const std::string& dir_to_sync,
-                                      const bool force_bg = false);
+  virtual rocksdb_rs::status::Status ScheduleFileDeletion(
+      const std::string& file_path, const std::string& dir_to_sync,
+      const bool force_bg = false);
 
   // Wait for all files being deleteing in the background to finish or for
   // destructor to be called.
@@ -192,4 +193,3 @@ class SstFileManagerImpl : public SstFileManager {
 };
 
 }  // namespace rocksdb
-

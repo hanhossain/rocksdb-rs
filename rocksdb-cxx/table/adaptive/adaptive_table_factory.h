@@ -5,14 +5,13 @@
 
 #pragma once
 
-
 #include <string>
 
 #include "rocksdb/options.h"
 #include "rocksdb/table.h"
 
 namespace rocksdb::status {
-    struct Status;
+struct Status;
 }
 
 namespace rocksdb {

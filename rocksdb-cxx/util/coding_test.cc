@@ -96,8 +96,9 @@ TEST(Coding, Varint64) {
 TEST(Coding, Varint32Overflow) {
   uint32_t result;
   std::string input("\x81\x82\x83\x84\x85\x11");
-  ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(input.data(), input.data() + input.size(),
-                             &result) == nullptr);
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(input.data(),
+                                                 input.data() + input.size(),
+                                                 &result) == nullptr);
 }
 
 TEST(Coding, Varint32Truncation) {
@@ -106,18 +107,20 @@ TEST(Coding, Varint32Truncation) {
   PutVarint32(&s, large_value);
   uint32_t result;
   for (unsigned int len = 0; len + 1 < s.size(); len++) {
-    ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(s.data(), s.data() + len, &result) == nullptr);
+    ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(s.data(), s.data() + len,
+                                                   &result) == nullptr);
   }
-  ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(s.data(), s.data() + s.size(), &result) !=
-              nullptr);
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint32Ptr(s.data(), s.data() + s.size(),
+                                                 &result) != nullptr);
   ASSERT_EQ(large_value, result);
 }
 
 TEST(Coding, Varint64Overflow) {
   uint64_t result;
   std::string input("\x81\x82\x83\x84\x85\x81\x82\x83\x84\x85\x11");
-  ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(input.data(), input.data() + input.size(),
-                             &result) == nullptr);
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(input.data(),
+                                                 input.data() + input.size(),
+                                                 &result) == nullptr);
 }
 
 TEST(Coding, Varint64Truncation) {
@@ -126,10 +129,11 @@ TEST(Coding, Varint64Truncation) {
   PutVarint64(&s, large_value);
   uint64_t result;
   for (unsigned int len = 0; len + 1 < s.size(); len++) {
-    ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(s.data(), s.data() + len, &result) == nullptr);
+    ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(s.data(), s.data() + len,
+                                                   &result) == nullptr);
   }
-  ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(s.data(), s.data() + s.size(), &result) !=
-              nullptr);
+  ASSERT_TRUE(rocksdb_rs::coding::GetVarint64Ptr(s.data(), s.data() + s.size(),
+                                                 &result) != nullptr);
   ASSERT_EQ(large_value, result);
 }
 

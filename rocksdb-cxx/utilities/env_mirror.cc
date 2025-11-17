@@ -7,7 +7,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-
 #include "rocksdb/utilities/env_mirror.h"
 
 namespace rocksdb {
@@ -20,7 +19,8 @@ class SequentialFileMirror : public SequentialFile {
   std::string fname;
   explicit SequentialFileMirror(std::string f) : fname(f) {}
 
-  rocksdb_rs::status::Status Read(size_t n, Slice* result, char* scratch) override {
+  rocksdb_rs::status::Status Read(size_t n, Slice* result,
+                                  char* scratch) override {
     Slice aslice;
     rocksdb_rs::status::Status as = a_->Read(n, &aslice, scratch);
     if (as.eq(rocksdb_rs::status::Status_OK())) {
@@ -54,7 +54,8 @@ class SequentialFileMirror : public SequentialFile {
     assert(as.eq(bs));
     return as;
   }
-  rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::status::Status InvalidateCache(size_t offset,
+                                             size_t length) override {
     rocksdb_rs::status::Status as = a_->InvalidateCache(offset, length);
     rocksdb_rs::status::Status bs = b_->InvalidateCache(offset, length);
     assert(as.eq(bs));
@@ -69,7 +70,7 @@ class RandomAccessFileMirror : public RandomAccessFile {
   explicit RandomAccessFileMirror(std::string f) : fname(f) {}
 
   rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
-              char* scratch) const override {
+                                  char* scratch) const override {
     rocksdb_rs::status::Status as = a_->Read(offset, n, result, scratch);
     if (as.eq(rocksdb_rs::status::Status_OK())) {
       char* bscratch = new char[n];
@@ -77,7 +78,8 @@ class RandomAccessFileMirror : public RandomAccessFile {
       size_t off = 0;
       size_t left = result->size();
       while (left) {
-        rocksdb_rs::status::Status bs = b_->Read(offset + off, left, &bslice, bscratch);
+        rocksdb_rs::status::Status bs =
+            b_->Read(offset + off, left, &bslice, bscratch);
         assert(as.eq(bs));
         assert(memcmp(bscratch, scratch + off, bslice.size()) == 0);
         off += bslice.size();
@@ -110,11 +112,13 @@ class WritableFileMirror : public WritableFile {
     assert(as.eq(bs));
     return as;
   }
-  rocksdb_rs::status::Status Append(const Slice& data,
-                const DataVerificationInfo& /* verification_info */) override {
+  rocksdb_rs::status::Status Append(
+      const Slice& data,
+      const DataVerificationInfo& /* verification_info */) override {
     return Append(data);
   }
-  rocksdb_rs::status::Status PositionedAppend(const Slice& data, uint64_t offset) override {
+  rocksdb_rs::status::Status PositionedAppend(const Slice& data,
+                                              uint64_t offset) override {
     rocksdb_rs::status::Status as = a_->PositionedAppend(data, offset);
     rocksdb_rs::status::Status bs = b_->PositionedAppend(data, offset);
     assert(as.eq(bs));
@@ -182,7 +186,8 @@ class WritableFileMirror : public WritableFile {
     // NOTE: we don't verify this one
     return a_->GetUniqueId(id, max_size);
   }
-  rocksdb_rs::status::Status InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::status::Status InvalidateCache(size_t offset,
+                                             size_t length) override {
     rocksdb_rs::status::Status as = a_->InvalidateCache(offset, length);
     rocksdb_rs::status::Status bs = b_->InvalidateCache(offset, length);
     assert(as.eq(bs));
@@ -190,13 +195,15 @@ class WritableFileMirror : public WritableFile {
   }
 
  protected:
-  rocksdb_rs::status::Status Allocate(uint64_t offset, uint64_t length) override {
+  rocksdb_rs::status::Status Allocate(uint64_t offset,
+                                      uint64_t length) override {
     rocksdb_rs::status::Status as = a_->Allocate(offset, length);
     rocksdb_rs::status::Status bs = b_->Allocate(offset, length);
     assert(as.eq(bs));
     return as;
   }
-  rocksdb_rs::status::Status RangeSync(uint64_t offset, uint64_t nbytes) override {
+  rocksdb_rs::status::Status RangeSync(uint64_t offset,
+                                       uint64_t nbytes) override {
     rocksdb_rs::status::Status as = a_->RangeSync(offset, nbytes);
     rocksdb_rs::status::Status bs = b_->RangeSync(offset, nbytes);
     assert(as.eq(bs));
@@ -204,9 +211,9 @@ class WritableFileMirror : public WritableFile {
   }
 };
 
-rocksdb_rs::status::Status EnvMirror::NewSequentialFile(const std::string& f,
-                                    std::unique_ptr<SequentialFile>* r,
-                                    const EnvOptions& options) {
+rocksdb_rs::status::Status EnvMirror::NewSequentialFile(
+    const std::string& f, std::unique_ptr<SequentialFile>* r,
+    const EnvOptions& options) {
   if (f.find("/proc/") == 0) {
     return a_->NewSequentialFile(f, r, options);
   }
@@ -221,9 +228,9 @@ rocksdb_rs::status::Status EnvMirror::NewSequentialFile(const std::string& f,
   return as;
 }
 
-rocksdb_rs::status::Status EnvMirror::NewRandomAccessFile(const std::string& f,
-                                      std::unique_ptr<RandomAccessFile>* r,
-                                      const EnvOptions& options) {
+rocksdb_rs::status::Status EnvMirror::NewRandomAccessFile(
+    const std::string& f, std::unique_ptr<RandomAccessFile>* r,
+    const EnvOptions& options) {
   if (f.find("/proc/") == 0) {
     return a_->NewRandomAccessFile(f, r, options);
   }
@@ -238,9 +245,9 @@ rocksdb_rs::status::Status EnvMirror::NewRandomAccessFile(const std::string& f,
   return as;
 }
 
-rocksdb_rs::status::Status EnvMirror::NewWritableFile(const std::string& f,
-                                  std::unique_ptr<WritableFile>* r,
-                                  const EnvOptions& options) {
+rocksdb_rs::status::Status EnvMirror::NewWritableFile(
+    const std::string& f, std::unique_ptr<WritableFile>* r,
+    const EnvOptions& options) {
   if (f.find("/proc/") == 0) return a_->NewWritableFile(f, r, options);
   WritableFileMirror* mf = new WritableFileMirror(f, options);
   rocksdb_rs::status::Status as = a_->NewWritableFile(f, &mf->a_, options);
@@ -253,15 +260,16 @@ rocksdb_rs::status::Status EnvMirror::NewWritableFile(const std::string& f,
   return as;
 }
 
-rocksdb_rs::status::Status EnvMirror::ReuseWritableFile(const std::string& fname,
-                                    const std::string& old_fname,
-                                    std::unique_ptr<WritableFile>* r,
-                                    const EnvOptions& options) {
+rocksdb_rs::status::Status EnvMirror::ReuseWritableFile(
+    const std::string& fname, const std::string& old_fname,
+    std::unique_ptr<WritableFile>* r, const EnvOptions& options) {
   if (fname.find("/proc/") == 0)
     return a_->ReuseWritableFile(fname, old_fname, r, options);
   WritableFileMirror* mf = new WritableFileMirror(fname, options);
-  rocksdb_rs::status::Status as = a_->ReuseWritableFile(fname, old_fname, &mf->a_, options);
-  rocksdb_rs::status::Status bs = b_->ReuseWritableFile(fname, old_fname, &mf->b_, options);
+  rocksdb_rs::status::Status as =
+      a_->ReuseWritableFile(fname, old_fname, &mf->a_, options);
+  rocksdb_rs::status::Status bs =
+      b_->ReuseWritableFile(fname, old_fname, &mf->b_, options);
   assert(as.eq(bs));
   if (as.ok())
     r->reset(mf);

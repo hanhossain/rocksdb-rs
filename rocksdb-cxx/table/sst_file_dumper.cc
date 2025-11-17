@@ -19,6 +19,7 @@
 #include "db/write_batch_internal.h"
 #include "options/cf_options.h"
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/iterator.h"
@@ -35,8 +36,6 @@
 #include "table/table_reader.h"
 #include "util/compression.h"
 #include "util/random.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -73,7 +72,8 @@ extern const uint64_t kLegacyPlainTableMagicNumber;
 
 const char* testFileName = "test_file_name";
 
-rocksdb_rs::status::Status SstFileDumper::GetTableReader(const std::string& file_path) {
+rocksdb_rs::status::Status SstFileDumper::GetTableReader(
+    const std::string& file_path) {
   // Warning about 'magic_number' being uninitialized shows up only in UBsan
   // builds. Though access is guarded by 's.ok()' checks, fix the issue to
   // avoid any warnings.
@@ -87,7 +87,8 @@ rocksdb_rs::status::Status SstFileDumper::GetTableReader(const std::string& file
   uint64_t file_size = 0;
   FileOptions fopts = soptions_;
   fopts.temperature = file_temp_;
-  rocksdb_rs::status::Status s = fs->NewRandomAccessFile(file_path, fopts, &file, nullptr).status();
+  rocksdb_rs::status::Status s =
+      fs->NewRandomAccessFile(file_path, fopts, &file, nullptr).status();
   if (s.ok()) {
     s = fs->GetFileSize(file_path, IOOptions(), &file_size, nullptr).status();
   }
@@ -204,10 +205,12 @@ rocksdb_rs::status::Status SstFileDumper::VerifyChecksum() {
                                        TableReaderCaller::kSSTDumpTool);
 }
 
-rocksdb_rs::status::Status SstFileDumper::DumpTable(const std::string& out_filename) {
+rocksdb_rs::status::Status SstFileDumper::DumpTable(
+    const std::string& out_filename) {
   std::unique_ptr<WritableFile> out_file;
   Env* env = options_.env;
-  rocksdb_rs::status::Status s = env->NewWritableFile(out_filename, &out_file, soptions_);
+  rocksdb_rs::status::Status s =
+      env->NewWritableFile(out_filename, &out_file, soptions_);
   if (s.ok()) {
     s = table_reader_->DumpTable(out_file.get());
   }
@@ -226,7 +229,8 @@ rocksdb_rs::status::Status SstFileDumper::CalculateCompressedTableSize(
   std::unique_ptr<WritableFileWriter> dest_writer;
   rocksdb_rs::status::Status s =
       WritableFileWriter::Create(env->GetFileSystem(), testFileName,
-                                 FileOptions(soptions_), &dest_writer, nullptr).status();
+                                 FileOptions(soptions_), &dest_writer, nullptr)
+          .status();
   if (!s.ok()) {
     return s;
   }
@@ -258,8 +262,8 @@ rocksdb_rs::status::Status SstFileDumper::CalculateCompressedTableSize(
 
 rocksdb_rs::status::Status SstFileDumper::ShowAllCompressionSizes(
     size_t block_size,
-    const std::vector<std::pair<rocksdb_rs::compression_type::CompressionType, const char*>>&
-        compression_types,
+    const std::vector<std::pair<rocksdb_rs::compression_type::CompressionType,
+                                const char*>>& compression_types,
     int32_t compress_level_from, int32_t compress_level_to,
     uint32_t max_dict_bytes, uint32_t zstd_max_train_bytes,
     uint64_t max_dict_buffer_bytes, bool use_zstd_dict_trainer) {
@@ -275,7 +279,8 @@ rocksdb_rs::status::Status SstFileDumper::ShowAllCompressionSizes(
       for (int32_t j = compress_level_from; j <= compress_level_to; j++) {
         fprintf(stdout, "Compression level: %d", j);
         compress_opt.level = j;
-        rocksdb_rs::status::Status s = ShowCompressionSize(block_size, i.first, compress_opt);
+        rocksdb_rs::status::Status s =
+            ShowCompressionSize(block_size, i.first, compress_opt);
         if (!s.ok()) {
           return s;
         }
@@ -288,7 +293,8 @@ rocksdb_rs::status::Status SstFileDumper::ShowAllCompressionSizes(
 }
 
 rocksdb_rs::status::Status SstFileDumper::ShowCompressionSize(
-    size_t block_size, rocksdb_rs::compression_type::CompressionType compress_type,
+    size_t block_size,
+    rocksdb_rs::compression_type::CompressionType compress_type,
     const CompressionOptions& compress_opt) {
   Options opts;
   opts.statistics = rocksdb::CreateDBStatistics();
@@ -310,8 +316,8 @@ rocksdb_rs::status::Status SstFileDumper::ShowCompressionSize(
   std::chrono::steady_clock::time_point start =
       std::chrono::steady_clock::now();
   uint64_t file_size;
-  rocksdb_rs::status::Status s = CalculateCompressedTableSize(tb_opts, block_size, &num_data_blocks,
-                                          &file_size);
+  rocksdb_rs::status::Status s = CalculateCompressedTableSize(
+      tb_opts, block_size, &num_data_blocks, &file_size);
   if (!s.ok()) {
     return s;
   }
@@ -364,10 +370,9 @@ rocksdb_rs::status::Status SstFileDumper::ShowCompressionSize(
 
 // Reads TableProperties prior to opening table reader in order to set up
 // options.
-rocksdb_rs::status::Status SstFileDumper::ReadTableProperties(uint64_t table_magic_number,
-                                          RandomAccessFileReader* file,
-                                          uint64_t file_size,
-                                          FilePrefetchBuffer* prefetch_buffer) {
+rocksdb_rs::status::Status SstFileDumper::ReadTableProperties(
+    uint64_t table_magic_number, RandomAccessFileReader* file,
+    uint64_t file_size, FilePrefetchBuffer* prefetch_buffer) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   rocksdb_rs::status::Status s = rocksdb::ReadTableProperties(
@@ -447,10 +452,10 @@ rocksdb_rs::status::Status SstFileDumper::SetOldTableOptions() {
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status SstFileDumper::ReadSequential(bool print_kv, uint64_t read_num,
-                                     bool has_from, const std::string& from_key,
-                                     bool has_to, const std::string& to_key,
-                                     bool use_from_as_prefix) {
+rocksdb_rs::status::Status SstFileDumper::ReadSequential(
+    bool print_kv, uint64_t read_num, bool has_from,
+    const std::string& from_key, bool has_to, const std::string& to_key,
+    bool use_from_as_prefix) {
   if (!table_reader_) {
     return init_result_.Clone();
   }
@@ -474,7 +479,8 @@ rocksdb_rs::status::Status SstFileDumper::ReadSequential(bool print_kv, uint64_t
     if (read_num > 0 && i > read_num) break;
 
     ParsedInternalKey ikey;
-    rocksdb_rs::status::Status pik_status = ParseInternalKey(key, &ikey, true /* log_err_key */);
+    rocksdb_rs::status::Status pik_status =
+        ParseInternalKey(key, &ikey, true /* log_err_key */);
     if (!pik_status.ok()) {
       std::cerr << *pik_status.getState() << "\n";
       continue;

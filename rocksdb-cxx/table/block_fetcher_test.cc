@@ -66,8 +66,9 @@ class BlockFetcherTest : public testing::Test {
   }
 
   // Creates a table with kv pairs (i, i) where i ranges from 0 to 9, inclusive.
-  void CreateTable(const std::string& table_name,
-                   const rocksdb_rs::compression_type::CompressionType& compression_type) {
+  void CreateTable(
+      const std::string& table_name,
+      const rocksdb_rs::compression_type::CompressionType& compression_type) {
     std::unique_ptr<WritableFileWriter> writer;
     NewFileWriter(table_name, &writer);
 
@@ -113,7 +114,8 @@ class BlockFetcherTest : public testing::Test {
                false /* compressed */, false /* do_uncompress */,
                heap_buf_allocator, compressed_buf_allocator, index_block,
                memcpy_stats, &compression_type);
-    ASSERT_EQ(compression_type, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    ASSERT_EQ(compression_type,
+              rocksdb_rs::compression_type::CompressionType::kNoCompression);
     result->assign(index_block->data.ToString());
   }
 
@@ -129,8 +131,11 @@ class BlockFetcherTest : public testing::Test {
   void TestFetchDataBlock(
       const std::string& table_name_prefix, bool compressed, bool do_uncompress,
       std::array<TestStats, NumModes> expected_stats_by_mode) {
-    for (rocksdb_rs::compression_type::CompressionType compression_type : GetSupportedCompressions()) {
-      bool do_compress = compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    for (rocksdb_rs::compression_type::CompressionType compression_type :
+         GetSupportedCompressions()) {
+      bool do_compress =
+          compression_type !=
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
       if (compressed != do_compress) continue;
       std::string compression_type_str =
           CompressionTypeToString(compression_type);
@@ -138,8 +143,12 @@ class BlockFetcherTest : public testing::Test {
       std::string table_name = table_name_prefix + compression_type_str;
       CreateTable(table_name, compression_type);
 
-      rocksdb_rs::compression_type::CompressionType expected_compression_type_after_fetch =
-          (compressed && !do_uncompress) ? compression_type : rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      rocksdb_rs::compression_type::CompressionType
+          expected_compression_type_after_fetch =
+              (compressed && !do_uncompress)
+                  ? compression_type
+                  : rocksdb_rs::compression_type::CompressionType::
+                        kNoCompression;
 
       BlockContents blocks[NumModes];
       std::string block_datas[NumModes];
@@ -170,7 +179,8 @@ class BlockFetcherTest : public testing::Test {
         ASSERT_EQ(memcpy_stats[i].num_compressed_buf_memcpy,
                   expected_stats.memcpy_stats.num_compressed_buf_memcpy);
 
-        if (rocksdb_rs::compression_type::CompressionType::kXpressCompression == compression_type) {
+        if (rocksdb_rs::compression_type::CompressionType::kXpressCompression ==
+            compression_type) {
           // XPRESS allocates memory internally, thus does not support for
           // custom allocator verification
           continue;
@@ -291,12 +301,13 @@ class BlockFetcherTest : public testing::Test {
   // NOTE: compression_type returns the compression type of the fetched block
   // contents, so if the block is fetched and uncompressed, then it's
   // kNoCompression.
-  void FetchBlock(RandomAccessFileReader* file, const BlockHandle& block,
-                  BlockType block_type, bool compressed, bool do_uncompress,
-                  MemoryAllocator* heap_buf_allocator,
-                  MemoryAllocator* compressed_buf_allocator,
-                  BlockContents* contents, MemcpyStats* stats,
-                  rocksdb_rs::compression_type::CompressionType* compresstion_type) {
+  void FetchBlock(
+      RandomAccessFileReader* file, const BlockHandle& block,
+      BlockType block_type, bool compressed, bool do_uncompress,
+      MemoryAllocator* heap_buf_allocator,
+      MemoryAllocator* compressed_buf_allocator, BlockContents* contents,
+      MemcpyStats* stats,
+      rocksdb_rs::compression_type::CompressionType* compresstion_type) {
     ImmutableOptions ioptions(options_);
     ReadOptions roptions;
     PersistentCacheOptions persistent_cache_options;
@@ -321,13 +332,12 @@ class BlockFetcherTest : public testing::Test {
   // NOTE: expected_compression_type is the expected compression
   // type of the fetched block content, if the block is uncompressed,
   // then the expected compression type is kNoCompression.
-  void FetchFirstDataBlock(const std::string& table_name, bool compressed,
-                           bool do_uncompress,
-                           rocksdb_rs::compression_type::CompressionType expected_compression_type,
-                           MemoryAllocator* heap_buf_allocator,
-                           MemoryAllocator* compressed_buf_allocator,
-                           BlockContents* block, std::string* result,
-                           MemcpyStats* memcpy_stats) {
+  void FetchFirstDataBlock(
+      const std::string& table_name, bool compressed, bool do_uncompress,
+      rocksdb_rs::compression_type::CompressionType expected_compression_type,
+      MemoryAllocator* heap_buf_allocator,
+      MemoryAllocator* compressed_buf_allocator, BlockContents* block,
+      std::string* result, MemcpyStats* memcpy_stats) {
     ImmutableOptions ioptions(options_);
     InternalKeyComparator comparator(options_.comparator);
     FileOptions foptions(options_);
@@ -369,7 +379,8 @@ class BlockFetcherTest : public testing::Test {
 // Expects:
 // the index block contents are the same for both read modes.
 TEST_F(BlockFetcherTest, FetchIndexBlock) {
-  for (rocksdb_rs::compression_type::CompressionType compression : GetSupportedCompressions()) {
+  for (rocksdb_rs::compression_type::CompressionType compression :
+       GetSupportedCompressions()) {
     std::string table_name =
         "FetchIndexBlock" + CompressionTypeToString(compression);
     CreateTable(table_name, compression);
@@ -508,7 +519,6 @@ TEST_F(BlockFetcherTest, FetchAndUncompressCompressedDataBlock) {
   TestFetchDataBlock("FetchAndUncompressCompressedDataBlock", true, true,
                      expected_stats_by_mode);
 }
-
 
 }  // namespace
 }  // namespace rocksdb

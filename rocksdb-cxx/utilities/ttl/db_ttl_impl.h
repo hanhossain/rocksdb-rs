@@ -38,24 +38,25 @@ class DBWithTTLImpl : public DBWithTTL {
 
   virtual rocksdb_rs::status::Status Close() override;
 
-  rocksdb_rs::status::Status CreateColumnFamilyWithTtl(const ColumnFamilyOptions& options,
-                                   const std::string& column_family_name,
-                                   ColumnFamilyHandle** handle,
-                                   int ttl) override;
+  rocksdb_rs::status::Status CreateColumnFamilyWithTtl(
+      const ColumnFamilyOptions& options, const std::string& column_family_name,
+      ColumnFamilyHandle** handle, int ttl) override;
 
-  rocksdb_rs::status::Status CreateColumnFamily(const ColumnFamilyOptions& options,
-                            const std::string& column_family_name,
-                            ColumnFamilyHandle** handle) override;
+  rocksdb_rs::status::Status CreateColumnFamily(
+      const ColumnFamilyOptions& options, const std::string& column_family_name,
+      ColumnFamilyHandle** handle) override;
 
   using StackableDB::Put;
   virtual rocksdb_rs::status::Status Put(const WriteOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     const Slice& val) override;
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         const Slice& val) override;
 
   using StackableDB::Get;
   virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     PinnableSlice* value) override;
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         PinnableSlice* value) override;
 
   using StackableDB::MultiGet;
   virtual rust::Vec<rocksdb_rs::status::Status> MultiGet(
@@ -72,10 +73,12 @@ class DBWithTTLImpl : public DBWithTTL {
 
   using StackableDB::Merge;
   virtual rocksdb_rs::status::Status Merge(const WriteOptions& options,
-                       ColumnFamilyHandle* column_family, const Slice& key,
-                       const Slice& value) override;
+                                           ColumnFamilyHandle* column_family,
+                                           const Slice& key,
+                                           const Slice& value) override;
 
-  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts, WriteBatch* updates) override;
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts,
+                                           WriteBatch* updates) override;
 
   using StackableDB::NewIterator;
   virtual Iterator* NewIterator(const ReadOptions& opts,
@@ -85,8 +88,9 @@ class DBWithTTLImpl : public DBWithTTL {
 
   static bool IsStale(const Slice& value, int32_t ttl, SystemClock* clock);
 
-  static rocksdb_rs::status::Status AppendTS(const Slice& val, std::string* val_with_ts,
-                         SystemClock* clock);
+  static rocksdb_rs::status::Status AppendTS(const Slice& val,
+                                             std::string* val_with_ts,
+                                             SystemClock* clock);
 
   static rocksdb_rs::status::Status SanityCheckTimestamp(const Slice& str);
 
@@ -132,8 +136,9 @@ class TtlIterator : public Iterator {
   Slice key() const override { return iter_->key(); }
 
   int32_t ttl_timestamp() const {
-    return rocksdb_rs::coding_lean::DecodeFixed32(iter_->value().data() + iter_->value().size() -
-                         DBWithTTLImpl::kTSLength);
+    return rocksdb_rs::coding_lean::DecodeFixed32(iter_->value().data() +
+                                                  iter_->value().size() -
+                                                  DBWithTTLImpl::kTSLength);
   }
 
   Slice value() const override {
@@ -170,9 +175,11 @@ class TtlCompactionFilter : public LayeredCompactionFilterBase {
     }
   }
 
-  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options) override;
-  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                         const ColumnFamilyOptions& cf_opts) const override;
+  rocksdb_rs::status::Status PrepareOptions(
+      const ConfigOptions& config_options) override;
+  rocksdb_rs::status::Status ValidateOptions(
+      const DBOptions& db_opts,
+      const ColumnFamilyOptions& cf_opts) const override;
 
  private:
   int32_t ttl_;
@@ -191,9 +198,11 @@ class TtlCompactionFilterFactory : public CompactionFilterFactory {
 
   const char* Name() const override { return kClassName(); }
   static const char* kClassName() { return "TtlCompactionFilterFactory"; }
-  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options) override;
-  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                         const ColumnFamilyOptions& cf_opts) const override;
+  rocksdb_rs::status::Status PrepareOptions(
+      const ConfigOptions& config_options) override;
+  rocksdb_rs::status::Status ValidateOptions(
+      const DBOptions& db_opts,
+      const ColumnFamilyOptions& cf_opts) const override;
   const Customizable* Inner() const override {
     return user_comp_filter_factory_.get();
   }
@@ -227,9 +236,11 @@ class TtlMergeOperator : public MergeOperator {
     }
   }
 
-  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options) override;
-  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                         const ColumnFamilyOptions& cf_opts) const override;
+  rocksdb_rs::status::Status PrepareOptions(
+      const ConfigOptions& config_options) override;
+  rocksdb_rs::status::Status ValidateOptions(
+      const DBOptions& db_opts,
+      const ColumnFamilyOptions& cf_opts) const override;
   const Customizable* Inner() const override { return user_merge_op_.get(); }
 
  private:

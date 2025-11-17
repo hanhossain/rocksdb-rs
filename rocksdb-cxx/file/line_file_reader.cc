@@ -11,14 +11,13 @@
 
 namespace rocksdb {
 
-rocksdb_rs::io_status::IOStatus LineFileReader::Create(const std::shared_ptr<FileSystem>& fs,
-                                const std::string& fname,
-                                const FileOptions& file_opts,
-                                std::unique_ptr<LineFileReader>* reader,
-                                IODebugContext* dbg,
-                                RateLimiter* rate_limiter) {
+rocksdb_rs::io_status::IOStatus LineFileReader::Create(
+    const std::shared_ptr<FileSystem>& fs, const std::string& fname,
+    const FileOptions& file_opts, std::unique_ptr<LineFileReader>* reader,
+    IODebugContext* dbg, RateLimiter* rate_limiter) {
   std::unique_ptr<FSSequentialFile> file;
-  rocksdb_rs::io_status::IOStatus io_s = fs->NewSequentialFile(fname, file_opts, &file, dbg);
+  rocksdb_rs::io_status::IOStatus io_s =
+      fs->NewSequentialFile(fname, file_opts, &file, dbg);
   if (io_s.ok()) {
     reader->reset(new LineFileReader(
         std::move(file), fname, nullptr,

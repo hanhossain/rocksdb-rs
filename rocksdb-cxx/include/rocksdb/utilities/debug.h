@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include "rocksdb/db.h"
 #include "rocksdb/types.h"
 
@@ -34,13 +33,12 @@ struct KeyVersion {
 // copied to memory, if the range covers too many keys, the memory usage
 // may be huge. `max_num_ikeys` can be used to cap the memory usage.
 // The result is inserted into the provided vector, `key_versions`.
-rocksdb_rs::status::Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
-                         size_t max_num_ikeys,
-                         std::vector<KeyVersion>* key_versions);
+rocksdb_rs::status::Status GetAllKeyVersions(
+    DB* db, Slice begin_key, Slice end_key, size_t max_num_ikeys,
+    std::vector<KeyVersion>* key_versions);
 
-rocksdb_rs::status::Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
-                         Slice end_key, size_t max_num_ikeys,
-                         std::vector<KeyVersion>* key_versions);
+rocksdb_rs::status::Status GetAllKeyVersions(
+    DB* db, ColumnFamilyHandle* cfh, Slice begin_key, Slice end_key,
+    size_t max_num_ikeys, std::vector<KeyVersion>* key_versions);
 
 }  // namespace rocksdb
-

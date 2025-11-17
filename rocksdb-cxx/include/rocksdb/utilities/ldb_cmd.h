@@ -5,7 +5,6 @@
 //
 #pragma once
 
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -257,7 +256,8 @@ class LDBCommand {
 
   bool ParseCompressionTypeOption(
       const std::map<std::string, std::string>& options,
-      const std::string& option, rocksdb_rs::compression_type::CompressionType& value,
+      const std::string& option,
+      rocksdb_rs::compression_type::CompressionType& value,
       LDBCommandExecuteResult& exec_state);
 
   /**
@@ -313,4 +313,3 @@ class LDBCommandRunner {
 };
 
 }  // namespace rocksdb
-

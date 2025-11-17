@@ -32,15 +32,14 @@ class PersistentCacheHelper {
 
   // Lookup block from cache of serialized blocks. Size includes block trailer
   // (if applicable).
-  static rocksdb_rs::status::Status LookupSerialized(const PersistentCacheOptions& cache_options,
-                                 const BlockHandle& handle,
-                                 std::unique_ptr<char[]>* out_data,
-                                 const size_t expected_data_size);
+  static rocksdb_rs::status::Status LookupSerialized(
+      const PersistentCacheOptions& cache_options, const BlockHandle& handle,
+      std::unique_ptr<char[]>* out_data, const size_t expected_data_size);
 
   // Lookup block from uncompressed cache. No block trailer.
-  static rocksdb_rs::status::Status LookupUncompressed(const PersistentCacheOptions& cache_options,
-                                   const BlockHandle& handle,
-                                   BlockContents* contents);
+  static rocksdb_rs::status::Status LookupUncompressed(
+      const PersistentCacheOptions& cache_options, const BlockHandle& handle,
+      BlockContents* contents);
 };
 
 }  // namespace rocksdb

@@ -10,11 +10,10 @@
 
 #include "db/dbformat.h"
 #include "file/readahead_file_info.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/comparator.h"
 #include "rocksdb/iterator.h"
 #include "table/format.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -171,7 +170,8 @@ class InternalIteratorBase : public Cleanable {
   // REQUIRES: Same as for value().
   virtual bool IsValuePinned() const { return false; }
 
-  virtual rocksdb_rs::status::Status GetProperty(std::string /*prop_name*/, std::string* /*prop*/) {
+  virtual rocksdb_rs::status::Status GetProperty(std::string /*prop_name*/,
+                                                 std::string* /*prop*/) {
     return rocksdb_rs::status::Status_NotSupported("");
   }
 

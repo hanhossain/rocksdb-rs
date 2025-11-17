@@ -16,6 +16,7 @@
 #include "options/options_helper.h"
 #include "port/port.h"
 #include "port/stack_trace.h"
+#include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/file_system.h"
 #include "table/block_based/block_based_table_builder.h"
@@ -25,8 +26,6 @@
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 #include "util/random.h"
-
-#include "rocksdb-rs/src/compression_type.rs.h"
 
 namespace rocksdb {
 
@@ -86,12 +85,12 @@ class BlockBasedTableReaderBaseTest : public testing::Test {
   void TearDown() override { EXPECT_OK(DestroyDir(env_, test_dir_)); }
 
   // Creates a table with the specificied key value pairs (kv).
-  void CreateTable(const std::string& table_name,
-                   const ImmutableOptions& ioptions,
-                   const rocksdb_rs::compression_type::CompressionType& compression_type,
-                   const std::map<std::string, std::string>& kv,
-                   uint32_t compression_parallel_threads = 1,
-                   uint32_t compression_dict_bytes = 0) {
+  void CreateTable(
+      const std::string& table_name, const ImmutableOptions& ioptions,
+      const rocksdb_rs::compression_type::CompressionType& compression_type,
+      const std::map<std::string, std::string>& kv,
+      uint32_t compression_parallel_threads = 1,
+      uint32_t compression_dict_bytes = 0) {
     std::unique_ptr<WritableFileWriter> writer;
     NewFileWriter(table_name, &writer);
 
@@ -214,9 +213,10 @@ class BlockBasedTableReaderBaseTest : public testing::Test {
 //          compression dictionary.
 class BlockBasedTableReaderTest
     : public BlockBasedTableReaderBaseTest,
-      public testing::WithParamInterface<std::tuple<
-          rocksdb_rs::compression_type::CompressionType, bool, BlockBasedTableOptions::IndexType, bool,
-          test::UserDefinedTimestampTestMode, uint32_t, uint32_t>> {
+      public testing::WithParamInterface<
+          std::tuple<rocksdb_rs::compression_type::CompressionType, bool,
+                     BlockBasedTableOptions::IndexType, bool,
+                     test::UserDefinedTimestampTestMode, uint32_t, uint32_t>> {
  protected:
   void SetUp() override {
     compression_type_ = std::get<0>(GetParam());
@@ -433,27 +433,32 @@ class ChargeTableReaderTest
   static std::size_t CalculateMaxTableReaderNumBeforeCacheFull(
       std::size_t cache_capacity, std::size_t approx_table_reader_mem) {
     // To make calculation easier for testing
-    assert(cache_capacity % CacheReservationManagerImpl<
-                                rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::
-                                GetDummyEntrySize() ==
-               0 &&
-           cache_capacity >= 2 * CacheReservationManagerImpl<
-                                     rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::
-                                     GetDummyEntrySize());
+    assert(
+        cache_capacity %
+                CacheReservationManagerImpl<
+                    rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::
+                    GetDummyEntrySize() ==
+            0 &&
+        cache_capacity >=
+            2 * CacheReservationManagerImpl<
+                    rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::
+                    GetDummyEntrySize());
 
     // We need to subtract 1 for max_num_dummy_entry to account for dummy
     // entries' overhead, assumed the overhead is no greater than 1 dummy entry
     // size
     std::size_t max_num_dummy_entry =
-        (size_t)std::floor((
-            1.0 * cache_capacity /
-            CacheReservationManagerImpl<
-                rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize())) -
+        (size_t)std::floor(
+            (1.0 * cache_capacity /
+             CacheReservationManagerImpl<
+                 rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::
+                 GetDummyEntrySize())) -
         1;
     std::size_t cache_capacity_rounded_to_dummy_entry_multiples =
         max_num_dummy_entry *
         CacheReservationManagerImpl<
-            rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize();
+            rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::
+            GetDummyEntrySize();
     std::size_t max_table_reader_num_capped = static_cast<std::size_t>(
         std::floor(1.0 * cache_capacity_rounded_to_dummy_entry_multiples /
                    approx_table_reader_mem));
@@ -465,14 +470,17 @@ class ChargeTableReaderTest
     // To cache and re-use the same kv map and compression type in the test
     // suite for elimiating variance caused by these two factors
     kv_ = BlockBasedTableReaderBaseTest::GenerateKVMap();
-    compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    compression_type_ =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
-    table_reader_charge_tracking_cache_ = std::make_shared<
-        TargetCacheChargeTrackingCache<
-            rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>>((NewLRUCache(
-        4 * CacheReservationManagerImpl<
-                rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>::GetDummyEntrySize(),
-        0 /* num_shard_bits */, true /* strict_capacity_limit */)));
+    table_reader_charge_tracking_cache_ =
+        std::make_shared<TargetCacheChargeTrackingCache<
+            rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>>(
+            (NewLRUCache(
+                4 * CacheReservationManagerImpl<
+                        rocksdb_rs::cache::CacheEntryRole::
+                            kBlockBasedTableReader>::GetDummyEntrySize(),
+                0 /* num_shard_bits */, true /* strict_capacity_limit */)));
 
     // To ApproximateTableReaderMem() without being affected by
     // the feature of charging its memory, we turn off the feature
@@ -501,8 +509,8 @@ class ChargeTableReaderTest
   }
 
   CacheEntryRoleOptions::Decision charge_table_reader_;
-  std::shared_ptr<
-      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>>
+  std::shared_ptr<TargetCacheChargeTrackingCache<
+      rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>>
       table_reader_charge_tracking_cache_;
   std::size_t approx_table_reader_mem_;
   std::map<std::string, std::string> kv_;
@@ -584,10 +592,11 @@ TEST_P(ChargeTableReaderTest, Basic) {
 
   if (charge_table_reader_ == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_TRUE(s.IsMemoryLimit()) << "s: " << *s.ToString();
-    EXPECT_TRUE(s.ToString()->find(
-                    static_cast<std::string>(CacheEntryRole_ToCamelString(
-                        rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader))) !=
-                std::string::npos);
+    EXPECT_TRUE(
+        s.ToString()->find(
+            static_cast<std::string>(CacheEntryRole_ToCamelString(
+                rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader))) !=
+        std::string::npos);
     EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                 std::string::npos);
 
@@ -612,7 +621,7 @@ TEST_P(ChargeTableReaderTest, Basic) {
         FileOptions(), ImmutableOptions(options_),
         InternalKeyComparator(options_.comparator), table_name, &tables.back(),
         false /* prefetch_index_and_filter_in_cache */, &s);
-    EXPECT_TRUE(s.ok()) <<*s.ToString();
+    EXPECT_TRUE(s.ok()) << *s.ToString();
 
     tables.clear();
     EXPECT_EQ(table_reader_charge_tracking_cache_->GetCacheCharge(), 0);

@@ -15,5 +15,6 @@ namespace rocksdb {
 
 // This function can be used to list the Information logs,
 // given the db pointer.
-rocksdb_rs::status::Status GetInfoLogList(DB* db, std::vector<std::string>* info_log_list);
+rocksdb_rs::status::Status GetInfoLogList(
+    DB* db, std::vector<std::string>* info_log_list);
 }  // namespace rocksdb

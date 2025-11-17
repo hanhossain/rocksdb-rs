@@ -100,7 +100,8 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
     return hash_entries_info_.entries.size();
   }
 
-  virtual rocksdb_rs::status::Status MaybePostVerify(const Slice& filter_content) override;
+  virtual rocksdb_rs::status::Status MaybePostVerify(
+      const Slice& filter_content) override;
 
  protected:
   static constexpr uint32_t kMetadataLen = 5;
@@ -109,7 +110,8 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
   // the cache when cache charging is available
   static const std::size_t kUint64tHashEntryCacheResBucketSize =
       CacheReservationManagerImpl<
-          rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
+          rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::
+          GetDummyEntrySize() /
       sizeof(uint64_t);
 
   // For delegating between XXPH3FilterBitsBuilders
@@ -243,7 +245,8 @@ class XXPH3FilterBitsBuilder : public BuiltinFilterBitsBuilder {
       // Since these hash entries are corrupted and they will not be used
       // anymore, we can reset them and release memory.
       ResetEntries();
-      return rocksdb_rs::status::Status_Corruption("Filter's hash entries checksum mismatched");
+      return rocksdb_rs::status::Status_Corruption(
+          "Filter's hash entries checksum mismatched");
     }
   }
 
@@ -453,7 +456,8 @@ class FastLocalBloomBitsBuilder : public XXPH3FilterBitsBuilder {
       actual_millibits_per_key = millibits_per_key_;
     }
     // END XXX/TODO
-    return rocksdb_rs::util::bloom::FastLocalBloomImpl_ChooseNumProbes(actual_millibits_per_key);
+    return rocksdb_rs::util::bloom::FastLocalBloomImpl_ChooseNumProbes(
+        actual_millibits_per_key);
   }
 
   void AddAllEntries(char* data, uint32_t len, int num_probes) {
@@ -649,7 +653,8 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     BandingType banding;
     std::size_t bytes_banding = ribbon::StandardBanding<
         Standard128RibbonTypesAndSettings>::EstimateMemoryUsage(num_slots);
-    rocksdb_rs::status::Status status_banding_cache_res = rocksdb_rs::status::Status_OK();
+    rocksdb_rs::status::Status status_banding_cache_res =
+        rocksdb_rs::status::Status_OK();
 
     // Cache charging for banding
     std::unique_ptr<CacheReservationManager::CacheReservationHandle>
@@ -898,7 +903,8 @@ class Standard128RibbonBitsBuilder : public XXPH3FilterBitsBuilder {
     return fake_soln.ExpectedFpRate();
   }
 
-  rocksdb_rs::status::Status MaybePostVerify(const Slice& filter_content) override {
+  rocksdb_rs::status::Status MaybePostVerify(
+      const Slice& filter_content) override {
     bool fall_back = (bloom_fallback_.EstimateEntriesAdded() > 0);
     return fall_back ? bloom_fallback_.MaybePostVerify(filter_content)
                      : XXPH3FilterBitsBuilder::MaybePostVerify(filter_content);
@@ -1111,7 +1117,8 @@ Slice LegacyBloomBitsBuilder::Finish(std::unique_ptr<const char[]>* buf) {
   }
   // See BloomFilterPolicy::GetFilterBitsReader for metadata
   data[total_bits / 8] = static_cast<char>(num_probes_);
-  rocksdb_rs::coding_lean::EncodeFixed32(data + total_bits / 8 + 1, static_cast<uint32_t>(num_lines));
+  rocksdb_rs::coding_lean::EncodeFixed32(data + total_bits / 8 + 1,
+                                         static_cast<uint32_t>(num_lines));
 
   const char* const_data = data;
   buf->reset(const_data);
@@ -1271,7 +1278,8 @@ class AlwaysFalseFilter : public BuiltinFilterBitsReader {
   using BuiltinFilterBitsReader::HashMayMatch;  // inherit overload
 };
 
-rocksdb_rs::status::Status XXPH3FilterBitsBuilder::MaybePostVerify(const Slice& filter_content) {
+rocksdb_rs::status::Status XXPH3FilterBitsBuilder::MaybePostVerify(
+    const Slice& filter_content) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
 
   if (!detect_filter_construct_corruption_) {
@@ -1344,7 +1352,8 @@ BloomLikeFilterPolicy::BloomLikeFilterPolicy(double bits_per_key)
   desired_one_in_fp_rate_ =
       1.0 / rocksdb_rs::util::bloom::BloomMath_CacheLocalFpRate(
                 bits_per_key,
-                rocksdb_rs::util::bloom::FastLocalBloomImpl_ChooseNumProbes(millibits_per_key_),
+                rocksdb_rs::util::bloom::FastLocalBloomImpl_ChooseNumProbes(
+                    millibits_per_key_),
                 /*cache_line_bits*/ 512);
 
   // For better or worse, this is a rounding up of a nudged rounding up,
@@ -1414,8 +1423,8 @@ FilterBitsBuilder* BloomLikeFilterPolicy::GetFastLocalBloomBuilderWithContext(
   if (context.table_options.block_cache &&
       filter_construction_charged ==
           CacheEntryRoleOptions::Decision::kEnabled) {
-    cache_res_mgr = std::make_shared<
-        CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
+    cache_res_mgr = std::make_shared<CacheReservationManagerImpl<
+        rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
         context.table_options.block_cache);
   }
   return new FastLocalBloomBitsBuilder(
@@ -1463,8 +1472,8 @@ BloomLikeFilterPolicy::GetStandard128RibbonBuilderWithContext(
   if (context.table_options.block_cache &&
       filter_construction_charged ==
           CacheEntryRoleOptions::Decision::kEnabled) {
-    cache_res_mgr = std::make_shared<
-        CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
+    cache_res_mgr = std::make_shared<CacheReservationManagerImpl<
+        rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
         context.table_options.block_cache);
   }
   return new Standard128RibbonBitsBuilder(
@@ -1599,7 +1608,8 @@ BuiltinFilterBitsReader* BuiltinFilterPolicy::GetBuiltinFilterBitsReader(
   uint32_t len = len_with_meta - kMetadataLen;
   assert(len > 0);
 
-  uint32_t num_lines = rocksdb_rs::coding_lean::DecodeFixed32(contents.data() + len_with_meta - 4);
+  uint32_t num_lines = rocksdb_rs::coding_lean::DecodeFixed32(
+      contents.data() + len_with_meta - 4);
   uint32_t log2_cache_line_size;
 
   if (num_lines * CACHE_LINE_SIZE == len) {
@@ -1699,7 +1709,8 @@ BuiltinFilterBitsReader* BuiltinFilterPolicy::GetBloomBitsReader(
     return new AlwaysTrueFilter();
   }
 
-  uint16_t rest = rocksdb_rs::coding_lean::DecodeFixed16(contents.data() + len_with_meta - 2);
+  uint16_t rest = rocksdb_rs::coding_lean::DecodeFixed16(contents.data() +
+                                                         len_with_meta - 2);
   if (rest != 0) {
     // Reserved, possibly for hash seed
     // Future safe
@@ -1740,7 +1751,8 @@ FilterBitsBuilder* RibbonFilterPolicy::GetBuilderWithContext(
   switch (context.compaction_style) {
     case kCompactionStyleLevel:
     case kCompactionStyleUniversal: {
-      if (context.reason == rocksdb_rs::types::TableFileCreationReason::kFlush) {
+      if (context.reason ==
+          rocksdb_rs::types::TableFileCreationReason::kFlush) {
         // Treat flush as level -1
         assert(context.level_at_creation == 0);
         levelish = -1;

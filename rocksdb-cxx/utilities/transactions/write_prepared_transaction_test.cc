@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include <algorithm>
 #include <atomic>
 #include <cinttypes>
@@ -176,15 +175,14 @@ TEST(PreparedHeap, Concurrent) {
       }
     });
     for (size_t i = 1; i <= t_cnt; i++) {
-      t[i] =
-          rocksdb::port::Thread([&heap, &prepared_mutex, &last, i]() {
-            auto seq = i;
-            do {
-              std::this_thread::yield();
-            } while (last.load() < seq);
-            WriteLock wl(&prepared_mutex);
-            heap.erase(seq);
-          });
+      t[i] = rocksdb::port::Thread([&heap, &prepared_mutex, &last, i]() {
+        auto seq = i;
+        do {
+          std::this_thread::yield();
+        } while (last.load() < seq);
+        WriteLock wl(&prepared_mutex);
+        heap.erase(seq);
+      });
     }
     for (size_t i = 0; i <= t_cnt; i++) {
       t[i].join();
@@ -357,7 +355,7 @@ class WritePreparedTransactionTestBase : public TransactionTestBase {
                                    TxnDBWritePolicy write_policy,
                                    WriteOrdering write_ordering)
       : TransactionTestBase(use_stackable_db, two_write_queue, write_policy,
-                            write_ordering){};
+                            write_ordering) {};
 
  protected:
   void UpdateTransactionDBOptions(size_t snapshot_cache_bits,
@@ -535,7 +533,7 @@ class WritePreparedTransactionTest
   WritePreparedTransactionTest()
       : WritePreparedTransactionTestBase(
             std::get<0>(GetParam()), std::get<1>(GetParam()),
-            std::get<2>(GetParam()), std::get<3>(GetParam())){};
+            std::get<2>(GetParam()), std::get<3>(GetParam())) {};
 };
 
 #if !defined(ROCKSDB_VALGRIND_RUN) || defined(ROCKSDB_FULL_VALGRIND_RUN)
@@ -549,7 +547,7 @@ class SnapshotConcurrentAccessTest
             std::get<0>(GetParam()), std::get<1>(GetParam()),
             std::get<2>(GetParam()), std::get<3>(GetParam())),
         split_id_(std::get<4>(GetParam())),
-        split_cnt_(std::get<5>(GetParam())){};
+        split_cnt_(std::get<5>(GetParam())) {};
 
  protected:
   // A test is split into split_cnt_ tests, each identified with split_id_ where
@@ -2186,8 +2184,9 @@ TEST_P(WritePreparedTransactionTest, IsInSnapshot) {
   }
 }
 
-void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const rocksdb_rs::status::Status& exp_s,
-                 PinnableSlice& exp_v, Slice key) {
+void ASSERT_SAME(ReadOptions roptions, TransactionDB* db,
+                 const rocksdb_rs::status::Status& exp_s, PinnableSlice& exp_v,
+                 Slice key) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   PinnableSlice v;
   s = db->Get(roptions, db->DefaultColumnFamily(), key, &v);
@@ -2211,8 +2210,8 @@ void ASSERT_SAME(ReadOptions roptions, TransactionDB* db, const rocksdb_rs::stat
   }
 }
 
-void ASSERT_SAME(TransactionDB* db, const rocksdb_rs::status::Status& exp_s, PinnableSlice& exp_v,
-                 Slice key) {
+void ASSERT_SAME(TransactionDB* db, const rocksdb_rs::status::Status& exp_s,
+                 PinnableSlice& exp_v, Slice key) {
   ASSERT_SAME(ReadOptions(), db, exp_s, exp_v, key);
 }
 
@@ -3594,7 +3593,7 @@ TEST_P(WritePreparedTransactionTest, NonAtomicCommitOfDelayedPrepared) {
       rocksdb::SyncPoint::GetInstance()->DisableProcessing();
       rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
     }  // for split_before_mutex
-  }    // for split_read
+  }  // for split_read
 }
 
 // When max evicted seq advances a prepared seq, it involves two updates: i)

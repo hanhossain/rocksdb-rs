@@ -4,7 +4,6 @@
 //  (found in the LICENSE.Apache file in the root directory).
 #pragma once
 
-
 #include <limits>
 #include <string>
 #include <vector>
@@ -13,12 +12,11 @@
 #include "memtable/skiplist.h"
 #include "options/db_options.h"
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/comparator.h"
 #include "rocksdb/iterator.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/utilities/write_batch_with_index.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -144,8 +142,10 @@ class ReadableWriteBatch : public WriteBatch {
                    default_cf_ts_sz) {}
   // Retrieve some information from a write entry in the write batch, given
   // the start offset of the write entry.
-  rocksdb_rs::status::Status GetEntryFromDataOffset(size_t data_offset, WriteType* type, Slice* Key,
-                                Slice* value, Slice* blob, Slice* xid) const;
+  rocksdb_rs::status::Status GetEntryFromDataOffset(size_t data_offset,
+                                                    WriteType* type, Slice* Key,
+                                                    Slice* value, Slice* blob,
+                                                    Slice* xid) const;
 };
 
 class WriteBatchEntryComparator {
@@ -322,13 +322,15 @@ class WriteBatchWithIndexInternal {
   WBWIIteratorImpl::Result GetFromBatch(WriteBatchWithIndex* batch,
                                         const Slice& key,
                                         MergeContext* merge_context,
-                                        std::string* value, rocksdb_rs::status::Status* s);
+                                        std::string* value,
+                                        rocksdb_rs::status::Status* s);
   rocksdb_rs::status::Status MergeKey(const Slice& key, const Slice* value,
-                  std::string* result) const {
+                                      std::string* result) const {
     return MergeKey(key, value, merge_context_, result);
   }
   rocksdb_rs::status::Status MergeKey(const Slice& key, const Slice* value,
-                  const MergeContext& context, std::string* result) const;
+                                      const MergeContext& context,
+                                      std::string* result) const;
   size_t GetNumOperands() const { return merge_context_.GetNumOperands(); }
   MergeContext* GetMergeContext() { return &merge_context_; }
   Slice GetOperand(int index) const { return merge_context_.GetOperand(index); }

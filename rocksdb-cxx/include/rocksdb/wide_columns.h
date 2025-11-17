@@ -10,9 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include "rocksdb/slice.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/slice.h"
 
 namespace rocksdb {
 
@@ -101,7 +100,8 @@ class PinnableWideColumns {
   void SetPlainValue(std::string&& value);
 
   rocksdb_rs::status::Status SetWideColumnValue(const Slice& value);
-  rocksdb_rs::status::Status SetWideColumnValue(const Slice& value, Cleanable* cleanable);
+  rocksdb_rs::status::Status SetWideColumnValue(const Slice& value,
+                                                Cleanable* cleanable);
   rocksdb_rs::status::Status SetWideColumnValue(PinnableSlice&& value);
   rocksdb_rs::status::Status SetWideColumnValue(std::string&& value);
 
@@ -171,23 +171,26 @@ inline void PinnableWideColumns::SetPlainValue(std::string&& value) {
   CreateIndexForPlainValue();
 }
 
-inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(const Slice& value) {
+inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(
+    const Slice& value) {
   CopyValue(value);
   return CreateIndexForWideColumns();
 }
 
-inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(const Slice& value,
-                                                      Cleanable* cleanable) {
+inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(
+    const Slice& value, Cleanable* cleanable) {
   PinOrCopyValue(value, cleanable);
   return CreateIndexForWideColumns();
 }
 
-inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(PinnableSlice&& value) {
+inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(
+    PinnableSlice&& value) {
   MoveValue(std::move(value));
   return CreateIndexForWideColumns();
 }
 
-inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(std::string&& value) {
+inline rocksdb_rs::status::Status PinnableWideColumns::SetWideColumnValue(
+    std::string&& value) {
   MoveValue(std::move(value));
   return CreateIndexForWideColumns();
 }

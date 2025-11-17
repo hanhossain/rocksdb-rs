@@ -116,57 +116,52 @@ rocksdb_rs::status::Status ReadTablePropertiesHelper(
 // @returns a status to indicate if the operation succeeded. On success,
 //          *table_properties will point to a heap-allocated TableProperties
 //          object, otherwise value of `table_properties` will not be modified.
-rocksdb_rs::status::Status ReadTableProperties(RandomAccessFileReader* file, uint64_t file_size,
-                           uint64_t table_magic_number,
-                           const ImmutableOptions& ioptions,
-                           const ReadOptions& read_options,
-                           std::unique_ptr<TableProperties>* properties,
-                           MemoryAllocator* memory_allocator = nullptr,
-                           FilePrefetchBuffer* prefetch_buffer = nullptr);
+rocksdb_rs::status::Status ReadTableProperties(
+    RandomAccessFileReader* file, uint64_t file_size,
+    uint64_t table_magic_number, const ImmutableOptions& ioptions,
+    const ReadOptions& read_options,
+    std::unique_ptr<TableProperties>* properties,
+    MemoryAllocator* memory_allocator = nullptr,
+    FilePrefetchBuffer* prefetch_buffer = nullptr);
 
 // Find the meta block from the meta index block. Returns OK and
 // block_handle->IsNull() if not found.
-rocksdb_rs::status::Status FindOptionalMetaBlock(InternalIterator* meta_index_iter,
-                             const std::string& meta_block_name,
-                             BlockHandle* block_handle);
+rocksdb_rs::status::Status FindOptionalMetaBlock(
+    InternalIterator* meta_index_iter, const std::string& meta_block_name,
+    BlockHandle* block_handle);
 
 // Find the meta block from the meta index block. Returns Corruption if not
 // found.
 rocksdb_rs::status::Status FindMetaBlock(InternalIterator* meta_index_iter,
-                     const std::string& meta_block_name,
-                     BlockHandle* block_handle);
+                                         const std::string& meta_block_name,
+                                         BlockHandle* block_handle);
 
 // Find the meta block
-rocksdb_rs::status::Status FindMetaBlockInFile(RandomAccessFileReader* file, uint64_t file_size,
-                           uint64_t table_magic_number,
-                           const ImmutableOptions& ioptions,
-                           const ReadOptions& read_options,
-                           const std::string& meta_block_name,
-                           BlockHandle* block_handle,
-                           MemoryAllocator* memory_allocator = nullptr,
-                           FilePrefetchBuffer* prefetch_buffer = nullptr,
-                           Footer* footer_out = nullptr);
+rocksdb_rs::status::Status FindMetaBlockInFile(
+    RandomAccessFileReader* file, uint64_t file_size,
+    uint64_t table_magic_number, const ImmutableOptions& ioptions,
+    const ReadOptions& read_options, const std::string& meta_block_name,
+    BlockHandle* block_handle, MemoryAllocator* memory_allocator = nullptr,
+    FilePrefetchBuffer* prefetch_buffer = nullptr,
+    Footer* footer_out = nullptr);
 
 // Read meta block contents
-rocksdb_rs::status::Status ReadMetaIndexBlockInFile(RandomAccessFileReader* file,
-                                uint64_t file_size, uint64_t table_magic_number,
-                                const ImmutableOptions& ioptions,
-                                const ReadOptions& read_options,
-                                BlockContents* block_contents,
-                                MemoryAllocator* memory_allocator = nullptr,
-                                FilePrefetchBuffer* prefetch_buffer = nullptr,
-                                Footer* footer_out = nullptr);
+rocksdb_rs::status::Status ReadMetaIndexBlockInFile(
+    RandomAccessFileReader* file, uint64_t file_size,
+    uint64_t table_magic_number, const ImmutableOptions& ioptions,
+    const ReadOptions& read_options, BlockContents* block_contents,
+    MemoryAllocator* memory_allocator = nullptr,
+    FilePrefetchBuffer* prefetch_buffer = nullptr,
+    Footer* footer_out = nullptr);
 
 // Read the specified meta block with name meta_block_name
 // from `file` and initialize `contents` with contents of this block.
 // Return Status_OK in case of success.
-rocksdb_rs::status::Status ReadMetaBlock(RandomAccessFileReader* file,
-                     FilePrefetchBuffer* prefetch_buffer, uint64_t file_size,
-                     uint64_t table_magic_number,
-                     const ImmutableOptions& ioptions,
-                     const ReadOptions& read_options,
-                     const std::string& meta_block_name, BlockType block_type,
-                     BlockContents* contents,
-                     MemoryAllocator* memory_allocator = nullptr);
+rocksdb_rs::status::Status ReadMetaBlock(
+    RandomAccessFileReader* file, FilePrefetchBuffer* prefetch_buffer,
+    uint64_t file_size, uint64_t table_magic_number,
+    const ImmutableOptions& ioptions, const ReadOptions& read_options,
+    const std::string& meta_block_name, BlockType block_type,
+    BlockContents* contents, MemoryAllocator* memory_allocator = nullptr);
 
 }  // namespace rocksdb

@@ -36,8 +36,10 @@ namespace {
 // a utility that helps writing block content to the file
 //   @offset will advance if @block_contents was successfully written.
 //   @block_handle the block handle this particular block.
-rocksdb_rs::io_status::IOStatus WriteBlock(const Slice& block_contents, WritableFileWriter* file,
-                    uint64_t* offset, BlockHandle* block_handle) {
+rocksdb_rs::io_status::IOStatus WriteBlock(const Slice& block_contents,
+                                           WritableFileWriter* file,
+                                           uint64_t* offset,
+                                           BlockHandle* block_handle) {
   block_handle->set_offset(*offset);
   block_handle->set_size(block_contents.size());
   rocksdb_rs::io_status::IOStatus io_s = file->Append(block_contents);
@@ -112,7 +114,8 @@ PlainTableBuilder::PlainTableBuilder(
           : "nullptr";
 
   std::string val;
-  rocksdb_rs::coding::PutFixed32(val, static_cast<uint32_t>(encoder_.GetEncodingType()));
+  rocksdb_rs::coding::PutFixed32(
+      val, static_cast<uint32_t>(encoder_.GetEncodingType()));
   properties_
       .user_collected_properties[PlainTablePropertyNames::kEncodingType] = val;
 
@@ -126,8 +129,7 @@ PlainTableBuilder::PlainTableBuilder(
   }
 }
 
-PlainTableBuilder::~PlainTableBuilder() {
-}
+PlainTableBuilder::~PlainTableBuilder() {}
 
 void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
   // temp buffer for metadata bytes between key and value.
@@ -141,7 +143,8 @@ void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
     return;
   }
   if (internal_key.type == kTypeRangeDeletion) {
-    status_ = rocksdb_rs::status::Status_NotSupported("Range deletion unsupported");
+    status_ =
+        rocksdb_rs::status::Status_NotSupported("Range deletion unsupported");
     return;
   }
 
@@ -169,8 +172,8 @@ void PlainTableBuilder::Add(const Slice& key, const Slice& value) {
   // Write value length
   uint32_t value_size = static_cast<uint32_t>(value.size());
   if (io_status_.ok()) {
-    char* end_ptr =
-        rocksdb_rs::coding::EncodeVarint32(meta_bytes_buf + meta_bytes_buf_size, value_size);
+    char* end_ptr = rocksdb_rs::coding::EncodeVarint32(
+        meta_bytes_buf + meta_bytes_buf_size, value_size);
     assert(end_ptr <= meta_bytes_buf + sizeof(meta_bytes_buf));
     meta_bytes_buf_size = end_ptr - meta_bytes_buf;
     io_status_ = file_->Append(Slice(meta_bytes_buf, meta_bytes_buf_size));
@@ -271,8 +274,8 @@ rocksdb_rs::status::Status PlainTableBuilder::Finish() {
 
   // -- Write property block
   BlockHandle property_block_handle;
-  rocksdb_rs::io_status::IOStatus s = WriteBlock(property_block_builder.Finish(), file_, &offset_,
-                          &property_block_handle);
+  rocksdb_rs::io_status::IOStatus s = WriteBlock(
+      property_block_builder.Finish(), file_, &offset_, &property_block_handle);
   if (!s.ok()) {
     return s.status();
   }

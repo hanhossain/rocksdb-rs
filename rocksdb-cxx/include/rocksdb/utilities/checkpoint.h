@@ -43,9 +43,9 @@ class Checkpoint {
   // NOTE: db_paths and cf_paths are not supported for creating checkpoints
   // and NotSupported will be returned when the DB (without WALs) uses more
   // than one directory.
-  virtual rocksdb_rs::status::Status CreateCheckpoint(const std::string& checkpoint_dir,
-                                  uint64_t log_size_for_flush = 0,
-                                  uint64_t* sequence_number_ptr = nullptr);
+  virtual rocksdb_rs::status::Status CreateCheckpoint(
+      const std::string& checkpoint_dir, uint64_t log_size_for_flush = 0,
+      uint64_t* sequence_number_ptr = nullptr);
 
   // Exports all live SST files of a specified Column Family onto export_dir,
   // returning SST files information in metadata.
@@ -53,9 +53,9 @@ class Checkpoint {
   //   is in the same partition as the db directory, copied otherwise.
   // - export_dir should not already exist and will be created by this API.
   // - Always triggers a flush.
-  virtual rocksdb_rs::status::Status ExportColumnFamily(ColumnFamilyHandle* handle,
-                                    const std::string& export_dir,
-                                    ExportImportFilesMetaData** metadata);
+  virtual rocksdb_rs::status::Status ExportColumnFamily(
+      ColumnFamilyHandle* handle, const std::string& export_dir,
+      ExportImportFilesMetaData** metadata);
 
   virtual ~Checkpoint() {}
 };

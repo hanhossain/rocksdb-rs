@@ -11,6 +11,7 @@
 #include <mutex>
 #include <unordered_map>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/trace_reader_writer.h"
@@ -18,8 +19,6 @@
 #include "rocksdb/trace_record_result.h"
 #include "rocksdb/utilities/replayer.h"
 #include "trace_replay/trace_replay.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -33,16 +32,19 @@ class ReplayerImpl : public Replayer {
   rocksdb_rs::status::Status Prepare() override;
 
   using Replayer::Next;
-  rocksdb_rs::status::Status Next(std::unique_ptr<TraceRecord>* record) override;
+  rocksdb_rs::status::Status Next(
+      std::unique_ptr<TraceRecord>* record) override;
 
   using Replayer::Execute;
-  rocksdb_rs::status::Status Execute(const std::unique_ptr<TraceRecord>& record,
-                 std::unique_ptr<TraceRecordResult>* result) override;
+  rocksdb_rs::status::Status Execute(
+      const std::unique_ptr<TraceRecord>& record,
+      std::unique_ptr<TraceRecordResult>* result) override;
 
   using Replayer::Replay;
   rocksdb_rs::status::Status Replay(
       const ReplayOptions& options,
-      const std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)>&
+      const std::function<void(rocksdb_rs::status::Status,
+                               std::unique_ptr<TraceRecordResult>&&)>&
           result_callback) override;
 
   using Replayer::GetHeaderTimestamp;
@@ -79,7 +81,9 @@ struct ReplayerWorkerArg {
   std::function<void(rocksdb_rs::status::Status, uint64_t)> error_cb;
   // Callback function to report the trace execution status and operation
   // execution status/result(s).
-  std::function<void(rocksdb_rs::status::Status, std::unique_ptr<TraceRecordResult>&&)> result_cb;
+  std::function<void(rocksdb_rs::status::Status,
+                     std::unique_ptr<TraceRecordResult>&&)>
+      result_cb;
 };
 
 }  // namespace rocksdb

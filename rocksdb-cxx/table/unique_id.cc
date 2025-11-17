@@ -3,8 +3,9 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-#include <cstdint>
 #include <rocksdb-rs/src/hash.rs.h>
+
+#include <cstdint>
 
 #include "table/unique_id_impl.h"
 #include "util/hash.h"
@@ -24,7 +25,8 @@ constexpr uint64_t kLoOffsetForZero = 6417269962128484497U;
 void InternalUniqueIdToExternal(rocksdb_rs::unique_id::UniqueIdPtr in_out) {
   uint64_t hi, lo;
   rocksdb_rs::hash::bijective_hash2x64(in_out.ptr[1] + kHiOffsetForZero,
-                                       in_out.ptr[0] + kLoOffsetForZero, hi, lo);
+                                       in_out.ptr[0] + kLoOffsetForZero, hi,
+                                       lo);
   in_out.ptr[0] = lo;
   in_out.ptr[1] = hi;
   if (in_out.extended) {
@@ -44,10 +46,11 @@ void ExternalUniqueIdToInternal(rocksdb_rs::unique_id::UniqueIdPtr in_out) {
 }
 
 template <typename ID>
-rocksdb_rs::status::Status GetUniqueIdFromTablePropertiesHelper(const TableProperties &props,
-                                            std::string& out_id) {
+rocksdb_rs::status::Status GetUniqueIdFromTablePropertiesHelper(
+    const TableProperties& props, std::string& out_id) {
   ID tmp{};
-  rocksdb_rs::status::Status s = tmp.get_sst_internal_unique_id(props.db_id, props.db_session_id, props.orig_file_number, false);
+  rocksdb_rs::status::Status s = tmp.get_sst_internal_unique_id(
+      props.db_id, props.db_session_id, props.orig_file_number, false);
   if (s.ok()) {
     InternalUniqueIdToExternal(tmp.as_unique_id_ptr());
     out_id = *tmp.encode_bytes();
@@ -57,14 +60,16 @@ rocksdb_rs::status::Status GetUniqueIdFromTablePropertiesHelper(const TablePrope
   return s;
 }
 
-rocksdb_rs::status::Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
-                                              std::string& out_id) {
-  return GetUniqueIdFromTablePropertiesHelper<rocksdb_rs::unique_id::UniqueId64x3>(props, out_id);
+rocksdb_rs::status::Status GetExtendedUniqueIdFromTableProperties(
+    const TableProperties& props, std::string& out_id) {
+  return GetUniqueIdFromTablePropertiesHelper<
+      rocksdb_rs::unique_id::UniqueId64x3>(props, out_id);
 }
 
-rocksdb_rs::status::Status GetUniqueIdFromTableProperties(const TableProperties &props,
-                                      std::string& out_id) {
-  return GetUniqueIdFromTablePropertiesHelper<rocksdb_rs::unique_id::UniqueId64x2>(props, out_id);
+rocksdb_rs::status::Status GetUniqueIdFromTableProperties(
+    const TableProperties& props, std::string& out_id) {
+  return GetUniqueIdFromTablePropertiesHelper<
+      rocksdb_rs::unique_id::UniqueId64x2>(props, out_id);
 }
 
 }  // namespace rocksdb

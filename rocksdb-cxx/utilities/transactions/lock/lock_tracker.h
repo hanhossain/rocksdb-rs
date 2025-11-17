@@ -7,10 +7,9 @@
 
 #include <memory>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/types.h"
 #include "rocksdb/utilities/transaction_db.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 

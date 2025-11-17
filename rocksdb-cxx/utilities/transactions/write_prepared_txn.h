@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include <algorithm>
 #include <atomic>
 #include <mutex>
@@ -15,6 +14,7 @@
 #include <vector>
 
 #include "db/write_callback.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/snapshot.h"
@@ -27,8 +27,6 @@
 #include "utilities/transactions/pessimistic_transaction_db.h"
 #include "utilities/transactions/transaction_base.h"
 #include "utilities/transactions/transaction_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -53,14 +51,16 @@ class WritePreparedTxn : public PessimisticTransaction {
   // the last seq in the memtable.
   using Transaction::Get;
   virtual rocksdb_rs::status::Status Get(const ReadOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     PinnableSlice* value) override;
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         PinnableSlice* value) override;
 
   using Transaction::MultiGet;
   virtual void MultiGet(const ReadOptions& options,
                         ColumnFamilyHandle* column_family,
                         const size_t num_keys, const Slice* keys,
-                        PinnableSlice* values, rocksdb_rs::status::Status* statuses,
+                        PinnableSlice* values,
+                        rocksdb_rs::status::Status* statuses,
                         const bool sorted_input = false) override;
 
   // Note: The behavior is undefined in presence of interleaved writes to the
@@ -91,7 +91,8 @@ class WritePreparedTxn : public PessimisticTransaction {
 
   rocksdb_rs::status::Status CommitWithoutPrepareInternal() override;
 
-  rocksdb_rs::status::Status CommitBatchInternal(WriteBatch* batch, size_t batch_cnt) override;
+  rocksdb_rs::status::Status CommitBatchInternal(WriteBatch* batch,
+                                                 size_t batch_cnt) override;
 
   // Since the data is already written to memtables at the Prepare phase, the
   // commit entails writing only a commit marker in the WAL. The sequence number
@@ -103,11 +104,12 @@ class WritePreparedTxn : public PessimisticTransaction {
 
   rocksdb_rs::status::Status RollbackInternal() override;
 
-  virtual rocksdb_rs::status::Status ValidateSnapshot(ColumnFamilyHandle* column_family,
-                                  const Slice& key,
-                                  SequenceNumber* tracked_at_seq) override;
+  virtual rocksdb_rs::status::Status ValidateSnapshot(
+      ColumnFamilyHandle* column_family, const Slice& key,
+      SequenceNumber* tracked_at_seq) override;
 
-  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(WriteBatch* src_batch) override;
+  virtual rocksdb_rs::status::Status RebuildFromWriteBatch(
+      WriteBatch* src_batch) override;
 
   WritePreparedTxnDB* wpt_db_;
   // Number of sub-batches in prepare
@@ -115,4 +117,3 @@ class WritePreparedTxn : public PessimisticTransaction {
 };
 
 }  // namespace rocksdb
-

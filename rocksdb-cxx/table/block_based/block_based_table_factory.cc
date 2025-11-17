@@ -163,7 +163,6 @@ size_t TailPrefetchStats::GetSuggestedPrefetchSize() {
   return std::min(kMaxPrefetchSize, max_qualified_size);
 }
 
-
 const std::string kOptNameMetadataCacheOpts = "metadata_cache_options";
 
 static std::unordered_map<std::string, PinningTier>
@@ -223,7 +222,6 @@ static std::unordered_map<std::string,
         {"kFlushOnly",
          BlockBasedTableOptions::PrepopulateBlockCache::kFlushOnly}};
 
-
 static std::unordered_map<std::string, OptionTypeInfo>
     block_based_table_type_info = {
         /* currently not supported
@@ -234,27 +232,35 @@ static std::unordered_map<std::string, OptionTypeInfo>
          OptionTypeInfo::AsCustomSharedPtr<FlushBlockPolicyFactory>(
              offsetof(struct BlockBasedTableOptions,
                       flush_block_policy_factory),
-             rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever)},
+             rocksdb_rs::utilities::options_type::OptionVerificationType::
+                 kByName,
+             rocksdb_rs::utilities::options_type::OptionTypeFlags::
+                 kCompareNever)},
         {"cache_index_and_filter_blocks",
          {offsetof(struct BlockBasedTableOptions,
                    cache_index_and_filter_blocks),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"cache_index_and_filter_blocks_with_high_priority",
          {offsetof(struct BlockBasedTableOptions,
                    cache_index_and_filter_blocks_with_high_priority),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"pin_l0_filter_and_index_blocks_in_cache",
          {offsetof(struct BlockBasedTableOptions,
                    pin_l0_filter_and_index_blocks_in_cache),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"index_type", OptionTypeInfo::Enum<BlockBasedTableOptions::IndexType>(
                            offsetof(struct BlockBasedTableOptions, index_type),
                            &block_base_table_index_type_string_map)},
         {"hash_index_allow_collision",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::
+              kDeprecated,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"data_block_index_type",
          OptionTypeInfo::Enum<BlockBasedTableOptions::DataBlockIndexType>(
@@ -267,81 +273,105 @@ static std::unordered_map<std::string, OptionTypeInfo>
         {"data_block_hash_table_util_ratio",
          {offsetof(struct BlockBasedTableOptions,
                    data_block_hash_table_util_ratio),
-          rocksdb_rs::utilities::options_type::OptionType::kDouble, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kDouble,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"checksum",
          {offsetof(struct BlockBasedTableOptions, checksum),
-          rocksdb_rs::utilities::options_type::OptionType::kChecksumType, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kChecksumType,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"no_block_cache",
          {offsetof(struct BlockBasedTableOptions, no_block_cache),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"block_size",
          {offsetof(struct BlockBasedTableOptions, block_size),
-          rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"block_size_deviation",
          {offsetof(struct BlockBasedTableOptions, block_size_deviation),
-          rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kInt,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"block_restart_interval",
          {offsetof(struct BlockBasedTableOptions, block_restart_interval),
-          rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kInt,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"index_block_restart_interval",
          {offsetof(struct BlockBasedTableOptions, index_block_restart_interval),
-          rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kInt,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"index_per_partition",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::
+              kDeprecated,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"metadata_block_size",
          {offsetof(struct BlockBasedTableOptions, metadata_block_size),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"partition_filters",
          {offsetof(struct BlockBasedTableOptions, partition_filters),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"optimize_filters_for_memory",
          {offsetof(struct BlockBasedTableOptions, optimize_filters_for_memory),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"filter_policy",
          OptionTypeInfo::AsCustomSharedPtr<const FilterPolicy>(
              offsetof(struct BlockBasedTableOptions, filter_policy),
-             rocksdb_rs::utilities::options_type::OptionVerificationType::kByNameAllowFromNull,
+             rocksdb_rs::utilities::options_type::OptionVerificationType::
+                 kByNameAllowFromNull,
              rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
         {"whole_key_filtering",
          {offsetof(struct BlockBasedTableOptions, whole_key_filtering),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"detect_filter_construct_corruption",
          {offsetof(struct BlockBasedTableOptions,
                    detect_filter_construct_corruption),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"reserve_table_builder_memory",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::
+              kDeprecated,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"reserve_table_reader_memory",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::
+              kDeprecated,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"skip_table_builder_flush",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::
+              kDeprecated,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"format_version",
          {offsetof(struct BlockBasedTableOptions, format_version),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt32T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt32T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"verify_compression",
          {offsetof(struct BlockBasedTableOptions, verify_compression),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"read_amp_bytes_per_bit",
          {offsetof(struct BlockBasedTableOptions, read_amp_bytes_per_bit),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt32T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt32T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
           [](const ConfigOptions& /*opts*/, const std::string& /*name*/,
              const std::string& value, void* addr) {
@@ -361,26 +391,34 @@ static std::unordered_map<std::string, OptionTypeInfo>
           }}},
         {"enable_index_compression",
          {offsetof(struct BlockBasedTableOptions, enable_index_compression),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"block_align",
          {offsetof(struct BlockBasedTableOptions, block_align),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"pin_top_level_index_and_filter",
          {offsetof(struct BlockBasedTableOptions,
                    pin_top_level_index_and_filter),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {kOptNameMetadataCacheOpts,
          OptionTypeInfo::Struct(
              kOptNameMetadataCacheOpts, &metadata_cache_options_type_info,
              offsetof(struct BlockBasedTableOptions, metadata_cache_options),
-             rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
+             rocksdb_rs::utilities::options_type::OptionVerificationType::
+                 kNormal,
+             rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
         {"block_cache",
          {offsetof(struct BlockBasedTableOptions, block_cache),
-          rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-          (rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever | rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize),
+          rocksdb_rs::utilities::options_type::OptionType::kUnknown,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          (rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever |
+           rocksdb_rs::utilities::options_type::OptionTypeFlags::
+               kDontSerialize),
           // Parses the input value as a Cache
           [](const ConfigOptions& opts, const std::string&,
              const std::string& value, void* addr) {
@@ -388,11 +426,14 @@ static std::unordered_map<std::string, OptionTypeInfo>
             return Cache::CreateFromString(opts, value, cache);
           }}},
         {"block_cache_compressed",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::
+              kDeprecated,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"max_auto_readahead_size",
          {offsetof(struct BlockBasedTableOptions, max_auto_readahead_size),
-          rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"prepopulate_block_cache",
          OptionTypeInfo::Enum<BlockBasedTableOptions::PrepopulateBlockCache>(
@@ -401,12 +442,14 @@ static std::unordered_map<std::string, OptionTypeInfo>
              rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)},
         {"initial_auto_readahead_size",
          {offsetof(struct BlockBasedTableOptions, initial_auto_readahead_size),
-          rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"num_file_reads_for_auto_readahead",
          {offsetof(struct BlockBasedTableOptions,
                    num_file_reads_for_auto_readahead),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
 
 };
@@ -471,7 +514,8 @@ void BlockBasedTableFactory::InitializeOptions() {
       table_options_.cache_usage_options.options_overrides;
   const auto options = table_options_.cache_usage_options.options;
   for (std::uint32_t i = 0; i < kNumCacheEntryRoles; ++i) {
-    rocksdb_rs::cache::CacheEntryRole role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
+    rocksdb_rs::cache::CacheEntryRole role =
+        static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
     auto options_overrides_iter = options_overrides.find(role);
     if (options_overrides_iter == options_overrides.end()) {
       options_overrides.insert({role, options});
@@ -482,7 +526,8 @@ void BlockBasedTableFactory::InitializeOptions() {
   }
 }
 
-rocksdb_rs::status::Status BlockBasedTableFactory::PrepareOptions(const ConfigOptions& opts) {
+rocksdb_rs::status::Status BlockBasedTableFactory::PrepareOptions(
+    const ConfigOptions& opts) {
   InitializeOptions();
   return TableFactory::PrepareOptions(opts);
 }
@@ -490,9 +535,10 @@ rocksdb_rs::status::Status BlockBasedTableFactory::PrepareOptions(const ConfigOp
 namespace {
 // Different cache kinds use the same keys for physically different values, so
 // they must not share an underlying key space with each other.
-rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOptions& bbto) {
-  int cache_count = (bbto.block_cache != nullptr) +
-                    (bbto.persistent_cache != nullptr);
+rocksdb_rs::status::Status CheckCacheOptionCompatibility(
+    const BlockBasedTableOptions& bbto) {
+  int cache_count =
+      (bbto.block_cache != nullptr) + (bbto.persistent_cache != nullptr);
   if (cache_count <= 1) {
     // Nothing to share / overlap
     return rocksdb_rs::status::Status_OK();
@@ -500,7 +546,8 @@ rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOp
 
   // More complex test of shared key space, in case the instances are wrappers
   // for some shared underlying cache.
-  static Cache::CacheItemHelper kHelper{rocksdb_rs::cache::CacheEntryRole::kMisc};
+  static Cache::CacheItemHelper kHelper{
+      rocksdb_rs::cache::CacheEntryRole::kMisc};
   CacheKey sentinel_key = CacheKey::CreateUniqueForProcessLifetime();
   struct SentinelValue {
     explicit SentinelValue(char _c) : c(_c) {}
@@ -509,13 +556,13 @@ rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOp
   static SentinelValue kRegularBlockCacheMarker{'b'};
   static char kPersistentCacheMarker{'p'};
   if (bbto.block_cache) {
-    bbto.block_cache
-        ->Insert(sentinel_key.AsSlice(), &kRegularBlockCacheMarker, &kHelper, 1);
+    bbto.block_cache->Insert(sentinel_key.AsSlice(), &kRegularBlockCacheMarker,
+                             &kHelper, 1);
   }
   if (bbto.persistent_cache) {
     // Note: persistent cache copies the data, not keeping the pointer
-    bbto.persistent_cache
-        ->Insert(sentinel_key.AsSlice(), &kPersistentCacheMarker, 1);
+    bbto.persistent_cache->Insert(sentinel_key.AsSlice(),
+                                  &kPersistentCacheMarker, 1);
   }
   // If we get something different from what we inserted, that indicates
   // dangerously overlapping key spaces.
@@ -530,7 +577,8 @@ rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOp
             "block_cache and persistent_cache share the same key space, "
             "which is not supported");
       } else if (v != &kRegularBlockCacheMarker) {
-        return rocksdb_rs::status::Status_Corruption("Unexpected mutation to block_cache");
+        return rocksdb_rs::status::Status_Corruption(
+            "Unexpected mutation to block_cache");
       }
     }
   }
@@ -545,7 +593,8 @@ rocksdb_rs::status::Status CheckCacheOptionCompatibility(const BlockBasedTableOp
             "persistent_cache and block_cache share the same key space, "
             "which is not supported");
       } else if (data[0] != kPersistentCacheMarker) {
-        return rocksdb_rs::status::Status_Corruption("Unexpected mutation to persistent_cache");
+        return rocksdb_rs::status::Status_Corruption(
+            "Unexpected mutation to persistent_cache");
       }
     }
   }
@@ -607,7 +656,9 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
         "Unsupported BlockBasedTable format_version. Please check "
         "include/rocksdb/table.h for more info");
   }
-  if (table_options_.block_align && (cf_opts.compression != rocksdb_rs::compression_type::CompressionType::kNoCompression)) {
+  if (table_options_.block_align &&
+      (cf_opts.compression !=
+       rocksdb_rs::compression_type::CompressionType::kNoCompression)) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "Enable block_align, but compression "
         "enabled");
@@ -639,13 +690,17 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
   for (auto options_overrides_iter = options_overrides.cbegin();
        options_overrides_iter != options_overrides.cend();
        ++options_overrides_iter) {
-    const rocksdb_rs::cache::CacheEntryRole role = options_overrides_iter->first;
+    const rocksdb_rs::cache::CacheEntryRole role =
+        options_overrides_iter->first;
     const CacheEntryRoleOptions options = options_overrides_iter->second;
-    static const std::set<rocksdb_rs::cache::CacheEntryRole> kMemoryChargingSupported = {
-        rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer,
-        rocksdb_rs::cache::CacheEntryRole::kFilterConstruction,
-        rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader, rocksdb_rs::cache::CacheEntryRole::kFileMetadata,
-        rocksdb_rs::cache::CacheEntryRole::kBlobCache};
+    static const std::set<rocksdb_rs::cache::CacheEntryRole>
+        kMemoryChargingSupported = {
+            rocksdb_rs::cache::CacheEntryRole::
+                kCompressionDictionaryBuildingBuffer,
+            rocksdb_rs::cache::CacheEntryRole::kFilterConstruction,
+            rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader,
+            rocksdb_rs::cache::CacheEntryRole::kFileMetadata,
+            rocksdb_rs::cache::CacheEntryRole::kBlobCache};
     if (options.charged != CacheEntryRoleOptions::Decision::kFallback &&
         kMemoryChargingSupported.count(role) == 0) {
       return rocksdb_rs::status::Status_NotSupported(
@@ -696,7 +751,8 @@ rocksdb_rs::status::Status BlockBasedTableFactory::ValidateOptions(
     }
   }
   {
-    rocksdb_rs::status::Status s = CheckCacheOptionCompatibility(table_options_);
+    rocksdb_rs::status::Status s =
+        CheckCacheOptionCompatibility(table_options_);
     if (!s.ok()) {
       return s;
     }
@@ -886,13 +942,11 @@ const void* BlockBasedTableFactory::GetOptionsPtr(
 // @return Status_OK() on success.  Otherwise, a non-ok status indicating
 //     error will be returned, and "new_table_options" will be set to
 //     "table_options".
-rocksdb_rs::status::Status BlockBasedTableFactory::ParseOption(const ConfigOptions& config_options,
-                                           const OptionTypeInfo& opt_info,
-                                           const std::string& opt_name,
-                                           const std::string& opt_value,
-                                           void* opt_ptr) {
-  rocksdb_rs::status::Status status = TableFactory::ParseOption(config_options, opt_info, opt_name,
-                                            opt_value, opt_ptr);
+rocksdb_rs::status::Status BlockBasedTableFactory::ParseOption(
+    const ConfigOptions& config_options, const OptionTypeInfo& opt_info,
+    const std::string& opt_name, const std::string& opt_value, void* opt_ptr) {
+  rocksdb_rs::status::Status status = TableFactory::ParseOption(
+      config_options, opt_info, opt_name, opt_value, opt_ptr);
   if (config_options.input_strings_escaped && !status.ok()) {  // Got an error
     // !input_strings_escaped indicates the old API, where everything is
     // parsable.
@@ -929,7 +983,8 @@ rocksdb_rs::status::Status GetBlockBasedTableOptionsFromMap(
     BlockBasedTableOptions* new_table_options) {
   assert(new_table_options);
   BlockBasedTableFactory bbtf(table_options);
-  rocksdb_rs::status::Status s = bbtf.ConfigureFromMap(config_options, opts_map);
+  rocksdb_rs::status::Status s =
+      bbtf.ConfigureFromMap(config_options, opts_map);
   if (s.ok()) {
     *new_table_options = *(bbtf.GetOptions<BlockBasedTableOptions>());
   } else {

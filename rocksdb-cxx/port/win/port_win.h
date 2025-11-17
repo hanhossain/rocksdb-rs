@@ -32,7 +32,6 @@
 #include <thread>
 
 #include "port/win/win_thread.h"
-
 #include "rocksdb-rs/src/port_defs.rs.h"
 
 #undef min
@@ -307,7 +306,8 @@ std::wstring utf8_to_utf16(const std::string& utf8);
 
 using ThreadId = int;
 
-extern void SetCpuPriority(ThreadId id, rocksdb_rs::port_defs::CpuPriority priority);
+extern void SetCpuPriority(ThreadId id,
+                           rocksdb_rs::port_defs::CpuPriority priority);
 
 int64_t GetProcessID();
 

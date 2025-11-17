@@ -102,8 +102,9 @@ class CacheDumperImpl : public CacheDumper {
   rocksdb_rs::io_status::IOStatus DumpCacheEntriesToWriter() override;
 
  private:
-  rocksdb_rs::io_status::IOStatus WriteBlock(CacheDumpUnitType type, const Slice& key,
-                      const Slice& value);
+  rocksdb_rs::io_status::IOStatus WriteBlock(CacheDumpUnitType type,
+                                             const Slice& key,
+                                             const Slice& value);
   rocksdb_rs::io_status::IOStatus WriteHeader();
   rocksdb_rs::io_status::IOStatus WriteFooter();
   bool ShouldFilterOut(const Slice& key);
@@ -134,13 +135,18 @@ class CacheDumpedLoaderImpl : public CacheDumpedLoader {
         secondary_cache_(secondary_cache),
         reader_(std::move(reader)) {}
   ~CacheDumpedLoaderImpl() {}
-  rocksdb_rs::io_status::IOStatus RestoreCacheEntriesToSecondaryCache() override;
+  rocksdb_rs::io_status::IOStatus RestoreCacheEntriesToSecondaryCache()
+      override;
 
  private:
-  rocksdb_rs::io_status::IOStatus ReadDumpUnitMeta(std::string* data, DumpUnitMeta* unit_meta);
-  rocksdb_rs::io_status::IOStatus ReadDumpUnit(size_t len, std::string* data, DumpUnit* unit);
-  rocksdb_rs::io_status::IOStatus ReadHeader(std::string* data, DumpUnit* dump_unit);
-  rocksdb_rs::io_status::IOStatus ReadCacheBlock(std::string* data, DumpUnit* dump_unit);
+  rocksdb_rs::io_status::IOStatus ReadDumpUnitMeta(std::string* data,
+                                                   DumpUnitMeta* unit_meta);
+  rocksdb_rs::io_status::IOStatus ReadDumpUnit(size_t len, std::string* data,
+                                               DumpUnit* unit);
+  rocksdb_rs::io_status::IOStatus ReadHeader(std::string* data,
+                                             DumpUnit* dump_unit);
+  rocksdb_rs::io_status::IOStatus ReadCacheBlock(std::string* data,
+                                                 DumpUnit* dump_unit);
 
   CacheDumpOptions options_;
   std::shared_ptr<SecondaryCache> secondary_cache_;
@@ -158,10 +164,12 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   ~ToFileCacheDumpWriter() { Close(); }
 
   // Write the serialized metadata to the file
-  virtual rocksdb_rs::io_status::IOStatus WriteMetadata(const Slice& metadata) override {
+  virtual rocksdb_rs::io_status::IOStatus WriteMetadata(
+      const Slice& metadata) override {
     assert(file_writer_ != nullptr);
     std::string prefix;
-    rocksdb_rs::coding::PutFixed32(prefix, static_cast<uint32_t>(metadata.size()));
+    rocksdb_rs::coding::PutFixed32(prefix,
+                                   static_cast<uint32_t>(metadata.size()));
     rocksdb_rs::io_status::IOStatus io_s = file_writer_->Append(Slice(prefix));
     if (!io_s.ok()) {
       return io_s;
@@ -171,7 +179,8 @@ class ToFileCacheDumpWriter : public CacheDumpWriter {
   }
 
   // Write the serialized data to the file
-  virtual rocksdb_rs::io_status::IOStatus WritePacket(const Slice& data) override {
+  virtual rocksdb_rs::io_status::IOStatus WritePacket(
+      const Slice& data) override {
     assert(file_writer_ != nullptr);
     std::string prefix;
     rocksdb_rs::coding::PutFixed32(prefix, static_cast<uint32_t>(data.size()));
@@ -206,7 +215,8 @@ class FromFileCacheDumpReader : public CacheDumpReader {
 
   ~FromFileCacheDumpReader() { delete[] buffer_; }
 
-  virtual rocksdb_rs::io_status::IOStatus ReadMetadata(std::string* metadata) override {
+  virtual rocksdb_rs::io_status::IOStatus ReadMetadata(
+      std::string* metadata) override {
     uint32_t metadata_len = 0;
     rocksdb_rs::io_status::IOStatus io_s = ReadSizePrefix(&metadata_len);
     if (!io_s.ok()) {
@@ -215,7 +225,8 @@ class FromFileCacheDumpReader : public CacheDumpReader {
     return Read(metadata_len, metadata);
   }
 
-  virtual rocksdb_rs::io_status::IOStatus ReadPacket(std::string* data) override {
+  virtual rocksdb_rs::io_status::IOStatus ReadPacket(
+      std::string* data) override {
     uint32_t data_len = 0;
     rocksdb_rs::io_status::IOStatus io_s = ReadSizePrefix(&data_len);
     if (!io_s.ok()) {
@@ -233,14 +244,16 @@ class FromFileCacheDumpReader : public CacheDumpReader {
     }
     Slice encoded_slice(prefix);
     if (!rocksdb_rs::coding::GetFixed32(encoded_slice, *len)) {
-      return rocksdb_rs::io_status::IOStatus_Corruption("Decode size prefix string failed");
+      return rocksdb_rs::io_status::IOStatus_Corruption(
+          "Decode size prefix string failed");
     }
     return rocksdb_rs::io_status::IOStatus_OK();
   }
 
   rocksdb_rs::io_status::IOStatus Read(size_t len, std::string* data) {
     assert(file_reader_ != nullptr);
-    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
+    rocksdb_rs::io_status::IOStatus io_s =
+        rocksdb_rs::io_status::IOStatus_new();
 
     unsigned int bytes_to_read = static_cast<unsigned int>(len);
     unsigned int to_read = bytes_to_read > kDumpReaderBufferSize
@@ -255,7 +268,8 @@ class FromFileCacheDumpReader : public CacheDumpReader {
         return io_s;
       }
       if (result_.size() < to_read) {
-        return rocksdb_rs::io_status::IOStatus_Corruption("Corrupted cache dump file.");
+        return rocksdb_rs::io_status::IOStatus_Corruption(
+            "Corrupted cache dump file.");
       }
       data->append(result_.data(), result_.size());
 
@@ -278,8 +292,10 @@ class CacheDumperHelper {
   // serialize the dump_unit_meta to a string, it is fixed 16 bytes size.
   static void EncodeDumpUnitMeta(const DumpUnitMeta& meta, std::string* data) {
     assert(data);
-    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(meta.sequence_num));
-    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(meta.dump_unit_checksum));
+    rocksdb_rs::coding::PutFixed32(*data,
+                                   static_cast<uint32_t>(meta.sequence_num));
+    rocksdb_rs::coding::PutFixed32(
+        *data, static_cast<uint32_t>(meta.dump_unit_checksum));
     rocksdb_rs::coding::PutFixed64(*data, meta.dump_unit_size);
   }
 
@@ -289,25 +305,30 @@ class CacheDumperHelper {
     rocksdb_rs::coding::PutFixed64(*data, dump_unit.timestamp);
     data->push_back(dump_unit.type);
     PutLengthPrefixedSlice(data, dump_unit.key);
-    rocksdb_rs::coding::PutFixed32(*data, static_cast<uint32_t>(dump_unit.value_len));
+    rocksdb_rs::coding::PutFixed32(*data,
+                                   static_cast<uint32_t>(dump_unit.value_len));
     rocksdb_rs::coding::PutFixed32(*data, dump_unit.value_checksum);
     PutLengthPrefixedSlice(data,
                            Slice((char*)dump_unit.value, dump_unit.value_len));
   }
 
   // Deserialize the dump_unit_meta from a string
-  static rocksdb_rs::status::Status DecodeDumpUnitMeta(const std::string& encoded_data,
-                                   DumpUnitMeta* unit_meta) {
+  static rocksdb_rs::status::Status DecodeDumpUnitMeta(
+      const std::string& encoded_data, DumpUnitMeta* unit_meta) {
     assert(unit_meta != nullptr);
     Slice encoded_slice = Slice(encoded_data);
-    if (!rocksdb_rs::coding::GetFixed32(encoded_slice, unit_meta->sequence_num)) {
-      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit meta sequence_num failed");
+    if (!rocksdb_rs::coding::GetFixed32(encoded_slice,
+                                        unit_meta->sequence_num)) {
+      return rocksdb_rs::status::Status_Incomplete(
+          "Decode dumped unit meta sequence_num failed");
     }
-    if (!rocksdb_rs::coding::GetFixed32(encoded_slice, unit_meta->dump_unit_checksum)) {
+    if (!rocksdb_rs::coding::GetFixed32(encoded_slice,
+                                        unit_meta->dump_unit_checksum)) {
       return rocksdb_rs::status::Status_Incomplete(
           "Decode dumped unit meta dump_unit_checksum failed");
     }
-    if (!rocksdb_rs::coding::GetFixed64(encoded_slice, unit_meta->dump_unit_size)) {
+    if (!rocksdb_rs::coding::GetFixed64(encoded_slice,
+                                        unit_meta->dump_unit_size)) {
       return rocksdb_rs::status::Status_Incomplete(
           "Decode dumped unit meta dump_unit_size failed");
     }
@@ -315,37 +336,43 @@ class CacheDumperHelper {
   }
 
   // Deserialize the dump_unit from a string.
-  static rocksdb_rs::status::Status DecodeDumpUnit(const std::string& encoded_data,
-                               DumpUnit* dump_unit) {
+  static rocksdb_rs::status::Status DecodeDumpUnit(
+      const std::string& encoded_data, DumpUnit* dump_unit) {
     assert(dump_unit != nullptr);
     Slice encoded_slice = Slice(encoded_data);
 
     // Decode timestamp
     if (!rocksdb_rs::coding::GetFixed64(encoded_slice, dump_unit->timestamp)) {
-      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete(
+          "Decode dumped unit string failed");
     }
     // Decode the block type
     dump_unit->type = static_cast<CacheDumpUnitType>(encoded_slice[0]);
     encoded_slice.remove_prefix(1);
     // Decode the key
     if (!GetLengthPrefixedSlice(&encoded_slice, &(dump_unit->key))) {
-      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete(
+          "Decode dumped unit string failed");
     }
     // Decode the value size
     uint32_t value_len;
     if (!rocksdb_rs::coding::GetFixed32(encoded_slice, value_len)) {
-      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete(
+          "Decode dumped unit string failed");
     }
     dump_unit->value_len = static_cast<size_t>(value_len);
     // Decode the value checksum
-    if (!rocksdb_rs::coding::GetFixed32(encoded_slice, dump_unit->value_checksum)) {
-      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
+    if (!rocksdb_rs::coding::GetFixed32(encoded_slice,
+                                        dump_unit->value_checksum)) {
+      return rocksdb_rs::status::Status_Incomplete(
+          "Decode dumped unit string failed");
     }
     // Decode the block content and copy to the memory space whose pointer
     // will be managed by the cache finally.
     Slice block;
     if (!GetLengthPrefixedSlice(&encoded_slice, &block)) {
-      return rocksdb_rs::status::Status_Incomplete("Decode dumped unit string failed");
+      return rocksdb_rs::status::Status_Incomplete(
+          "Decode dumped unit string failed");
     }
     dump_unit->value = (void*)block.data();
     assert(block.size() == dump_unit->value_len);

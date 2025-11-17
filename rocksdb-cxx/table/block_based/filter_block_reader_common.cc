@@ -66,7 +66,8 @@ bool FilterBlockReaderCommon<TBlocklike>::cache_filter_blocks() const {
 }
 
 template <typename TBlocklike>
-rocksdb_rs::status::Status FilterBlockReaderCommon<TBlocklike>::GetOrReadFilterBlock(
+rocksdb_rs::status::Status
+FilterBlockReaderCommon<TBlocklike>::GetOrReadFilterBlock(
     bool no_io, GetContext* get_context,
     BlockCacheLookupContext* lookup_context,
     CachableEntry<TBlocklike>* filter_block,

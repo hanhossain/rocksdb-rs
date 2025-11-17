@@ -7,10 +7,10 @@
 
 #include <set>
 
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
-#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/secondary_cache.h"
 #include "rocksdb/table.h"
 
@@ -44,7 +44,8 @@ class CacheDumpWriter {
   virtual ~CacheDumpWriter() = default;
 
   // Called ONCE before the calls to WritePacket
-  virtual rocksdb_rs::io_status::IOStatus WriteMetadata(const Slice& metadata) = 0;
+  virtual rocksdb_rs::io_status::IOStatus WriteMetadata(
+      const Slice& metadata) = 0;
   virtual rocksdb_rs::io_status::IOStatus WritePacket(const Slice& data) = 0;
   virtual rocksdb_rs::io_status::IOStatus Close() = 0;
 };
@@ -57,7 +58,8 @@ class CacheDumpReader {
  public:
   virtual ~CacheDumpReader() = default;
   // Called ONCE before the calls to ReadPacket
-  virtual rocksdb_rs::io_status::IOStatus ReadMetadata(std::string* metadata) = 0;
+  virtual rocksdb_rs::io_status::IOStatus ReadMetadata(
+      std::string* metadata) = 0;
   // Sets data to empty string on EOF
   virtual rocksdb_rs::io_status::IOStatus ReadPacket(std::string* data) = 0;
   // (Close not needed)
@@ -88,13 +90,15 @@ class CacheDumper {
   // Only dump the blocks in the block cache that belong to the DBs in this list
   virtual rocksdb_rs::status::Status SetDumpFilter(std::vector<DB*> db_list) {
     (void)db_list;
-    return rocksdb_rs::status::Status_NotSupported("SetDumpFilter is not supported");
+    return rocksdb_rs::status::Status_NotSupported(
+        "SetDumpFilter is not supported");
   }
   // The main function to dump out all the blocks that satisfy the filter
   // condition from block cache to a certain CacheDumpWriter in one shot. This
   // process may take some time.
   virtual rocksdb_rs::io_status::IOStatus DumpCacheEntriesToWriter() {
-    return rocksdb_rs::io_status::IOStatus_NotSupported("DumpCacheEntriesToWriter is not supported");
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
+        "DumpCacheEntriesToWriter is not supported");
   }
 };
 
@@ -105,29 +109,28 @@ class CacheDumper {
 class CacheDumpedLoader {
  public:
   virtual ~CacheDumpedLoader() = default;
-  virtual rocksdb_rs::io_status::IOStatus RestoreCacheEntriesToSecondaryCache() {
+  virtual rocksdb_rs::io_status::IOStatus
+  RestoreCacheEntriesToSecondaryCache() {
     return rocksdb_rs::io_status::IOStatus_NotSupported(
         "RestoreCacheEntriesToSecondaryCache is not supported");
   }
 };
 
 // Get the writer which stores all the metadata and data sequentially to a file
-rocksdb_rs::io_status::IOStatus NewToFileCacheDumpWriter(const std::shared_ptr<FileSystem>& fs,
-                                  const FileOptions& file_opts,
-                                  const std::string& file_name,
-                                  std::unique_ptr<CacheDumpWriter>* writer);
+rocksdb_rs::io_status::IOStatus NewToFileCacheDumpWriter(
+    const std::shared_ptr<FileSystem>& fs, const FileOptions& file_opts,
+    const std::string& file_name, std::unique_ptr<CacheDumpWriter>* writer);
 
 // Get the reader which read out the metadata and data sequentially from a file
-rocksdb_rs::io_status::IOStatus NewFromFileCacheDumpReader(const std::shared_ptr<FileSystem>& fs,
-                                    const FileOptions& file_opts,
-                                    const std::string& file_name,
-                                    std::unique_ptr<CacheDumpReader>* reader);
+rocksdb_rs::io_status::IOStatus NewFromFileCacheDumpReader(
+    const std::shared_ptr<FileSystem>& fs, const FileOptions& file_opts,
+    const std::string& file_name, std::unique_ptr<CacheDumpReader>* reader);
 
 // Get the default cache dumper
-rocksdb_rs::status::Status NewDefaultCacheDumper(const CacheDumpOptions& dump_options,
-                             const std::shared_ptr<Cache>& cache,
-                             std::unique_ptr<CacheDumpWriter>&& writer,
-                             std::unique_ptr<CacheDumper>* cache_dumper);
+rocksdb_rs::status::Status NewDefaultCacheDumper(
+    const CacheDumpOptions& dump_options, const std::shared_ptr<Cache>& cache,
+    std::unique_ptr<CacheDumpWriter>&& writer,
+    std::unique_ptr<CacheDumper>* cache_dumper);
 
 // Get the default cache dump loader
 rocksdb_rs::status::Status NewDefaultCacheDumpedLoader(

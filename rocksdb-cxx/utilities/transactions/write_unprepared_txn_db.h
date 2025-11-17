@@ -16,8 +16,9 @@ class WriteUnpreparedTxnDB : public WritePreparedTxnDB {
  public:
   using WritePreparedTxnDB::WritePreparedTxnDB;
 
-  rocksdb_rs::status::Status Initialize(const std::vector<size_t>& compaction_enabled_cf_indices,
-                    const std::vector<ColumnFamilyHandle*>& handles) override;
+  rocksdb_rs::status::Status Initialize(
+      const std::vector<size_t>& compaction_enabled_cf_indices,
+      const std::vector<ColumnFamilyHandle*>& handles) override;
 
   Transaction* BeginTransaction(const WriteOptions& write_options,
                                 const TransactionOptions& txn_options,
@@ -32,7 +33,8 @@ class WriteUnpreparedTxnDB : public WritePreparedTxnDB {
                         WriteUnpreparedTxn* txn);
 
  private:
-  rocksdb_rs::status::Status RollbackRecoveredTransaction(const DBImpl::RecoveredTransaction* rtxn);
+  rocksdb_rs::status::Status RollbackRecoveredTransaction(
+      const DBImpl::RecoveredTransaction* rtxn);
 };
 
 class WriteUnpreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
@@ -55,9 +57,10 @@ class WriteUnpreparedCommitEntryPreReleaseCallback : public PreReleaseCallback {
   }
 
   virtual rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
-                          bool is_mem_disabled __attribute__((__unused__)),
-                          uint64_t, size_t /*index*/,
-                          size_t /*total*/) override {
+                                              bool is_mem_disabled
+                                              __attribute__((__unused__)),
+                                              uint64_t, size_t /*index*/,
+                                              size_t /*total*/) override {
     const uint64_t last_commit_seq = LIKELY(data_batch_cnt_ <= 1)
                                          ? commit_seq
                                          : commit_seq + data_batch_cnt_ - 1;

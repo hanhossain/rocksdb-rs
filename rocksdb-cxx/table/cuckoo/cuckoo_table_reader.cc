@@ -73,13 +73,15 @@ CuckooTableReader::CuckooTableReader(
   auto& user_props = table_props_->user_collected_properties;
   auto hash_funs = user_props.find(CuckooTablePropertyNames::kNumHashFunc);
   if (hash_funs == user_props.end()) {
-    status_ = rocksdb_rs::status::Status_Corruption("Number of hash functions not found");
+    status_ = rocksdb_rs::status::Status_Corruption(
+        "Number of hash functions not found");
     return;
   }
   num_hash_func_ = *reinterpret_cast<const uint32_t*>(hash_funs->second.data());
   auto unused_key = user_props.find(CuckooTablePropertyNames::kEmptyKey);
   if (unused_key == user_props.end()) {
-    status_ = rocksdb_rs::status::Status_Corruption("Empty bucket value not found");
+    status_ =
+        rocksdb_rs::status::Status_Corruption("Empty bucket value not found");
     return;
   }
   unused_key_ = unused_key->second;
@@ -87,7 +89,8 @@ CuckooTableReader::CuckooTableReader(
   key_length_ = static_cast<uint32_t>(table_props_->fixed_key_len);
   auto user_key_len = user_props.find(CuckooTablePropertyNames::kUserKeyLength);
   if (user_key_len == user_props.end()) {
-    status_ = rocksdb_rs::status::Status_Corruption("User key length not found");
+    status_ =
+        rocksdb_rs::status::Status_Corruption("User key length not found");
     return;
   }
   user_key_length_ =
@@ -105,7 +108,8 @@ CuckooTableReader::CuckooTableReader(
   auto hash_table_size =
       user_props.find(CuckooTablePropertyNames::kHashTableSize);
   if (hash_table_size == user_props.end()) {
-    status_ = rocksdb_rs::status::Status_Corruption("Hash table size not found");
+    status_ =
+        rocksdb_rs::status::Status_Corruption("Hash table size not found");
     return;
   }
   table_size_ =
@@ -121,7 +125,8 @@ CuckooTableReader::CuckooTableReader(
   auto identity_as_first_hash =
       user_props.find(CuckooTablePropertyNames::kIdentityAsFirstHash);
   if (identity_as_first_hash == user_props.end()) {
-    status_ = rocksdb_rs::status::Status_Corruption("identity as first hash not found");
+    status_ = rocksdb_rs::status::Status_Corruption(
+        "identity as first hash not found");
     return;
   }
   identity_as_first_hash_ =
@@ -138,7 +143,8 @@ CuckooTableReader::CuckooTableReader(
   auto cuckoo_block_size =
       user_props.find(CuckooTablePropertyNames::kCuckooBlockSize);
   if (cuckoo_block_size == user_props.end()) {
-    status_ = rocksdb_rs::status::Status_Corruption("Cuckoo block size not found");
+    status_ =
+        rocksdb_rs::status::Status_Corruption("Cuckoo block size not found");
     return;
   }
   cuckoo_block_size_ =
@@ -146,14 +152,16 @@ CuckooTableReader::CuckooTableReader(
   cuckoo_block_bytes_minus_one_ = cuckoo_block_size_ * bucket_length_ - 1;
   // TODO: rate limit reads of whole cuckoo tables.
   status_ =
-      file_->Read(IOOptions(), 0, static_cast<size_t>(file_size), &file_data_,
-                  nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
+      file_
+          ->Read(IOOptions(), 0, static_cast<size_t>(file_size), &file_data_,
+                 nullptr, nullptr, Env::IO_TOTAL /* rate_limiter_priority */)
+          .status();
 }
 
-rocksdb_rs::status::Status CuckooTableReader::Get(const ReadOptions& /*readOptions*/,
-                              const Slice& key, GetContext* get_context,
-                              const SliceTransform* /* prefix_extractor */,
-                              bool /*skip_filters*/) {
+rocksdb_rs::status::Status CuckooTableReader::Get(
+    const ReadOptions& /*readOptions*/, const Slice& key,
+    GetContext* get_context, const SliceTransform* /* prefix_extractor */,
+    bool /*skip_filters*/) {
   assert(key.size() == key_length_ + (is_last_level_ ? 8 : 0));
   Slice user_key = ExtractUserKey(key);
   for (uint32_t hash_cnt = 0; hash_cnt < num_hash_func_; ++hash_cnt) {
@@ -182,8 +190,8 @@ rocksdb_rs::status::Status CuckooTableReader::Get(const ReadOptions& /*readOptio
         } else {
           Slice full_key(bucket, key_length_);
           ParsedInternalKey found_ikey;
-          rocksdb_rs::status::Status s = ParseInternalKey(full_key, &found_ikey,
-                                      false /* log_err_key */);  // TODO
+          rocksdb_rs::status::Status s = ParseInternalKey(
+              full_key, &found_ikey, false /* log_err_key */);  // TODO
           if (!s.ok()) return s;
           bool dont_care __attribute__((__unused__));
           get_context->SaveValue(found_ikey, value, &dont_care);
@@ -225,7 +233,9 @@ class CuckooTableIterator : public InternalIterator {
   void Prev() override;
   Slice key() const override;
   Slice value() const override;
-  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status status() const override {
+    return rocksdb_rs::status::Status_OK();
+  }
   void InitIfNeeded();
 
  private:
@@ -396,7 +406,9 @@ InternalIterator* CuckooTableReader::NewIterator(
     size_t /*compaction_readahead_size*/, bool /* allow_unprepared_value */) {
   if (!status().ok()) {
     return NewErrorInternalIterator<Slice>(
-        rocksdb_rs::status::Status_Corruption("CuckooTableReader status is not okay."), arena);
+        rocksdb_rs::status::Status_Corruption(
+            "CuckooTableReader status is not okay."),
+        arena);
   }
   CuckooTableIterator* iter;
   if (arena == nullptr) {

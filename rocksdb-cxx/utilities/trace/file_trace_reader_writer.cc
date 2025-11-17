@@ -41,9 +41,11 @@ rocksdb_rs::status::Status FileTraceReader::Reset() {
 
 rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
   assert(file_reader_ != nullptr);
-  rocksdb_rs::status::Status s = file_reader_->Read(IOOptions(), offset_, kTraceMetadataSize,
-                                &result_, buffer_, nullptr,
-                                Env::IO_TOTAL /* rate_limiter_priority */).status();
+  rocksdb_rs::status::Status s =
+      file_reader_
+          ->Read(IOOptions(), offset_, kTraceMetadataSize, &result_, buffer_,
+                 nullptr, Env::IO_TOTAL /* rate_limiter_priority */)
+          .status();
   if (!s.ok()) {
     return s;
   }
@@ -59,16 +61,18 @@ rocksdb_rs::status::Status FileTraceReader::Read(std::string* data) {
   *data = result_.ToString();
   offset_ += kTraceMetadataSize;
 
-  uint32_t payload_len =
-      rocksdb_rs::coding_lean::DecodeFixed32(&buffer_[kTraceTimestampSize + kTraceTypeSize]);
+  uint32_t payload_len = rocksdb_rs::coding_lean::DecodeFixed32(
+      &buffer_[kTraceTimestampSize + kTraceTypeSize]);
 
   // Read Payload
   unsigned int bytes_to_read = payload_len;
   unsigned int to_read =
       bytes_to_read > kBufferSize ? kBufferSize : bytes_to_read;
   while (to_read > 0) {
-    s = file_reader_->Read(IOOptions(), offset_, to_read, &result_, buffer_,
-                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
+    s = file_reader_
+            ->Read(IOOptions(), offset_, to_read, &result_, buffer_, nullptr,
+                   Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
     if (!s.ok()) {
       return s;
     }
@@ -102,13 +106,15 @@ rocksdb_rs::status::Status FileTraceWriter::Write(const Slice& data) {
 
 uint64_t FileTraceWriter::GetFileSize() { return file_writer_->GetFileSize(); }
 
-rocksdb_rs::status::Status NewFileTraceReader(Env* env, const EnvOptions& env_options,
-                          const std::string& trace_filename,
-                          std::unique_ptr<TraceReader>* trace_reader) {
+rocksdb_rs::status::Status NewFileTraceReader(
+    Env* env, const EnvOptions& env_options, const std::string& trace_filename,
+    std::unique_ptr<TraceReader>* trace_reader) {
   std::unique_ptr<RandomAccessFileReader> file_reader;
-  rocksdb_rs::status::Status s = RandomAccessFileReader::Create(
-      env->GetFileSystem(), trace_filename, FileOptions(env_options),
-      &file_reader, nullptr).status();
+  rocksdb_rs::status::Status s =
+      RandomAccessFileReader::Create(env->GetFileSystem(), trace_filename,
+                                     FileOptions(env_options), &file_reader,
+                                     nullptr)
+          .status();
   if (!s.ok()) {
     return s;
   }
@@ -116,13 +122,15 @@ rocksdb_rs::status::Status NewFileTraceReader(Env* env, const EnvOptions& env_op
   return s;
 }
 
-rocksdb_rs::status::Status NewFileTraceWriter(Env* env, const EnvOptions& env_options,
-                          const std::string& trace_filename,
-                          std::unique_ptr<TraceWriter>* trace_writer) {
+rocksdb_rs::status::Status NewFileTraceWriter(
+    Env* env, const EnvOptions& env_options, const std::string& trace_filename,
+    std::unique_ptr<TraceWriter>* trace_writer) {
   std::unique_ptr<WritableFileWriter> file_writer;
-  rocksdb_rs::status::Status s = WritableFileWriter::Create(env->GetFileSystem(), trace_filename,
-                                        FileOptions(env_options), &file_writer,
-                                        nullptr).status();
+  rocksdb_rs::status::Status s =
+      WritableFileWriter::Create(env->GetFileSystem(), trace_filename,
+                                 FileOptions(env_options), &file_writer,
+                                 nullptr)
+          .status();
   if (!s.ok()) {
     return s;
   }

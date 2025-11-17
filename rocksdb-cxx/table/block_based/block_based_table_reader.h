@@ -138,13 +138,14 @@ class BlockBasedTable : public TableReader {
       const ReadOptions& read_options) override;
 
   // @param skip_filters Disables loading/accessing the filter block
-  rocksdb_rs::status::Status Get(const ReadOptions& readOptions, const Slice& key,
-             GetContext* get_context, const SliceTransform* prefix_extractor,
-             bool skip_filters = false) override;
+  rocksdb_rs::status::Status Get(const ReadOptions& readOptions,
+                                 const Slice& key, GetContext* get_context,
+                                 const SliceTransform* prefix_extractor,
+                                 bool skip_filters = false) override;
 
-  rocksdb_rs::status::Status MultiGetFilter(const ReadOptions& read_options,
-                        const SliceTransform* prefix_extractor,
-                        MultiGetRange* mget_range) override;
+  rocksdb_rs::status::Status MultiGetFilter(
+      const ReadOptions& read_options, const SliceTransform* prefix_extractor,
+      MultiGetRange* mget_range) override;
 
   DECLARE_SYNC_AND_ASYNC_OVERRIDE(void, MultiGet,
                                   const ReadOptions& readOptions,
@@ -155,8 +156,9 @@ class BlockBasedTable : public TableReader {
   // Pre-fetch the disk blocks that correspond to the key range specified by
   // (kbegin, kend). The call will return error status in the event of
   // IO or iteration error.
-  rocksdb_rs::status::Status Prefetch(const ReadOptions& read_options, const Slice* begin,
-                  const Slice* end) override;
+  rocksdb_rs::status::Status Prefetch(const ReadOptions& read_options,
+                                      const Slice* begin,
+                                      const Slice* end) override;
 
   // Given a key, return an approximate byte offset in the file where
   // the data for that key begins (or would begin if the key were
@@ -175,8 +177,8 @@ class BlockBasedTable : public TableReader {
   uint64_t ApproximateSize(const ReadOptions& read_options, const Slice& start,
                            const Slice& end, TableReaderCaller caller) override;
 
-  rocksdb_rs::status::Status ApproximateKeyAnchors(const ReadOptions& read_options,
-                               std::vector<Anchor>& anchors) override;
+  rocksdb_rs::status::Status ApproximateKeyAnchors(
+      const ReadOptions& read_options, std::vector<Anchor>& anchors) override;
 
   bool TEST_BlockInCache(const BlockHandle& handle) const;
 
@@ -196,7 +198,7 @@ class BlockBasedTable : public TableReader {
   rocksdb_rs::status::Status DumpTable(WritableFile* out_file) override;
 
   rocksdb_rs::status::Status VerifyChecksum(const ReadOptions& readOptions,
-                        TableReaderCaller caller) override;
+                                            TableReaderCaller caller) override;
 
   ~BlockBasedTable();
 
@@ -261,20 +263,22 @@ class BlockBasedTable : public TableReader {
   // It is the caller's responsibility to make sure that this is called with
   // block-based table serialized block contents, which contains the compression
   // byte in the trailer after `block_size`.
-  static inline rocksdb_rs::compression_type::CompressionType GetBlockCompressionType(const char* block_data,
-                                                        size_t block_size) {
-    return static_cast<rocksdb_rs::compression_type::CompressionType>(block_data[block_size]);
+  static inline rocksdb_rs::compression_type::CompressionType
+  GetBlockCompressionType(const char* block_data, size_t block_size) {
+    return static_cast<rocksdb_rs::compression_type::CompressionType>(
+        block_data[block_size]);
   }
-  static inline rocksdb_rs::compression_type::CompressionType GetBlockCompressionType(
-      const BlockContents& contents) {
+  static inline rocksdb_rs::compression_type::CompressionType
+  GetBlockCompressionType(const BlockContents& contents) {
     assert(contents.has_trailer);
     return GetBlockCompressionType(contents.data.data(), contents.data.size());
   }
 
   // Retrieve all key value pairs from data blocks in the table.
   // The key retrieved are internal keys.
-  rocksdb_rs::status::Status GetKVPairsFromDataBlocks(const ReadOptions& read_options,
-                                  std::vector<KVPairBlock>* kv_pair_blocks);
+  rocksdb_rs::status::Status GetKVPairsFromDataBlocks(
+      const ReadOptions& read_options,
+      std::vector<KVPairBlock>* kv_pair_blocks);
 
   struct Rep;
 
@@ -296,7 +300,8 @@ class BlockBasedTable : public TableReader {
   template <typename TBlockIter>
   TBlockIter* NewDataBlockIterator(const ReadOptions& ro,
                                    CachableEntry<Block>& block,
-                                   TBlockIter* input_iter, rocksdb_rs::status::Status s) const;
+                                   TBlockIter* input_iter,
+                                   rocksdb_rs::status::Status s) const;
 
   class PartitionedIndexIteratorState;
 
@@ -342,12 +347,15 @@ class BlockBasedTable : public TableReader {
   //    in uncompressed block cache, also sets cache_handle to reference that
   //    block.
   template <typename TBlocklike>
-  WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> MaybeReadBlockAndLoadToCache(
-      FilePrefetchBuffer* prefetch_buffer, const ReadOptions& ro,
-      const BlockHandle& handle, const UncompressionDict& uncompression_dict,
-      bool for_compaction, CachableEntry<TBlocklike>* block_entry,
-      GetContext* get_context, BlockCacheLookupContext* lookup_context,
-      BlockContents* contents, bool async_read) const;
+  WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike>
+  MaybeReadBlockAndLoadToCache(FilePrefetchBuffer* prefetch_buffer,
+                               const ReadOptions& ro, const BlockHandle& handle,
+                               const UncompressionDict& uncompression_dict,
+                               bool for_compaction,
+                               CachableEntry<TBlocklike>* block_entry,
+                               GetContext* get_context,
+                               BlockCacheLookupContext* lookup_context,
+                               BlockContents* contents, bool async_read) const;
 
   // Similar to the above, with one crucial difference: it will retrieve the
   // block from the file even if there are no caches configured (assuming the
@@ -375,8 +383,9 @@ class BlockBasedTable : public TableReader {
       void, RetrieveMultipleBlocks, const ReadOptions& options,
       const MultiGetRange* batch,
       const autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE>* handles,
-      rocksdb_rs::status::Status* statuses, CachableEntry<Block_kData>* results, char* scratch,
-      const UncompressionDict& uncompression_dict, bool use_fs_scratch);
+      rocksdb_rs::status::Status* statuses, CachableEntry<Block_kData>* results,
+      char* scratch, const UncompressionDict& uncompression_dict,
+      bool use_fs_scratch);
 
   // Get the iterator from the index reader.
   //
@@ -405,9 +414,11 @@ class BlockBasedTable : public TableReader {
   // @param uncompression_dict Data for presetting the compression library's
   //    dictionary.
   template <typename TBlocklike>
-  WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> GetDataBlockFromCache(
-      const Slice& cache_key, BlockCacheInterface<TBlocklike> block_cache,
-      CachableEntry<TBlocklike>* block, GetContext* get_context) const;
+  WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike>
+  GetDataBlockFromCache(const Slice& cache_key,
+                        BlockCacheInterface<TBlocklike> block_cache,
+                        CachableEntry<TBlocklike>* block,
+                        GetContext* get_context) const;
 
   // Put a maybe compressed block to the corresponding block caches.
   // This method will perform decompression against block_contents if needed
@@ -420,7 +431,8 @@ class BlockBasedTable : public TableReader {
   // @param uncompression_dict Data for presetting the compression library's
   //    dictionary.
   template <typename TBlocklike>
-  WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike> PutDataBlockToCache(
+  WithBlocklikeCheck<rocksdb_rs::status::Status, TBlocklike>
+  PutDataBlockToCache(
       const Slice& cache_key, BlockCacheInterface<TBlocklike> block_cache,
       CachableEntry<TBlocklike>* cached_block, BlockContents&& block_contents,
       rocksdb_rs::compression_type::CompressionType block_comp_type,
@@ -437,12 +449,11 @@ class BlockBasedTable : public TableReader {
   // Optionally, user can pass a preloaded meta_index_iter for the index that
   // need to access extra meta blocks for index construction. This parameter
   // helps avoid re-reading meta index block if caller already created one.
-  rocksdb_rs::status::Status CreateIndexReader(const ReadOptions& ro,
-                           FilePrefetchBuffer* prefetch_buffer,
-                           InternalIterator* preloaded_meta_index_iter,
-                           bool use_cache, bool prefetch, bool pin,
-                           BlockCacheLookupContext* lookup_context,
-                           std::unique_ptr<IndexReader>* index_reader);
+  rocksdb_rs::status::Status CreateIndexReader(
+      const ReadOptions& ro, FilePrefetchBuffer* prefetch_buffer,
+      InternalIterator* preloaded_meta_index_iter, bool use_cache,
+      bool prefetch, bool pin, BlockCacheLookupContext* lookup_context,
+      std::unique_ptr<IndexReader>* index_reader);
 
   bool FullFilterKeyMayMatch(FilterBlockReader* filter, const Slice& user_key,
                              const bool no_io,
@@ -465,19 +476,18 @@ class BlockBasedTable : public TableReader {
       const bool prefetch_all, const bool preload_all,
       std::unique_ptr<FilePrefetchBuffer>* prefetch_buffer, Statistics* stats,
       uint64_t tail_size, Logger* const logger);
-  rocksdb_rs::status::Status ReadMetaIndexBlock(const ReadOptions& ro,
-                            FilePrefetchBuffer* prefetch_buffer,
-                            std::unique_ptr<Block>* metaindex_block,
-                            std::unique_ptr<InternalIterator>* iter);
-  rocksdb_rs::status::Status ReadPropertiesBlock(const ReadOptions& ro,
-                             FilePrefetchBuffer* prefetch_buffer,
-                             InternalIterator* meta_iter,
-                             const SequenceNumber largest_seqno);
-  rocksdb_rs::status::Status ReadRangeDelBlock(const ReadOptions& ro,
-                           FilePrefetchBuffer* prefetch_buffer,
-                           InternalIterator* meta_iter,
-                           const InternalKeyComparator& internal_comparator,
-                           BlockCacheLookupContext* lookup_context);
+  rocksdb_rs::status::Status ReadMetaIndexBlock(
+      const ReadOptions& ro, FilePrefetchBuffer* prefetch_buffer,
+      std::unique_ptr<Block>* metaindex_block,
+      std::unique_ptr<InternalIterator>* iter);
+  rocksdb_rs::status::Status ReadPropertiesBlock(
+      const ReadOptions& ro, FilePrefetchBuffer* prefetch_buffer,
+      InternalIterator* meta_iter, const SequenceNumber largest_seqno);
+  rocksdb_rs::status::Status ReadRangeDelBlock(
+      const ReadOptions& ro, FilePrefetchBuffer* prefetch_buffer,
+      InternalIterator* meta_iter,
+      const InternalKeyComparator& internal_comparator,
+      BlockCacheLookupContext* lookup_context);
   rocksdb_rs::status::Status PrefetchIndexAndFilterBlocks(
       const ReadOptions& ro, FilePrefetchBuffer* prefetch_buffer,
       InternalIterator* meta_iter, BlockBasedTable* new_table,
@@ -487,10 +497,11 @@ class BlockBasedTable : public TableReader {
 
   static BlockType GetBlockTypeForMetaBlockByName(const Slice& meta_block_name);
 
-  rocksdb_rs::status::Status VerifyChecksumInMetaBlocks(const ReadOptions& read_options,
-                                    InternalIteratorBase<Slice>* index_iter);
-  rocksdb_rs::status::Status VerifyChecksumInBlocks(const ReadOptions& read_options,
-                                InternalIteratorBase<IndexValue>* index_iter);
+  rocksdb_rs::status::Status VerifyChecksumInMetaBlocks(
+      const ReadOptions& read_options, InternalIteratorBase<Slice>* index_iter);
+  rocksdb_rs::status::Status VerifyChecksumInBlocks(
+      const ReadOptions& read_options,
+      InternalIteratorBase<IndexValue>* index_iter);
 
   // Create the filter from the filter block.
   std::unique_ptr<FilterBlockReader> CreateFilterBlockReader(
@@ -658,10 +669,9 @@ struct BlockBasedTable::Rep {
   }
 
   uint64_t cf_id_for_tracing() const {
-    return table_properties
-               ? table_properties->column_family_id
-               : rocksdb::TablePropertiesCollectorFactory::Context::
-                     kUnknownColumnFamily;
+    return table_properties ? table_properties->column_family_id
+                            : rocksdb::TablePropertiesCollectorFactory::
+                                  Context::kUnknownColumnFamily;
   }
 
   Slice cf_name_for_tracing() const {
@@ -672,7 +682,8 @@ struct BlockBasedTable::Rep {
   uint32_t level_for_tracing() const { return level >= 0 ? level : UINT32_MAX; }
 
   uint64_t sst_number_for_tracing() const {
-    return file ? rocksdb_rs::filename::TableFileNameToNumber(file->file_name()) : UINT64_MAX;
+    return file ? rocksdb_rs::filename::TableFileNameToNumber(file->file_name())
+                : UINT64_MAX;
   }
   void CreateFilePrefetchBuffer(
       size_t readahead_size, size_t max_readahead_size,

@@ -12,11 +12,10 @@
 #include <memory>
 #include <string>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/statistics.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -36,15 +35,16 @@ class PersistentCache {
   // data       Page data to copy (caller retains ownership)
   // size       Size of the page
   virtual rocksdb_rs::status::Status Insert(const Slice& key, const char* data,
-                        const size_t size) = 0;
+                                            const size_t size) = 0;
 
   // Lookup page cache by page identifier
   //
   // page_key   Page identifier
   // buf        Buffer where the data should be copied
   // size       Size of the page
-  virtual rocksdb_rs::status::Status Lookup(const Slice& key, std::unique_ptr<char[]>* data,
-                        size_t* size) = 0;
+  virtual rocksdb_rs::status::Status Lookup(const Slice& key,
+                                            std::unique_ptr<char[]>* data,
+                                            size_t* size) = 0;
 
   // True if the cache is configured to store serialized blocks, which are
   // potentially compressed and include a trailer (when SST format calls for
@@ -67,9 +67,8 @@ class PersistentCache {
 };
 
 // Factor method to create a new persistent cache
-rocksdb_rs::status::Status NewPersistentCache(Env* const env, const std::string& path,
-                          const uint64_t size,
-                          const std::shared_ptr<Logger>& log,
-                          const bool optimized_for_nvm,
-                          std::shared_ptr<PersistentCache>* cache);
+rocksdb_rs::status::Status NewPersistentCache(
+    Env* const env, const std::string& path, const uint64_t size,
+    const std::shared_ptr<Logger>& log, const bool optimized_for_nvm,
+    std::shared_ptr<PersistentCache>* cache);
 }  // namespace rocksdb

@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include <array>
 
 #include "rocksdb/slice.h"
@@ -43,9 +42,11 @@ class PlainTableKeyEncoder {
   // meta_bytes_buf: buffer for extra meta bytes
   // meta_bytes_buf_size: offset to append extra meta bytes. Will be updated
   //                      if meta_bytes_buf is updated.
-  rocksdb_rs::io_status::IOStatus AppendKey(const Slice& key, WritableFileWriter* file,
-                     uint64_t* offset, char* meta_bytes_buf,
-                     size_t* meta_bytes_buf_size);
+  rocksdb_rs::io_status::IOStatus AppendKey(const Slice& key,
+                                            WritableFileWriter* file,
+                                            uint64_t* offset,
+                                            char* meta_bytes_buf,
+                                            size_t* meta_bytes_buf_size);
 
   // Return actual encoding type to be picked
   EncodingType GetEncodingType() { return encoding_type_; }
@@ -66,7 +67,9 @@ class PlainTableKeyEncoder {
 class PlainTableFileReader {
  public:
   explicit PlainTableFileReader(const PlainTableReaderFileInfo* _file_info)
-      : file_info_(_file_info), num_buf_(0), status_(rocksdb_rs::status::Status_new()) {}
+      : file_info_(_file_info),
+        num_buf_(0),
+        status_(rocksdb_rs::status::Status_new()) {}
 
   // In mmaped mode, the results point to mmaped area of the file, which
   // means it is always valid before closing the file.
@@ -156,13 +159,17 @@ class PlainTableKeyDecoder {
   // bytes_read: how many bytes read from start. Output
   // seekable: whether key can be read from this place. Used when building
   //           indexes. Output.
-  rocksdb_rs::status::Status NextKey(uint32_t start_offset, ParsedInternalKey* parsed_key,
-                 Slice* internal_key, Slice* value, uint32_t* bytes_read,
-                 bool* seekable = nullptr);
+  rocksdb_rs::status::Status NextKey(uint32_t start_offset,
+                                     ParsedInternalKey* parsed_key,
+                                     Slice* internal_key, Slice* value,
+                                     uint32_t* bytes_read,
+                                     bool* seekable = nullptr);
 
-  rocksdb_rs::status::Status NextKeyNoValue(uint32_t start_offset, ParsedInternalKey* parsed_key,
-                        Slice* internal_key, uint32_t* bytes_read,
-                        bool* seekable = nullptr);
+  rocksdb_rs::status::Status NextKeyNoValue(uint32_t start_offset,
+                                            ParsedInternalKey* parsed_key,
+                                            Slice* internal_key,
+                                            uint32_t* bytes_read,
+                                            bool* seekable = nullptr);
 
   PlainTableFileReader file_reader_;
   EncodingType encoding_type_;
@@ -175,20 +182,23 @@ class PlainTableKeyDecoder {
 
  private:
   rocksdb_rs::status::Status NextPlainEncodingKey(uint32_t start_offset,
-                              ParsedInternalKey* parsed_key,
-                              Slice* internal_key, uint32_t* bytes_read,
-                              bool* seekable = nullptr);
-  rocksdb_rs::status::Status NextPrefixEncodingKey(uint32_t start_offset,
-                               ParsedInternalKey* parsed_key,
-                               Slice* internal_key, uint32_t* bytes_read,
-                               bool* seekable = nullptr);
-  rocksdb_rs::status::Status ReadInternalKey(uint32_t file_offset, uint32_t user_key_size,
-                         ParsedInternalKey* parsed_key, uint32_t* bytes_read,
-                         bool* internal_key_valid, Slice* internal_key);
+                                                  ParsedInternalKey* parsed_key,
+                                                  Slice* internal_key,
+                                                  uint32_t* bytes_read,
+                                                  bool* seekable = nullptr);
+  rocksdb_rs::status::Status NextPrefixEncodingKey(
+      uint32_t start_offset, ParsedInternalKey* parsed_key, Slice* internal_key,
+      uint32_t* bytes_read, bool* seekable = nullptr);
+  rocksdb_rs::status::Status ReadInternalKey(uint32_t file_offset,
+                                             uint32_t user_key_size,
+                                             ParsedInternalKey* parsed_key,
+                                             uint32_t* bytes_read,
+                                             bool* internal_key_valid,
+                                             Slice* internal_key);
   inline rocksdb_rs::status::Status DecodeSize(uint32_t start_offset,
-                           PlainTableEntryType* entry_type, uint32_t* key_size,
-                           uint32_t* bytes_read);
+                                               PlainTableEntryType* entry_type,
+                                               uint32_t* key_size,
+                                               uint32_t* bytes_read);
 };
 
 }  // namespace rocksdb
-

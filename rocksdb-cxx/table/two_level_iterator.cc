@@ -89,7 +89,9 @@ class TwoLevelIndexIterator : public InternalIteratorBase<IndexValue> {
 TwoLevelIndexIterator::TwoLevelIndexIterator(
     TwoLevelIteratorState* state,
     InternalIteratorBase<IndexValue>* first_level_iter)
-    : state_(state), first_level_iter_(first_level_iter), status_(rocksdb_rs::status::Status_new()) {}
+    : state_(state),
+      first_level_iter_(first_level_iter),
+      status_(rocksdb_rs::status::Status_new()) {}
 
 void TwoLevelIndexIterator::Seek(const Slice& target) {
   first_level_iter_.Seek(target);
@@ -203,8 +205,8 @@ void TwoLevelIndexIterator::InitDataBlock() {
       data_block_handle_ = handle;
       SetSecondLevelIterator(iter);
       if (iter == nullptr) {
-        status_ = rocksdb_rs::status::Status_Corruption("Missing block for partition " +
-                                     handle.ToString());
+        status_ = rocksdb_rs::status::Status_Corruption(
+            "Missing block for partition " + handle.ToString());
       }
     }
   }

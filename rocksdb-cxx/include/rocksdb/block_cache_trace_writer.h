@@ -129,9 +129,9 @@ class BlockCacheTraceWriter {
   virtual ~BlockCacheTraceWriter() {}
 
   // Pass Slice references to avoid copy.
-  virtual rocksdb_rs::status::Status WriteBlockAccess(const BlockCacheTraceRecord& record,
-                                  const Slice& block_key, const Slice& cf_name,
-                                  const Slice& referenced_key) = 0;
+  virtual rocksdb_rs::status::Status WriteBlockAccess(
+      const BlockCacheTraceRecord& record, const Slice& block_key,
+      const Slice& cf_name, const Slice& referenced_key) = 0;
 
   // Write a trace header at the beginning, typically on initiating a trace,
   // with some metadata like a magic number and RocksDB version.

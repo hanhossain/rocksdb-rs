@@ -10,12 +10,11 @@
 #include <memory>
 #include <string>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/advanced_cache.h"
 #include "rocksdb/env.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/statistics.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -76,9 +75,9 @@ class SimCache : public CacheWrapper {
   // a file located at activity_log_file, max_logging_size option can be used to
   // stop logging to the file automatically after reaching a specific size in
   // bytes, a values of 0 disable this feature
-  virtual rocksdb_rs::status::Status StartActivityLogging(const std::string& activity_log_file,
-                                      Env* env,
-                                      uint64_t max_logging_size = 0) = 0;
+  virtual rocksdb_rs::status::Status StartActivityLogging(
+      const std::string& activity_log_file, Env* env,
+      uint64_t max_logging_size = 0) = 0;
 
   // Stop cache activity logging if any
   virtual void StopActivityLogging() = 0;

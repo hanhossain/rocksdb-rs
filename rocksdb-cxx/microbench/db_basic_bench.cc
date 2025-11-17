@@ -303,7 +303,8 @@ static void DBPut(benchmark::State& state) {
 
   if (state.thread_index() == 0) {
     auto db_full = static_cast_with_check<DBImpl>(db.get());
-    rocksdb_rs::status::Status s = db_full->WaitForCompact(WaitForCompactOptions());
+    rocksdb_rs::status::Status s =
+        db_full->WaitForCompact(WaitForCompactOptions());
     if (!s.ok()) {
       state.SkipWithError(s.ToString().c_str());
       return;
@@ -375,8 +376,8 @@ static void ManualCompaction(benchmark::State& state) {
   wo.disableWAL = true;
   uint64_t flush_mod = key_num / 4;  // at least generate 4 files for compaction
   for (uint64_t i = 0; i < key_num; i++) {
-    rocksdb_rs::status::Status s = db->Put(wo, kg.Next(),
-                       rnd.RandomString(static_cast<int>(per_key_size)));
+    rocksdb_rs::status::Status s = db->Put(
+        wo, kg.Next(), rnd.RandomString(static_cast<int>(per_key_size)));
     if (!s.ok()) {
       state.SkipWithError(s.ToString().c_str());
     }
@@ -497,8 +498,8 @@ static void ManualFlush(benchmark::State& state) {
   for (auto _ : state) {
     state.PauseTiming();
     for (uint64_t i = 0; i < key_num; i++) {
-      rocksdb_rs::status::Status s = db->Put(wo, kg.Next(),
-                         rnd.RandomString(static_cast<int>(per_key_size)));
+      rocksdb_rs::status::Status s = db->Put(
+          wo, kg.Next(), rnd.RandomString(static_cast<int>(per_key_size)));
     }
     FlushOptions fo;
     state.ResumeTiming();
@@ -510,7 +511,8 @@ static void ManualFlush(benchmark::State& state) {
 
   if (state.thread_index() == 0) {
     auto db_full = static_cast_with_check<DBImpl>(db.get());
-    rocksdb_rs::status::Status s = db_full->WaitForCompact(WaitForCompactOptions());
+    rocksdb_rs::status::Status s =
+        db_full->WaitForCompact(WaitForCompactOptions());
     if (!s.ok()) {
       state.SkipWithError(s.ToString().c_str());
       return;
@@ -556,7 +558,8 @@ static void DBGet(benchmark::State& state) {
   }
   if (mmap) {
     options.allow_mmap_reads = true;
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   options.compaction_style = compaction_style;
 
@@ -582,8 +585,8 @@ static void DBGet(benchmark::State& state) {
     auto wo = WriteOptions();
     wo.disableWAL = true;
     for (uint64_t i = 0; i < key_num; i++) {
-      rocksdb_rs::status::Status s = db->Put(wo, kg_seq.Next(),
-                         rnd.RandomString(static_cast<int>(per_key_size)));
+      rocksdb_rs::status::Status s = db->Put(
+          wo, kg_seq.Next(), rnd.RandomString(static_cast<int>(per_key_size)));
       if (!s.ok()) {
         state.SkipWithError(s.ToString().c_str());
       }
@@ -591,8 +594,8 @@ static void DBGet(benchmark::State& state) {
 
     // Compact whole DB into one level, so each iteration will consider the same
     // number of files (one).
-    rocksdb_rs::status::Status s = db->CompactRange(CompactRangeOptions(), nullptr /* begin */,
-                                nullptr /* end */);
+    rocksdb_rs::status::Status s = db->CompactRange(
+        CompactRangeOptions(), nullptr /* begin */, nullptr /* end */);
     if (!s.ok()) {
       state.SkipWithError(s.ToString().c_str());
     }
@@ -820,8 +823,9 @@ static void DBGetMergeOperandsInMemtable(benchmark::State& state) {
     auto write_opts = WriteOptions();
     write_opts.disableWAL = true;
     for (uint64_t i = 0; i < kNumEntries; i++) {
-      rocksdb_rs::status::Status s = db->Merge(write_opts, sequential_key_gen.Next(),
-                           rnd.RandomString(static_cast<int>(kValueLen)));
+      rocksdb_rs::status::Status s =
+          db->Merge(write_opts, sequential_key_gen.Next(),
+                    rnd.RandomString(static_cast<int>(kValueLen)));
       if (!s.ok()) {
         state.SkipWithError(s.ToString().c_str());
       }
@@ -878,7 +882,8 @@ static void DBGetMergeOperandsInSstFile(benchmark::State& state) {
   if (kMmap) {
     options.allow_mmap_reads = true;
   }
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.merge_operator = MergeOperators::CreateStringAppendOperator();
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   // Make memtable large enough that automatic flush will not be triggered.
@@ -900,8 +905,9 @@ static void DBGetMergeOperandsInSstFile(benchmark::State& state) {
     write_opts.disableWAL = true;
     for (uint64_t i = 0; i < kNumEntriesPerKey; i++) {
       for (uint64_t j = 0; j < kNumKeys; j++) {
-        rocksdb_rs::status::Status s = db->Merge(write_opts, sequential_key_gen.Next(),
-                             rnd.RandomString(static_cast<int>(kValueLen)));
+        rocksdb_rs::status::Status s =
+            db->Merge(write_opts, sequential_key_gen.Next(),
+                      rnd.RandomString(static_cast<int>(kValueLen)));
         if (!s.ok()) {
           state.SkipWithError(s.ToString().c_str());
         }
@@ -913,7 +919,8 @@ static void DBGetMergeOperandsInSstFile(benchmark::State& state) {
     db->Flush(FlushOptions());
     for (uint64_t i = 0; i < kNumKeys; ++i) {
       std::string value;
-      rocksdb_rs::status::Status s = db->Get(ReadOptions(), sequential_key_gen.Next(), &value);
+      rocksdb_rs::status::Status s =
+          db->Get(ReadOptions(), sequential_key_gen.Next(), &value);
       if (!s.ok()) {
         state.SkipWithError(s.ToString().c_str());
       }
@@ -1098,8 +1105,8 @@ static void IteratorSeek(benchmark::State& state) {
     auto wo = WriteOptions();
     wo.disableWAL = true;
     for (uint64_t i = 0; i < key_num; i++) {
-      rocksdb_rs::status::Status s = db->Put(wo, kg.Next(),
-                         rnd.RandomString(static_cast<int>(per_key_size)));
+      rocksdb_rs::status::Status s = db->Put(
+          wo, kg.Next(), rnd.RandomString(static_cast<int>(per_key_size)));
       if (!s.ok()) {
         state.SkipWithError(s.ToString().c_str());
       }
@@ -1189,8 +1196,8 @@ static void IteratorNext(benchmark::State& state) {
     auto wo = WriteOptions();
     wo.disableWAL = true;
     for (uint64_t i = 0; i < key_num; i++) {
-      rocksdb_rs::status::Status s = db->Put(wo, kg.Next(),
-                         rnd.RandomString(static_cast<int>(per_key_size)));
+      rocksdb_rs::status::Status s = db->Put(
+          wo, kg.Next(), rnd.RandomString(static_cast<int>(per_key_size)));
       if (!s.ok()) {
         state.SkipWithError(s.ToString().c_str());
       }
@@ -1261,13 +1268,15 @@ static void IteratorNextWithPerfContext(benchmark::State& state) {
     auto wo = WriteOptions();
     wo.disableWAL = true;
     for (uint64_t i = 0; i < 1024; i++) {
-      rocksdb_rs::status::Status s = db->Put(wo, kg.Next(), rnd.RandomString(1024));
+      rocksdb_rs::status::Status s =
+          db->Put(wo, kg.Next(), rnd.RandomString(1024));
       if (!s.ok()) {
         state.SkipWithError(s.ToString().c_str());
       }
     }
     auto db_full = static_cast_with_check<DBImpl>(db.get());
-    rocksdb_rs::status::Status s = db_full->WaitForCompact(WaitForCompactOptions());
+    rocksdb_rs::status::Status s =
+        db_full->WaitForCompact(WaitForCompactOptions());
     if (!s.ok()) {
       state.SkipWithError(s.ToString().c_str());
       return;
@@ -1351,8 +1360,8 @@ static void IteratorPrev(benchmark::State& state) {
     auto wo = WriteOptions();
     wo.disableWAL = true;
     for (uint64_t i = 0; i < key_num; i++) {
-      rocksdb_rs::status::Status s = db->Put(wo, kg.Next(),
-                         rnd.RandomString(static_cast<int>(per_key_size)));
+      rocksdb_rs::status::Status s = db->Put(
+          wo, kg.Next(), rnd.RandomString(static_cast<int>(per_key_size)));
       if (!s.ok()) {
         state.SkipWithError(s.ToString().c_str());
       }
@@ -1443,8 +1452,8 @@ static void PrefixSeek(benchmark::State& state) {
     auto wo = WriteOptions();
     wo.disableWAL = true;
     for (uint64_t i = 0; i < key_num; i++) {
-      rocksdb_rs::status::Status s = db->Put(wo, kg.Next(),
-                         rnd.RandomString(static_cast<int>(per_key_size)));
+      rocksdb_rs::status::Status s = db->Put(
+          wo, kg.Next(), rnd.RandomString(static_cast<int>(per_key_size)));
       if (!s.ok()) {
         state.SkipWithError(s.ToString().c_str());
       }

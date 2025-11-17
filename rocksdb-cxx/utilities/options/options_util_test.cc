@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/utilities/options_util.h"
 
 #include <cctype>
@@ -256,7 +255,8 @@ TEST_F(OptionsUtilTest, SanityCheck) {
   ConfigOptions config_options;
   config_options.ignore_unknown_options = false;
   config_options.input_strings_escaped = true;
-  config_options.sanity_level = ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
+  config_options.sanity_level =
+      ConfigOptions::SanityLevel::kSanityLevelLooselyCompatible;
   // perform sanity check
   ASSERT_OK(
       CheckOptionsCompatibility(config_options, dbname_, db_opt, cf_descs));
@@ -779,4 +779,3 @@ int main(int argc, char** argv) {
 #endif  // GFLAGS
   return RUN_ALL_TESTS();
 }
-

@@ -169,9 +169,13 @@ struct CompressionDict {
 
  public:
 #if ZSTD_VERSION_NUMBER >= 700
-  CompressionDict(std::string dict, rocksdb_rs::compression_type::CompressionType type, int level) {
+  CompressionDict(std::string dict,
+                  rocksdb_rs::compression_type::CompressionType type,
+                  int level) {
 #else   // ZSTD_VERSION_NUMBER >= 700
-  CompressionDict(std::string dict, rocksdb_rs::compression_type::CompressionType /*type*/, int /*level*/) {
+  CompressionDict(std::string dict,
+                  rocksdb_rs::compression_type::CompressionType /*type*/,
+                  int /*level*/) {
 #endif  // ZSTD_VERSION_NUMBER >= 700
     dict_ = std::move(dict);
 #if ZSTD_VERSION_NUMBER >= 700
@@ -324,7 +328,8 @@ struct UncompressionDict {
 
   // For TypedCacheInterface
   const Slice& ContentSlice() const { return slice_; }
-  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kOtherBlock;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole =
+      rocksdb_rs::cache::CacheEntryRole::kOtherBlock;
   static constexpr BlockType kBlockType = BlockType::kCompressionDictionary;
 
 #ifdef ROCKSDB_ZSTD_DDICT
@@ -388,11 +393,13 @@ class CompressionContext {
 
 #else   // ZSTD && (ZSTD_VERSION_NUMBER >= 500)
  private:
-  void CreateNativeContext(rocksdb_rs::compression_type::CompressionType /* type */) {}
+  void CreateNativeContext(
+      rocksdb_rs::compression_type::CompressionType /* type */) {}
   void DestroyNativeContext() {}
 #endif  // ZSTD && (ZSTD_VERSION_NUMBER >= 500)
  public:
-  explicit CompressionContext(rocksdb_rs::compression_type::CompressionType type) {
+  explicit CompressionContext(
+      rocksdb_rs::compression_type::CompressionType type) {
     CreateNativeContext(type);
   }
   ~CompressionContext() { DestroyNativeContext(); }
@@ -410,7 +417,8 @@ class CompressionInfo {
  public:
   CompressionInfo(const CompressionOptions& _opts,
                   const CompressionContext& _context,
-                  const CompressionDict& _dict, rocksdb_rs::compression_type::CompressionType _type,
+                  const CompressionDict& _dict,
+                  rocksdb_rs::compression_type::CompressionType _type,
                   uint64_t _sample_for_compression)
       : opts_(_opts),
         context_(_context),
@@ -431,8 +439,11 @@ class UncompressionContext {
   ZSTDUncompressCachedData uncomp_cached_data_;
 
  public:
-  explicit UncompressionContext(rocksdb_rs::compression_type::CompressionType type) {
-    if (type == rocksdb_rs::compression_type::CompressionType::kZSTD || type == rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression) {
+  explicit UncompressionContext(
+      rocksdb_rs::compression_type::CompressionType type) {
+    if (type == rocksdb_rs::compression_type::CompressionType::kZSTD ||
+        type == rocksdb_rs::compression_type::CompressionType::
+                    kZSTDNotFinalCompression) {
       ctx_cache_ = CompressionContextCache::Instance();
       uncomp_cached_data_ = ctx_cache_->GetCachedZSTDUncompressData();
     }
@@ -459,7 +470,8 @@ class UncompressionInfo {
 
  public:
   UncompressionInfo(const UncompressionContext& _context,
-                    const UncompressionDict& _dict, rocksdb_rs::compression_type::CompressionType _type)
+                    const UncompressionDict& _dict,
+                    rocksdb_rs::compression_type::CompressionType _type)
       : context_(_context), dict_(_dict), type_(_type) {}
 
   const UncompressionContext& context() const { return context_; }
@@ -544,7 +556,8 @@ inline bool StreamingCompressionTypeSupported(
   }
 }
 
-inline bool CompressionTypeSupported(rocksdb_rs::compression_type::CompressionType compression_type) {
+inline bool CompressionTypeSupported(
+    rocksdb_rs::compression_type::CompressionType compression_type) {
   switch (compression_type) {
     case rocksdb_rs::compression_type::CompressionType::kNoCompression:
       return true;
@@ -560,7 +573,8 @@ inline bool CompressionTypeSupported(rocksdb_rs::compression_type::CompressionTy
       return LZ4_Supported();
     case rocksdb_rs::compression_type::CompressionType::kXpressCompression:
       return XPRESS_Supported();
-    case rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression:
+    case rocksdb_rs::compression_type::CompressionType::
+        kZSTDNotFinalCompression:
       return ZSTDNotFinal_Supported();
     case rocksdb_rs::compression_type::CompressionType::kZSTD:
       return ZSTD_Supported();
@@ -570,7 +584,8 @@ inline bool CompressionTypeSupported(rocksdb_rs::compression_type::CompressionTy
   }
 }
 
-inline bool DictCompressionTypeSupported(rocksdb_rs::compression_type::CompressionType compression_type) {
+inline bool DictCompressionTypeSupported(
+    rocksdb_rs::compression_type::CompressionType compression_type) {
   switch (compression_type) {
     case rocksdb_rs::compression_type::CompressionType::kNoCompression:
       return false;
@@ -589,7 +604,8 @@ inline bool DictCompressionTypeSupported(rocksdb_rs::compression_type::Compressi
 #endif
     case rocksdb_rs::compression_type::CompressionType::kXpressCompression:
       return false;
-    case rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression:
+    case rocksdb_rs::compression_type::CompressionType::
+        kZSTDNotFinalCompression:
 #if ZSTD_VERSION_NUMBER >= 500  // v0.5.0+
       return ZSTDNotFinal_Supported();
 #else
@@ -607,7 +623,8 @@ inline bool DictCompressionTypeSupported(rocksdb_rs::compression_type::Compressi
   }
 }
 
-inline std::string CompressionTypeToString(rocksdb_rs::compression_type::CompressionType compression_type) {
+inline std::string CompressionTypeToString(
+    rocksdb_rs::compression_type::CompressionType compression_type) {
   switch (compression_type) {
     case rocksdb_rs::compression_type::CompressionType::kNoCompression:
       return "NoCompression";
@@ -625,9 +642,11 @@ inline std::string CompressionTypeToString(rocksdb_rs::compression_type::Compres
       return "Xpress";
     case rocksdb_rs::compression_type::CompressionType::kZSTD:
       return "ZSTD";
-    case rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression:
+    case rocksdb_rs::compression_type::CompressionType::
+        kZSTDNotFinalCompression:
       return "ZSTDNotFinal";
-    case rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption:
+    case rocksdb_rs::compression_type::CompressionType::
+        kDisableCompressionOption:
       return "DisableOption";
     default:
       assert(false);
@@ -726,8 +745,8 @@ inline size_t PutDecompressedSizeInfo(std::string* output, uint32_t length) {
 inline bool GetDecompressedSizeInfo(const char** input_data,
                                     size_t* input_length,
                                     uint32_t* output_len) {
-  auto new_input_data =
-      rocksdb_rs::coding::GetVarint32Ptr(*input_data, *input_data + *input_length, output_len);
+  auto new_input_data = rocksdb_rs::coding::GetVarint32Ptr(
+      *input_data, *input_data + *input_length, output_len);
   if (new_input_data == nullptr) {
     return false;
   }
@@ -1571,7 +1590,8 @@ inline bool CompressData(const Slice& raw,
       ret = XPRESS_Compress(raw.data(), raw.size(), compressed_output);
       break;
     case rocksdb_rs::compression_type::CompressionType::kZSTD:
-    case rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression:
+    case rocksdb_rs::compression_type::CompressionType::
+        kZSTDNotFinalCompression:
       ret = ZSTD_Compress(compression_info, raw.data(), raw.size(),
                           compressed_output);
       break;
@@ -1608,7 +1628,8 @@ inline CacheAllocationPtr UncompressData(
       // allocator.
       return CacheAllocationPtr(XPRESS_Uncompress(data, n, uncompressed_size));
     case rocksdb_rs::compression_type::CompressionType::kZSTD:
-    case rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression:
+    case rocksdb_rs::compression_type::CompressionType::
+        kZSTDNotFinalCompression:
       return ZSTD_Uncompress(uncompression_info, data, n, uncompressed_size,
                              allocator);
     default:
@@ -1619,14 +1640,18 @@ inline CacheAllocationPtr UncompressData(
 // Records the compression type for subsequent WAL records.
 class CompressionTypeRecord {
  public:
-  explicit CompressionTypeRecord(rocksdb_rs::compression_type::CompressionType compression_type)
+  explicit CompressionTypeRecord(
+      rocksdb_rs::compression_type::CompressionType compression_type)
       : compression_type_(compression_type) {}
 
-  rocksdb_rs::compression_type::CompressionType GetCompressionType() const { return compression_type_; }
+  rocksdb_rs::compression_type::CompressionType GetCompressionType() const {
+    return compression_type_;
+  }
 
   inline void EncodeTo(std::string* dst) const {
     assert(dst != nullptr);
-    rocksdb_rs::coding::PutFixed32(*dst, static_cast<uint32_t>(compression_type_));
+    rocksdb_rs::coding::PutFixed32(*dst,
+                                   static_cast<uint32_t>(compression_type_));
   }
 
   inline rocksdb_rs::status::Status DecodeFrom(Slice* src) {
@@ -1634,13 +1659,14 @@ class CompressionTypeRecord {
 
     uint32_t val;
     if (!rocksdb_rs::coding::GetFixed32(*src, val)) {
-      return rocksdb_rs::status::Status_Corruption(class_name,
-                                "Error decoding WAL compression type");
+      return rocksdb_rs::status::Status_Corruption(
+          class_name, "Error decoding WAL compression type");
     }
-    rocksdb_rs::compression_type::CompressionType compression_type = static_cast<rocksdb_rs::compression_type::CompressionType>(val);
+    rocksdb_rs::compression_type::CompressionType compression_type =
+        static_cast<rocksdb_rs::compression_type::CompressionType>(val);
     if (!StreamingCompressionTypeSupported(compression_type)) {
-      return rocksdb_rs::status::Status_Corruption(class_name,
-                                "WAL compression type not supported");
+      return rocksdb_rs::status::Status_Corruption(
+          class_name, "WAL compression type not supported");
     }
     compression_type_ = compression_type;
     return rocksdb_rs::status::Status_OK();
@@ -1662,9 +1688,10 @@ class CompressionTypeRecord {
 // NOTE: This class is not thread safe.
 class StreamingCompress {
  public:
-  StreamingCompress(rocksdb_rs::compression_type::CompressionType compression_type,
-                    const CompressionOptions& opts,
-                    uint32_t compress_format_version, size_t max_output_len)
+  StreamingCompress(
+      rocksdb_rs::compression_type::CompressionType compression_type,
+      const CompressionOptions& opts, uint32_t compress_format_version,
+      size_t max_output_len)
       : compression_type_(compression_type),
         opts_(opts),
         compress_format_version_(compress_format_version),
@@ -1684,10 +1711,10 @@ class StreamingCompress {
                        size_t* output_pos) = 0;
   // static method to create object of a class inherited from StreamingCompress
   // based on the actual compression type.
-  static StreamingCompress* Create(rocksdb_rs::compression_type::CompressionType compression_type,
-                                   const CompressionOptions& opts,
-                                   uint32_t compress_format_version,
-                                   size_t max_output_len);
+  static StreamingCompress* Create(
+      rocksdb_rs::compression_type::CompressionType compression_type,
+      const CompressionOptions& opts, uint32_t compress_format_version,
+      size_t max_output_len);
   virtual void Reset() = 0;
 
  protected:
@@ -1705,8 +1732,9 @@ class StreamingCompress {
 // NOTE: This class is not thread safe.
 class StreamingUncompress {
  public:
-  StreamingUncompress(rocksdb_rs::compression_type::CompressionType compression_type,
-                      uint32_t compress_format_version, size_t max_output_len)
+  StreamingUncompress(
+      rocksdb_rs::compression_type::CompressionType compression_type,
+      uint32_t compress_format_version, size_t max_output_len)
       : compression_type_(compression_type),
         compress_format_version_(compress_format_version),
         max_output_len_(max_output_len) {}
@@ -1725,9 +1753,9 @@ class StreamingUncompress {
   // Returns -1 for errors, remaining input to be processed otherwise.
   virtual int Uncompress(const char* input, size_t input_size, char* output,
                          size_t* output_pos) = 0;
-  static StreamingUncompress* Create(rocksdb_rs::compression_type::CompressionType compression_type,
-                                     uint32_t compress_format_version,
-                                     size_t max_output_len);
+  static StreamingUncompress* Create(
+      rocksdb_rs::compression_type::CompressionType compression_type,
+      uint32_t compress_format_version, size_t max_output_len);
   virtual void Reset() = 0;
 
  protected:
@@ -1741,8 +1769,8 @@ class ZSTDStreamingCompress final : public StreamingCompress {
   explicit ZSTDStreamingCompress(const CompressionOptions& opts,
                                  uint32_t compress_format_version,
                                  size_t max_output_len)
-      : StreamingCompress(rocksdb_rs::compression_type::CompressionType::kZSTD, opts, compress_format_version,
-                          max_output_len) {
+      : StreamingCompress(rocksdb_rs::compression_type::CompressionType::kZSTD,
+                          opts, compress_format_version, max_output_len) {
 #ifdef ZSTD_STREAMING
     cctx_ = ZSTD_createCCtx();
     // Each compressed frame will have a checksum
@@ -1769,7 +1797,9 @@ class ZSTDStreamingUncompress final : public StreamingUncompress {
  public:
   explicit ZSTDStreamingUncompress(uint32_t compress_format_version,
                                    size_t max_output_len)
-      : StreamingUncompress(rocksdb_rs::compression_type::CompressionType::kZSTD, compress_format_version, max_output_len) {
+      : StreamingUncompress(
+            rocksdb_rs::compression_type::CompressionType::kZSTD,
+            compress_format_version, max_output_len) {
 #ifdef ZSTD_STREAMING
     dctx_ = ZSTD_createDCtx();
     assert(dctx_ != nullptr);

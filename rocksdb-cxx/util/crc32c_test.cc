@@ -198,8 +198,7 @@ int main(int argc, char** argv) {
   const uint8_t* src = (uint8_t*)rocksdb::crc32c::buffer;
   uint64_t* dst = (uint64_t*)rocksdb::crc32c::buffer;
   const uint64_t* end =
-      (const uint64_t*)(rocksdb::crc32c::buffer +
-                        rocksdb::crc32c::BUFFER_SIZE);
+      (const uint64_t*)(rocksdb::crc32c::buffer + rocksdb::crc32c::BUFFER_SIZE);
   *dst++ = 0;
   while (dst < end) {
     rocksdb_rs::coding_lean::EncodeFixed64(

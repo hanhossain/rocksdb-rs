@@ -66,10 +66,12 @@ class RandomAccessFileReader {
       const FileOperationInfo::StartTimePoint& start_ts,
       const FileOperationInfo::FinishTimePoint& finish_ts,
       const rocksdb_rs::io_status::IOStatus& status) const {
-    NotifyOnFileReadFinish(offset, length, start_ts, finish_ts, status.status());
+    NotifyOnFileReadFinish(offset, length, start_ts, finish_ts,
+                           status.status());
   }
 
-  void NotifyOnIOError(const rocksdb_rs::io_status::IOStatus& io_status, FileOperationType operation,
+  void NotifyOnIOError(const rocksdb_rs::io_status::IOStatus& io_status,
+                       FileOperationType operation,
                        const std::string& file_path, size_t length,
                        uint64_t offset) const {
     if (listeners_.empty()) {
@@ -81,7 +83,6 @@ class RandomAccessFileReader {
       listener->OnIOError(io_error_info);
     }
   }
-
 
   bool ShouldNotifyListeners() const { return !listeners_.empty(); }
 
@@ -153,10 +154,10 @@ class RandomAccessFileReader {
                   });
   }
 
-  static rocksdb_rs::io_status::IOStatus Create(const std::shared_ptr<FileSystem>& fs,
-                         const std::string& fname, const FileOptions& file_opts,
-                         std::unique_ptr<RandomAccessFileReader>* reader,
-                         IODebugContext* dbg);
+  static rocksdb_rs::io_status::IOStatus Create(
+      const std::shared_ptr<FileSystem>& fs, const std::string& fname,
+      const FileOptions& file_opts,
+      std::unique_ptr<RandomAccessFileReader>* reader, IODebugContext* dbg);
   RandomAccessFileReader(const RandomAccessFileReader&) = delete;
   RandomAccessFileReader& operator=(const RandomAccessFileReader&) = delete;
 
@@ -174,9 +175,10 @@ class RandomAccessFileReader {
   // `rate_limiter_priority` is used to charge the internal rate limiter when
   // enabled. The special value `Env::IO_TOTAL` makes this operation bypass the
   // rate limiter.
-  rocksdb_rs::io_status::IOStatus Read(const IOOptions& opts, uint64_t offset, size_t n, Slice* result,
-                char* scratch, AlignedBuf* aligned_buf,
-                Env::IOPriority rate_limiter_priority) const;
+  rocksdb_rs::io_status::IOStatus Read(
+      const IOOptions& opts, uint64_t offset, size_t n, Slice* result,
+      char* scratch, AlignedBuf* aligned_buf,
+      Env::IOPriority rate_limiter_priority) const;
 
   // REQUIRES:
   // num_reqs > 0, reqs do not overlap, and offsets in reqs are increasing.
@@ -187,12 +189,13 @@ class RandomAccessFileReader {
   // `rate_limiter_priority` will be used to charge the internal rate limiter.
   // It is not yet supported so the client must provide the special value
   // `Env::IO_TOTAL` to bypass the rate limiter.
-  rocksdb_rs::io_status::IOStatus MultiRead(const IOOptions& opts, FSReadRequest* reqs,
-                     size_t num_reqs, AlignedBuf* aligned_buf,
-                     Env::IOPriority rate_limiter_priority) const;
+  rocksdb_rs::io_status::IOStatus MultiRead(
+      const IOOptions& opts, FSReadRequest* reqs, size_t num_reqs,
+      AlignedBuf* aligned_buf, Env::IOPriority rate_limiter_priority) const;
 
-  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n,
-                    const Env::IOPriority rate_limiter_priority) const {
+  rocksdb_rs::io_status::IOStatus Prefetch(
+      uint64_t offset, size_t n,
+      const Env::IOPriority rate_limiter_priority) const {
     IOOptions opts;
     opts.rate_limiter_priority = rate_limiter_priority;
     return file_->Prefetch(offset, n, opts, nullptr);
@@ -204,12 +207,13 @@ class RandomAccessFileReader {
 
   bool use_direct_io() const { return file_->use_direct_io(); }
 
-  rocksdb_rs::io_status::IOStatus PrepareIOOptions(const ReadOptions& ro, IOOptions& opts) const;
+  rocksdb_rs::io_status::IOStatus PrepareIOOptions(const ReadOptions& ro,
+                                                   IOOptions& opts) const;
 
-  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
-                     std::function<void(const FSReadRequest&, void*)> cb,
-                     void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
-                     AlignedBuf* aligned_buf);
+  rocksdb_rs::io_status::IOStatus ReadAsync(
+      FSReadRequest& req, const IOOptions& opts,
+      std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
+      void** io_handle, IOHandleDeleter* del_fn, AlignedBuf* aligned_buf);
 
   void ReadAsyncCallback(const FSReadRequest& req, void* cb_arg);
 };

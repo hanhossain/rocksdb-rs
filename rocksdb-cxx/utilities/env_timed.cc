@@ -6,10 +6,9 @@
 
 #include "env/composite_env_wrapper.h"
 #include "monitoring/perf_context_imp.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_system.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -52,25 +51,22 @@ rocksdb_rs::io_status::IOStatus TimedFileSystem::NewRandomRWFile(
   return FileSystemWrapper::NewRandomRWFile(fname, options, result, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::NewDirectory(const std::string& name,
-                                       const IOOptions& options,
-                                       std::unique_ptr<FSDirectory>* result,
-                                       IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::NewDirectory(
+    const std::string& name, const IOOptions& options,
+    std::unique_ptr<FSDirectory>* result, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_new_directory_nanos);
   return FileSystemWrapper::NewDirectory(name, options, result, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::FileExists(const std::string& fname,
-                                     const IOOptions& options,
-                                     IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::FileExists(
+    const std::string& fname, const IOOptions& options, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_file_exists_nanos);
   return FileSystemWrapper::FileExists(fname, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::GetChildren(const std::string& dir,
-                                      const IOOptions& options,
-                                      std::vector<std::string>* result,
-                                      IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::GetChildren(
+    const std::string& dir, const IOOptions& options,
+    std::vector<std::string>* result, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_get_children_nanos);
   return FileSystemWrapper::GetChildren(dir, options, result, dbg);
 }
@@ -83,84 +79,75 @@ rocksdb_rs::io_status::IOStatus TimedFileSystem::GetChildrenFileAttributes(
                                                       dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::DeleteFile(const std::string& fname,
-                                     const IOOptions& options,
-                                     IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::DeleteFile(
+    const std::string& fname, const IOOptions& options, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_delete_file_nanos);
   return FileSystemWrapper::DeleteFile(fname, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::CreateDir(const std::string& dirname,
-                                    const IOOptions& options,
-                                    IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::CreateDir(
+    const std::string& dirname, const IOOptions& options, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_create_dir_nanos);
   return FileSystemWrapper::CreateDir(dirname, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::CreateDirIfMissing(const std::string& dirname,
-                                             const IOOptions& options,
-                                             IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::CreateDirIfMissing(
+    const std::string& dirname, const IOOptions& options, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_create_dir_if_missing_nanos);
   return FileSystemWrapper::CreateDirIfMissing(dirname, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::DeleteDir(const std::string& dirname,
-                                    const IOOptions& options,
-                                    IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::DeleteDir(
+    const std::string& dirname, const IOOptions& options, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_delete_dir_nanos);
   return FileSystemWrapper::DeleteDir(dirname, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::GetFileSize(const std::string& fname,
-                                      const IOOptions& options,
-                                      uint64_t* file_size,
-                                      IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::GetFileSize(
+    const std::string& fname, const IOOptions& options, uint64_t* file_size,
+    IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_get_file_size_nanos);
   return FileSystemWrapper::GetFileSize(fname, options, file_size, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::GetFileModificationTime(const std::string& fname,
-                                                  const IOOptions& options,
-                                                  uint64_t* file_mtime,
-                                                  IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::GetFileModificationTime(
+    const std::string& fname, const IOOptions& options, uint64_t* file_mtime,
+    IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_get_file_modification_time_nanos);
   return FileSystemWrapper::GetFileModificationTime(fname, options, file_mtime,
                                                     dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::RenameFile(const std::string& src,
-                                     const std::string& dst,
-                                     const IOOptions& options,
-                                     IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::RenameFile(
+    const std::string& src, const std::string& dst, const IOOptions& options,
+    IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_rename_file_nanos);
   return FileSystemWrapper::RenameFile(src, dst, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::LinkFile(const std::string& src,
-                                   const std::string& dst,
-                                   const IOOptions& options,
-                                   IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::LinkFile(
+    const std::string& src, const std::string& dst, const IOOptions& options,
+    IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_link_file_nanos);
   return FileSystemWrapper::LinkFile(src, dst, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::LockFile(const std::string& fname,
-                                   const IOOptions& options, FileLock** lock,
-                                   IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::LockFile(
+    const std::string& fname, const IOOptions& options, FileLock** lock,
+    IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_lock_file_nanos);
   return FileSystemWrapper::LockFile(fname, options, lock, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::UnlockFile(FileLock* lock, const IOOptions& options,
-                                     IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::UnlockFile(
+    FileLock* lock, const IOOptions& options, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_unlock_file_nanos);
   return FileSystemWrapper::UnlockFile(lock, options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus TimedFileSystem::NewLogger(const std::string& fname,
-                                    const IOOptions& options,
-                                    std::shared_ptr<Logger>* result,
-                                    IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus TimedFileSystem::NewLogger(
+    const std::string& fname, const IOOptions& options,
+    std::shared_ptr<Logger>* result, IODebugContext* dbg) {
   PERF_TIMER_GUARD(env_new_logger_nanos);
   return FileSystemWrapper::NewLogger(fname, options, result, dbg);
 }
@@ -177,6 +164,5 @@ Env* NewTimedEnv(Env* base_env) {
       NewTimedFileSystem(base_env->GetFileSystem());
   return new CompositeEnvWrapper(base_env, timed_fs);
 }
-
 
 }  // namespace rocksdb

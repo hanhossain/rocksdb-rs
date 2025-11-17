@@ -43,22 +43,22 @@ class FilterBlockReaderCommon : public FilterBlockReader {
                      const ReadOptions& read_options) override;
 
  protected:
-  static rocksdb_rs::status::Status ReadFilterBlock(const BlockBasedTable* table,
-                                FilePrefetchBuffer* prefetch_buffer,
-                                const ReadOptions& read_options, bool use_cache,
-                                GetContext* get_context,
-                                BlockCacheLookupContext* lookup_context,
-                                CachableEntry<TBlocklike>* filter_block);
+  static rocksdb_rs::status::Status ReadFilterBlock(
+      const BlockBasedTable* table, FilePrefetchBuffer* prefetch_buffer,
+      const ReadOptions& read_options, bool use_cache, GetContext* get_context,
+      BlockCacheLookupContext* lookup_context,
+      CachableEntry<TBlocklike>* filter_block);
 
   const BlockBasedTable* table() const { return table_; }
   const SliceTransform* table_prefix_extractor() const;
   bool whole_key_filtering() const;
   bool cache_filter_blocks() const;
 
-  rocksdb_rs::status::Status GetOrReadFilterBlock(bool no_io, GetContext* get_context,
-                              BlockCacheLookupContext* lookup_context,
-                              CachableEntry<TBlocklike>* filter_block,
-                              const ReadOptions& read_options) const;
+  rocksdb_rs::status::Status GetOrReadFilterBlock(
+      bool no_io, GetContext* get_context,
+      BlockCacheLookupContext* lookup_context,
+      CachableEntry<TBlocklike>* filter_block,
+      const ReadOptions& read_options) const;
 
   size_t ApproximateFilterBlockMemoryUsage() const;
 

@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/write_prepared_txn.h"
 
 #include <cinttypes>
@@ -12,13 +11,12 @@
 
 #include "db/column_family.h"
 #include "db/db_impl/db_impl.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/utilities/transaction_db.h"
 #include "util/cast_util.h"
 #include "utilities/transactions/pessimistic_transaction.h"
 #include "utilities/transactions/write_prepared_txn_db.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -43,7 +41,8 @@ void WritePreparedTxn::Initialize(const TransactionOptions& txn_options) {
 void WritePreparedTxn::MultiGet(const ReadOptions& options,
                                 ColumnFamilyHandle* column_family,
                                 const size_t num_keys, const Slice* keys,
-                                PinnableSlice* values, rocksdb_rs::status::Status* statuses,
+                                PinnableSlice* values,
+                                rocksdb_rs::status::Status* statuses,
                                 const bool sorted_input) {
   assert(options.io_activity == Env::IOActivity::kUnknown);
   SequenceNumber min_uncommitted, snap_seq;
@@ -63,9 +62,9 @@ void WritePreparedTxn::MultiGet(const ReadOptions& options,
   }
 }
 
-rocksdb_rs::status::Status WritePreparedTxn::Get(const ReadOptions& options,
-                             ColumnFamilyHandle* column_family,
-                             const Slice& key, PinnableSlice* pinnable_val) {
+rocksdb_rs::status::Status WritePreparedTxn::Get(
+    const ReadOptions& options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* pinnable_val) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
@@ -76,8 +75,8 @@ rocksdb_rs::status::Status WritePreparedTxn::Get(const ReadOptions& options,
       wpt_db_->AssignMinMaxSeqs(options.snapshot, &min_uncommitted, &snap_seq);
   WritePreparedTxnReadCallback callback(wpt_db_, snap_seq, min_uncommitted,
                                         backed_by_snapshot);
-  rocksdb_rs::status::Status res = write_batch_.GetFromBatchAndDB(db_, options, column_family, key,
-                                              pinnable_val, &callback);
+  rocksdb_rs::status::Status res = write_batch_.GetFromBatchAndDB(
+      db_, options, column_family, key, pinnable_val, &callback);
   const bool callback_valid =
       callback.valid();  // NOTE: validity of callback must always be checked
                          // before it is destructed
@@ -144,8 +143,8 @@ rocksdb_rs::status::Status WritePreparedTxn::CommitWithoutPrepareInternal() {
   return CommitBatchInternal(GetWriteBatch()->GetWriteBatch(), batch_cnt);
 }
 
-rocksdb_rs::status::Status WritePreparedTxn::CommitBatchInternal(WriteBatch* batch,
-                                             size_t batch_cnt) {
+rocksdb_rs::status::Status WritePreparedTxn::CommitBatchInternal(
+    WriteBatch* batch, size_t batch_cnt) {
   return wpt_db_->WriteInternal(write_options_, batch, batch_cnt, this);
 }
 
@@ -335,7 +334,8 @@ rocksdb_rs::status::Status WritePreparedTxn::RollbackInternal() {
       s = db_->GetImpl(roptions_, key, get_impl_options);
       assert(s.ok() || s.IsNotFound());
       if (s.ok()) {
-        s = rollback_batch_->Put(cf_handle, key, static_cast<const Slice&>(pinnable_val));
+        s = rollback_batch_->Put(cf_handle, key,
+                                 static_cast<const Slice&>(pinnable_val));
         assert(s.ok());
       } else if (s.IsNotFound()) {
         // There has been no readable value before txn. By adding a delete we
@@ -352,20 +352,23 @@ rocksdb_rs::status::Status WritePreparedTxn::RollbackInternal() {
       return s;
     }
 
-    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& /*val*/) override {
+    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
+                                     const Slice& /*val*/) override {
       return Rollback(cf, key);
     }
 
-    rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t cf,
+                                        const Slice& key) override {
       return Rollback(cf, key);
     }
 
-    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf,
+                                              const Slice& key) override {
       return Rollback(cf, key);
     }
 
     rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
-                   const Slice& /*val*/) override {
+                                       const Slice& /*val*/) override {
       if (rollback_merge_operands_) {
         return Rollback(cf, key);
       } else {
@@ -373,10 +376,18 @@ rocksdb_rs::status::Status WritePreparedTxn::RollbackInternal() {
       }
     }
 
-    rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_OK(); }
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_OK(); }
-    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
-    rocksdb_rs::status::Status MarkCommit(const Slice&) override { return rocksdb_rs::status::Status_OK(); }
+    rocksdb_rs::status::Status MarkNoop(bool) override {
+      return rocksdb_rs::status::Status_OK();
+    }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
+      return rocksdb_rs::status::Status_OK();
+    }
+    rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
+      return rocksdb_rs::status::Status_OK();
+    }
+    rocksdb_rs::status::Status MarkCommit(const Slice&) override {
+      return rocksdb_rs::status::Status_OK();
+    }
     rocksdb_rs::status::Status MarkRollback(const Slice&) override {
       return rocksdb_rs::status::Status_InvalidArgument();
     }
@@ -469,9 +480,9 @@ rocksdb_rs::status::Status WritePreparedTxn::RollbackInternal() {
   return s;
 }
 
-rocksdb_rs::status::Status WritePreparedTxn::ValidateSnapshot(ColumnFamilyHandle* column_family,
-                                          const Slice& key,
-                                          SequenceNumber* tracked_at_seq) {
+rocksdb_rs::status::Status WritePreparedTxn::ValidateSnapshot(
+    ColumnFamilyHandle* column_family, const Slice& key,
+    SequenceNumber* tracked_at_seq) {
   assert(snapshot_);
 
   SequenceNumber min_uncommitted =
@@ -507,7 +518,8 @@ void WritePreparedTxn::SetSnapshot() {
   SetSnapshotInternal(snapshot);
 }
 
-rocksdb_rs::status::Status WritePreparedTxn::RebuildFromWriteBatch(WriteBatch* src_batch) {
+rocksdb_rs::status::Status WritePreparedTxn::RebuildFromWriteBatch(
+    WriteBatch* src_batch) {
   auto ret = PessimisticTransaction::RebuildFromWriteBatch(src_batch);
   prepare_batch_cnt_ = GetWriteBatch()->SubBatchCnt();
   return ret;

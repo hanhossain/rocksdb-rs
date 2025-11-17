@@ -87,7 +87,8 @@ bool IsCacheFile(const std::string& file) {
   return suffix == ".rc";
 }
 
-rocksdb_rs::status::Status BlockCacheTier::CleanupCacheFolder(const std::string& folder) {
+rocksdb_rs::status::Status BlockCacheTier::CleanupCacheFolder(
+    const std::string& folder) {
   std::vector<std::string> files;
   rocksdb_rs::status::Status status = opt_.env->GetChildren(folder, &files);
   if (!status.ok()) {
@@ -168,8 +169,9 @@ PersistentCache::StatsType BlockCacheTier::Stats() {
   return out;
 }
 
-rocksdb_rs::status::Status BlockCacheTier::Insert(const Slice& key, const char* data,
-                              const size_t size) {
+rocksdb_rs::status::Status BlockCacheTier::Insert(const Slice& key,
+                                                  const char* data,
+                                                  const size_t size) {
   // update stats
   stats_.bytes_pipelined_.Add(size);
 
@@ -213,7 +215,8 @@ void BlockCacheTier::InsertMain() {
   }
 }
 
-rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key, const Slice& data) {
+rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key,
+                                                      const Slice& data) {
   // pre-condition
   assert(key.size());
   assert(data.size());
@@ -248,7 +251,8 @@ rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key, const Sl
   BlockInfo* info = metadata_.Insert(key, lba);
   assert(info);
   if (!info) {
-    return rocksdb_rs::status::Status_IOError("Unexpected error inserting to index");
+    return rocksdb_rs::status::Status_IOError(
+        "Unexpected error inserting to index");
   }
 
   // insert to cache file reverse mapping
@@ -260,8 +264,9 @@ rocksdb_rs::status::Status BlockCacheTier::InsertImpl(const Slice& key, const Sl
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_ptr<char[]>* val,
-                              size_t* size) {
+rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key,
+                                                  std::unique_ptr<char[]>* val,
+                                                  size_t* size) {
   StopWatchNano timer(opt_.clock, /*auto_start=*/true);
 
   LBA lba;
@@ -279,7 +284,8 @@ rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_
     // different, and the cache file might be removed between the two lookups
     stats_.cache_misses_++;
     stats_.read_miss_latency_.Add(timer.ElapsedNanos() / 1000);
-    return rocksdb_rs::status::Status_NotFound("blockcache: cache file not found");
+    return rocksdb_rs::status::Status_NotFound(
+        "blockcache: cache file not found");
   }
 
   assert(file->refs_);
@@ -294,7 +300,8 @@ rocksdb_rs::status::Status BlockCacheTier::Lookup(const Slice& key, std::unique_
     stats_.cache_misses_++;
     stats_.cache_errors_++;
     stats_.read_miss_latency_.Add(timer.ElapsedNanos() / 1000);
-    return rocksdb_rs::status::Status_NotFound("blockcache: error reading data");
+    return rocksdb_rs::status::Status_NotFound(
+        "blockcache: error reading data");
   }
 
   assert(blk_key == key);
@@ -386,11 +393,10 @@ bool BlockCacheTier::Reserve(const size_t size) {
   return true;
 }
 
-rocksdb_rs::status::Status NewPersistentCache(Env* const env, const std::string& path,
-                          const uint64_t size,
-                          const std::shared_ptr<Logger>& log,
-                          const bool optimized_for_nvm,
-                          std::shared_ptr<PersistentCache>* cache) {
+rocksdb_rs::status::Status NewPersistentCache(
+    Env* const env, const std::string& path, const uint64_t size,
+    const std::shared_ptr<Logger>& log, const bool optimized_for_nvm,
+    std::shared_ptr<PersistentCache>* cache) {
   if (!cache) {
     return rocksdb_rs::status::Status_IOError("invalid argument cache");
   }
@@ -417,4 +423,3 @@ rocksdb_rs::status::Status NewPersistentCache(Env* const env, const std::string&
 }
 
 }  // namespace rocksdb
-

@@ -13,7 +13,7 @@
 #include "rocksdb/table.h"
 
 namespace rocksdb::status {
-    struct Status;
+struct Status;
 }
 
 namespace rocksdb {
@@ -163,11 +163,11 @@ class PlainTableFactory : public TableFactory {
   static const char* kClassName() { return kPlainTableName(); }
   const char* Name() const override { return kPlainTableName(); }
   using TableFactory::NewTableReader;
-  rocksdb_rs::status::Status NewTableReader(const ReadOptions& ro,
-                        const TableReaderOptions& table_reader_options,
-                        std::unique_ptr<RandomAccessFileReader>&& file,
-                        uint64_t file_size, std::unique_ptr<TableReader>* table,
-                        bool prefetch_index_and_filter_in_cache) const override;
+  rocksdb_rs::status::Status NewTableReader(
+      const ReadOptions& ro, const TableReaderOptions& table_reader_options,
+      std::unique_ptr<RandomAccessFileReader>&& file, uint64_t file_size,
+      std::unique_ptr<TableReader>* table,
+      bool prefetch_index_and_filter_in_cache) const override;
 
   TableBuilder* NewTableBuilder(
       const TableBuilderOptions& table_builder_options,

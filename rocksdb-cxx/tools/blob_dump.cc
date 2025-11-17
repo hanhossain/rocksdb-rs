@@ -11,8 +11,8 @@
 
 #include "utilities/blob_db/blob_dump_tool.h"
 
-using rocksdb_rs::status::Status;
 using rocksdb::blob_db::BlobDumpTool;
+using rocksdb_rs::status::Status;
 
 int main(int argc, char** argv) {
   using DisplayType = BlobDumpTool::DisplayType;

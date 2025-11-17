@@ -15,11 +15,10 @@
 #include <memory>
 #include <string>
 
-#include "rocksdb/data_structure.h"
-#include "rocksdb/memory_allocator.h"
-
 #include "rocksdb-rs/src/cache.rs.h"
 #include "rocksdb-rs/src/compression_type.rs.h"
+#include "rocksdb/data_structure.h"
+#include "rocksdb/memory_allocator.h"
 
 namespace rocksdb {
 
@@ -51,7 +50,9 @@ constexpr uint32_t kNumCacheEntryRoles =
     static_cast<uint32_t>(rocksdb_rs::cache::CacheEntryRole::kMisc) + 1;
 
 // A fast bit set for CacheEntryRoles
-using CacheEntryRoleSet = SmallEnumSet<rocksdb_rs::cache::CacheEntryRole, rocksdb_rs::cache::CacheEntryRole::kMisc>;
+using CacheEntryRoleSet =
+    SmallEnumSet<rocksdb_rs::cache::CacheEntryRole,
+                 rocksdb_rs::cache::CacheEntryRole::kMisc>;
 
 extern const bool kDefaultToAdaptiveMutex;
 
@@ -237,7 +238,8 @@ inline std::shared_ptr<Cache> NewLRUCache(const LRUCacheOptions& cache_opts) {
 // except LRUCacheOptions.secondary_cache is not used and should not be set.
 struct CompressedSecondaryCacheOptions : LRUCacheOptions {
   // The compression method (if any) that is used to compress data.
-  rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
 
   // compress_format_version can have two values:
   // compress_format_version == 1 -- decompressed size is not included in the
@@ -252,7 +254,8 @@ struct CompressedSecondaryCacheOptions : LRUCacheOptions {
 
   // Kinds of entries that should not be compressed, but can be stored.
   // (Filter blocks are essentially non-compressible but others usually are.)
-  CacheEntryRoleSet do_not_compress_roles = {rocksdb_rs::cache::CacheEntryRole::kFilterBlock};
+  CacheEntryRoleSet do_not_compress_roles = {
+      rocksdb_rs::cache::CacheEntryRole::kFilterBlock};
 
   CompressedSecondaryCacheOptions() {}
   CompressedSecondaryCacheOptions(
@@ -262,7 +265,8 @@ struct CompressedSecondaryCacheOptions : LRUCacheOptions {
       bool _use_adaptive_mutex = kDefaultToAdaptiveMutex,
       CacheMetadataChargePolicy _metadata_charge_policy =
           kDefaultCacheMetadataChargePolicy,
-      rocksdb_rs::compression_type::CompressionType _compression_type = rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+      rocksdb_rs::compression_type::CompressionType _compression_type =
+          rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
       uint32_t _compress_format_version = 2,
       bool _enable_custom_split_merge = false,
       const CacheEntryRoleSet& _do_not_compress_roles =
@@ -292,7 +296,8 @@ inline std::shared_ptr<SecondaryCache> NewCompressedSecondaryCache(
     bool use_adaptive_mutex = kDefaultToAdaptiveMutex,
     CacheMetadataChargePolicy metadata_charge_policy =
         kDefaultCacheMetadataChargePolicy,
-    rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+    rocksdb_rs::compression_type::CompressionType compression_type =
+        rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
     uint32_t compress_format_version = 2,
     bool enable_custom_split_merge = false,
     const CacheEntryRoleSet& _do_not_compress_roles = {

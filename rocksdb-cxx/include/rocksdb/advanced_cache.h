@@ -12,11 +12,10 @@
 #include <memory>
 #include <string>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/memory_allocator.h"
 #include "rocksdb/slice.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -99,8 +98,10 @@ class Cache {
   // data into a buffer. The secondary cache may decide to not store it in a
   // contiguous buffer, in which case this callback will be called multiple
   // times with increasing offset
-  using SaveToCallback = rocksdb_rs::status::Status (*)(ObjectPtr from_obj, size_t from_offset,
-                                    size_t length, char* out_buf);
+  using SaveToCallback = rocksdb_rs::status::Status (*)(ObjectPtr from_obj,
+                                                        size_t from_offset,
+                                                        size_t length,
+                                                        char* out_buf);
 
   // A function pointer type for destruction of a cache object. This will
   // typically call the destructor for the appropriate type of the object.
@@ -116,9 +117,9 @@ class Cache {
   // provided by Lookup and may be used to follow DB- or CF-specific settings.
   // In case of some error, non-OK is returned and the caller should ignore
   // any result in out_obj. (The implementation must clean up after itself.)
-  using CreateCallback = rocksdb_rs::status::Status (*)(const Slice& data, CreateContext* context,
-                                    MemoryAllocator* allocator,
-                                    ObjectPtr* out_obj, size_t* out_charge);
+  using CreateCallback = rocksdb_rs::status::Status (*)(
+      const Slice& data, CreateContext* context, MemoryAllocator* allocator,
+      ObjectPtr* out_obj, size_t* out_charge);
 
   // A struct with pointers to helper functions for spilling items from the
   // cache into the secondary cache. May be extended in the future. An
@@ -142,15 +143,18 @@ class Cache {
     // from attempting re-insertion into secondary cache (for efficiency).
     const CacheItemHelper* without_secondary_compat;
 
-    CacheItemHelper() : CacheItemHelper(rocksdb_rs::cache::CacheEntryRole::kMisc) {}
+    CacheItemHelper()
+        : CacheItemHelper(rocksdb_rs::cache::CacheEntryRole::kMisc) {}
 
     // For helpers without SecondaryCache support
-    explicit CacheItemHelper(rocksdb_rs::cache::CacheEntryRole _role, DeleterFn _del_cb = nullptr)
+    explicit CacheItemHelper(rocksdb_rs::cache::CacheEntryRole _role,
+                             DeleterFn _del_cb = nullptr)
         : CacheItemHelper(_role, _del_cb, nullptr, nullptr, nullptr, this) {}
 
     // For helpers with SecondaryCache support
-    explicit CacheItemHelper(rocksdb_rs::cache::CacheEntryRole _role, DeleterFn _del_cb,
-                             SizeCallback _size_cb, SaveToCallback _saveto_cb,
+    explicit CacheItemHelper(rocksdb_rs::cache::CacheEntryRole _role,
+                             DeleterFn _del_cb, SizeCallback _size_cb,
+                             SaveToCallback _saveto_cb,
                              CreateCallback _create_cb,
                              const CacheItemHelper* _without_secondary_compat)
         : del_cb(_del_cb),
@@ -195,9 +199,9 @@ class Cache {
   // @return OK if the cache was successfully created
   // @return NotFound if an invalid name was specified in the value
   // @return InvalidArgument if either the options were not valid
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& config_options,
-                                 const std::string& value,
-                                 std::shared_ptr<Cache>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& config_options, const std::string& value,
+      std::shared_ptr<Cache>* result);
 
  public:  // functions
   // The type of the Cache
@@ -245,10 +249,10 @@ class Cache {
   //
   // When the inserted entry is no longer needed, it will be destroyed using
   // helper->del_cb (if non-nullptr).
-  virtual rocksdb_rs::status::Status Insert(const Slice& key, ObjectPtr obj,
-                        const CacheItemHelper* helper, size_t charge,
-                        Handle** handle = nullptr,
-                        Priority priority = Priority::LOW) = 0;
+  virtual rocksdb_rs::status::Status Insert(
+      const Slice& key, ObjectPtr obj, const CacheItemHelper* helper,
+      size_t charge, Handle** handle = nullptr,
+      Priority priority = Priority::LOW) = 0;
 
   // Similar to Insert, but used for creating cache entries that cannot
   // be found with Lookup, such as for memory charging purposes. The
@@ -536,10 +540,10 @@ class CacheWrapper : public Cache {
   // Only function that derived class must provide
   // const char* Name() const override { ... }
 
-  rocksdb_rs::status::Status Insert(const Slice& key, ObjectPtr value,
-                const CacheItemHelper* helper, size_t charge,
-                Handle** handle = nullptr,
-                Priority priority = Priority::LOW) override {
+  rocksdb_rs::status::Status Insert(
+      const Slice& key, ObjectPtr value, const CacheItemHelper* helper,
+      size_t charge, Handle** handle = nullptr,
+      Priority priority = Priority::LOW) override {
     return target_->Insert(key, value, helper, charge, handle, priority);
   }
 

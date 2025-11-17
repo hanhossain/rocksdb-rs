@@ -4,7 +4,6 @@
 //  (found in the LICENSE.Apache file in the root directory).
 //
 
-
 #include "logging/auto_roll_logger.h"
 
 #include <sys/stat.h>
@@ -224,7 +223,8 @@ TEST_F(AutoRollLoggerTest, RollLogFileByTime) {
 
   InitTestDb();
   // -- Test the existence of file during the server restart.
-  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(default_env->FileExists(kLogFile)));
+  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(
+      default_env->FileExists(kLogFile)));
   AutoRollLogger logger(default_env->GetFileSystem(), nsc, kTestDir, "",
                         log_size, time, keep_log_file_num);
   ASSERT_OK(default_env->FileExists(kLogFile));
@@ -728,4 +728,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

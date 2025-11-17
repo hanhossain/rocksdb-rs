@@ -6,9 +6,8 @@
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
 #include "rocksdb/utilities/transaction_db.h"
-#include "utilities/merge_operators.h"
-
 #include "test_util/testutil.h"
+#include "utilities/merge_operators.h"
 #include "utilities/transactions/transaction_test.h"
 
 namespace rocksdb {
@@ -151,7 +150,8 @@ TEST_P(WriteCommittedTxnWithTsTest, ReOpenWithTimestamp) {
 
   {
     std::string value;
-    const rocksdb_rs::status::Status s = db->Get(ReadOptions(), handles_[0], "id", &value);
+    const rocksdb_rs::status::Status s =
+        db->Get(ReadOptions(), handles_[0], "id", &value);
     ASSERT_OK(s);
     uint64_t ival = 0;
     Slice value_slc = value;
@@ -212,7 +212,8 @@ TEST_P(WriteCommittedTxnWithTsTest, RecoverFromWal) {
 
   {
     std::string value;
-    rocksdb_rs::status::Status s = GetFromDb(ReadOptions(), handles_[1], "foo", /*ts=*/23, &value);
+    rocksdb_rs::status::Status s =
+        GetFromDb(ReadOptions(), handles_[1], "foo", /*ts=*/23, &value);
     ASSERT_TRUE(s.IsNotFound());
 
     s = db->Get(ReadOptions(), handles_[0], "bar", &value);
@@ -575,4 +576,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

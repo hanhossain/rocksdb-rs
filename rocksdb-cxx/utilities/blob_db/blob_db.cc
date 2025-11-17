@@ -14,8 +14,10 @@
 namespace rocksdb {
 namespace blob_db {
 
-rocksdb_rs::status::Status BlobDB::Open(const Options& options, const BlobDBOptions& bdb_options,
-                    const std::string& dbname, BlobDB** blob_db) {
+rocksdb_rs::status::Status BlobDB::Open(const Options& options,
+                                        const BlobDBOptions& bdb_options,
+                                        const std::string& dbname,
+                                        BlobDB** blob_db) {
   *blob_db = nullptr;
   DBOptions db_options(options);
   ColumnFamilyOptions cf_options(options);
@@ -23,8 +25,8 @@ rocksdb_rs::status::Status BlobDB::Open(const Options& options, const BlobDBOpti
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   std::vector<ColumnFamilyHandle*> handles;
-  rocksdb_rs::status::Status s = BlobDB::Open(db_options, bdb_options, dbname, column_families,
-                          &handles, blob_db);
+  rocksdb_rs::status::Status s = BlobDB::Open(
+      db_options, bdb_options, dbname, column_families, &handles, blob_db);
   if (s.ok()) {
     assert(handles.size() == 1);
     // i can delete the handle since DBImpl is always holding a reference to
@@ -34,11 +36,11 @@ rocksdb_rs::status::Status BlobDB::Open(const Options& options, const BlobDBOpti
   return s;
 }
 
-rocksdb_rs::status::Status BlobDB::Open(const DBOptions& db_options,
-                    const BlobDBOptions& bdb_options, const std::string& dbname,
-                    const std::vector<ColumnFamilyDescriptor>& column_families,
-                    std::vector<ColumnFamilyHandle*>* handles,
-                    BlobDB** blob_db) {
+rocksdb_rs::status::Status BlobDB::Open(
+    const DBOptions& db_options, const BlobDBOptions& bdb_options,
+    const std::string& dbname,
+    const std::vector<ColumnFamilyDescriptor>& column_families,
+    std::vector<ColumnFamilyHandle*>* handles, BlobDB** blob_db) {
   assert(handles);
 
   if (column_families.size() != 1 ||

@@ -23,6 +23,7 @@ int main() {
 
 #include "db/db_test_util.h"
 #include "file/line_file_reader.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/trace_reader_writer.h"
@@ -30,8 +31,6 @@ int main() {
 #include "test_util/testutil.h"
 #include "tools/trace_analyzer_tool.h"
 #include "trace_replay/trace_replay.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 

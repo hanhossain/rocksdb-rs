@@ -37,9 +37,10 @@ class MockTableReader : public TableReader {
                                 size_t compaction_readahead_size = 0,
                                 bool allow_unprepared_value = false) override;
 
-  rocksdb_rs::status::Status Get(const ReadOptions& readOptions, const Slice& key,
-             GetContext* get_context, const SliceTransform* prefix_extractor,
-             bool skip_filters = false) override;
+  rocksdb_rs::status::Status Get(const ReadOptions& readOptions,
+                                 const Slice& key, GetContext* get_context,
+                                 const SliceTransform* prefix_extractor,
+                                 bool skip_filters = false) override;
 
   uint64_t ApproximateOffsetOf(const ReadOptions& /*read_options*/,
                                const Slice& /*key*/,
@@ -113,7 +114,9 @@ class MockTableIterator : public InternalIterator {
 
   Slice value() const override { return Slice(itr_->second); }
 
-  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status status() const override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
  private:
   const KVVector& table_;
@@ -162,10 +165,14 @@ class MockTableBuilder : public TableBuilder {
   }
 
   // Return non-ok iff some error has been detected.
-  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status status() const override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   // Return non-ok iff some error happens during IO.
-  rocksdb_rs::io_status::IOStatus io_status() const override { return rocksdb_rs::io_status::IOStatus_OK(); }
+  rocksdb_rs::io_status::IOStatus io_status() const override {
+    return rocksdb_rs::io_status::IOStatus_OK();
+  }
 
   rocksdb_rs::status::Status Finish() override {
     MutexLock lock_guard(&file_system_->mutex);
@@ -207,10 +214,9 @@ InternalIterator* MockTableReader::NewIterator(
   return new MockTableIterator(table_);
 }
 
-rocksdb_rs::status::Status MockTableReader::Get(const ReadOptions&, const Slice& key,
-                            GetContext* get_context,
-                            const SliceTransform* /*prefix_extractor*/,
-                            bool /*skip_filters*/) {
+rocksdb_rs::status::Status MockTableReader::Get(
+    const ReadOptions&, const Slice& key, GetContext* get_context,
+    const SliceTransform* /*prefix_extractor*/, bool /*skip_filters*/) {
   std::unique_ptr<MockTableIterator> iter(new MockTableIterator(table_));
   for (iter->Seek(key); iter->Valid(); iter->Next()) {
     ParsedInternalKey parsed_key;
@@ -271,11 +277,13 @@ TableBuilder* MockTableFactory::NewTableBuilder(
                               key_value_size_);
 }
 
-rocksdb_rs::status::Status MockTableFactory::CreateMockTable(Env* env, const std::string& fname,
-                                         KVVector file_contents) {
+rocksdb_rs::status::Status MockTableFactory::CreateMockTable(
+    Env* env, const std::string& fname, KVVector file_contents) {
   std::unique_ptr<WritableFileWriter> file_writer;
-  rocksdb_rs::status::Status s = WritableFileWriter::Create(env->GetFileSystem(), fname,
-                                        FileOptions(), &file_writer, nullptr).status();
+  rocksdb_rs::status::Status s =
+      WritableFileWriter::Create(env->GetFileSystem(), fname, FileOptions(),
+                                 &file_writer, nullptr)
+          .status();
   if (!s.ok()) {
     return s;
   }
@@ -287,20 +295,22 @@ rocksdb_rs::status::Status MockTableFactory::CreateMockTable(Env* env, const std
   return s;
 }
 
-rocksdb_rs::status::Status MockTableFactory::GetAndWriteNextID(WritableFileWriter* file,
-                                           uint32_t* next_id) const {
+rocksdb_rs::status::Status MockTableFactory::GetAndWriteNextID(
+    WritableFileWriter* file, uint32_t* next_id) const {
   *next_id = next_id_.fetch_add(1);
   char buf[4];
   rocksdb_rs::coding_lean::EncodeFixed32(buf, *next_id);
   return file->Append(Slice(buf, 4)).status();
 }
 
-rocksdb_rs::status::Status MockTableFactory::GetIDFromFile(RandomAccessFileReader* file,
-                                       uint32_t* id) const {
+rocksdb_rs::status::Status MockTableFactory::GetIDFromFile(
+    RandomAccessFileReader* file, uint32_t* id) const {
   char buf[4];
   Slice result;
-  rocksdb_rs::status::Status s = file->Read(IOOptions(), 0, 4, &result, buf, nullptr,
-                        Env::IO_TOTAL /* rate_limiter_priority */).status();
+  rocksdb_rs::status::Status s =
+      file->Read(IOOptions(), 0, 4, &result, buf, nullptr,
+                 Env::IO_TOTAL /* rate_limiter_priority */)
+          .status();
   assert(result.size() == 4);
   *id = rocksdb_rs::coding_lean::DecodeFixed32(buf);
   return s;

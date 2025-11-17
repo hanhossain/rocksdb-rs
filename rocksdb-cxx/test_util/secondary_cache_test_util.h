@@ -96,11 +96,13 @@ class WithCacheType : public TestCreateContext {
   }
 
   static const Cache::CacheItemHelper* GetHelper(
-      rocksdb_rs::cache::CacheEntryRole r = rocksdb_rs::cache::CacheEntryRole::kDataBlock,
+      rocksdb_rs::cache::CacheEntryRole r =
+          rocksdb_rs::cache::CacheEntryRole::kDataBlock,
       bool secondary_compatible = true, bool fail = false);
 
   static const Cache::CacheItemHelper* GetHelperFail(
-      rocksdb_rs::cache::CacheEntryRole r = rocksdb_rs::cache::CacheEntryRole::kDataBlock);
+      rocksdb_rs::cache::CacheEntryRole r =
+          rocksdb_rs::cache::CacheEntryRole::kDataBlock);
 };
 
 class WithCacheTypeParam : public WithCacheType,

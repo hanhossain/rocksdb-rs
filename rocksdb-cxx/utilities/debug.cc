@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "rocksdb/utilities/debug.h"
 
 #include "db/db_impl/db_impl.h"
@@ -50,9 +49,9 @@ std::string KeyVersion::GetTypeName() const {
   }
 }
 
-rocksdb_rs::status::Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_key,
-                         size_t max_num_ikeys,
-                         std::vector<KeyVersion>* key_versions) {
+rocksdb_rs::status::Status GetAllKeyVersions(
+    DB* db, Slice begin_key, Slice end_key, size_t max_num_ikeys,
+    std::vector<KeyVersion>* key_versions) {
   if (nullptr == db) {
     return rocksdb_rs::status::Status_InvalidArgument("db cannot be null.");
   }
@@ -60,17 +59,19 @@ rocksdb_rs::status::Status GetAllKeyVersions(DB* db, Slice begin_key, Slice end_
                            max_num_ikeys, key_versions);
 }
 
-rocksdb_rs::status::Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Slice begin_key,
-                         Slice end_key, size_t max_num_ikeys,
-                         std::vector<KeyVersion>* key_versions) {
+rocksdb_rs::status::Status GetAllKeyVersions(
+    DB* db, ColumnFamilyHandle* cfh, Slice begin_key, Slice end_key,
+    size_t max_num_ikeys, std::vector<KeyVersion>* key_versions) {
   if (nullptr == db) {
     return rocksdb_rs::status::Status_InvalidArgument("db cannot be null.");
   }
   if (nullptr == cfh) {
-    return rocksdb_rs::status::Status_InvalidArgument("Column family handle cannot be null.");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Column family handle cannot be null.");
   }
   if (nullptr == key_versions) {
-    return rocksdb_rs::status::Status_InvalidArgument("key_versions cannot be null.");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "key_versions cannot be null.");
   }
   key_versions->clear();
 
@@ -115,4 +116,3 @@ rocksdb_rs::status::Status GetAllKeyVersions(DB* db, ColumnFamilyHandle* cfh, Sl
 }
 
 }  // namespace rocksdb
-

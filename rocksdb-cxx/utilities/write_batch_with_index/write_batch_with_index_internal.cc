@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/write_batch_with_index/write_batch_with_index_internal.h"
 
 #include "db/column_family.h"
@@ -70,7 +69,8 @@ void BaseDeltaIterator::SeekForPrev(const Slice& k) {
 
 void BaseDeltaIterator::Next() {
   if (!Valid()) {
-    status_ = rocksdb_rs::status::Status_NotSupported("Next() on invalid iterator");
+    status_ =
+        rocksdb_rs::status::Status_NotSupported("Next() on invalid iterator");
     return;
   }
 
@@ -107,7 +107,8 @@ void BaseDeltaIterator::Next() {
 
 void BaseDeltaIterator::Prev() {
   if (!Valid()) {
-    status_ = rocksdb_rs::status::Status_NotSupported("Prev() on invalid iterator");
+    status_ =
+        rocksdb_rs::status::Status_NotSupported("Prev() on invalid iterator");
     return;
   }
 
@@ -187,7 +188,9 @@ rocksdb_rs::status::Status BaseDeltaIterator::status() const {
   return delta_iterator_->status();
 }
 
-void BaseDeltaIterator::Invalidate(rocksdb_rs::status::Status s) { status_.copy_from(s); }
+void BaseDeltaIterator::Invalidate(rocksdb_rs::status::Status s) {
+  status_.copy_from(s);
+}
 
 void BaseDeltaIterator::AssertInvariants() {
 #ifndef NDEBUG
@@ -452,13 +455,13 @@ WBWIIteratorImpl::Result WBWIIteratorImpl::FindLatestUpdate(
   return result;
 }
 
-rocksdb_rs::status::Status ReadableWriteBatch::GetEntryFromDataOffset(size_t data_offset,
-                                                  WriteType* type, Slice* Key,
-                                                  Slice* value, Slice* blob,
-                                                  Slice* xid) const {
+rocksdb_rs::status::Status ReadableWriteBatch::GetEntryFromDataOffset(
+    size_t data_offset, WriteType* type, Slice* Key, Slice* value, Slice* blob,
+    Slice* xid) const {
   if (type == nullptr || Key == nullptr || value == nullptr ||
       blob == nullptr || xid == nullptr) {
-    return rocksdb_rs::status::Status_InvalidArgument("Output parameters cannot be null");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Output parameters cannot be null");
   }
 
   if (data_offset == GetDataSize()) {
@@ -467,13 +470,14 @@ rocksdb_rs::status::Status ReadableWriteBatch::GetEntryFromDataOffset(size_t dat
   }
 
   if (data_offset > GetDataSize()) {
-    return rocksdb_rs::status::Status_InvalidArgument("data offset exceed write batch size");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "data offset exceed write batch size");
   }
   Slice input = Slice(rep_.data() + data_offset, rep_.size() - data_offset);
   char tag;
   uint32_t column_family;
-  rocksdb_rs::status::Status s = ReadRecordFromWriteBatch(&input, &tag, &column_family, Key, value,
-                                      blob, xid);
+  rocksdb_rs::status::Status s = ReadRecordFromWriteBatch(
+      &input, &tag, &column_family, Key, value, blob, xid);
   if (!s.ok()) {
     return s;
   }
@@ -512,8 +516,9 @@ rocksdb_rs::status::Status ReadableWriteBatch::GetEntryFromDataOffset(size_t dat
       *type = kXIDRecord;
       break;
     default:
-      return rocksdb_rs::status::Status_Corruption("unknown WriteBatch tag ",
-                                std::to_string(static_cast<unsigned int>(tag)));
+      return rocksdb_rs::status::Status_Corruption(
+          "unknown WriteBatch tag ",
+          std::to_string(static_cast<unsigned int>(tag)));
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -646,10 +651,9 @@ WriteBatchWithIndexInternal::WriteBatchWithIndexInternal(
     const DBOptions* db_options, ColumnFamilyHandle* column_family)
     : db_(nullptr), db_options_(db_options), column_family_(column_family) {}
 
-rocksdb_rs::status::Status WriteBatchWithIndexInternal::MergeKey(const Slice& key,
-                                             const Slice* value,
-                                             const MergeContext& context,
-                                             std::string* result) const {
+rocksdb_rs::status::Status WriteBatchWithIndexInternal::MergeKey(
+    const Slice& key, const Slice* value, const MergeContext& context,
+    std::string* result) const {
   if (column_family_ != nullptr) {
     auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family_);
     const auto merge_operator = cfh->cfd()->ioptions()->merge_operator.get();
@@ -693,7 +697,8 @@ rocksdb_rs::status::Status WriteBatchWithIndexInternal::MergeKey(const Slice& ke
           /* op_failure_scope */ nullptr);
     }
   } else {
-    return rocksdb_rs::status::Status_InvalidArgument("Must provide a column_family");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Must provide a column_family");
   }
 }
 
@@ -710,8 +715,9 @@ WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
   iter->Seek(key);
   auto result = iter->FindLatestUpdate(key, context);
   if (result == WBWIIteratorImpl::kError) {
-    (*s) = rocksdb_rs::status::Status_Corruption("Unexpected entry in WriteBatchWithIndex:",
-                              std::to_string(iter->Entry().type));
+    (*s) = rocksdb_rs::status::Status_Corruption(
+        "Unexpected entry in WriteBatchWithIndex:",
+        std::to_string(iter->Entry().type));
     return result;
   } else if (result == WBWIIteratorImpl::kNotFound) {
     return result;
@@ -739,4 +745,3 @@ WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
 }
 
 }  // namespace rocksdb
-

@@ -23,9 +23,11 @@ void ForceReleaseCachedEntry(void* arg, void* h) {
 }
 
 // WART: this is specific to block-based table
-rocksdb_rs::status::Status VerifyBlockChecksum(ChecksumType type, const char* data,
-                           size_t block_size, const std::string& file_name,
-                           uint64_t offset) {
+rocksdb_rs::status::Status VerifyBlockChecksum(ChecksumType type,
+                                               const char* data,
+                                               size_t block_size,
+                                               const std::string& file_name,
+                                               uint64_t offset) {
   PERF_TIMER_GUARD(block_checksum_time);
   // After block_size bytes is compression type (1 byte), which is part of
   // the checksummed section.

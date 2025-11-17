@@ -78,7 +78,6 @@ using GFLAGS_NAMESPACE::SetUsageMessage;
 
 using namespace rocksdb_rs::filename;
 
-
 DEFINE_int32(key_size, 10, "Key size");
 DEFINE_int32(value_size, 100, "Value size");
 DEFINE_string(db, "", "Use the db with the following name.");

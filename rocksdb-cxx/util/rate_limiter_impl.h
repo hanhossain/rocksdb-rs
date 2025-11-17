@@ -15,13 +15,12 @@
 #include <deque>
 
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/rate_limiter.h"
 #include "rocksdb/system_clock.h"
 #include "util/mutexlock.h"
 #include "util/random.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 

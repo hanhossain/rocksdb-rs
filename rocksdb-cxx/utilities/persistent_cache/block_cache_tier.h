@@ -4,7 +4,6 @@
 //  (found in the LICENSE.Apache file in the root directory).
 #pragma once
 
-
 #ifndef OS_WIN
 #include <unistd.h>
 #endif  // ! OS_WIN
@@ -56,9 +55,11 @@ class BlockCacheTier : public PersistentCacheTier {
     assert(!insert_th_.joinable());
   }
 
-  rocksdb_rs::status::Status Insert(const Slice& key, const char* data, const size_t size) override;
-  rocksdb_rs::status::Status Lookup(const Slice& key, std::unique_ptr<char[]>* data,
-                size_t* size) override;
+  rocksdb_rs::status::Status Insert(const Slice& key, const char* data,
+                                    const size_t size) override;
+  rocksdb_rs::status::Status Lookup(const Slice& key,
+                                    std::unique_ptr<char[]>* data,
+                                    size_t* size) override;
   rocksdb_rs::status::Status Open() override;
   rocksdb_rs::status::Status Close() override;
   bool Erase(const Slice& key) override;
@@ -140,7 +141,7 @@ class BlockCacheTier : public PersistentCacheTier {
   port::RWMutex lock_;                          // Synchronization
   const PersistentCacheConfig opt_;             // BlockCache options
   BoundedQueue<InsertOp> insert_ops_;           // Ops waiting for insert
-  rocksdb::port::Thread insert_th_;   // Insert thread
+  rocksdb::port::Thread insert_th_;             // Insert thread
   uint32_t writer_cache_id_ = 0;                // Current cache file identifier
   WriteableCacheFile* cache_file_ = nullptr;    // Current cache file reference
   CacheWriteBufferAllocator buffer_allocator_;  // Buffer provider
@@ -151,4 +152,3 @@ class BlockCacheTier : public PersistentCacheTier {
 };
 
 }  // namespace rocksdb
-

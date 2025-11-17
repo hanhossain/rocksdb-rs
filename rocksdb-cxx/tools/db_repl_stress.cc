@@ -42,9 +42,9 @@ using rocksdb::Options;
 using rocksdb::Random;
 using rocksdb::SequenceNumber;
 using rocksdb::Slice;
-using rocksdb_rs::status::Status;
 using rocksdb::TransactionLogIterator;
 using rocksdb::WriteOptions;
+using rocksdb_rs::status::Status;
 
 using GFLAGS_NAMESPACE::ParseCommandLineFlags;
 using GFLAGS_NAMESPACE::SetUsageMessage;
@@ -129,4 +129,3 @@ int main(int argc, const char** argv) {
 }
 
 #endif  // GFLAGS
-

@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/optimistic_transaction_db_impl.h"
 
 #include <string>
@@ -37,16 +36,17 @@ Transaction* OptimisticTransactionDBImpl::BeginTransaction(
   }
 }
 
-rocksdb_rs::status::Status OptimisticTransactionDB::Open(const Options& options,
-                                     const std::string& dbname,
-                                     OptimisticTransactionDB** dbptr) {
+rocksdb_rs::status::Status OptimisticTransactionDB::Open(
+    const Options& options, const std::string& dbname,
+    OptimisticTransactionDB** dbptr) {
   DBOptions db_options(options);
   ColumnFamilyOptions cf_options(options);
   std::vector<ColumnFamilyDescriptor> column_families;
   column_families.push_back(
       ColumnFamilyDescriptor(kDefaultColumnFamilyName, cf_options));
   std::vector<ColumnFamilyHandle*> handles;
-  rocksdb_rs::status::Status s = Open(db_options, dbname, column_families, &handles, dbptr);
+  rocksdb_rs::status::Status s =
+      Open(db_options, dbname, column_families, &handles, dbptr);
   if (s.ok()) {
     assert(handles.size() == 1);
     // i can delete the handle since DBImpl is always holding a reference to

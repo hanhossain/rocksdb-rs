@@ -31,12 +31,12 @@ void AppendProperty(std::string& props, const std::string& key,
 }
 
 void AppendProperty(std::string& props, const std::string& key,
-                const rust::String& value, const std::string& prop_delim,
-                const std::string& kv_delim) {
-    props.append(key);
-    props.append(kv_delim);
-    props.append(std::string(value));
-    props.append(prop_delim);
+                    const rust::String& value, const std::string& prop_delim,
+                    const std::string& kv_delim) {
+  props.append(key);
+  props.append(kv_delim);
+  props.append(std::string(value));
+  props.append(prop_delim);
 }
 
 template <class TValue>
@@ -104,9 +104,8 @@ std::string TableProperties::ToString(const std::string& prop_delim,
                  prop_delim, kv_delim);
 
   AppendProperty(result, "column family ID",
-                 column_family_id ==
-                         rocksdb::TablePropertiesCollectorFactory::
-                             Context::kUnknownColumnFamily
+                 column_family_id == rocksdb::TablePropertiesCollectorFactory::
+                                         Context::kUnknownColumnFamily
                      ? std::string("N/A")
                      : std::to_string(column_family_id),
                  prop_delim, kv_delim);
@@ -163,9 +162,10 @@ std::string TableProperties::ToString(const std::string& prop_delim,
   // Unique ID, when available
   std::string id;
   rocksdb_rs::status::Status s = GetUniqueIdFromTableProperties(*this, id);
-  AppendProperty(result, "unique ID",
-                 s.ok() ? rocksdb_rs::unique_id::UniqueIdToHumanString(id) : "N/A", prop_delim,
-                 kv_delim);
+  AppendProperty(
+      result, "unique ID",
+      s.ok() ? rocksdb_rs::unique_id::UniqueIdToHumanString(id) : "N/A",
+      prop_delim, kv_delim);
 
   SeqnoToTimeMapping seq_time_mapping;
   s = seq_time_mapping.Add(seqno_to_time_mapping);

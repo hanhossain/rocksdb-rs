@@ -27,8 +27,7 @@ inline MemoryAllocator* GetMemoryAllocator(
 //
 // Returns Status_OK() on checksum match, or Status_Corruption() on checksum
 // mismatch.
-extern rocksdb_rs::status::Status VerifyBlockChecksum(ChecksumType type, const char* data,
-                                  size_t block_size,
-                                  const std::string& file_name,
-                                  uint64_t offset);
+extern rocksdb_rs::status::Status VerifyBlockChecksum(
+    ChecksumType type, const char* data, size_t block_size,
+    const std::string& file_name, uint64_t offset);
 }  // namespace rocksdb

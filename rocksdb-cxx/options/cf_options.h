@@ -208,7 +208,8 @@ struct MutableCFOptions {
         enable_blob_files(false),
         min_blob_size(0),
         blob_file_size(0),
-        blob_compression_type(rocksdb_rs::compression_type::CompressionType::kNoCompression),
+        blob_compression_type(
+            rocksdb_rs::compression_type::CompressionType::kNoCompression),
         enable_blob_garbage_collection(false),
         blob_garbage_collection_age_cutoff(0.0),
         blob_garbage_collection_force_threshold(0.0),
@@ -219,8 +220,12 @@ struct MutableCFOptions {
         check_flush_compaction_key_order(true),
         paranoid_file_checks(false),
         report_bg_io_stats(false),
-        compression(Snappy_Supported() ? rocksdb_rs::compression_type::CompressionType::kSnappyCompression : rocksdb_rs::compression_type::CompressionType::kNoCompression),
-        bottommost_compression(rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption),
+        compression(Snappy_Supported() ? rocksdb_rs::compression_type::
+                                             CompressionType::kSnappyCompression
+                                       : rocksdb_rs::compression_type::
+                                             CompressionType::kNoCompression),
+        bottommost_compression(rocksdb_rs::compression_type::CompressionType::
+                                   kDisableCompressionOption),
         last_level_temperature(Temperature::kUnknown),
         memtable_protection_bytes_per_key(0),
         block_protection_bytes_per_key(0),
@@ -317,7 +322,8 @@ struct MutableCFOptions {
   uint8_t block_protection_bytes_per_key;
 
   uint64_t sample_for_compression;
-  std::vector<rocksdb_rs::compression_type::CompressionType> compression_per_level;
+  std::vector<rocksdb_rs::compression_type::CompressionType>
+      compression_per_level;
 
   // Derived options
   // Per-level target file size.
@@ -327,17 +333,18 @@ struct MutableCFOptions {
 uint64_t MultiplyCheckOverflow(uint64_t op1, double op2);
 
 // Get the max file size in a given level.
-uint64_t MaxFileSizeForLevel(const MutableCFOptions& cf_options,
-    int level, CompactionStyle compaction_style, int base_level = 1,
-    bool level_compaction_dynamic_level_bytes = false);
+uint64_t MaxFileSizeForLevel(const MutableCFOptions& cf_options, int level,
+                             CompactionStyle compaction_style,
+                             int base_level = 1,
+                             bool level_compaction_dynamic_level_bytes = false);
 
 // Get the max size of an L0 file for which we will pin its meta-blocks when
 // `pin_l0_filter_and_index_blocks_in_cache` is set.
 size_t MaxFileSizeForL0MetaPin(const MutableCFOptions& cf_options);
 
-rocksdb_rs::status::Status GetStringFromMutableCFOptions(const ConfigOptions& config_options,
-                                     const MutableCFOptions& mutable_opts,
-                                     std::string* opt_string);
+rocksdb_rs::status::Status GetStringFromMutableCFOptions(
+    const ConfigOptions& config_options, const MutableCFOptions& mutable_opts,
+    std::string* opt_string);
 
 rocksdb_rs::status::Status GetMutableOptionsFromStrings(
     const MutableCFOptions& base_options,

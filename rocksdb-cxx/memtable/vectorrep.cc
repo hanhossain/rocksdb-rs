@@ -59,7 +59,7 @@ class VectorRep : public MemTableRep {
     // Initialize an iterator over the specified collection.
     // The returned iterator is not valid.
     // explicit Iterator(const MemTableRep* collection);
-    ~Iterator() override{};
+    ~Iterator() override {};
 
     // Returns true iff the iterator is positioned at a valid node.
     bool Valid() const override;
@@ -291,7 +291,8 @@ MemTableRep::Iterator* VectorRep::GetIterator(Arena* arena) {
 
 static std::unordered_map<std::string, OptionTypeInfo> vector_rep_table_info = {
     {"count",
-     {0, rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+     {0, rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 

@@ -109,7 +109,7 @@ class Aggregator {
 // merge operator. It is recommended that all the aggregation function
 // is added before calling CreateAggMergeOperator().
 rocksdb_rs::status::Status AddAggregator(const std::string& function_name,
-                     std::unique_ptr<Aggregator>&& agg);
+                                         std::unique_ptr<Aggregator>&& agg);
 
 // Get the singleton instance of merge operator for aggregation.
 // Always the same one is returned with a shared_ptr is hold as a
@@ -119,8 +119,9 @@ std::shared_ptr<MergeOperator> GetAggMergeOperator();
 
 // Encode aggregation function and payload that can be consumed by aggregation
 // merge operator.
-rocksdb_rs::status::Status EncodeAggFuncAndPayload(const Slice& function_name, const Slice& payload,
-                               std::string& output);
+rocksdb_rs::status::Status EncodeAggFuncAndPayload(const Slice& function_name,
+                                                   const Slice& payload,
+                                                   std::string& output);
 // Helper function to extract aggregation function name and payload.
 // Return false if it fails to decode.
 bool ExtractAggFuncAndValue(const Slice& op, Slice& func, Slice& value);

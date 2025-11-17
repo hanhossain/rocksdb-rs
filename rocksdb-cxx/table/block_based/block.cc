@@ -49,9 +49,13 @@ struct DecodeEntry {
       // Fast path: all three values are encoded in one byte each
       p += 3;
     } else {
-      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
-      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
-      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, value_length)) == nullptr) {
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr)
+        return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) ==
+          nullptr)
+        return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, value_length)) ==
+          nullptr) {
         return nullptr;
       }
     }
@@ -82,9 +86,13 @@ struct CheckAndDecodeEntry {
       // Fast path: all three values are encoded in one byte each
       p += 3;
     } else {
-      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
-      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
-      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, value_length)) == nullptr) {
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr)
+        return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) ==
+          nullptr)
+        return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, value_length)) ==
+          nullptr) {
         return nullptr;
       }
     }
@@ -120,8 +128,11 @@ struct DecodeKeyV4 {
       // Fast path: all three values are encoded in one byte each
       p += 2;
     } else {
-      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr) return nullptr;
-      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) == nullptr) return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, shared)) == nullptr)
+        return nullptr;
+      if ((p = rocksdb_rs::coding::GetVarint32Ptr(p, limit, non_shared)) ==
+          nullptr)
+        return nullptr;
     }
     return p;
   }
@@ -717,9 +728,11 @@ bool IndexBlockIter::ParseNextIndexKey() {
 void IndexBlockIter::DecodeCurrentValue(bool is_shared) {
   Slice v(value_.data(), data_ + restarts_ - value_.data());
   // Delta encoding is used if `shared` != 0.
-  rocksdb_rs::status::Status decode_s __attribute__((__unused__)) = decoded_value_.DecodeFrom(
-      &v, have_first_key_,
-      (value_delta_encoded_ && is_shared) ? &decoded_value_.handle : nullptr);
+  rocksdb_rs::status::Status decode_s __attribute__((__unused__)) =
+      decoded_value_.DecodeFrom(&v, have_first_key_,
+                                (value_delta_encoded_ && is_shared)
+                                    ? &decoded_value_.handle
+                                    : nullptr);
   assert(decode_s.ok());
   value_ = Slice(value_.data(), v.data() - value_.data());
 
@@ -990,7 +1003,8 @@ bool IndexBlockIter::PrefixSeek(const Slice& target, uint32_t* index,
 
 uint32_t Block::NumRestarts() const {
   assert(size_ >= 2 * sizeof(uint32_t));
-  uint32_t block_footer = rocksdb_rs::coding_lean::DecodeFixed32(data_ + size_ - sizeof(uint32_t));
+  uint32_t block_footer =
+      rocksdb_rs::coding_lean::DecodeFixed32(data_ + size_ - sizeof(uint32_t));
   uint32_t num_restarts = block_footer;
   if (size_ > kMaxBlockSizeSupportedByHashIndex) {
     // In BlockBuilder, we have ensured a block with HashIndex is less than
@@ -1016,7 +1030,8 @@ BlockBasedTableOptions::DataBlockIndexType Block::IndexType() const {
     // The check is for the same reason as that in NumRestarts()
     return BlockBasedTableOptions::kDataBlockBinarySearch;
   }
-  uint32_t block_footer = rocksdb_rs::coding_lean::DecodeFixed32(data_ + size_ - sizeof(uint32_t));
+  uint32_t block_footer =
+      rocksdb_rs::coding_lean::DecodeFixed32(data_ + size_ - sizeof(uint32_t));
   uint32_t num_restarts = block_footer;
   BlockBasedTableOptions::DataBlockIndexType index_type;
   UnPackIndexTypeAndNumRestarts(block_footer, &index_type, &num_restarts);
@@ -1214,7 +1229,8 @@ void Block::InitializeMetaIndexBlockProtectionInfo(
 MetaBlockIter* Block::NewMetaIterator(bool block_contents_pinned) {
   MetaBlockIter* iter = new MetaBlockIter();
   if (size_ < 2 * sizeof(uint32_t)) {
-    iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
+    iter->Invalidate(
+        rocksdb_rs::status::Status_Corruption("bad block contents"));
     return iter;
   } else if (num_restarts_ == 0) {
     // Empty block.
@@ -1239,7 +1255,8 @@ DataBlockIter* Block::NewDataIterator(const Comparator* raw_ucmp,
     ret_iter = new DataBlockIter;
   }
   if (size_ < 2 * sizeof(uint32_t)) {
-    ret_iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
+    ret_iter->Invalidate(
+        rocksdb_rs::status::Status_Corruption("bad block contents"));
     return ret_iter;
   }
   if (num_restarts_ == 0) {
@@ -1277,7 +1294,8 @@ IndexBlockIter* Block::NewIndexIterator(
     ret_iter = new IndexBlockIter;
   }
   if (size_ < 2 * sizeof(uint32_t)) {
-    ret_iter->Invalidate(rocksdb_rs::status::Status_Corruption("bad block contents"));
+    ret_iter->Invalidate(
+        rocksdb_rs::status::Status_Corruption("bad block contents"));
     return ret_iter;
   }
   if (num_restarts_ == 0) {

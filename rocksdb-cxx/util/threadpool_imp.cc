@@ -208,14 +208,16 @@ inline void ThreadPoolImpl::Impl::LowerIOPriority() {
   low_io_priority_ = true;
 }
 
-inline void ThreadPoolImpl::Impl::LowerCPUPriority(rocksdb_rs::port_defs::CpuPriority pri) {
+inline void ThreadPoolImpl::Impl::LowerCPUPriority(
+    rocksdb_rs::port_defs::CpuPriority pri) {
   std::lock_guard<std::mutex> lock(mu_);
   cpu_priority_ = pri;
 }
 
 void ThreadPoolImpl::Impl::BGThread(size_t thread_id) {
   bool low_io_priority = false;
-  rocksdb_rs::port_defs::CpuPriority current_cpu_priority = rocksdb_rs::port_defs::CpuPriority::kNormal;
+  rocksdb_rs::port_defs::CpuPriority current_cpu_priority =
+      rocksdb_rs::port_defs::CpuPriority::kNormal;
 
   while (true) {
     // Wait until there is an item that is ready to run

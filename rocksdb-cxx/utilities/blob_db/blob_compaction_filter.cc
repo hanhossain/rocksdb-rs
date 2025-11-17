@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/blob_db/blob_compaction_filter.h"
 
 #include <cinttypes>
@@ -96,14 +95,16 @@ CompactionFilter::Decision BlobIndexCompactionFilterBase::FilterV2(
     }
     // Read value from blob file.
     PinnableSlice blob;
-    rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    rocksdb_rs::compression_type::CompressionType compression_type =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     constexpr bool need_decompress = true;
     if (!ReadBlobFromOldFile(ikey.user_key, blob_index, &blob, need_decompress,
                              &compression_type)) {
       return Decision::kIOError;
     }
-    CompactionFilter::Decision decision = ucf->FilterV2(
-        level, ikey.user_key, kValue, static_cast<const Slice&>(blob), new_value, skip_until);
+    CompactionFilter::Decision decision =
+        ucf->FilterV2(level, ikey.user_key, kValue,
+                      static_cast<const Slice&>(blob), new_value, skip_until);
     if (decision == Decision::kChangeValue) {
       return HandleValueChange(ikey.user_key, new_value);
     }
@@ -126,7 +127,8 @@ CompactionFilter::Decision BlobIndexCompactionFilterBase::HandleValueChange(
   }
   Slice new_blob_value(*new_value);
   std::string compression_output;
-  if (blob_db_impl->bdb_options_.compression != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+  if (blob_db_impl->bdb_options_.compression !=
+      rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     new_blob_value =
         blob_db_impl->GetCompressedSlice(new_blob_value, &compression_output);
   }
@@ -202,7 +204,8 @@ bool BlobIndexCompactionFilterBase::OpenNewBlobFileIfNeeded() const {
 
 bool BlobIndexCompactionFilterBase::ReadBlobFromOldFile(
     const Slice& key, const BlobIndex& blob_index, PinnableSlice* blob,
-    bool need_decompress, rocksdb_rs::compression_type::CompressionType* compression_type) const {
+    bool need_decompress,
+    rocksdb_rs::compression_type::CompressionType* compression_type) const {
   BlobDBImpl* const blob_db_impl = context_.blob_db_impl;
   assert(blob_db_impl);
 
@@ -221,8 +224,11 @@ bool BlobIndexCompactionFilterBase::ReadBlobFromOldFile(
     return false;
   }
 
-  if (need_decompress && *compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
-    s = blob_db_impl->DecompressSlice(static_cast<const Slice&>(*blob), *compression_type, blob);
+  if (need_decompress &&
+      *compression_type !=
+          rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+    s = blob_db_impl->DecompressSlice(static_cast<const Slice&>(*blob),
+                                      *compression_type, blob);
     if (!s.ok()) {
       ROCKS_LOG_ERROR(
           blob_db_impl->db_options_.info_log,
@@ -251,8 +257,8 @@ bool BlobIndexCompactionFilterBase::WriteBlobToNewFile(
 
   assert(writer_);
   uint64_t new_key_offset = 0;
-  const rocksdb_rs::status::Status s = writer_->AddRecord(key, blob, kNoExpiration, &new_key_offset,
-                                      new_blob_offset);
+  const rocksdb_rs::status::Status s = writer_->AddRecord(
+      key, blob, kNoExpiration, &new_key_offset, new_blob_offset);
 
   if (!s.ok()) {
     const BlobDBImpl* const blob_db_impl = context_.blob_db_impl;
@@ -366,7 +372,8 @@ CompactionFilter::BlobDecision BlobIndexCompactionFilterGC::PrepareBlobOutput(
   }
 
   PinnableSlice blob;
-  rocksdb_rs::compression_type::CompressionType compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   std::string compression_output;
   if (!ReadBlobFromOldFile(key, blob_index, &blob, false, &compression_type)) {
     gc_stats_.SetError();
@@ -376,16 +383,19 @@ CompactionFilter::BlobDecision BlobIndexCompactionFilterGC::PrepareBlobOutput(
   // If the compression_type is changed, re-compress it with the new compression
   // type.
   if (compression_type != blob_db_impl->bdb_options_.compression) {
-    if (compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
-      const rocksdb_rs::status::Status status =
-          blob_db_impl->DecompressSlice(static_cast<const Slice&>(blob), compression_type, &blob);
+    if (compression_type !=
+        rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+      const rocksdb_rs::status::Status status = blob_db_impl->DecompressSlice(
+          static_cast<const Slice&>(blob), compression_type, &blob);
       if (!status.ok()) {
         gc_stats_.SetError();
         return BlobDecision::kCorruption;
       }
     }
-    if (blob_db_impl->bdb_options_.compression != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
-      blob_db_impl->GetCompressedSlice(static_cast<const Slice&>(blob), &compression_output);
+    if (blob_db_impl->bdb_options_.compression !=
+        rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+      blob_db_impl->GetCompressedSlice(static_cast<const Slice&>(blob),
+                                       &compression_output);
       blob = PinnableSlice(&compression_output);
       blob.PinSelf();
     }
@@ -393,7 +403,8 @@ CompactionFilter::BlobDecision BlobIndexCompactionFilterGC::PrepareBlobOutput(
 
   uint64_t new_blob_file_number = 0;
   uint64_t new_blob_offset = 0;
-  if (!WriteBlobToNewFile(key, static_cast<const Slice&>(blob), &new_blob_file_number, &new_blob_offset)) {
+  if (!WriteBlobToNewFile(key, static_cast<const Slice&>(blob),
+                          &new_blob_file_number, &new_blob_offset)) {
     gc_stats_.SetError();
     return BlobDecision::kIOError;
   }

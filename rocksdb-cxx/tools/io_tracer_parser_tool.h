@@ -7,9 +7,8 @@
 
 #include <memory>
 
-#include "rocksdb/env.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/env.h"
 
 namespace rocksdb {
 

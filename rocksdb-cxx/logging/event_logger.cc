@@ -61,7 +61,7 @@ void EventLogger::LogToBuffer(LogBuffer* log_buffer, const JSONWriter& jwriter,
 #else
   assert(log_buffer);
   rocksdb::LogToBuffer(log_buffer, max_log_size, "%s %s", Prefix(),
-                                 jwriter.Get().c_str());
+                       jwriter.Get().c_str());
 #endif
 }
 

@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include "rocksdb/table_properties.h"
-
 #include "rocksdb-rs/src/unique_id.rs.h"
+#include "rocksdb/table_properties.h"
 
 namespace rocksdb {
 
@@ -35,8 +34,8 @@ namespace rocksdb {
 // And assuming one generates many SST files in the lifetime of each process,
 // the probability of ID collisions is much "better than random"; see
 // https://github.com/pdillinger/unique_id
-rocksdb_rs::status::Status GetUniqueIdFromTableProperties(const TableProperties &props,
-                                      std::string& out_id);
+rocksdb_rs::status::Status GetUniqueIdFromTableProperties(
+    const TableProperties& props, std::string& out_id);
 
 // Computes a 192-bit (24 binary char) stable, universally unique ID
 // with an extra 64 bits of uniqueness compared to the standard ID. It is only
@@ -46,7 +45,7 @@ rocksdb_rs::status::Status GetUniqueIdFromTableProperties(const TableProperties 
 // example above would expect a global file ID collision every 4 days with
 // 128-bit IDs (using some worst-case assumptions about process lifetime).
 // It's 10^17 years with 192-bit IDs.
-rocksdb_rs::status::Status GetExtendedUniqueIdFromTableProperties(const TableProperties &props,
-                                              std::string& out_id);
+rocksdb_rs::status::Status GetExtendedUniqueIdFromTableProperties(
+    const TableProperties& props, std::string& out_id);
 
 }  // namespace rocksdb

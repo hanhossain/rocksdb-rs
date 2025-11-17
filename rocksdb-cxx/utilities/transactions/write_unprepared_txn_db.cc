@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/write_unprepared_txn_db.h"
 
 #include "db/arena_wrapped_db_iter.h"
@@ -110,7 +109,8 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
         s = db_->GetImpl(roptions, key, get_impl_options);
         assert(s.ok() || s.IsNotFound());
         if (s.ok()) {
-          s = rollback_batch_->Put(cf_handle, key, static_cast<const Slice&>(pinnable_val));
+          s = rollback_batch_->Put(cf_handle, key,
+                                   static_cast<const Slice&>(pinnable_val));
           assert(s.ok());
         } else if (s.IsNotFound()) {
           // There has been no readable value before txn. By adding a delete we
@@ -124,20 +124,22 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
       }
 
       rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
-                   const Slice& /*val*/) override {
+                                       const Slice& /*val*/) override {
         return Rollback(cf, key);
       }
 
-      rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
+      rocksdb_rs::status::Status DeleteCF(uint32_t cf,
+                                          const Slice& key) override {
         return Rollback(cf, key);
       }
 
-      rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+      rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf,
+                                                const Slice& key) override {
         return Rollback(cf, key);
       }
 
       rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
-                     const Slice& /*val*/) override {
+                                         const Slice& /*val*/) override {
         if (rollback_merge_operands_) {
           return Rollback(cf, key);
         } else {
@@ -146,7 +148,9 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::RollbackRecoveredTransaction(
       }
 
       // Recovered batches do not contain 2PC markers.
-      rocksdb_rs::status::Status MarkNoop(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
+      rocksdb_rs::status::Status MarkNoop(bool) override {
+        return rocksdb_rs::status::Status_InvalidArgument();
+      }
       rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
         return rocksdb_rs::status::Status_InvalidArgument();
       }
@@ -208,8 +212,10 @@ rocksdb_rs::status::Status WriteUnpreparedTxnDB::Initialize(
     explicit CommitSubBatchPreReleaseCallback(WritePreparedTxnDB* db)
         : db_(db) {}
     rocksdb_rs::status::Status Callback(SequenceNumber commit_seq,
-                    bool is_mem_disabled __attribute__((__unused__)), uint64_t,
-                    size_t /*index*/, size_t /*total*/) override {
+                                        bool is_mem_disabled
+                                        __attribute__((__unused__)),
+                                        uint64_t, size_t /*index*/,
+                                        size_t /*total*/) override {
       assert(!is_mem_disabled);
       db_->AddCommitted(commit_seq, commit_seq);
       return rocksdb_rs::status::Status_OK();

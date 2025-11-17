@@ -221,8 +221,8 @@ rocksdb_rs::status::Status SliceTransform::CreateFromString(
   });
   std::string id;
   std::unordered_map<std::string, std::string> opt_map;
-  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(config_options, result->get(),
-                                              value, &id, &opt_map);
+  rocksdb_rs::status::Status status = Customizable::GetOptionsMap(
+      config_options, result->get(), value, &id, &opt_map);
   if (!status.ok()) {  // GetOptionsMap failed
     return status;
   } else if (id.empty() && opt_map.empty()) {

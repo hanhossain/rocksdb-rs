@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/transaction_base.h"
 
 #include <cinttypes>
@@ -11,13 +10,12 @@
 #include "db/column_family.h"
 #include "db/db_impl/db_impl.h"
 #include "logging/logging.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
 #include "util/cast_util.h"
 #include "util/string_util.h"
 #include "utilities/transactions/lock/lock_tracker.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -30,7 +28,8 @@ rocksdb_rs::status::Status Transaction::CommitAndTryCreateSnapshot(
   TxnTimestamp commit_ts = GetCommitTimestamp();
   if (commit_ts == kMaxTxnTimestamp) {
     if (ts == kMaxTxnTimestamp) {
-      return rocksdb_rs::status::Status_InvalidArgument("Commit timestamp unset");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Commit timestamp unset");
     } else {
       const rocksdb_rs::status::Status s = SetCommitTimestamp(ts);
       if (!s.ok()) {
@@ -40,7 +39,8 @@ rocksdb_rs::status::Status Transaction::CommitAndTryCreateSnapshot(
   } else if (ts != kMaxTxnTimestamp) {
     if (ts != commit_ts) {
       // For now we treat this as error.
-      return rocksdb_rs::status::Status_InvalidArgument("Different commit ts specified");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Different commit ts specified");
     }
   }
   SetSnapshotOnNextOperation(notifier);
@@ -147,10 +147,9 @@ void TransactionBaseImpl::SetSnapshotIfNeeded() {
   }
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::TryLock(ColumnFamilyHandle* column_family,
-                                    const SliceParts& key, bool read_only,
-                                    bool exclusive, const bool do_validate,
-                                    const bool assume_tracked) {
+rocksdb_rs::status::Status TransactionBaseImpl::TryLock(
+    ColumnFamilyHandle* column_family, const SliceParts& key, bool read_only,
+    bool exclusive, const bool do_validate, const bool assume_tracked) {
   size_t key_size = 0;
   for (int i = 0; i < key.num_parts; ++i) {
     key_size += key.parts[i].size();
@@ -231,9 +230,9 @@ rocksdb_rs::status::Status TransactionBaseImpl::PopSavePoint() {
   return write_batch_.PopSavePoint();
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::Get(const ReadOptions& read_options,
-                                ColumnFamilyHandle* column_family,
-                                const Slice& key, std::string* value) {
+rocksdb_rs::status::Status TransactionBaseImpl::Get(
+    const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, std::string* value) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
@@ -249,18 +248,17 @@ rocksdb_rs::status::Status TransactionBaseImpl::Get(const ReadOptions& read_opti
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::Get(const ReadOptions& read_options,
-                                ColumnFamilyHandle* column_family,
-                                const Slice& key, PinnableSlice* pinnable_val) {
+rocksdb_rs::status::Status TransactionBaseImpl::Get(
+    const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* pinnable_val) {
   return write_batch_.GetFromBatchAndDB(db_, read_options, column_family, key,
                                         pinnable_val);
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
-                                         ColumnFamilyHandle* column_family,
-                                         const Slice& key, std::string* value,
-                                         bool exclusive,
-                                         const bool do_validate) {
+rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(
+    const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, std::string* value, bool exclusive,
+    const bool do_validate) {
   if (!do_validate && read_options.snapshot != nullptr) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with snapshot is not "
@@ -286,12 +284,10 @@ rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(const ReadOptions& 
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(const ReadOptions& read_options,
-                                         ColumnFamilyHandle* column_family,
-                                         const Slice& key,
-                                         PinnableSlice* pinnable_val,
-                                         bool exclusive,
-                                         const bool do_validate) {
+rocksdb_rs::status::Status TransactionBaseImpl::GetForUpdate(
+    const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* pinnable_val, bool exclusive,
+    const bool do_validate) {
   if (!do_validate && read_options.snapshot != nullptr) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "If do_validate is false then GetForUpdate with snapshot is not "
@@ -325,7 +321,8 @@ rust::Vec<rocksdb_rs::status::Status> TransactionBaseImpl::MultiGet(
 
   values->resize(num_keys);
 
-  rust::Vec<rocksdb_rs::status::Status> stat_list = rocksdb_rs::status::Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> stat_list =
+      rocksdb_rs::status::Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = Get(read_options, column_family[i], keys[i], &(*values)[i]);
   }
@@ -336,7 +333,8 @@ rust::Vec<rocksdb_rs::status::Status> TransactionBaseImpl::MultiGet(
 void TransactionBaseImpl::MultiGet(const ReadOptions& read_options,
                                    ColumnFamilyHandle* column_family,
                                    const size_t num_keys, const Slice* keys,
-                                   PinnableSlice* values, rocksdb_rs::status::Status* statuses,
+                                   PinnableSlice* values,
+                                   rocksdb_rs::status::Status* statuses,
                                    const bool sorted_input) {
   assert(read_options.io_activity == Env::IOActivity::kUnknown);
   write_batch_.MultiGetFromBatchAndDB(db_, read_options, column_family,
@@ -360,8 +358,8 @@ rust::Vec<rocksdb_rs::status::Status> TransactionBaseImpl::MultiGetForUpdate(
 
   // Lock all keys
   for (size_t i = 0; i < num_keys; ++i) {
-    rocksdb_rs::status::Status s = TryLock(column_family[i], keys[i], true /* read_only */,
-                       true /* exclusive */);
+    rocksdb_rs::status::Status s = TryLock(
+        column_family[i], keys[i], true /* read_only */, true /* exclusive */);
     if (!s.ok()) {
       // Fail entire multiget if we cannot lock all keys
       return s.create_vec(num_keys);
@@ -369,7 +367,8 @@ rust::Vec<rocksdb_rs::status::Status> TransactionBaseImpl::MultiGetForUpdate(
   }
 
   // TODO(agiardullo): optimize multiget?
-  rust::Vec<rocksdb_rs::status::Status> stat_list = rocksdb_rs::status::Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> stat_list =
+      rocksdb_rs::status::Status_new().create_vec(num_keys);
   for (size_t i = 0; i < num_keys; ++i) {
     stat_list[i] = Get(read_options, column_family[i], keys[i], &(*values)[i]);
   }
@@ -394,12 +393,13 @@ Iterator* TransactionBaseImpl::GetIterator(const ReadOptions& read_options,
                                           &read_options);
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_family,
-                                const Slice& key, const Slice& value,
-                                const bool assume_tracked) {
+rocksdb_rs::status::Status TransactionBaseImpl::Put(
+    ColumnFamilyHandle* column_family, const Slice& key, const Slice& value,
+    const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, do_validate, assume_tracked);
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              do_validate, assume_tracked);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Put(column_family, key, value);
@@ -411,12 +411,13 @@ rocksdb_rs::status::Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_f
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_family,
-                                const SliceParts& key, const SliceParts& value,
-                                const bool assume_tracked) {
+rocksdb_rs::status::Status TransactionBaseImpl::Put(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const SliceParts& value, const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, do_validate, assume_tracked);
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              do_validate, assume_tracked);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Put(column_family, key, value);
@@ -428,12 +429,13 @@ rocksdb_rs::status::Status TransactionBaseImpl::Put(ColumnFamilyHandle* column_f
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::Merge(ColumnFamilyHandle* column_family,
-                                  const Slice& key, const Slice& value,
-                                  const bool assume_tracked) {
+rocksdb_rs::status::Status TransactionBaseImpl::Merge(
+    ColumnFamilyHandle* column_family, const Slice& key, const Slice& value,
+    const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, do_validate, assume_tracked);
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              do_validate, assume_tracked);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Merge(column_family, key, value);
@@ -445,12 +447,13 @@ rocksdb_rs::status::Status TransactionBaseImpl::Merge(ColumnFamilyHandle* column
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::Delete(ColumnFamilyHandle* column_family,
-                                   const Slice& key,
-                                   const bool assume_tracked) {
+rocksdb_rs::status::Status TransactionBaseImpl::Delete(
+    ColumnFamilyHandle* column_family, const Slice& key,
+    const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, do_validate, assume_tracked);
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              do_validate, assume_tracked);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Delete(column_family, key);
@@ -462,12 +465,13 @@ rocksdb_rs::status::Status TransactionBaseImpl::Delete(ColumnFamilyHandle* colum
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::Delete(ColumnFamilyHandle* column_family,
-                                   const SliceParts& key,
-                                   const bool assume_tracked) {
+rocksdb_rs::status::Status TransactionBaseImpl::Delete(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, do_validate, assume_tracked);
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              do_validate, assume_tracked);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Delete(column_family, key);
@@ -479,12 +483,13 @@ rocksdb_rs::status::Status TransactionBaseImpl::Delete(ColumnFamilyHandle* colum
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle* column_family,
-                                         const Slice& key,
-                                         const bool assume_tracked) {
+rocksdb_rs::status::Status TransactionBaseImpl::SingleDelete(
+    ColumnFamilyHandle* column_family, const Slice& key,
+    const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, do_validate, assume_tracked);
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              do_validate, assume_tracked);
 
   if (s.ok()) {
     s = GetBatchForWrite()->SingleDelete(column_family, key);
@@ -496,12 +501,13 @@ rocksdb_rs::status::Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle*
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle* column_family,
-                                         const SliceParts& key,
-                                         const bool assume_tracked) {
+rocksdb_rs::status::Status TransactionBaseImpl::SingleDelete(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const bool assume_tracked) {
   const bool do_validate = !assume_tracked;
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, do_validate, assume_tracked);
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              do_validate, assume_tracked);
 
   if (s.ok()) {
     s = GetBatchForWrite()->SingleDelete(column_family, key);
@@ -513,10 +519,11 @@ rocksdb_rs::status::Status TransactionBaseImpl::SingleDelete(ColumnFamilyHandle*
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle* column_family,
-                                         const Slice& key, const Slice& value) {
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, false /* do_validate */);
+rocksdb_rs::status::Status TransactionBaseImpl::PutUntracked(
+    ColumnFamilyHandle* column_family, const Slice& key, const Slice& value) {
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              false /* do_validate */);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Put(column_family, key, value);
@@ -528,11 +535,12 @@ rocksdb_rs::status::Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle*
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle* column_family,
-                                         const SliceParts& key,
-                                         const SliceParts& value) {
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, false /* do_validate */);
+rocksdb_rs::status::Status TransactionBaseImpl::PutUntracked(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const SliceParts& value) {
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              false /* do_validate */);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Put(column_family, key, value);
@@ -544,11 +552,11 @@ rocksdb_rs::status::Status TransactionBaseImpl::PutUntracked(ColumnFamilyHandle*
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::MergeUntracked(ColumnFamilyHandle* column_family,
-                                           const Slice& key,
-                                           const Slice& value) {
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, false /* do_validate */);
+rocksdb_rs::status::Status TransactionBaseImpl::MergeUntracked(
+    ColumnFamilyHandle* column_family, const Slice& key, const Slice& value) {
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              false /* do_validate */);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Merge(column_family, key, value);
@@ -560,10 +568,11 @@ rocksdb_rs::status::Status TransactionBaseImpl::MergeUntracked(ColumnFamilyHandl
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHandle* column_family,
-                                            const Slice& key) {
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, false /* do_validate */);
+rocksdb_rs::status::Status TransactionBaseImpl::DeleteUntracked(
+    ColumnFamilyHandle* column_family, const Slice& key) {
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              false /* do_validate */);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Delete(column_family, key);
@@ -575,10 +584,11 @@ rocksdb_rs::status::Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHand
   return s;
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHandle* column_family,
-                                            const SliceParts& key) {
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, false /* do_validate */);
+rocksdb_rs::status::Status TransactionBaseImpl::DeleteUntracked(
+    ColumnFamilyHandle* column_family, const SliceParts& key) {
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              false /* do_validate */);
 
   if (s.ok()) {
     s = GetBatchForWrite()->Delete(column_family, key);
@@ -592,8 +602,9 @@ rocksdb_rs::status::Status TransactionBaseImpl::DeleteUntracked(ColumnFamilyHand
 
 rocksdb_rs::status::Status TransactionBaseImpl::SingleDeleteUntracked(
     ColumnFamilyHandle* column_family, const Slice& key) {
-  rocksdb_rs::status::Status s = TryLock(column_family, key, false /* read_only */,
-                     true /* exclusive */, false /* do_validate */);
+  rocksdb_rs::status::Status s =
+      TryLock(column_family, key, false /* read_only */, true /* exclusive */,
+              false /* do_validate */);
 
   if (s.ok()) {
     s = GetBatchForWrite()->SingleDelete(column_family, key);
@@ -699,7 +710,8 @@ void TransactionBaseImpl::UndoGetForUpdate(ColumnFamilyHandle* column_family,
   }
 }
 
-rocksdb_rs::status::Status TransactionBaseImpl::RebuildFromWriteBatch(WriteBatch* src_batch) {
+rocksdb_rs::status::Status TransactionBaseImpl::RebuildFromWriteBatch(
+    WriteBatch* src_batch) {
   struct IndexedWriteBatchBuilder : public WriteBatch::Handler {
     Transaction* txn_;
     DBImpl* db_;
@@ -708,26 +720,32 @@ rocksdb_rs::status::Status TransactionBaseImpl::RebuildFromWriteBatch(WriteBatch
       assert(dynamic_cast<TransactionBaseImpl*>(txn_) != nullptr);
     }
 
-    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& val) override {
+    rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
+                                     const Slice& val) override {
       return txn_->Put(db_->GetColumnFamilyHandle(cf), key, val);
     }
 
-    rocksdb_rs::status::Status DeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t cf,
+                                        const Slice& key) override {
       return txn_->Delete(db_->GetColumnFamilyHandle(cf), key);
     }
 
-    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf, const Slice& key) override {
+    rocksdb_rs::status::Status SingleDeleteCF(uint32_t cf,
+                                              const Slice& key) override {
       return txn_->SingleDelete(db_->GetColumnFamilyHandle(cf), key);
     }
 
-    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key, const Slice& val) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t cf, const Slice& key,
+                                       const Slice& val) override {
       return txn_->Merge(db_->GetColumnFamilyHandle(cf), key, val);
     }
 
     // this is used for reconstructing prepared transactions upon
     // recovery. there should not be any meta markers in the batches
     // we are processing.
-    rocksdb_rs::status::Status MarkBeginPrepare(bool) override { return rocksdb_rs::status::Status_InvalidArgument(); }
+    rocksdb_rs::status::Status MarkBeginPrepare(bool) override {
+      return rocksdb_rs::status::Status_InvalidArgument();
+    }
 
     rocksdb_rs::status::Status MarkEndPrepare(const Slice&) override {
       return rocksdb_rs::status::Status_InvalidArgument();
@@ -737,7 +755,8 @@ rocksdb_rs::status::Status TransactionBaseImpl::RebuildFromWriteBatch(WriteBatch
       return rocksdb_rs::status::Status_InvalidArgument();
     }
 
-    rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&, const Slice&) override {
+    rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice&,
+                                                       const Slice&) override {
       return rocksdb_rs::status::Status_InvalidArgument();
     }
 

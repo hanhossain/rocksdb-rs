@@ -7,9 +7,8 @@
 
 #include <string>
 
-#include "rocksdb/options.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/options.h"
 
 namespace rocksdb {
 // Try to migrate DB created with old_opts to be use new_opts.
@@ -20,6 +19,7 @@ namespace rocksdb {
 // sacrificed: for data migrated, data inserted later might be dropped
 // earlier. This is to gurantee FIFO compaction won't drop all the
 // migrated data to fit max_table_files_size.
-rocksdb_rs::status::Status OptionChangeMigration(std::string dbname, const Options& old_opts,
-                             const Options& new_opts);
+rocksdb_rs::status::Status OptionChangeMigration(std::string dbname,
+                                                 const Options& old_opts,
+                                                 const Options& new_opts);
 }  // namespace rocksdb

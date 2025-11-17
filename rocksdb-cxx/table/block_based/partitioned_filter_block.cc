@@ -42,7 +42,8 @@ PartitionedFilterBlockBuilder::PartitionedFilterBlockBuilder(
           BlockBasedTableOptions::kDataBlockBinarySearch /* index_type */,
           0.75 /* data_block_hash_table_util_ratio */, ts_sz,
           persist_user_defined_timestamps, true /* is_user_key */),
-      partitioned_filters_construction_status_(rocksdb_rs::status::Status_new()),
+      partitioned_filters_construction_status_(
+          rocksdb_rs::status::Status_new()),
       p_index_builder_(p_index_builder),
       keys_added_to_partition_(0),
       total_added_in_built_(0) {
@@ -70,8 +71,7 @@ PartitionedFilterBlockBuilder::PartitionedFilterBlockBuilder(
   }
 }
 
-PartitionedFilterBlockBuilder::~PartitionedFilterBlockBuilder() {
-}
+PartitionedFilterBlockBuilder::~PartitionedFilterBlockBuilder() {}
 
 void PartitionedFilterBlockBuilder::MaybeCutAFilterBlock(
     const Slice* next_key) {
@@ -99,7 +99,8 @@ void PartitionedFilterBlockBuilder::MaybeCutAFilterBlock(
 
   total_added_in_built_ += filter_bits_builder_->EstimateEntriesAdded();
   std::unique_ptr<const char[]> filter_data;
-  rocksdb_rs::status::Status filter_construction_status = rocksdb_rs::status::Status_OK();
+  rocksdb_rs::status::Status filter_construction_status =
+      rocksdb_rs::status::Status_OK();
   Slice filter =
       filter_bits_builder_->Finish(&filter_data, &filter_construction_status);
   if (filter_construction_status.ok()) {
@@ -109,7 +110,8 @@ void PartitionedFilterBlockBuilder::MaybeCutAFilterBlock(
   filters.push_back({index_key, std::move(filter_data), filter});
   if (!filter_construction_status.ok() &&
       partitioned_filters_construction_status_.ok()) {
-    partitioned_filters_construction_status_.copy_from(filter_construction_status);
+    partitioned_filters_construction_status_.copy_from(
+        filter_construction_status);
   }
   keys_added_to_partition_ = 0;
   Reset();
@@ -130,7 +132,8 @@ size_t PartitionedFilterBlockBuilder::EstimateEntriesAdded() {
 }
 
 Slice PartitionedFilterBlockBuilder::Finish(
-    const BlockHandle& last_partition_block_handle, rocksdb_rs::status::Status* status,
+    const BlockHandle& last_partition_block_handle,
+    rocksdb_rs::status::Status* status,
     std::unique_ptr<const char[]>* filter_data) {
   if (finishing_filters == true) {
     // Record the handle of the last written filter block in the index
@@ -207,9 +210,9 @@ std::unique_ptr<FilterBlockReader> PartitionedFilterBlockReader::Create(
 
   CachableEntry<Block_kFilterPartitionIndex> filter_block;
   if (prefetch || !use_cache) {
-    const rocksdb_rs::status::Status s = ReadFilterBlock(table, prefetch_buffer, ro, use_cache,
-                                     nullptr /* get_context */, lookup_context,
-                                     &filter_block);
+    const rocksdb_rs::status::Status s = ReadFilterBlock(
+        table, prefetch_buffer, ro, use_cache, nullptr /* get_context */,
+        lookup_context, &filter_block);
     if (!s.ok()) {
       IGNORE_STATUS_IF_ERROR(s);
       return std::unique_ptr<FilterBlockReader>();
@@ -293,7 +296,8 @@ BlockHandle PartitionedFilterBlockReader::GetFilterPartitionHandle(
   return fltr_blk_handle;
 }
 
-rocksdb_rs::status::Status PartitionedFilterBlockReader::GetFilterPartitionBlock(
+rocksdb_rs::status::Status
+PartitionedFilterBlockReader::GetFilterPartitionBlock(
     FilePrefetchBuffer* prefetch_buffer, const BlockHandle& fltr_blk_handle,
     bool no_io, GetContext* get_context,
     BlockCacheLookupContext* lookup_context, const ReadOptions& _read_options,
@@ -332,8 +336,8 @@ bool PartitionedFilterBlockReader::MayMatch(
     GetContext* get_context, BlockCacheLookupContext* lookup_context,
     const ReadOptions& read_options, FilterFunction filter_function) const {
   CachableEntry<Block_kFilterPartitionIndex> filter_block;
-  rocksdb_rs::status::Status s = GetOrReadFilterBlock(no_io, get_context, lookup_context,
-                                  &filter_block, read_options);
+  rocksdb_rs::status::Status s = GetOrReadFilterBlock(
+      no_io, get_context, lookup_context, &filter_block, read_options);
   if (UNLIKELY(!s.ok())) {
     IGNORE_STATUS_IF_ERROR(s);
     return true;
@@ -368,8 +372,9 @@ void PartitionedFilterBlockReader::MayMatch(
     BlockCacheLookupContext* lookup_context, const ReadOptions& read_options,
     FilterManyFunction filter_function) const {
   CachableEntry<Block_kFilterPartitionIndex> filter_block;
-  rocksdb_rs::status::Status s = GetOrReadFilterBlock(no_io, range->begin()->get_context,
-                                  lookup_context, &filter_block, read_options);
+  rocksdb_rs::status::Status s =
+      GetOrReadFilterBlock(no_io, range->begin()->get_context, lookup_context,
+                           &filter_block, read_options);
   if (UNLIKELY(!s.ok())) {
     IGNORE_STATUS_IF_ERROR(s);
     return;  // Any/all may match
@@ -458,8 +463,9 @@ rocksdb_rs::status::Status PartitionedFilterBlockReader::CacheDependencies(
 
   CachableEntry<Block_kFilterPartitionIndex> filter_block;
 
-  rocksdb_rs::status::Status s = GetOrReadFilterBlock(false /* no_io */, nullptr /* get_context */,
-                                  &lookup_context, &filter_block, ro);
+  rocksdb_rs::status::Status s =
+      GetOrReadFilterBlock(false /* no_io */, nullptr /* get_context */,
+                           &lookup_context, &filter_block, ro);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(rep->ioptions.logger,
                     "Error retrieving top-level filter block while trying to "

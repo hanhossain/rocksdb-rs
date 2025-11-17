@@ -11,9 +11,8 @@
 
 #include <memory>
 
-#include "rocksdb/customizable.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/customizable.h"
 
 #ifdef _WIN32
 // Windows API macro interference
@@ -30,9 +29,9 @@ class SystemClock : public Customizable {
   ~SystemClock() override {}
 
   static const char* Type() { return "SystemClock"; }
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& options,
-                                 const std::string& value,
-                                 std::shared_ptr<SystemClock>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& options, const std::string& value,
+      std::shared_ptr<SystemClock>* result);
   // The name of this system clock
   virtual const char* Name() const override = 0;
 
@@ -102,7 +101,8 @@ class SystemClockWrapper : public SystemClock {
     return target_->TimeToString(time);
   }
 
-  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(
+      const ConfigOptions& options) override;
   std::string SerializeOptions(const ConfigOptions& config_options,
                                const std::string& header) const override;
   const Customizable* Inner() const override { return target_.get(); }

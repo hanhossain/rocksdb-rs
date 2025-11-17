@@ -32,8 +32,9 @@ namespace rocksdb {
 DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
 (const ReadOptions& options, const MultiGetRange* batch,
  const autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE>* handles,
- rocksdb_rs::status::Status* statuses, CachableEntry<Block_kData>* results, char* scratch,
- const UncompressionDict& uncompression_dict, bool use_fs_scratch) const {
+ rocksdb_rs::status::Status* statuses, CachableEntry<Block_kData>* results,
+ char* scratch, const UncompressionDict& uncompression_dict,
+ bool use_fs_scratch) const {
   RandomAccessFileReader* file = rep_->file.get();
   const Footer& footer = rep_->footer;
   const ImmutableOptions& ioptions = rep_->ioptions;
@@ -182,11 +183,11 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
     if (s.ok()) {
       if ((req.result.size() != req.len) ||
           (req_offset + BlockSizeWithTrailer(handle) > req.result.size())) {
-        s = rocksdb_rs::status::Status_Corruption("truncated block read from " +
-                               rep_->file->file_name() + " offset " +
-                               std::to_string(handle.offset()) + ", expected " +
-                               std::to_string(req.len) + " bytes, got " +
-                               std::to_string(req.result.size()));
+        s = rocksdb_rs::status::Status_Corruption(
+            "truncated block read from " + rep_->file->file_name() +
+            " offset " + std::to_string(handle.offset()) + ", expected " +
+            std::to_string(req.len) + " bytes, got " +
+            std::to_string(req.result.size()));
       }
     }
 
@@ -247,7 +248,8 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
       rocksdb_rs::compression_type::CompressionType compression_type =
           GetBlockCompressionType(serialized_block);
       if ((use_fs_scratch || use_shared_buffer) &&
-          compression_type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+          compression_type ==
+              rocksdb_rs::compression_type::CompressionType::kNoCompression) {
         Slice serialized =
             Slice(req.result.data() + req_offset, BlockSizeWithTrailer(handle));
         serialized_block = BlockContents(
@@ -284,7 +286,8 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::RetrieveMultipleBlocks)
       rocksdb_rs::compression_type::CompressionType compression_type =
           GetBlockCompressionType(serialized_block);
       BlockContents contents;
-      if (compression_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+      if (compression_type !=
+          rocksdb_rs::compression_type::CompressionType::kNoCompression) {
         UncompressionContext context(compression_type);
         UncompressionInfo info(context, uncompression_dict, compression_type);
         s = UncompressSerializedBlock(
@@ -370,7 +373,9 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
     autovector<BlockHandle, MultiGetContext::MAX_BATCH_SIZE> block_handles;
     std::array<CachableEntry<Block_kData>, MultiGetContext::MAX_BATCH_SIZE>
         results;
-    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(MultiGetContext::MAX_BATCH_SIZE);
+    rust::Vec<rocksdb_rs::status::Status> statuses =
+        rocksdb_rs::status::Status_new().create_vec(
+            MultiGetContext::MAX_BATCH_SIZE);
     // Empty data_lookup_contexts means "unused," when block cache tracing is
     // disabled. (Limited options as element type is not default contructible.)
     std::vector<BlockCacheLookupContext> data_lookup_contexts;
@@ -388,7 +393,8 @@ DEFINE_SYNC_AND_ASYNC(void, BlockBasedTable::MultiGet)
       MultiGetRange data_block_range(sst_file_range, sst_file_range.begin(),
                                      sst_file_range.end());
       CachableEntry<UncompressionDict> uncompression_dict;
-      rocksdb_rs::status::Status uncompression_dict_status = rocksdb_rs::status::Status_new();
+      rocksdb_rs::status::Status uncompression_dict_status =
+          rocksdb_rs::status::Status_new();
       bool uncompression_dict_inited = false;
       size_t total_len = 0;
 

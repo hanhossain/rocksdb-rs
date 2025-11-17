@@ -32,9 +32,8 @@
 #include <string>
 #include <vector>
 
-#include "rocksdb/write_batch_base.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/write_batch_base.h"
 
 namespace rocksdb {
 
@@ -80,13 +79,15 @@ class WriteBatch : public WriteBatchBase {
   // user-defined timestamp is enabled as long as `key` points to a contiguous
   // buffer with timestamp appended after user key. The caller is responsible
   // for setting up the memory buffer pointed to by `key`.
-  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
-             const Slice& value) override;
-  rocksdb_rs::status::Status Put(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                 const Slice& key, const Slice& value) override;
+  rocksdb_rs::status::Status Put(const Slice& key,
+                                 const Slice& value) override {
     return Put(nullptr, key, value);
   }
-  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const Slice& key,
-             const Slice& ts, const Slice& value) override;
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                 const Slice& key, const Slice& ts,
+                                 const Slice& value) override;
 
   // Variant of Put() that gathers output like writev(2).  The key and value
   // that will be written to the database are concatenations of arrays of
@@ -95,17 +96,20 @@ class WriteBatch : public WriteBatchBase {
   // user-defined timestamp is enabled as long as the timestamp is the last
   // Slice in `key`, a SliceParts (array of Slices). The caller is responsible
   // for setting up the `key` SliceParts object.
-  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family, const SliceParts& key,
-             const SliceParts& value) override;
-  rocksdb_rs::status::Status Put(const SliceParts& key, const SliceParts& value) override {
+  rocksdb_rs::status::Status Put(ColumnFamilyHandle* column_family,
+                                 const SliceParts& key,
+                                 const SliceParts& value) override;
+  rocksdb_rs::status::Status Put(const SliceParts& key,
+                                 const SliceParts& value) override {
     return Put(nullptr, key, value);
   }
 
   // Store the mapping "key->{column1:value1, column2:value2, ...}" in the
   // column family specified by "column_family".
   using WriteBatchBase::PutEntity;
-  rocksdb_rs::status::Status PutEntity(ColumnFamilyHandle* column_family, const Slice& key,
-                   const WideColumns& columns) override;
+  rocksdb_rs::status::Status PutEntity(ColumnFamilyHandle* column_family,
+                                       const Slice& key,
+                                       const WideColumns& columns) override;
 
   using WriteBatchBase::Delete;
   // If the database contains a mapping for "key", erase it.  Else do nothing.
@@ -113,10 +117,13 @@ class WriteBatch : public WriteBatchBase {
   // timestamp is enabled as long as `key` points to a contiguous buffer with
   // timestamp appended after user key. The caller is responsible for setting
   // up the memory buffer pointed to by `key`.
-  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key) override;
-  rocksdb_rs::status::Status Delete(const Slice& key) override { return Delete(nullptr, key); }
-  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family, const Slice& key,
-                const Slice& ts) override;
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
+                                    const Slice& key) override;
+  rocksdb_rs::status::Status Delete(const Slice& key) override {
+    return Delete(nullptr, key);
+  }
+  rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
+                                    const Slice& key, const Slice& ts) override;
 
   // variant that takes SliceParts
   // These two variants of Delete(..., const SliceParts& key) can be used when
@@ -124,61 +131,73 @@ class WriteBatch : public WriteBatchBase {
   // Slice in `key`, a SliceParts (array of Slices). The caller is responsible
   // for setting up the `key` SliceParts object.
   rocksdb_rs::status::Status Delete(ColumnFamilyHandle* column_family,
-                const SliceParts& key) override;
-  rocksdb_rs::status::Status Delete(const SliceParts& key) override { return Delete(nullptr, key); }
+                                    const SliceParts& key) override;
+  rocksdb_rs::status::Status Delete(const SliceParts& key) override {
+    return Delete(nullptr, key);
+  }
 
   using WriteBatchBase::SingleDelete;
   // WriteBatch implementation of DB::SingleDelete().  See db.h.
   rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
-                      const Slice& key) override;
+                                          const Slice& key) override;
   rocksdb_rs::status::Status SingleDelete(const Slice& key) override {
     return SingleDelete(nullptr, key);
   }
-  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family, const Slice& key,
-                      const Slice& ts) override;
+  rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
+                                          const Slice& key,
+                                          const Slice& ts) override;
 
   // variant that takes SliceParts
   rocksdb_rs::status::Status SingleDelete(ColumnFamilyHandle* column_family,
-                      const SliceParts& key) override;
+                                          const SliceParts& key) override;
   rocksdb_rs::status::Status SingleDelete(const SliceParts& key) override {
     return SingleDelete(nullptr, key);
   }
 
   using WriteBatchBase::DeleteRange;
   // WriteBatch implementation of DB::DeleteRange().  See db.h.
-  rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* column_family, const Slice& begin_key,
-                     const Slice& end_key) override;
-  rocksdb_rs::status::Status DeleteRange(const Slice& begin_key, const Slice& end_key) override {
+  rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* column_family,
+                                         const Slice& begin_key,
+                                         const Slice& end_key) override;
+  rocksdb_rs::status::Status DeleteRange(const Slice& begin_key,
+                                         const Slice& end_key) override {
     return DeleteRange(nullptr, begin_key, end_key);
   }
   // begin_key and end_key should be user keys without timestamp.
-  rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* column_family, const Slice& begin_key,
-                     const Slice& end_key, const Slice& ts) override;
+  rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* column_family,
+                                         const Slice& begin_key,
+                                         const Slice& end_key,
+                                         const Slice& ts) override;
 
   // variant that takes SliceParts
   rocksdb_rs::status::Status DeleteRange(ColumnFamilyHandle* column_family,
-                     const SliceParts& begin_key,
-                     const SliceParts& end_key) override;
+                                         const SliceParts& begin_key,
+                                         const SliceParts& end_key) override;
   rocksdb_rs::status::Status DeleteRange(const SliceParts& begin_key,
-                     const SliceParts& end_key) override {
+                                         const SliceParts& end_key) override {
     return DeleteRange(nullptr, begin_key, end_key);
   }
 
   using WriteBatchBase::Merge;
   // Merge "value" with the existing value of "key" in the database.
   // "key->merge(existing, value)"
-  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const Slice& key,
-               const Slice& value) override;
-  rocksdb_rs::status::Status Merge(const Slice& key, const Slice& value) override {
+  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family,
+                                   const Slice& key,
+                                   const Slice& value) override;
+  rocksdb_rs::status::Status Merge(const Slice& key,
+                                   const Slice& value) override {
     return Merge(nullptr, key, value);
   }
-  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* /*column_family*/, const Slice& /*key*/,
-               const Slice& /*ts*/, const Slice& /*value*/) override;
+  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* /*column_family*/,
+                                   const Slice& /*key*/, const Slice& /*ts*/,
+                                   const Slice& /*value*/) override;
 
   // variant that takes SliceParts
-  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family, const SliceParts& key,
-               const SliceParts& value) override;
-  rocksdb_rs::status::Status Merge(const SliceParts& key, const SliceParts& value) override {
+  rocksdb_rs::status::Status Merge(ColumnFamilyHandle* column_family,
+                                   const SliceParts& key,
+                                   const SliceParts& value) override;
+  rocksdb_rs::status::Status Merge(const SliceParts& key,
+                                   const SliceParts& value) override {
     return Merge(nullptr, key, value);
   }
 
@@ -229,8 +248,9 @@ class WriteBatch : public WriteBatchBase {
     // backwards compatibility. If the column family is not default,
     // the function is noop
     // If user-defined timestamp is enabled, then `key` includes timestamp.
-    virtual rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
-                         const Slice& value) {
+    virtual rocksdb_rs::status::Status PutCF(uint32_t column_family_id,
+                                             const Slice& key,
+                                             const Slice& value) {
       if (column_family_id == 0) {
         // Put() historically doesn't return status. We didn't want to be
         // backwards incompatible so we didn't change the return status
@@ -245,14 +265,16 @@ class WriteBatch : public WriteBatchBase {
     virtual void Put(const Slice& /*key*/, const Slice& /*value*/) {}
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
-    virtual rocksdb_rs::status::Status PutEntityCF(uint32_t /* column_family_id */,
-                               const Slice& /* key */,
-                               const Slice& /* entity */) {
-      return rocksdb_rs::status::Status_NotSupported("PutEntityCF not implemented");
+    virtual rocksdb_rs::status::Status PutEntityCF(
+        uint32_t /* column_family_id */, const Slice& /* key */,
+        const Slice& /* entity */) {
+      return rocksdb_rs::status::Status_NotSupported(
+          "PutEntityCF not implemented");
     }
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
-    virtual rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) {
+    virtual rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
+                                                const Slice& key) {
       if (column_family_id == 0) {
         Delete(key);
         return rocksdb_rs::status::Status_OK();
@@ -264,7 +286,8 @@ class WriteBatch : public WriteBatchBase {
     virtual void Delete(const Slice& /*key*/) {}
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
-    virtual rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) {
+    virtual rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
+                                                      const Slice& key) {
       if (column_family_id == 0) {
         SingleDelete(key);
         return rocksdb_rs::status::Status_OK();
@@ -277,15 +300,17 @@ class WriteBatch : public WriteBatchBase {
 
     // If user-defined timestamp is enabled, then `begin_key` and `end_key`
     // both include timestamp.
-    virtual rocksdb_rs::status::Status DeleteRangeCF(uint32_t /*column_family_id*/,
-                                 const Slice& /*begin_key*/,
-                                 const Slice& /*end_key*/) {
-      return rocksdb_rs::status::Status_InvalidArgument("DeleteRangeCF not implemented");
+    virtual rocksdb_rs::status::Status DeleteRangeCF(
+        uint32_t /*column_family_id*/, const Slice& /*begin_key*/,
+        const Slice& /*end_key*/) {
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "DeleteRangeCF not implemented");
     }
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
-    virtual rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
-                           const Slice& value) {
+    virtual rocksdb_rs::status::Status MergeCF(uint32_t column_family_id,
+                                               const Slice& key,
+                                               const Slice& value) {
       if (column_family_id == 0) {
         Merge(key, value);
         return rocksdb_rs::status::Status_OK();
@@ -297,25 +322,29 @@ class WriteBatch : public WriteBatchBase {
     virtual void Merge(const Slice& /*key*/, const Slice& /*value*/) {}
 
     // If user-defined timestamp is enabled, then `key` includes timestamp.
-    virtual rocksdb_rs::status::Status PutBlobIndexCF(uint32_t /*column_family_id*/,
-                                  const Slice& /*key*/,
-                                  const Slice& /*value*/) {
-      return rocksdb_rs::status::Status_InvalidArgument("PutBlobIndexCF not implemented");
+    virtual rocksdb_rs::status::Status PutBlobIndexCF(
+        uint32_t /*column_family_id*/, const Slice& /*key*/,
+        const Slice& /*value*/) {
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "PutBlobIndexCF not implemented");
     }
 
     // The default implementation of LogData does nothing.
     virtual void LogData(const Slice& blob);
 
     virtual rocksdb_rs::status::Status MarkBeginPrepare(bool = false) {
-      return rocksdb_rs::status::Status_InvalidArgument("MarkBeginPrepare() handler not defined.");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "MarkBeginPrepare() handler not defined.");
     }
 
     virtual rocksdb_rs::status::Status MarkEndPrepare(const Slice& /*xid*/) {
-      return rocksdb_rs::status::Status_InvalidArgument("MarkEndPrepare() handler not defined.");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "MarkEndPrepare() handler not defined.");
     }
 
     virtual rocksdb_rs::status::Status MarkNoop(bool /*empty_batch*/) {
-      return rocksdb_rs::status::Status_InvalidArgument("MarkNoop() handler not defined.");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "MarkNoop() handler not defined.");
     }
 
     virtual rocksdb_rs::status::Status MarkRollback(const Slice& /*xid*/) {
@@ -324,11 +353,12 @@ class WriteBatch : public WriteBatchBase {
     }
 
     virtual rocksdb_rs::status::Status MarkCommit(const Slice& /*xid*/) {
-      return rocksdb_rs::status::Status_InvalidArgument("MarkCommit() handler not defined.");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "MarkCommit() handler not defined.");
     }
 
-    virtual rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& /*xid*/,
-                                           const Slice& /*commit_ts*/) {
+    virtual rocksdb_rs::status::Status MarkCommitWithTimestamp(
+        const Slice& /*xid*/, const Slice& /*commit_ts*/) {
       return rocksdb_rs::status::Status_InvalidArgument(
           "MarkCommitWithTimestamp() handler not defined.");
     }
@@ -414,8 +444,8 @@ class WriteBatch : public WriteBatchBase {
   //      std::numeric_limits<size_t>::max() indicating "don't know or column
   //      family info not found", this will cause UpdateTimestamps() to fail.
   // size_t ts_sz_func(uint32_t cf);
-  rocksdb_rs::status::Status UpdateTimestamps(const Slice& ts,
-                          std::function<size_t(uint32_t /*cf*/)> ts_sz_func);
+  rocksdb_rs::status::Status UpdateTimestamps(
+      const Slice& ts, std::function<size_t(uint32_t /*cf*/)> ts_sz_func);
 
   // Verify the per-key-value checksums of this write batch.
   // Corruption status will be returned if the verification fails.

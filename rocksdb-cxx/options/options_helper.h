@@ -10,11 +10,10 @@
 #include <string>
 #include <vector>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/advanced_options.h"
 #include "rocksdb/options.h"
 #include "rocksdb/table.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 struct ColumnFamilyOptions;
@@ -26,9 +25,11 @@ struct MutableDBOptions;
 struct MutableCFOptions;
 struct Options;
 
-std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedCompressions();
+std::vector<rocksdb_rs::compression_type::CompressionType>
+GetSupportedCompressions();
 
-std::vector<rocksdb_rs::compression_type::CompressionType> GetSupportedDictCompressions();
+std::vector<rocksdb_rs::compression_type::CompressionType>
+GetSupportedDictCompressions();
 
 std::vector<ChecksumType> GetSupportedChecksums();
 
@@ -41,7 +42,7 @@ inline bool IsSupportedChecksumType(ChecksumType type) {
 
 // Checks that the combination of DBOptions and ColumnFamilyOptions are valid
 rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                       const ColumnFamilyOptions& cf_opts);
+                                           const ColumnFamilyOptions& cf_opts);
 
 DBOptions BuildDBOptions(const ImmutableDBOptions& immutable_db_options,
                          const MutableDBOptions& mutable_db_options);
@@ -79,7 +80,8 @@ struct OptionsHelper {
       compaction_stop_style_to_string;
   static std::map<Temperature, std::string> temperature_to_string;
   static std::unordered_map<std::string, ChecksumType> checksum_type_string_map;
-  static std::unordered_map<std::string, rocksdb_rs::compression_type::CompressionType>
+  static std::unordered_map<std::string,
+                            rocksdb_rs::compression_type::CompressionType>
       compression_type_string_map;
   static std::unordered_map<std::string, PrepopulateBlobCache>
       prepopulate_blob_cache_string_map;

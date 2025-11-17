@@ -17,11 +17,11 @@
 namespace rocksdb {
 
 // Utility function to copy a file up to a specified length
-rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
-                  std::unique_ptr<WritableFileWriter>& dest_writer,
-                  uint64_t size, bool use_fsync,
-                  const std::shared_ptr<IOTracer>& io_tracer,
-                  const Temperature temperature) {
+rocksdb_rs::io_status::IOStatus CopyFile(
+    FileSystem* fs, const std::string& source,
+    std::unique_ptr<WritableFileWriter>& dest_writer, uint64_t size,
+    bool use_fsync, const std::shared_ptr<IOTracer>& io_tracer,
+    const Temperature temperature) {
   FileOptions soptions;
   rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<SequentialFileReader> src_reader;
@@ -51,7 +51,7 @@ rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& sour
     size_t bytes_to_read = std::min(sizeof(buffer), static_cast<size_t>(size));
     // TODO: rate limit copy file
     io_s = src_reader->Read(bytes_to_read, &slice, buffer,
-                         Env::IO_TOTAL /* rate_limiter_priority */);
+                            Env::IO_TOTAL /* rate_limiter_priority */);
     if (!io_s.ok()) {
       return io_s;
     }
@@ -67,10 +67,10 @@ rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& sour
   return dest_writer->Sync(use_fsync);
 }
 
-rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& source,
-                  const std::string& destination, uint64_t size, bool use_fsync,
-                  const std::shared_ptr<IOTracer>& io_tracer,
-                  const Temperature temperature) {
+rocksdb_rs::io_status::IOStatus CopyFile(
+    FileSystem* fs, const std::string& source, const std::string& destination,
+    uint64_t size, bool use_fsync, const std::shared_ptr<IOTracer>& io_tracer,
+    const Temperature temperature) {
   FileOptions options;
   rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<WritableFileWriter> dest_writer;
@@ -92,8 +92,10 @@ rocksdb_rs::io_status::IOStatus CopyFile(FileSystem* fs, const std::string& sour
 }
 
 // Utility function to create a file with the provided contents
-rocksdb_rs::io_status::IOStatus CreateFile(FileSystem* fs, const std::string& destination,
-                    const std::string& contents, bool use_fsync) {
+rocksdb_rs::io_status::IOStatus CreateFile(FileSystem* fs,
+                                           const std::string& destination,
+                                           const std::string& contents,
+                                           bool use_fsync) {
   const EnvOptions soptions;
   rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   std::unique_ptr<WritableFileWriter> dest_writer;
@@ -113,8 +115,10 @@ rocksdb_rs::io_status::IOStatus CreateFile(FileSystem* fs, const std::string& de
 }
 
 rocksdb_rs::status::Status DeleteDBFile(const ImmutableDBOptions* db_options,
-                    const std::string& fname, const std::string& dir_to_sync,
-                    const bool force_bg, const bool force_fg) {
+                                        const std::string& fname,
+                                        const std::string& dir_to_sync,
+                                        const bool force_bg,
+                                        const bool force_fg) {
   SstFileManagerImpl* sfm =
       static_cast<SstFileManagerImpl*>(db_options->sst_file_manager.get());
   if (sfm && !force_fg) {
@@ -138,7 +142,8 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     std::shared_ptr<IOTracer>& io_tracer, RateLimiter* rate_limiter,
     Env::IOPriority rate_limiter_priority) {
   if (checksum_factory == nullptr) {
-    return rocksdb_rs::io_status::IOStatus_InvalidArgument("Checksum factory is invalid");
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(
+        "Checksum factory is invalid");
   }
   assert(file_checksum != nullptr);
   assert(file_checksum_func_name != nullptr);
@@ -211,8 +216,8 @@ rocksdb_rs::io_status::IOStatus GenerateOneFileChecksum(
     io_s = reader->Read(opts, offset, bytes_to_read, &slice, buf.get(), nullptr,
                         rate_limiter_priority);
     if (!io_s.ok()) {
-      return rocksdb_rs::io_status::IOStatus_Corruption("file read failed with error: " +
-                                  *io_s.ToString());
+      return rocksdb_rs::io_status::IOStatus_Corruption(
+          "file read failed with error: " + *io_s.ToString());
     }
     if (slice.size() == 0) {
       return rocksdb_rs::io_status::IOStatus_Corruption("file too small");

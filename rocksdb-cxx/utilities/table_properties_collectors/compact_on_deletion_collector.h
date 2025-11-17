@@ -18,15 +18,16 @@ class CompactOnDeletionCollector : public TablePropertiesCollector {
   // @params key    the user key that is inserted into the table.
   // @params value  the value that is inserted into the table.
   // @params file_size  file size up to now
-  virtual rocksdb_rs::status::Status AddUserKey(const Slice& key, const Slice& value,
-                            rocksdb_rs::types::EntryType type, SequenceNumber seq,
-                            uint64_t file_size) override;
+  virtual rocksdb_rs::status::Status AddUserKey(
+      const Slice& key, const Slice& value, rocksdb_rs::types::EntryType type,
+      SequenceNumber seq, uint64_t file_size) override;
 
   // Finish() will be called when a table has already been built and is ready
   // for writing the properties block.
   // @params properties  User will add their collected statistics to
   // `properties`.
-  virtual rocksdb_rs::status::Status Finish(UserCollectedProperties* /*properties*/) override;
+  virtual rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* /*properties*/) override;
 
   // Return the human-readable properties, where the key is property name and
   // the value is the human-readable form of value.

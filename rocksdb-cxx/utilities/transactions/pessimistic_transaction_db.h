@@ -48,28 +48,31 @@ class PessimisticTransactionDB : public TransactionDB {
 
   using StackableDB::Put;
   virtual rocksdb_rs::status::Status Put(const WriteOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     const Slice& val) override;
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         const Slice& val) override;
 
   using StackableDB::Delete;
   virtual rocksdb_rs::status::Status Delete(const WriteOptions& wopts,
-                        ColumnFamilyHandle* column_family,
-                        const Slice& key) override;
+                                            ColumnFamilyHandle* column_family,
+                                            const Slice& key) override;
 
   using StackableDB::SingleDelete;
-  virtual rocksdb_rs::status::Status SingleDelete(const WriteOptions& wopts,
-                              ColumnFamilyHandle* column_family,
-                              const Slice& key) override;
+  virtual rocksdb_rs::status::Status SingleDelete(
+      const WriteOptions& wopts, ColumnFamilyHandle* column_family,
+      const Slice& key) override;
 
   using StackableDB::Merge;
   virtual rocksdb_rs::status::Status Merge(const WriteOptions& options,
-                       ColumnFamilyHandle* column_family, const Slice& key,
-                       const Slice& value) override;
+                                           ColumnFamilyHandle* column_family,
+                                           const Slice& key,
+                                           const Slice& value) override;
 
   using TransactionDB::Write;
-  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts, WriteBatch* updates) override;
-  inline rocksdb_rs::status::Status WriteWithConcurrencyControl(const WriteOptions& opts,
-                                            WriteBatch* updates) {
+  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts,
+                                           WriteBatch* updates) override;
+  inline rocksdb_rs::status::Status WriteWithConcurrencyControl(
+      const WriteOptions& opts, WriteBatch* updates) {
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (opts.protection_bytes_per_key > 0) {
       s = WriteBatchInternal::UpdateProtectionInfo(
@@ -96,9 +99,9 @@ class PessimisticTransactionDB : public TransactionDB {
   }
 
   using StackableDB::CreateColumnFamily;
-  virtual rocksdb_rs::status::Status CreateColumnFamily(const ColumnFamilyOptions& options,
-                                    const std::string& column_family_name,
-                                    ColumnFamilyHandle** handle) override;
+  virtual rocksdb_rs::status::Status CreateColumnFamily(
+      const ColumnFamilyOptions& options, const std::string& column_family_name,
+      ColumnFamilyHandle** handle) override;
 
   rocksdb_rs::status::Status CreateColumnFamilies(
       const ColumnFamilyOptions& options,
@@ -110,15 +113,19 @@ class PessimisticTransactionDB : public TransactionDB {
       std::vector<ColumnFamilyHandle*>* handles) override;
 
   using StackableDB::DropColumnFamily;
-  virtual rocksdb_rs::status::Status DropColumnFamily(ColumnFamilyHandle* column_family) override;
+  virtual rocksdb_rs::status::Status DropColumnFamily(
+      ColumnFamilyHandle* column_family) override;
 
   rocksdb_rs::status::Status DropColumnFamilies(
       const std::vector<ColumnFamilyHandle*>& column_families) override;
 
-  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn, uint32_t cfh_id,
-                 const std::string& key, bool exclusive);
-  rocksdb_rs::status::Status TryRangeLock(PessimisticTransaction* txn, uint32_t cfh_id,
-                      const Endpoint& start_endp, const Endpoint& end_endp);
+  rocksdb_rs::status::Status TryLock(PessimisticTransaction* txn,
+                                     uint32_t cfh_id, const std::string& key,
+                                     bool exclusive);
+  rocksdb_rs::status::Status TryRangeLock(PessimisticTransaction* txn,
+                                          uint32_t cfh_id,
+                                          const Endpoint& start_endp,
+                                          const Endpoint& end_endp);
 
   void UnLock(PessimisticTransaction* txn, const LockTracker& keys);
   void UnLock(PessimisticTransaction* txn, uint32_t cfh_id,
@@ -168,17 +175,18 @@ class PessimisticTransactionDB : public TransactionDB {
     return lock_manager_->GetLockTrackerFactory();
   }
 
-  std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>> CreateTimestampedSnapshot(
-      TxnTimestamp ts) override;
+  std::pair<rocksdb_rs::status::Status, std::shared_ptr<const Snapshot>>
+  CreateTimestampedSnapshot(TxnTimestamp ts) override;
 
   std::shared_ptr<const Snapshot> GetTimestampedSnapshot(
       TxnTimestamp ts) const override;
 
   void ReleaseTimestampedSnapshotsOlderThan(TxnTimestamp ts) override;
 
-  rocksdb_rs::status::Status GetTimestampedSnapshots(TxnTimestamp ts_lb, TxnTimestamp ts_ub,
-                                 std::vector<std::shared_ptr<const Snapshot>>&
-                                     timestamped_snapshots) const override;
+  rocksdb_rs::status::Status GetTimestampedSnapshots(
+      TxnTimestamp ts_lb, TxnTimestamp ts_ub,
+      std::vector<std::shared_ptr<const Snapshot>>& timestamped_snapshots)
+      const override;
 
  protected:
   DBImpl* db_impl_;
@@ -187,14 +195,15 @@ class PessimisticTransactionDB : public TransactionDB {
 
   static rocksdb_rs::status::Status FailIfBatchHasTs(const WriteBatch* wb);
 
-  static rocksdb_rs::status::Status FailIfCfEnablesTs(const DB* db,
-                                  const ColumnFamilyHandle* column_family);
+  static rocksdb_rs::status::Status FailIfCfEnablesTs(
+      const DB* db, const ColumnFamilyHandle* column_family);
 
   void ReinitializeTransaction(
       Transaction* txn, const WriteOptions& write_options,
       const TransactionOptions& txn_options = TransactionOptions());
 
-  virtual rocksdb_rs::status::Status VerifyCFOptions(const ColumnFamilyOptions& cf_options);
+  virtual rocksdb_rs::status::Status VerifyCFOptions(
+      const ColumnFamilyOptions& cf_options);
 
  private:
   friend class WritePreparedTxnDB;
@@ -254,10 +263,12 @@ class WriteCommittedTxnDB : public PessimisticTransactionDB {
   // Optimized version of ::Write that makes use of skip_concurrency_control
   // hint
   using TransactionDB::Write;
+  virtual rocksdb_rs::status::Status Write(
+      const WriteOptions& opts,
+      const TransactionDBWriteOptimizations& optimizations,
+      WriteBatch* updates) override;
   virtual rocksdb_rs::status::Status Write(const WriteOptions& opts,
-                       const TransactionDBWriteOptimizations& optimizations,
-                       WriteBatch* updates) override;
-  virtual rocksdb_rs::status::Status Write(const WriteOptions& opts, WriteBatch* updates) override;
+                                           WriteBatch* updates) override;
 };
 
 inline rocksdb_rs::status::Status PessimisticTransactionDB::FailIfBatchHasTs(
@@ -299,7 +310,8 @@ class SnapshotCreationCallback : public PostMemTableCallback {
     assert(db_impl_);
   }
 
-  rocksdb_rs::status::Status operator()(SequenceNumber seq, bool disable_memtable) override;
+  rocksdb_rs::status::Status operator()(SequenceNumber seq,
+                                        bool disable_memtable) override;
 
  private:
   DBImpl* const db_impl_;

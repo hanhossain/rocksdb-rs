@@ -49,8 +49,8 @@ InternalIteratorBase<IndexValue>* PartitionIndexReader::NewIterator(
     BlockCacheLookupContext* lookup_context) {
   const bool no_io = (read_options.read_tier == kBlockCacheTier);
   CachableEntry<Block> index_block;
-  const rocksdb_rs::status::Status s = GetOrReadIndexBlock(no_io, get_context, lookup_context,
-                                       &index_block, read_options);
+  const rocksdb_rs::status::Status s = GetOrReadIndexBlock(
+      no_io, get_context, lookup_context, &index_block, read_options);
   if (!s.ok()) {
     if (iter != nullptr) {
       iter->Invalidate(s);
@@ -130,8 +130,9 @@ rocksdb_rs::status::Status PartitionIndexReader::CacheDependencies(
 
   CachableEntry<Block> index_block;
   {
-    rocksdb_rs::status::Status s = GetOrReadIndexBlock(false /* no_io */, nullptr /* get_context */,
-                                   &lookup_context, &index_block, ro);
+    rocksdb_rs::status::Status s =
+        GetOrReadIndexBlock(false /* no_io */, nullptr /* get_context */,
+                            &lookup_context, &index_block, ro);
     if (!s.ok()) {
       return s;
     }
@@ -172,7 +173,8 @@ rocksdb_rs::status::Status PartitionIndexReader::CacheDependencies(
         0 /*num_reads_*/, 0 /*num_file_reads_for_auto_readahead*/);
     IOOptions opts;
     {
-      rocksdb_rs::status::Status s = rep->file->PrepareIOOptions(ro, opts).status();
+      rocksdb_rs::status::Status s =
+          rep->file->PrepareIOOptions(ro, opts).status();
       if (s.ok()) {
         s = prefetch_buffer->Prefetch(opts, rep->file.get(), prefetch_off,
                                       static_cast<size_t>(prefetch_len),

@@ -18,13 +18,12 @@
 
 #include "options/db_options.h"
 #include "port/port.h"
+#include "rocksdb-rs/src/filename.rs.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/options.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/transaction_log.h"
-
-#include "rocksdb-rs/src/status.rs.h"
-#include "rocksdb-rs/src/filename.rs.h"
 
 namespace rocksdb {
 
@@ -48,25 +47,24 @@ extern const std::string kTempFileNameSuffix;     // = "dbtmp"
 // specified number. On its success and when dir_contains_current_file is not
 // nullptr, the function will fsync the directory containing the CURRENT file
 // when
-extern rocksdb_rs::io_status::IOStatus SetCurrentFile(FileSystem* fs, const std::string& dbname,
-                               uint64_t descriptor_number,
-                               FSDirectory* dir_contains_current_file);
+extern rocksdb_rs::io_status::IOStatus SetCurrentFile(
+    FileSystem* fs, const std::string& dbname, uint64_t descriptor_number,
+    FSDirectory* dir_contains_current_file);
 
 // Make the IDENTITY file for the db
-extern rocksdb_rs::status::Status SetIdentityFile(Env* env, const std::string& dbname,
-                              const std::string& db_id = {});
+extern rocksdb_rs::status::Status SetIdentityFile(
+    Env* env, const std::string& dbname, const std::string& db_id = {});
 
 // Sync manifest file `file`.
-extern rocksdb_rs::io_status::IOStatus SyncManifest(const ImmutableDBOptions* db_options,
-                             WritableFileWriter* file);
+extern rocksdb_rs::io_status::IOStatus SyncManifest(
+    const ImmutableDBOptions* db_options, WritableFileWriter* file);
 
 // Return list of file names of info logs in `file_names`.
 // The list only contains file name. The parent directory name is stored
 // in `parent_dir`.
 // `db_log_dir` should be the one as in options.db_log_dir
-extern rocksdb_rs::status::Status GetInfoLogFiles(const std::shared_ptr<FileSystem>& fs,
-                              const std::string& db_log_dir,
-                              const std::string& dbname,
-                              std::string* parent_dir,
-                              std::vector<std::string>* file_names);
+extern rocksdb_rs::status::Status GetInfoLogFiles(
+    const std::shared_ptr<FileSystem>& fs, const std::string& db_log_dir,
+    const std::string& dbname, std::string* parent_dir,
+    std::vector<std::string>* file_names);
 }  // namespace rocksdb

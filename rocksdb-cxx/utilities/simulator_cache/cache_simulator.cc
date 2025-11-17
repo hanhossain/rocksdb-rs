@@ -249,8 +249,8 @@ rocksdb_rs::status::Status BlockCacheTraceSimulator::InitializeCaches() {
             /*insert_blocks_upon_row_kvpair_miss=*/false);
       } else {
         // Not supported.
-        return rocksdb_rs::status::Status_InvalidArgument("Unknown cache name " +
-                                       config.cache_name);
+        return rocksdb_rs::status::Status_InvalidArgument(
+            "Unknown cache name " + config.cache_name);
       }
       sim_caches_[config].push_back(sim_cache);
     }

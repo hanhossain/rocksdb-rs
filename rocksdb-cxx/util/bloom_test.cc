@@ -416,8 +416,9 @@ TEST_P(FullBloomTest, OptimizeForMemory) {
 class ChargeFilterConstructionTest : public testing::Test {};
 TEST_F(ChargeFilterConstructionTest, RibbonFilterFallBackOnLargeBanding) {
   constexpr std::size_t kCacheCapacity =
-      8 * CacheReservationManagerImpl<
-              rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize();
+      8 *
+      CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::
+                                      kFilterConstruction>::GetDummyEntrySize();
   constexpr std::size_t num_entries_for_cache_full = kCacheCapacity / 8;
 
   for (CacheEntryRoleOptions::Decision charge_filter_construction_mem :
@@ -466,17 +467,20 @@ TEST_F(ChargeFilterConstructionTest, RibbonFilterFallBackOnLargeBanding) {
       const size_t dummy_entry_num = static_cast<std::size_t>(std::ceil(
           filter.size() * 1.0 /
           CacheReservationManagerImpl<
-              rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize()));
+              rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::
+              GetDummyEntrySize()));
       EXPECT_GE(
           cache->GetPinnedUsage(),
           dummy_entry_num *
               CacheReservationManagerImpl<
-                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize());
+                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::
+                  GetDummyEntrySize());
       EXPECT_LT(
           cache->GetPinnedUsage(),
           (dummy_entry_num + 1) *
               CacheReservationManagerImpl<
-                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize());
+                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::
+                  GetDummyEntrySize());
     } else {
       EXPECT_EQ(cache->GetPinnedUsage(), 0);
     }

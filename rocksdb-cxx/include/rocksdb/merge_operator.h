@@ -51,9 +51,9 @@ class MergeOperator : public Customizable {
  public:
   virtual ~MergeOperator() {}
   static const char* Type() { return "MergeOperator"; }
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& opts,
-                                 const std::string& id,
-                                 std::shared_ptr<MergeOperator>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& opts, const std::string& id,
+      std::shared_ptr<MergeOperator>* result);
 
   // Gives the client a way to express the read -> modify -> write semantics
   // key:      (IN)    The key that's associated with this merge operation.

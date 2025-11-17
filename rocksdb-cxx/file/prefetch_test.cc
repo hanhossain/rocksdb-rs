@@ -32,13 +32,15 @@ class MockRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
         prefetch_count_(prefetch_count),
         small_buffer_alignment_(small_buffer_alignment) {}
 
-  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
-                    IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     if (support_prefetch_) {
       prefetch_count_.fetch_add(1);
       return target()->Prefetch(offset, n, options, dbg);
     } else {
-      return rocksdb_rs::io_status::IOStatus_NotSupported("Prefetch not supported");
+      return rocksdb_rs::io_status::IOStatus_NotSupported(
+          "Prefetch not supported");
     }
   }
 
@@ -65,10 +67,10 @@ class MockFS : public FileSystemWrapper {
   static const char* kClassName() { return "MockFS"; }
   const char* Name() const override { return kClassName(); }
 
-  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
-                               const FileOptions& opts,
-                               std::unique_ptr<FSRandomAccessFile>* result,
-                               IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(
+      const std::string& fname, const FileOptions& opts,
+      std::unique_ptr<FSRandomAccessFile>* result,
+      IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
     rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
     s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
@@ -102,7 +104,8 @@ class PrefetchTest
     options = CurrentOptions();
     options.write_buffer_size = 1024;
     options.create_if_missing = true;
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.env = env;
     options.disable_auto_compactions = true;
     if (use_direct_io) {
@@ -1565,7 +1568,8 @@ class PrefetchTest1 : public DBTestBase,
     options = CurrentOptions();
     options.write_buffer_size = 1024;
     options.create_if_missing = true;
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.env = env;
     options.disable_auto_compactions = true;
     if (use_direct_io) {
@@ -2596,7 +2600,8 @@ TEST_F(FilePrefetchBufferTest, SeekWithBlockCacheHit) {
   Slice result;
   // Simulate a seek of 4096 bytes at offset 0. Due to the readahead settings,
   // it will do two reads of 4096+8192 and 8192
-  rocksdb_rs::status::Status s = fpb.PrefetchAsync(IOOptions(), r.get(), 0, 4096, &result);
+  rocksdb_rs::status::Status s =
+      fpb.PrefetchAsync(IOOptions(), r.get(), 0, 4096, &result);
 
   // Platforms that don't have IO uring may not support async IO.
   if (s.IsNotSupported()) {
@@ -2636,7 +2641,8 @@ TEST_F(FilePrefetchBufferTest, NoSyncWithAsyncIO) {
   Slice async_result;
   // Simulate a seek of 4000 bytes at offset 3000. Due to the readahead
   // settings, it will do two reads of 4000+4096 and 4096
-  rocksdb_rs::status::Status s = fpb.PrefetchAsync(IOOptions(), r.get(), 3000, 4000, &async_result);
+  rocksdb_rs::status::Status s =
+      fpb.PrefetchAsync(IOOptions(), r.get(), 3000, 4000, &async_result);
 
   // Platforms that don't have IO uring may not support async IO
   if (s.IsNotSupported()) {

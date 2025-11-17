@@ -237,8 +237,9 @@ class FillBenchmarkThread : public BenchmarkThread {
   void FillOne() {
     char* buf = nullptr;
     auto internal_key_size = 16;
-    auto encoded_len =
-        FLAGS_item_size + rocksdb_rs::coding::VarintLength(internal_key_size) + internal_key_size;
+    auto encoded_len = FLAGS_item_size +
+                       rocksdb_rs::coding::VarintLength(internal_key_size) +
+                       internal_key_size;
     KeyHandle handle = table_->Allocate(encoded_len, &buf);
     assert(buf != nullptr);
     char* p = rocksdb_rs::coding::EncodeVarint32(buf, internal_key_size);
@@ -298,7 +299,8 @@ class ReadBenchmarkThread : public BenchmarkThread {
     CallbackVerifyArgs* callback_args = static_cast<CallbackVerifyArgs*>(arg);
     assert(callback_args != nullptr);
     uint32_t key_length;
-    const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
+    const char* key_ptr =
+        rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
     if ((callback_args->comparator)
             ->user_comparator()
             ->Equal(Slice(key_ptr, key_length - 8),
@@ -321,7 +323,8 @@ class ReadBenchmarkThread : public BenchmarkThread {
     verify_args.comparator = &internal_key_comp;
     table_->Get(lookup_key, &verify_args, callback);
     if (verify_args.found) {
-      *bytes_read_ += rocksdb_rs::coding::VarintLength(16) + 16 + FLAGS_item_size;
+      *bytes_read_ +=
+          rocksdb_rs::coding::VarintLength(16) + 16 + FLAGS_item_size;
       ++*read_hits_;
     }
   }
@@ -345,14 +348,17 @@ class SeqReadBenchmarkThread : public BenchmarkThread {
     std::unique_ptr<MemTableRep::Iterator> iter(table_->GetIterator());
     for (iter->SeekToFirst(); iter->Valid(); iter->Next()) {
       // pretend to read the value
-      *bytes_read_ += rocksdb_rs::coding::VarintLength(16) + 16 + FLAGS_item_size;
+      *bytes_read_ +=
+          rocksdb_rs::coding::VarintLength(16) + 16 + FLAGS_item_size;
     }
     ++*read_hits_;
   }
 
   void operator()() override {
     for (unsigned int i = 0; i < num_ops_; ++i) {
-      { ReadOneSeq(); }
+      {
+        ReadOneSeq();
+      }
     }
   }
 };
@@ -640,35 +646,35 @@ int main(int argc, char** argv) {
       memtablerep.reset(createMemtableRep());
       key_gen.reset(new rocksdb::KeyGenerator(
           &rng, rocksdb::WriteMode::SEQUENTIAL, FLAGS_num_operations));
-      benchmark.reset(new rocksdb::FillBenchmark(
-          memtablerep.get(), key_gen.get(), &sequence));
+      benchmark.reset(new rocksdb::FillBenchmark(memtablerep.get(),
+                                                 key_gen.get(), &sequence));
     } else if (name == rocksdb::Slice("fillrandom")) {
       memtablerep.reset(createMemtableRep());
       key_gen.reset(new rocksdb::KeyGenerator(
           &rng, rocksdb::WriteMode::UNIQUE_RANDOM, FLAGS_num_operations));
-      benchmark.reset(new rocksdb::FillBenchmark(
-          memtablerep.get(), key_gen.get(), &sequence));
+      benchmark.reset(new rocksdb::FillBenchmark(memtablerep.get(),
+                                                 key_gen.get(), &sequence));
     } else if (name == rocksdb::Slice("readrandom")) {
-      key_gen.reset(new rocksdb::KeyGenerator(
-          &rng, rocksdb::WriteMode::RANDOM, FLAGS_num_operations));
-      benchmark.reset(new rocksdb::ReadBenchmark(
-          memtablerep.get(), key_gen.get(), &sequence));
+      key_gen.reset(new rocksdb::KeyGenerator(&rng, rocksdb::WriteMode::RANDOM,
+                                              FLAGS_num_operations));
+      benchmark.reset(new rocksdb::ReadBenchmark(memtablerep.get(),
+                                                 key_gen.get(), &sequence));
     } else if (name == rocksdb::Slice("readseq")) {
       key_gen.reset(new rocksdb::KeyGenerator(
           &rng, rocksdb::WriteMode::SEQUENTIAL, FLAGS_num_operations));
-      benchmark.reset(new rocksdb::SeqReadBenchmark(memtablerep.get(),
-                                                              &sequence));
+      benchmark.reset(
+          new rocksdb::SeqReadBenchmark(memtablerep.get(), &sequence));
     } else if (name == rocksdb::Slice("readwrite")) {
       memtablerep.reset(createMemtableRep());
-      key_gen.reset(new rocksdb::KeyGenerator(
-          &rng, rocksdb::WriteMode::RANDOM, FLAGS_num_operations));
+      key_gen.reset(new rocksdb::KeyGenerator(&rng, rocksdb::WriteMode::RANDOM,
+                                              FLAGS_num_operations));
       benchmark.reset(new rocksdb::ReadWriteBenchmark<
                       rocksdb::ConcurrentReadBenchmarkThread>(
           memtablerep.get(), key_gen.get(), &sequence));
     } else if (name == rocksdb::Slice("seqreadwrite")) {
       memtablerep.reset(createMemtableRep());
-      key_gen.reset(new rocksdb::KeyGenerator(
-          &rng, rocksdb::WriteMode::RANDOM, FLAGS_num_operations));
+      key_gen.reset(new rocksdb::KeyGenerator(&rng, rocksdb::WriteMode::RANDOM,
+                                              FLAGS_num_operations));
       benchmark.reset(new rocksdb::ReadWriteBenchmark<
                       rocksdb::SeqConcurrentReadBenchmarkThread>(
           memtablerep.get(), key_gen.get(), &sequence));

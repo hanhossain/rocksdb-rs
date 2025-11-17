@@ -31,6 +31,8 @@
 #include "options/options_helper.h"
 #include "port/port.h"
 #include "port/stack_trace.h"
+#include "rocksdb-rs/src/coding_lean.rs.h"
+#include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/convenience.h"
 #include "rocksdb/db.h"
@@ -74,9 +76,6 @@
 #include "utilities/memory_allocators.h"
 #include "utilities/merge_operators.h"
 
-#include "rocksdb-rs/src/compression_type.rs.h"
-#include "rocksdb-rs/src/coding_lean.rs.h"
-
 namespace rocksdb {
 
 extern const uint64_t kLegacyBlockBasedTableMagicNumber;
@@ -93,11 +92,13 @@ class DummyPropertiesCollector : public TablePropertiesCollector {
  public:
   const char* Name() const override { return "DummyPropertiesCollector"; }
 
-  rocksdb_rs::status::Status Finish(UserCollectedProperties* /*properties*/) override {
+  rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* /*properties*/) override {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status Add(const Slice& /*user_key*/, const Slice& /*value*/) override {
+  rocksdb_rs::status::Status Add(const Slice& /*user_key*/,
+                                 const Slice& /*value*/) override {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -208,18 +209,19 @@ class Constructor {
       keys->push_back(kv.first);
     }
     data_.clear();
-    rocksdb_rs::status::Status s = FinishImpl(options, ioptions, moptions, table_options,
-                          internal_comparator, *kvmap);
+    rocksdb_rs::status::Status s =
+        FinishImpl(options, ioptions, moptions, table_options,
+                   internal_comparator, *kvmap);
     ASSERT_TRUE(s.ok()) << *s.ToString();
   }
 
   // Construct the data structure from the data in "data"
-  virtual rocksdb_rs::status::Status FinishImpl(const Options& options,
-                            const ImmutableOptions& ioptions,
-                            const MutableCFOptions& moptions,
-                            const BlockBasedTableOptions& table_options,
-                            const InternalKeyComparator& internal_comparator,
-                            const stl_wrappers::KVMap& data) = 0;
+  virtual rocksdb_rs::status::Status FinishImpl(
+      const Options& options, const ImmutableOptions& ioptions,
+      const MutableCFOptions& moptions,
+      const BlockBasedTableOptions& table_options,
+      const InternalKeyComparator& internal_comparator,
+      const stl_wrappers::KVMap& data) = 0;
 
   virtual InternalIterator* NewIterator(
       const SliceTransform* prefix_extractor = nullptr) const = 0;
@@ -244,7 +246,9 @@ class KeyConvertingIterator : public InternalIterator {
  public:
   explicit KeyConvertingIterator(InternalIterator* iter,
                                  bool arena_mode = false)
-      : status_(rocksdb_rs::status::Status_new()), iter_(iter), arena_mode_(arena_mode) {}
+      : status_(rocksdb_rs::status::Status_new()),
+        iter_(iter),
+        arena_mode_(arena_mode) {}
   ~KeyConvertingIterator() override {
     if (arena_mode_) {
       iter_->~InternalIterator();
@@ -306,12 +310,12 @@ class BlockConstructor : public Constructor {
   explicit BlockConstructor(const Comparator* cmp)
       : Constructor(cmp), comparator_(cmp), block_(nullptr) {}
   ~BlockConstructor() override { delete block_; }
-  rocksdb_rs::status::Status FinishImpl(const Options& /*options*/,
-                    const ImmutableOptions& /*ioptions*/,
-                    const MutableCFOptions& /*moptions*/,
-                    const BlockBasedTableOptions& table_options,
-                    const InternalKeyComparator& /*internal_comparator*/,
-                    const stl_wrappers::KVMap& kv_map) override {
+  rocksdb_rs::status::Status FinishImpl(
+      const Options& /*options*/, const ImmutableOptions& /*ioptions*/,
+      const MutableCFOptions& /*moptions*/,
+      const BlockBasedTableOptions& table_options,
+      const InternalKeyComparator& /*internal_comparator*/,
+      const stl_wrappers::KVMap& kv_map) override {
     delete block_;
     block_ = nullptr;
     BlockBuilder builder(table_options.block_restart_interval);
@@ -362,11 +366,12 @@ class TableConstructor : public Constructor {
   }
   ~TableConstructor() override { Reset(); }
 
-  rocksdb_rs::status::Status FinishImpl(const Options& options, const ImmutableOptions& ioptions,
-                    const MutableCFOptions& moptions,
-                    const BlockBasedTableOptions& /*table_options*/,
-                    const InternalKeyComparator& internal_comparator,
-                    const stl_wrappers::KVMap& kv_map) override {
+  rocksdb_rs::status::Status FinishImpl(
+      const Options& options, const ImmutableOptions& ioptions,
+      const MutableCFOptions& moptions,
+      const BlockBasedTableOptions& /*table_options*/,
+      const InternalKeyComparator& internal_comparator,
+      const stl_wrappers::KVMap& kv_map) override {
     Reset();
     soptions.use_mmap_reads = ioptions.allow_mmap_reads;
     std::unique_ptr<FSWritableFile> sink(new test::StringSink());
@@ -438,19 +443,19 @@ class TableConstructor : public Constructor {
   }
 
   virtual rocksdb_rs::status::Status Reopen(const ImmutableOptions& ioptions,
-                        const MutableCFOptions& moptions) {
+                                            const MutableCFOptions& moptions) {
     std::unique_ptr<FSRandomAccessFile> source(new test::StringSource(
         TEST_GetSink()->contents(), file_num_, ioptions.allow_mmap_reads));
 
     file_reader_.reset(new RandomAccessFileReader(std::move(source), "test"));
     return ioptions.table_factory->NewTableReader(
-        TableReaderOptions(ioptions, moptions.prefix_extractor, soptions,
-                           *last_internal_comparator_,
-                           0 /* block_protection_bytes_per_key */,
-                           /*skip_filters*/ false,
-                           /*immortal*/ false, false, level_,
-                           &block_cache_tracer_, moptions.write_buffer_size, "",
-                           file_num_, rocksdb_rs::unique_id::UniqueId64x2_null(), largest_seqno_),
+        TableReaderOptions(
+            ioptions, moptions.prefix_extractor, soptions,
+            *last_internal_comparator_, 0 /* block_protection_bytes_per_key */,
+            /*skip_filters*/ false,
+            /*immortal*/ false, false, level_, &block_cache_tracer_,
+            moptions.write_buffer_size, "", file_num_,
+            rocksdb_rs::unique_id::UniqueId64x2_null(), largest_seqno_),
         std::move(file_reader_), TEST_GetSink()->contents().size(),
         &table_reader_);
   }
@@ -511,11 +516,12 @@ class MemTableConstructor : public Constructor {
     memtable_->Ref();
   }
   ~MemTableConstructor() override { delete memtable_->Unref(); }
-  rocksdb_rs::status::Status FinishImpl(const Options&, const ImmutableOptions& ioptions,
-                    const MutableCFOptions& /*moptions*/,
-                    const BlockBasedTableOptions& /*table_options*/,
-                    const InternalKeyComparator& /*internal_comparator*/,
-                    const stl_wrappers::KVMap& kv_map) override {
+  rocksdb_rs::status::Status FinishImpl(
+      const Options&, const ImmutableOptions& ioptions,
+      const MutableCFOptions& /*moptions*/,
+      const BlockBasedTableOptions& /*table_options*/,
+      const InternalKeyComparator& /*internal_comparator*/,
+      const stl_wrappers::KVMap& kv_map) override {
     delete memtable_->Unref();
     ImmutableOptions mem_ioptions(ioptions);
     memtable_ = new MemTable(internal_comparator_, mem_ioptions,
@@ -524,8 +530,8 @@ class MemTableConstructor : public Constructor {
     memtable_->Ref();
     int seq = 1;
     for (const auto& kv : kv_map) {
-      rocksdb_rs::status::Status s = memtable_->Add(seq, kTypeValue, kv.first, kv.second,
-                                nullptr /* kv_prot_info */);
+      rocksdb_rs::status::Status s = memtable_->Add(
+          seq, kTypeValue, kv.first, kv.second, nullptr /* kv_prot_info */);
       if (!s.ok()) {
         return s;
       }
@@ -578,12 +584,12 @@ class DBConstructor : public Constructor {
     NewDB();
   }
   ~DBConstructor() override { delete db_; }
-  rocksdb_rs::status::Status FinishImpl(const Options& /*options*/,
-                    const ImmutableOptions& /*ioptions*/,
-                    const MutableCFOptions& /*moptions*/,
-                    const BlockBasedTableOptions& /*table_options*/,
-                    const InternalKeyComparator& /*internal_comparator*/,
-                    const stl_wrappers::KVMap& kv_map) override {
+  rocksdb_rs::status::Status FinishImpl(
+      const Options& /*options*/, const ImmutableOptions& /*ioptions*/,
+      const MutableCFOptions& /*moptions*/,
+      const BlockBasedTableOptions& /*table_options*/,
+      const InternalKeyComparator& /*internal_comparator*/,
+      const stl_wrappers::KVMap& kv_map) override {
     delete db_;
     db_ = nullptr;
     NewDB();
@@ -643,7 +649,8 @@ struct TestArgs {
 };
 
 std::ostream& operator<<(std::ostream& os, const TestArgs& args) {
-  os << "type: " << (int)args.type << " reverse_compare: " << args.reverse_compare
+  os << "type: " << (int)args.type
+     << " reverse_compare: " << args.reverse_compare
      << " restart_interval: " << args.restart_interval
      << " compression: " << static_cast<uint8_t>(args.compression)
      << " compression_parallel_threads: " << args.compression_parallel_threads
@@ -667,32 +674,52 @@ static std::vector<TestArgs> GenerateArgList() {
   std::vector<uint32_t> compression_parallel_threads = {1, 4};
 
   // Only add compression if it is supported
-  std::vector<std::pair<rocksdb_rs::compression_type::CompressionType, bool>> compression_types;
-  compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kNoCompression, false);
+  std::vector<std::pair<rocksdb_rs::compression_type::CompressionType, bool>>
+      compression_types;
+  compression_types.emplace_back(
+      rocksdb_rs::compression_type::CompressionType::kNoCompression, false);
   if (Snappy_Supported()) {
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kSnappyCompression, false);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+        false);
   }
   if (Zlib_Supported()) {
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kZlibCompression, false);
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kZlibCompression, true);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kZlibCompression, false);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kZlibCompression, true);
   }
   if (BZip2_Supported()) {
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kBZip2Compression, false);
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kBZip2Compression, true);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kBZip2Compression,
+        false);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kBZip2Compression, true);
   }
   if (LZ4_Supported()) {
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kLZ4Compression, false);
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true);
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression, false);
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression, true);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kLZ4Compression, false);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kLZ4Compression, true);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression,
+        false);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression, true);
   }
   if (XPRESS_Supported()) {
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kXpressCompression, false);
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kXpressCompression, true);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kXpressCompression,
+        false);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kXpressCompression,
+        true);
   }
   if (ZSTD_Supported()) {
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kZSTD, false);
-    compression_types.emplace_back(rocksdb_rs::compression_type::CompressionType::kZSTD, true);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kZSTD, false);
+    compression_types.emplace_back(
+        rocksdb_rs::compression_type::CompressionType::kZSTD, true);
   }
 
   for (auto test_type : test_types) {
@@ -1087,10 +1114,12 @@ INSTANTIATE_TEST_CASE_P(TableTest, ParameterizedHarnessTest,
 class DBHarnessTest : public HarnessTest {
  public:
   DBHarnessTest()
-      : HarnessTest(TestArgs{TestType::DB_TEST, /* reverse_compare */ false,
-                             /* restart_interval */ 16, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                             /* compression_parallel_threads */ 1,
-                             /* format_version */ 0, /* use_mmap */ false}) {}
+      : HarnessTest(TestArgs{
+            TestType::DB_TEST, /* reverse_compare */ false,
+            /* restart_interval */ 16,
+            rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            /* compression_parallel_threads */ 1,
+            /* format_version */ 0, /* use_mmap */ false}) {}
 };
 
 static bool Between(uint64_t val, uint64_t low, uint64_t high) {
@@ -1173,8 +1202,8 @@ class BlockBasedTableTest
 
     {
       std::unique_ptr<TraceReader> trace_reader;
-      rocksdb_rs::status::Status s = NewFileTraceReader(env_, EnvOptions(), trace_file_path_,
-                                    &trace_reader);
+      rocksdb_rs::status::Status s = NewFileTraceReader(
+          env_, EnvOptions(), trace_file_path_, &trace_reader);
       EXPECT_OK(s);
       BlockCacheTraceReader reader(std::move(trace_reader));
       BlockCacheTraceHeader header;
@@ -1273,7 +1302,8 @@ class FileChecksumTestHelper {
 
   WritableFileWriter* GetFileWriter() { return file_writer_.get(); }
 
-  rocksdb_rs::status::Status ResetTableBuilder(std::unique_ptr<TableBuilder>&& builder) {
+  rocksdb_rs::status::Status ResetTableBuilder(
+      std::unique_ptr<TableBuilder>&& builder) {
     assert(builder != nullptr);
     table_builder_ = std::move(builder);
     return rocksdb_rs::status::Status_OK();
@@ -1316,8 +1346,8 @@ class FileChecksumTestHelper {
     return table_builder_->GetFileChecksumFuncName();
   }
 
-  rocksdb_rs::status::Status CalculateFileChecksum(FileChecksumGenerator* file_checksum_generator,
-                               std::string* checksum) {
+  rocksdb_rs::status::Status CalculateFileChecksum(
+      FileChecksumGenerator* file_checksum_generator, std::string* checksum) {
     assert(file_checksum_generator != nullptr);
     cur_file_num_ = checksum_file_num_++;
     test::StringSink* ss_rw =
@@ -1330,17 +1360,20 @@ class FileChecksumTestHelper {
     Slice result;
     uint64_t offset = 0;
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-    s = file_reader_->Read(IOOptions(), offset, 2048, &result, scratch.get(),
-                           nullptr, Env::IO_TOTAL /* rate_limiter_priority */).status();
+    s = file_reader_
+            ->Read(IOOptions(), offset, 2048, &result, scratch.get(), nullptr,
+                   Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
     if (!s.ok()) {
       return s;
     }
     while (result.size() != 0) {
       file_checksum_generator->Update(scratch.get(), result.size());
       offset += static_cast<uint64_t>(result.size());
-      s = file_reader_->Read(IOOptions(), offset, 2048, &result, scratch.get(),
-                             nullptr,
-                             Env::IO_TOTAL /* rate_limiter_priority */).status();
+      s = file_reader_
+              ->Read(IOOptions(), offset, 2048, &result, scratch.get(), nullptr,
+                     Env::IO_TOTAL /* rate_limiter_priority */)
+              .status();
       if (!s.ok()) {
         return s;
       }
@@ -1416,7 +1449,8 @@ std::ostream& operator<<(std::ostream& os, const TestIds& ids) {
   return os << std::hex << "{{{ 0x" << ids.internal_id.data[0] << "U, 0x"
             << ids.internal_id.data[1] << "U, 0x" << ids.internal_id.data[2]
             << "U }}, {{ 0x" << ids.external_id.data[0] << "U, 0x"
-            << ids.external_id.data[1] << "U, 0x" << ids.external_id.data[2] << "U }}}";
+            << ids.external_id.data[1] << "U, 0x" << ids.external_id.data[2]
+            << "U }}}";
 }
 
 TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
@@ -1426,8 +1460,10 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
   if (db_session_id.size() == 20) {
     uint64_t upper;
     uint64_t lower;
-    EXPECT_OK(rocksdb_rs::unique_id::DecodeSessionId(db_session_id, upper, lower));
-    EXPECT_EQ(rocksdb_rs::unique_id::EncodeSessionId(upper, lower), db_session_id);
+    EXPECT_OK(
+        rocksdb_rs::unique_id::DecodeSessionId(db_session_id, upper, lower));
+    EXPECT_EQ(rocksdb_rs::unique_id::EncodeSessionId(upper, lower),
+              db_session_id);
   }
 
   // Get external using public API
@@ -1447,8 +1483,10 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
     EXPECT_OK(GetUniqueIdFromTableProperties(*tp, uid));
     EXPECT_EQ(uid.size(), 16U);
     EXPECT_EQ(uid, euid.substr(0, 16));
-    EXPECT_EQ(t.external_id.data[0], rocksdb_rs::coding_lean::DecodeFixed64(&uid[0]));
-    EXPECT_EQ(t.external_id.data[1], rocksdb_rs::coding_lean::DecodeFixed64(&uid[8]));
+    EXPECT_EQ(t.external_id.data[0],
+              rocksdb_rs::coding_lean::DecodeFixed64(&uid[0]));
+    EXPECT_EQ(t.external_id.data[1],
+              rocksdb_rs::coding_lean::DecodeFixed64(&uid[8]));
   }
   // All these should be effectively random
   EXPECT_TRUE(seen->insert(t.external_id.data[0]).second);
@@ -1456,7 +1494,8 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
   EXPECT_TRUE(seen->insert(t.external_id.data[2]).second);
 
   // Get internal with internal API
-  EXPECT_OK(t.internal_id.get_sst_internal_unique_id(db_id, db_session_id, file_number, false));
+  EXPECT_OK(t.internal_id.get_sst_internal_unique_id(db_id, db_session_id,
+                                                     file_number, false));
   EXPECT_NE(t.internal_id, rocksdb_rs::unique_id::UniqueId64x3_null());
 
   // Verify relationship
@@ -1468,7 +1507,8 @@ TestIds GetUniqueId(TableProperties* tp, std::unordered_set<uint64_t>* seen,
 
   // And 128-bit internal version
   rocksdb_rs::unique_id::UniqueId64x2 tmp2{};
-  EXPECT_OK(tmp2.get_sst_internal_unique_id(db_id, db_session_id, file_number, false));
+  EXPECT_OK(tmp2.get_sst_internal_unique_id(db_id, db_session_id, file_number,
+                                            false));
   EXPECT_NE(tmp2, rocksdb_rs::unique_id::UniqueId64x2_null());
 
   EXPECT_EQ(tmp2.data[0], t.internal_id.data[0]);
@@ -1595,7 +1635,8 @@ TEST_F(TablePropertyTest, UniqueIdsSchemaAndQuality) {
   // external IDs. This way, as long as we avoid "all zeros" in internal IDs,
   // we avoid it in external IDs.
   {
-    rocksdb_rs::unique_id::UniqueId64x3 id1{{0, 0, Random::GetTLSInstance()->Next64()}};
+    rocksdb_rs::unique_id::UniqueId64x3 id1{
+        {0, 0, Random::GetTLSInstance()->Next64()}};
     rocksdb_rs::unique_id::UniqueId64x3 id2 = id1;
     InternalUniqueIdToExternal(id1.as_unique_id_ptr());
     EXPECT_EQ(id1, id2);
@@ -1630,7 +1671,8 @@ TEST_F(TablePropertyTest, UniqueIdHumanStrings) {
             "6474DF650323BDF0-B48E64F3039308CA-17284B32E7F7444B");
 
   EXPECT_OK(GetUniqueIdFromTableProperties(tp, tmp));
-  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "6474DF650323BDF0-B48E64F3039308CA");
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp),
+            "6474DF650323BDF0-B48E64F3039308CA");
 
   // including zero padding
   tmp = std::string(24U, '\0');
@@ -1648,10 +1690,12 @@ TEST_F(TablePropertyTest, UniqueIdHumanStrings) {
             "0000000000120000-0000AB0000000000-00EF0000");
 
   tmp.resize(16);
-  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "0000000000120000-0000AB0000000000");
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp),
+            "0000000000120000-0000AB0000000000");
 
   tmp.resize(11);
-  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "0000000000120000-0000AB");
+  EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp),
+            "0000000000120000-0000AB");
 
   tmp.resize(6);
   EXPECT_EQ(rocksdb_rs::unique_id::UniqueIdToHumanString(tmp), "000000000012");
@@ -1672,22 +1716,19 @@ TEST_F(TablePropertyTest, UniqueIdsFailure) {
   SetGoodTableProperties(&tp);
   tp.db_id = "";
   EXPECT_TRUE(GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
-  EXPECT_TRUE(
-      GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+  EXPECT_TRUE(GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
 
   // Missing session id
   SetGoodTableProperties(&tp);
   tp.db_session_id = "";
   EXPECT_TRUE(GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
-  EXPECT_TRUE(
-      GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+  EXPECT_TRUE(GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
 
   // Missing file number
   SetGoodTableProperties(&tp);
   tp.orig_file_number = 0;
   EXPECT_TRUE(GetUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
-  EXPECT_TRUE(
-      GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
+  EXPECT_TRUE(GetExtendedUniqueIdFromTableProperties(tp, tmp).IsNotSupported());
 }
 
 // This test include all the basic checks except those for index size and block
@@ -1709,7 +1750,8 @@ TEST_P(BlockBasedTableTest, BasicBlockBasedTableProperties) {
   std::vector<std::string> keys;
   stl_wrappers::KVMap kvmap;
   Options options;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
@@ -1788,7 +1830,8 @@ TEST_P(BlockBasedTableTest, BlockBasedTableProperties2) {
 
   {
     Options options;
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 
@@ -1865,7 +1908,8 @@ TEST_P(BlockBasedTableTest, RangeDelBlock) {
   std::vector<std::string> sorted_keys;
   stl_wrappers::KVMap kvmap;
   Options options;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   table_options.block_restart_interval = 1;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -1954,7 +1998,8 @@ void PrefetchRange(TableConstructor* c, Options* opt,
                    const char* key_end,
                    const std::vector<std::string>& keys_in_cache,
                    const std::vector<std::string>& keys_not_in_cache,
-                   const rocksdb_rs::status::Status expected_status = rocksdb_rs::status::Status_OK()) {
+                   const rocksdb_rs::status::Status expected_status =
+                       rocksdb_rs::status::Status_OK()) {
   // reset the cache and reopen the table
   table_options->block_cache = NewLRUCache(16 * 1024 * 1024, 4);
   opt->table_factory.reset(NewBlockBasedTableFactory(*table_options));
@@ -2000,7 +2045,8 @@ TEST_P(BlockBasedTableTest, PrefetchTest) {
   Options opt;
   std::unique_ptr<InternalKeyComparator> ikc;
   ikc.reset(new test::PlainInternalKeyComparator(opt.comparator));
-  opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  opt.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   table_options.block_size = 1024;
   // big enough so we don't ever lose cached values.
@@ -2056,8 +2102,9 @@ TEST_P(BlockBasedTableTest, PrefetchTest) {
   PrefetchRange(&c, &opt, &table_options, nullptr, "k05",
                 {"k01", "k02", "k03", "k04", "k05"}, {"k06", "k07"});
   // invalid
-  PrefetchRange(&c, &opt, &table_options, "k06", "k00", {}, {},
-                rocksdb_rs::status::Status_InvalidArgument(Slice("k06 "), Slice("k07")));
+  PrefetchRange(
+      &c, &opt, &table_options, "k06", "k00", {}, {},
+      rocksdb_rs::status::Status_InvalidArgument(Slice("k06 "), Slice("k07")));
   c.ResetTableReader();
 }
 
@@ -2315,9 +2362,12 @@ TEST_P(BuiltinChecksumTest, ChecksumSchemas) {
 
   std::string empty;
 
-  char ct1 = static_cast<char>(rocksdb_rs::compression_type::CompressionType::kNoCompression);
-  char ct2 = static_cast<char>(rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
-  char ct3 = static_cast<char>(rocksdb_rs::compression_type::CompressionType::kZSTD);
+  char ct1 = static_cast<char>(
+      rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  char ct2 = static_cast<char>(
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+  char ct3 =
+      static_cast<char>(rocksdb_rs::compression_type::CompressionType::kZSTD);
 
   ChecksumType t = GetParam();
   switch (t) {
@@ -3025,7 +3075,8 @@ TEST_P(BlockBasedTableTest, IndexSizeStat) {
     std::vector<std::string> ks;
     stl_wrappers::KVMap kvmap;
     Options options;
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
     table_options.block_restart_interval = 1;
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -3045,7 +3096,8 @@ TEST_P(BlockBasedTableTest, NumBlockStat) {
   Random rnd(test::RandomSeed());
   TableConstructor c(BytewiseComparator(), true /* convert_to_internal_key_ */);
   Options options;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   table_options.block_restart_interval = 1;
   table_options.block_size = 1000;
@@ -3256,7 +3308,8 @@ TEST_P(BlockBasedTableTest, TracingMultiGetTest) {
     std::array<std::string, 2> encoded_keys;
     encoded_keys[0] = InternalKey(ukeys[0], 0, kTypeValue).Encode().ToString();
     encoded_keys[1] = InternalKey(ukeys[1], 0, kTypeValue).Encode().ToString();
-    std::array<rocksdb_rs::status::Status, 2> statuses { rocksdb_rs::status::Status_new(), rocksdb_rs::status::Status_new() };
+    std::array<rocksdb_rs::status::Status, 2> statuses{
+        rocksdb_rs::status::Status_new(), rocksdb_rs::status::Status_new()};
     autovector<KeyContext, MultiGetContext::MAX_BATCH_SIZE> key_context;
     key_context.emplace_back(/*ColumnFamilyHandle omitted*/ nullptr, ukeys[0],
                              &values[0],
@@ -3856,7 +3909,8 @@ TEST_P(BlockBasedTableTest, BlockCacheLeak) {
   Options opt;
   std::unique_ptr<InternalKeyComparator> ikc;
   ikc.reset(new test::PlainInternalKeyComparator(opt.comparator));
-  opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  opt.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   table_options.block_size = 1024;
   // big enough so we don't ever lose cached values.
@@ -3920,7 +3974,8 @@ TEST_P(BlockBasedTableTest, MemoryAllocator) {
     Options opt;
     std::unique_ptr<InternalKeyComparator> ikc;
     ikc.reset(new test::PlainInternalKeyComparator(opt.comparator));
-    opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    opt.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     BlockBasedTableOptions table_options;
     table_options.block_size = 1024;
     LRUCacheOptions lruOptions;
@@ -4062,10 +4117,11 @@ TEST_F(PlainTableTest, BasicPlainTableProperties) {
   std::string column_family_name;
   int unknown_level = -1;
   std::unique_ptr<TableBuilder> builder(factory.NewTableBuilder(
-      TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                          CompressionOptions(), kUnknownColumnFamily,
-                          column_family_name, unknown_level),
+      TableBuilderOptions(
+          ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          CompressionOptions(), kUnknownColumnFamily, column_family_name,
+          unknown_level),
       file_writer.get()));
 
   for (char c = 'a'; c <= 'z'; ++c) {
@@ -4117,10 +4173,11 @@ TEST_F(PlainTableTest, NoFileChecksum) {
   f.CreateWritableFile();
 
   std::unique_ptr<TableBuilder> builder(factory.NewTableBuilder(
-      TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                          CompressionOptions(), kUnknownColumnFamily,
-                          column_family_name, unknown_level),
+      TableBuilderOptions(
+          ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          CompressionOptions(), kUnknownColumnFamily, column_family_name,
+          unknown_level),
       f.GetFileWriter()));
   ASSERT_OK(f.ResetTableBuilder(std::move(builder)));
   f.AddKVtoKVMap(1000);
@@ -4157,10 +4214,11 @@ TEST_F(PlainTableTest, Crc32cFileChecksum) {
   f.SetFileChecksumGenerator(checksum_crc32c_gen1.release());
 
   std::unique_ptr<TableBuilder> builder(factory.NewTableBuilder(
-      TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                          CompressionOptions(), kUnknownColumnFamily,
-                          column_family_name, unknown_level),
+      TableBuilderOptions(
+          ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          CompressionOptions(), kUnknownColumnFamily, column_family_name,
+          unknown_level),
       f.GetFileWriter()));
   ASSERT_OK(f.ResetTableBuilder(std::move(builder)));
   f.AddKVtoKVMap(1000);
@@ -4174,7 +4232,6 @@ TEST_F(PlainTableTest, Crc32cFileChecksum) {
   ASSERT_OK(f.CalculateFileChecksum(checksum_crc32c_gen2.get(), &checksum));
   EXPECT_STREQ(f.GetFileChecksum().c_str(), checksum.c_str());
 }
-
 
 TEST_F(GeneralTableTest, ApproximateOffsetOfPlain) {
   TableConstructor c(BytewiseComparator(), true /* convert_to_internal_key_ */);
@@ -4190,7 +4247,8 @@ TEST_F(GeneralTableTest, ApproximateOffsetOfPlain) {
   Options options;
   options.db_host_id = "";
   test::PlainInternalKeyComparator internal_comparator(options.comparator);
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options;
   table_options.block_size = 1024;
   const ImmutableOptions ioptions(options);
@@ -4214,8 +4272,10 @@ TEST_F(GeneralTableTest, ApproximateOffsetOfPlain) {
   c.ResetTableReader();
 }
 
-static void DoCompressionTest(rocksdb_rs::compression_type::CompressionType comp) {
-  SCOPED_TRACE("rocksdb_rs::compression_type::CompressionType = " + CompressionTypeToString(comp));
+static void DoCompressionTest(
+    rocksdb_rs::compression_type::CompressionType comp) {
+  SCOPED_TRACE("rocksdb_rs::compression_type::CompressionType = " +
+               CompressionTypeToString(comp));
   Random rnd(301);
   TableConstructor c(BytewiseComparator(), true /* convert_to_internal_key_ */);
   std::string tmp;
@@ -4248,13 +4308,15 @@ TEST_F(GeneralTableTest, ApproximateOffsetOfCompressed) {
   if (!Snappy_Supported()) {
     fprintf(stderr, "skipping snappy compression tests\n");
   } else {
-    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+    compression_state.push_back(
+        rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
   }
 
   if (!Zlib_Supported()) {
     fprintf(stderr, "skipping zlib compression tests\n");
   } else {
-    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kZlibCompression);
+    compression_state.push_back(
+        rocksdb_rs::compression_type::CompressionType::kZlibCompression);
   }
 
   // TODO(kailiu) DoCompressionTest() doesn't work with BZip2.
@@ -4269,14 +4331,17 @@ TEST_F(GeneralTableTest, ApproximateOffsetOfCompressed) {
   if (!LZ4_Supported()) {
     fprintf(stderr, "skipping lz4 and lz4hc compression tests\n");
   } else {
-    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
-    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
+    compression_state.push_back(
+        rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+    compression_state.push_back(
+        rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
   }
 
   if (!XPRESS_Supported()) {
     fprintf(stderr, "skipping xpress and xpress compression tests\n");
   } else {
-    compression_state.push_back(rocksdb_rs::compression_type::CompressionType::kXpressCompression);
+    compression_state.push_back(
+        rocksdb_rs::compression_type::CompressionType::kXpressCompression);
   }
 
   for (auto state : compression_state) {
@@ -4295,7 +4360,8 @@ TEST_F(GeneralTableTest, ApproximateKeyAnchors) {
   stl_wrappers::KVMap kvmap;
   Options options;
   InternalKeyComparator ikc(options.comparator);
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options;
   table_options.block_size = 4096;
   const ImmutableOptions ioptions(options);
@@ -4488,9 +4554,9 @@ TEST(TableTest, FooterTests) {
     ASSERT_EQ(decoded_footer.format_version(), 0U);
     ASSERT_EQ(decoded_footer.GetBlockTrailerSize(), 5U);
     // Ensure serialized with legacy magic
-    ASSERT_EQ(
-        rocksdb_rs::coding_lean::DecodeFixed64(footer.GetSlice().data() + footer.GetSlice().size() - 8),
-        kLegacyBlockBasedTableMagicNumber);
+    ASSERT_EQ(rocksdb_rs::coding_lean::DecodeFixed64(
+                  footer.GetSlice().data() + footer.GetSlice().size() - 8),
+              kLegacyBlockBasedTableMagicNumber);
   }
   // block based, various checksums, various versions
   for (auto t : GetSupportedChecksums()) {
@@ -4529,9 +4595,9 @@ TEST(TableTest, FooterTests) {
     ASSERT_EQ(decoded_footer.format_version(), 0U);
     ASSERT_EQ(decoded_footer.GetBlockTrailerSize(), 0U);
     // Ensure serialized with legacy magic
-    ASSERT_EQ(
-        rocksdb_rs::coding_lean::DecodeFixed64(footer.GetSlice().data() + footer.GetSlice().size() - 8),
-        kLegacyPlainTableMagicNumber);
+    ASSERT_EQ(rocksdb_rs::coding_lean::DecodeFixed64(
+                  footer.GetSlice().data() + footer.GetSlice().size() - 8),
+              kLegacyPlainTableMagicNumber);
   }
   {
     // xxhash plain table (not currently used)
@@ -4638,11 +4704,10 @@ namespace {
 // A simple PrefixExtractor that only works for test PrefixAndWholeKeyTest
 class TestPrefixExtractor : public rocksdb::SliceTransform {
  public:
-  ~TestPrefixExtractor() override{};
+  ~TestPrefixExtractor() override {};
   const char* Name() const override { return "TestPrefixExtractor"; }
 
-  rocksdb::Slice Transform(
-      const rocksdb::Slice& src) const override {
+  rocksdb::Slice Transform(const rocksdb::Slice& src) const override {
     assert(IsValid(src));
     return rocksdb::Slice(src.data(), 3);
   }
@@ -4651,9 +4716,7 @@ class TestPrefixExtractor : public rocksdb::SliceTransform {
     return IsValid(src);
   }
 
-  bool InRange(const rocksdb::Slice& /*dst*/) const override {
-    return true;
-  }
+  bool InRange(const rocksdb::Slice& /*dst*/) const override { return true; }
 
   bool IsValid(const rocksdb::Slice& src) const {
     if (src.size() != 4) {
@@ -4735,10 +4798,10 @@ TEST_P(BlockBasedTableTest, DISABLED_TableWithGlobalSeqno) {
                                                   0 /* global_seqno*/));
   std::string column_family_name;
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
-      TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                          CompressionOptions(), kUnknownColumnFamily,
-                          column_family_name, -1),
+      TableBuilderOptions(
+          ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          CompressionOptions(), kUnknownColumnFamily, column_family_name, -1),
       file_writer.get()));
 
   for (char c = 'a'; c <= 'z'; ++c) {
@@ -4909,7 +4972,8 @@ TEST_P(BlockBasedTableTest, BlockAlignTest) {
   std::unique_ptr<WritableFileWriter> file_writer(new WritableFileWriter(
       std::move(holder), "" /* don't care */, FileOptions()));
   Options options;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
   const ImmutableOptions ioptions(options);
   const MutableCFOptions moptions(options);
@@ -4917,10 +4981,10 @@ TEST_P(BlockBasedTableTest, BlockAlignTest) {
   IntTblPropCollectorFactories int_tbl_prop_collector_factories;
   std::string column_family_name;
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
-      TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                          CompressionOptions(), kUnknownColumnFamily,
-                          column_family_name, -1),
+      TableBuilderOptions(
+          ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          CompressionOptions(), kUnknownColumnFamily, column_family_name, -1),
       file_writer.get()));
 
   for (int i = 1; i <= 10000; ++i) {
@@ -5000,7 +5064,8 @@ TEST_P(BlockBasedTableTest, PropertiesBlockRestartPointTest) {
       std::move(holder), "" /* don't care */, FileOptions()));
 
   Options options;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
   const ImmutableOptions ioptions(options);
@@ -5010,10 +5075,10 @@ TEST_P(BlockBasedTableTest, PropertiesBlockRestartPointTest) {
   std::string column_family_name;
 
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
-      TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                          CompressionOptions(), kUnknownColumnFamily,
-                          column_family_name, -1),
+      TableBuilderOptions(
+          ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          CompressionOptions(), kUnknownColumnFamily, column_family_name, -1),
       file_writer.get()));
 
   for (int i = 1; i <= 10000; ++i) {
@@ -5084,15 +5149,18 @@ TEST_P(BlockBasedTableTest, PropertiesBlockRestartPointTest) {
 }
 
 TEST_P(BlockBasedTableTest, CompressionRatioThreshold) {
-  for (rocksdb_rs::compression_type::CompressionType type : GetSupportedCompressions()) {
+  for (rocksdb_rs::compression_type::CompressionType type :
+       GetSupportedCompressions()) {
     if (type == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       continue;
     }
-    if (type == rocksdb_rs::compression_type::CompressionType::kBZip2Compression) {
+    if (type ==
+        rocksdb_rs::compression_type::CompressionType::kBZip2Compression) {
       // Weird behavior in this test
       continue;
     }
-    SCOPED_TRACE("Compression type: " + std::to_string(static_cast<uint8_t>(type)));
+    SCOPED_TRACE("Compression type: " +
+                 std::to_string(static_cast<uint8_t>(type)));
 
     Options options;
     options.compression = type;
@@ -5303,7 +5371,8 @@ TEST_P(BlockBasedTableTest, SeekMetaBlocks) {
 
 TEST_P(BlockBasedTableTest, BadOptions) {
   rocksdb::Options options;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions bbto = GetBlockBasedTableOptions();
   bbto.block_size = 4000;
   bbto.block_align = true;
@@ -5316,7 +5385,8 @@ TEST_P(BlockBasedTableTest, BadOptions) {
   ASSERT_NOK(rocksdb::DB::Open(options, kDBPath, &db));
 
   bbto.block_size = 4096;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
   ASSERT_NOK(rocksdb::DB::Open(options, kDBPath, &db));
 }
@@ -5580,10 +5650,12 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, Basic) {
     table_options.flush_block_policy_factory =
         std::make_shared<FlushBlockEveryKeyPolicyFactory>();
     table_options.cache_usage_options.options_overrides.insert(
-        {rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer,
+        {rocksdb_rs::cache::CacheEntryRole::
+             kCompressionDictionaryBuildingBuffer,
          {/*.charged = */ charge_compression_dictionary_building_buffer}});
     Options options;
-    options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
     options.compression_opts.max_dict_bytes = kMaxDictBytes;
     options.compression_opts.max_dict_buffer_bytes = kMaxDictBufferBytes;
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -5600,10 +5672,12 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, Basic) {
 
     std::unique_ptr<TableBuilder> builder(
         options.table_factory->NewTableBuilder(
-            TableBuilderOptions(
-                ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
-                rocksdb_rs::compression_type::CompressionType::kSnappyCompression, options.compression_opts,
-                kUnknownColumnFamily, "test_cf", -1 /* level */),
+            TableBuilderOptions(ioptions, moptions, ikc,
+                                &int_tbl_prop_collector_factories,
+                                rocksdb_rs::compression_type::CompressionType::
+                                    kSnappyCompression,
+                                options.compression_opts, kUnknownColumnFamily,
+                                "test_cf", -1 /* level */),
             file_writer.get()));
 
     std::string key1 = "key1";
@@ -5659,7 +5733,8 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest,
       std::make_shared<FlushBlockEveryKeyPolicyFactory>();
 
   Options options;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.compression_opts.max_dict_bytes = kMaxDictBytes;
   options.compression_opts.max_dict_buffer_bytes = kMaxDictBufferBytes;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -5675,10 +5750,11 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest,
   IntTblPropCollectorFactories int_tbl_prop_collector_factories;
 
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
-      TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
-                          options.compression_opts, kUnknownColumnFamily,
-                          "test_cf", -1 /* level */),
+      TableBuilderOptions(
+          ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
+          rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+          options.compression_opts, kUnknownColumnFamily, "test_cf",
+          -1 /* level */),
       file_writer.get()));
 
   std::string key1 = "key1";
@@ -5744,7 +5820,8 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, BasicWithCacheFull) {
       std::make_shared<FlushBlockEveryKeyPolicyFactory>();
 
   Options options;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.compression_opts.max_dict_bytes = kMaxDictBytes;
   options.compression_opts.max_dict_buffer_bytes = kMaxDictBufferBytes;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -5760,10 +5837,11 @@ TEST_F(ChargeCompressionDictionaryBuildingBufferTest, BasicWithCacheFull) {
   IntTblPropCollectorFactories int_tbl_prop_collector_factories;
 
   std::unique_ptr<TableBuilder> builder(options.table_factory->NewTableBuilder(
-      TableBuilderOptions(ioptions, moptions, ikc,
-                          &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
-                          options.compression_opts, kUnknownColumnFamily,
-                          "test_cf", -1 /* level */),
+      TableBuilderOptions(
+          ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
+          rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+          options.compression_opts, kUnknownColumnFamily, "test_cf",
+          -1 /* level */),
       file_writer.get()));
 
   std::string key1 = "key1";
@@ -5851,7 +5929,8 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
       std::string::npos);
   EXPECT_TRUE(
       s.ToString()->find(static_cast<std::string>(CacheEntryRole_ToCamelString(
-          rocksdb_rs::cache::CacheEntryRole::kDataBlock))) != std::string::npos);
+          rocksdb_rs::cache::CacheEntryRole::kDataBlock))) !=
+      std::string::npos);
   Destroy(options);
 
   // To test option validation on existence of block cache
@@ -5868,7 +5947,8 @@ TEST_F(CacheUsageOptionsOverridesTest, SanitizeAndValidateOptions) {
               std::string::npos);
   EXPECT_TRUE(
       s.ToString()->find(static_cast<std::string>(CacheEntryRole_ToCamelString(
-          rocksdb_rs::cache::CacheEntryRole::kFilterConstruction))) != std::string::npos);
+          rocksdb_rs::cache::CacheEntryRole::kFilterConstruction))) !=
+      std::string::npos);
   EXPECT_TRUE(s.ToString()->find("block cache is disabled") !=
               std::string::npos);
   Destroy(options);

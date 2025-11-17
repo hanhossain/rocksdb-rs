@@ -14,10 +14,9 @@
 #include <cmath>
 
 #include "port/port.h"  // for PREFETCH
+#include "rocksdb-rs/src/util/bloom.rs.h"
 #include "rocksdb/slice.h"
 #include "util/hash.h"
-
-#include "rocksdb-rs/src/util/bloom.rs.h"
 
 #ifdef __AVX2__
 #include <immintrin.h>
@@ -79,7 +78,8 @@ class FastLocalBloomImpl {
  public:
   static inline void AddHash(uint32_t h1, uint32_t h2, uint32_t len_bytes,
                              int num_probes, char *data) {
-    uint32_t bytes_to_cache_line = rocksdb_rs::util::fastrange::FastRange32(len_bytes >> 6, h1) << 6;
+    uint32_t bytes_to_cache_line =
+        rocksdb_rs::util::fastrange::FastRange32(len_bytes >> 6, h1) << 6;
     AddHashPrepared(h2, num_probes, data + bytes_to_cache_line);
   }
 
@@ -96,7 +96,8 @@ class FastLocalBloomImpl {
   static inline void PrepareHash(uint32_t h1, uint32_t len_bytes,
                                  const char *data,
                                  uint32_t /*out*/ *byte_offset) {
-    uint32_t bytes_to_cache_line = rocksdb_rs::util::fastrange::FastRange32(len_bytes >> 6, h1) << 6;
+    uint32_t bytes_to_cache_line =
+        rocksdb_rs::util::fastrange::FastRange32(len_bytes >> 6, h1) << 6;
     PREFETCH(data + bytes_to_cache_line, 0 /* rw */, 1 /* locality */);
     PREFETCH(data + bytes_to_cache_line + 63, 0 /* rw */, 1 /* locality */);
     *byte_offset = bytes_to_cache_line;
@@ -104,7 +105,8 @@ class FastLocalBloomImpl {
 
   static inline bool HashMayMatch(uint32_t h1, uint32_t h2, uint32_t len_bytes,
                                   int num_probes, const char *data) {
-    uint32_t bytes_to_cache_line = rocksdb_rs::util::fastrange::FastRange32(len_bytes >> 6, h1) << 6;
+    uint32_t bytes_to_cache_line =
+        rocksdb_rs::util::fastrange::FastRange32(len_bytes >> 6, h1) << 6;
     return HashMayMatchPrepared(h2, num_probes, data + bytes_to_cache_line);
   }
 
@@ -293,8 +295,9 @@ class LegacyLocalityBloomImpl {
   // reasonable warnings / user feedback, not for making functional decisions.
   static double EstimatedFpRate(size_t keys, size_t bytes, int num_probes) {
     double bits_per_key = 8.0 * bytes / keys;
-    double filter_rate = rocksdb_rs::util::bloom::BloomMath_CacheLocalFpRate(bits_per_key, num_probes,
-                                                     /*cache line bits*/ 512);
+    double filter_rate = rocksdb_rs::util::bloom::BloomMath_CacheLocalFpRate(
+        bits_per_key, num_probes,
+        /*cache line bits*/ 512);
     if (!ExtraRotates) {
       // Good estimate of impact of flaw in index computation.
       // Adds roughly 0.002 around 50 bits/key and 0.001 around 100 bits/key.
@@ -305,8 +308,10 @@ class LegacyLocalityBloomImpl {
       assert(false);
     }
     // Always uses 32-bit hash
-    double fingerprint_rate = rocksdb_rs::util::bloom::BloomMath_FingerprintFpRate(keys, 32);
-    return rocksdb_rs::util::bloom::BloomMath_IndependentProbabilitySum(filter_rate, fingerprint_rate);
+    double fingerprint_rate =
+        rocksdb_rs::util::bloom::BloomMath_FingerprintFpRate(keys, 32);
+    return rocksdb_rs::util::bloom::BloomMath_IndependentProbabilitySum(
+        filter_rate, fingerprint_rate);
   }
 
   static inline void AddHash(uint32_t h, uint32_t num_lines, int num_probes,

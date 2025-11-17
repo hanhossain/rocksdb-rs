@@ -7,7 +7,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 #include "utilities/checkpoint/checkpoint_impl.h"
 
 #include <algorithm>
@@ -35,14 +34,15 @@
 
 namespace rocksdb {
 
-rocksdb_rs::status::Status Checkpoint::Create(DB* db, Checkpoint** checkpoint_ptr) {
+rocksdb_rs::status::Status Checkpoint::Create(DB* db,
+                                              Checkpoint** checkpoint_ptr) {
   *checkpoint_ptr = new CheckpointImpl(db);
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status Checkpoint::CreateCheckpoint(const std::string& /*checkpoint_dir*/,
-                                    uint64_t /*log_size_for_flush*/,
-                                    uint64_t* /*sequence_number_ptr*/) {
+rocksdb_rs::status::Status Checkpoint::CreateCheckpoint(
+    const std::string& /*checkpoint_dir*/, uint64_t /*log_size_for_flush*/,
+    uint64_t* /*sequence_number_ptr*/) {
   return rocksdb_rs::status::Status_NotSupported("");
 }
 
@@ -77,9 +77,9 @@ rocksdb_rs::status::Status Checkpoint::ExportColumnFamily(
 }
 
 // Builds an openable snapshot of RocksDB
-rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& checkpoint_dir,
-                                        uint64_t log_size_for_flush,
-                                        uint64_t* sequence_number_ptr) {
+rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(
+    const std::string& checkpoint_dir, uint64_t log_size_for_flush,
+    uint64_t* sequence_number_ptr) {
   DBOptions db_options = db_->GetDBOptions();
 
   rocksdb_rs::status::Status s = db_->GetEnv()->FileExists(checkpoint_dir);
@@ -101,7 +101,8 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
     // directory, but it shouldn't be because we verified above the directory
     // doesn't exist.
     assert(checkpoint_dir.empty());
-    return rocksdb_rs::status::Status_InvalidArgument("invalid checkpoint directory name");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "invalid checkpoint directory name");
   }
 
   std::string full_private_path =
@@ -124,9 +125,11 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
               rocksdb_rs::types::FileType) {
             ROCKS_LOG_INFO(db_options.info_log, "Hard Linking %s",
                            fname.c_str());
-            return db_->GetFileSystem()->LinkFile(
-                src_dirname + "/" + fname, full_private_path + "/" + fname,
-                IOOptions(), nullptr).status();
+            return db_->GetFileSystem()
+                ->LinkFile(src_dirname + "/" + fname,
+                           full_private_path + "/" + fname, IOOptions(),
+                           nullptr)
+                .status();
           } /* link_file_cb */,
           [&](const std::string& src_dirname, const std::string& fname,
               uint64_t size_limit_bytes, rocksdb_rs::types::FileType,
@@ -136,13 +139,16 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
             ROCKS_LOG_INFO(db_options.info_log, "Copying %s", fname.c_str());
             return CopyFile(db_->GetFileSystem(), src_dirname + "/" + fname,
                             full_private_path + "/" + fname, size_limit_bytes,
-                            db_options.use_fsync, nullptr, temperature).status();
+                            db_options.use_fsync, nullptr, temperature)
+                .status();
           } /* copy_file_cb */,
-          [&](const std::string& fname, const std::string& contents, rocksdb_rs::types::FileType) {
+          [&](const std::string& fname, const std::string& contents,
+              rocksdb_rs::types::FileType) {
             ROCKS_LOG_INFO(db_options.info_log, "Creating %s", fname.c_str());
             return CreateFile(db_->GetFileSystem(),
                               full_private_path + "/" + fname, contents,
-                              db_options.use_fsync).status();
+                              db_options.use_fsync)
+                .status();
           } /* create_file_cb */,
           &sequence_number, log_size_for_flush);
 
@@ -160,12 +166,16 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
   }
   if (s.ok()) {
     std::unique_ptr<FSDirectory> checkpoint_directory;
-    s = db_->GetFileSystem()->NewDirectory(checkpoint_dir, IOOptions(),
-                                           &checkpoint_directory, nullptr).status();
+    s = db_->GetFileSystem()
+            ->NewDirectory(checkpoint_dir, IOOptions(), &checkpoint_directory,
+                           nullptr)
+            .status();
     if (s.ok() && checkpoint_directory != nullptr) {
-      s = checkpoint_directory->FsyncWithDirOptions(
-          IOOptions(), nullptr,
-          DirFsyncOptions(DirFsyncOptions::FsyncReason::kDirRenamed)).status();
+      s = checkpoint_directory
+              ->FsyncWithDirOptions(
+                  IOOptions(), nullptr,
+                  DirFsyncOptions(DirFsyncOptions::FsyncReason::kDirRenamed))
+              .status();
     }
   }
 
@@ -188,16 +198,18 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCheckpoint(const std::string& c
 
 rocksdb_rs::status::Status CheckpointImpl::CreateCustomCheckpoint(
     std::function<rocksdb_rs::status::Status(const std::string& src_dirname,
-                         const std::string& src_fname, rocksdb_rs::types::FileType type)>
+                                             const std::string& src_fname,
+                                             rocksdb_rs::types::FileType type)>
         link_file_cb,
-    std::function<
-        rocksdb_rs::status::Status(const std::string& src_dirname, const std::string& src_fname,
-               uint64_t size_limit_bytes, rocksdb_rs::types::FileType type,
-               const std::string& checksum_func_name,
-               const std::string& checksum_val, const Temperature temperature)>
+    std::function<rocksdb_rs::status::Status(
+        const std::string& src_dirname, const std::string& src_fname,
+        uint64_t size_limit_bytes, rocksdb_rs::types::FileType type,
+        const std::string& checksum_func_name, const std::string& checksum_val,
+        const Temperature temperature)>
         copy_file_cb,
-    std::function<rocksdb_rs::status::Status(const std::string& fname, const std::string& contents,
-                         rocksdb_rs::types::FileType type)>
+    std::function<rocksdb_rs::status::Status(const std::string& fname,
+                                             const std::string& contents,
+                                             rocksdb_rs::types::FileType type)>
         create_file_cb,
     uint64_t* sequence_number, uint64_t log_size_for_flush,
     bool get_live_table_checksum) {
@@ -237,8 +249,8 @@ rocksdb_rs::status::Status CheckpointImpl::CreateCustomCheckpoint(
       assert(info.file_type == rocksdb_rs::types::FileType::kCurrentFile);
 
       if (info.size != info.replacement_contents.size()) {
-        s = rocksdb_rs::status::Status_Corruption("Inconsistent size metadata for " +
-                               info.relative_filename);
+        s = rocksdb_rs::status::Status_Corruption(
+            "Inconsistent size metadata for " + info.relative_filename);
       } else {
         s = create_file_cb(info.relative_filename, info.replacement_contents,
                            info.file_type);
@@ -289,7 +301,8 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
   assert(*metadata == nullptr);
   auto s = db_->GetEnv()->FileExists(export_dir);
   if (s.ok()) {
-    return rocksdb_rs::status::Status_InvalidArgument("Specified export_dir exists");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Specified export_dir exists");
   } else if (!s.IsNotFound()) {
     assert(s.IsIOError());
     return s;
@@ -297,7 +310,8 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
 
   const auto final_nonslash_idx = export_dir.find_last_not_of('/');
   if (final_nonslash_idx == std::string::npos) {
-    return rocksdb_rs::status::Status_InvalidArgument("Specified export_dir invalid");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Specified export_dir invalid");
   }
   ROCKS_LOG_INFO(db_options.info_log,
                  "[%s] export column family onto export directory %s",
@@ -332,7 +346,8 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
                            cf_name.c_str(), fname.c_str());
             return CopyFile(db_->GetFileSystem(), src_dirname + fname,
                             tmp_export_dir + fname, 0, db_options.use_fsync,
-                            nullptr, Temperature::kUnknown).status();
+                            nullptr, Temperature::kUnknown)
+                .status();
           } /*copy_file_cb*/);
 
       const auto enable_status = db_->EnableFileDeletions(false /*force*/);
@@ -352,13 +367,16 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
     // Fsync export directory.
     moved_to_user_specified_dir = true;
     std::unique_ptr<FSDirectory> dir_ptr;
-    s = db_->GetFileSystem()->NewDirectory(export_dir, IOOptions(), &dir_ptr,
-                                           nullptr).status();
+    s = db_->GetFileSystem()
+            ->NewDirectory(export_dir, IOOptions(), &dir_ptr, nullptr)
+            .status();
     if (s.ok()) {
       assert(dir_ptr != nullptr);
-      s = dir_ptr->FsyncWithDirOptions(
-          IOOptions(), nullptr,
-          DirFsyncOptions(DirFsyncOptions::FsyncReason::kDirRenamed)).status();
+      s = dir_ptr
+              ->FsyncWithDirOptions(
+                  IOOptions(), nullptr,
+                  DirFsyncOptions(DirFsyncOptions::FsyncReason::kDirRenamed))
+              .status();
     }
   }
 
@@ -417,10 +435,10 @@ rocksdb_rs::status::Status CheckpointImpl::ExportColumnFamily(
 rocksdb_rs::status::Status CheckpointImpl::ExportFilesInMetaData(
     const DBOptions& db_options, const ColumnFamilyMetaData& metadata,
     std::function<rocksdb_rs::status::Status(const std::string& src_dirname,
-                         const std::string& src_fname)>
+                                             const std::string& src_fname)>
         link_file_cb,
     std::function<rocksdb_rs::status::Status(const std::string& src_dirname,
-                         const std::string& src_fname)>
+                                             const std::string& src_fname)>
         copy_file_cb) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   auto hardlink_file = true;
@@ -431,7 +449,8 @@ rocksdb_rs::status::Status CheckpointImpl::ExportFilesInMetaData(
     for (const auto& file_metadata : level_metadata.files) {
       uint64_t number;
       rocksdb_rs::types::FileType type;
-      const auto ok = rocksdb_rs::filename::ParseFileName(file_metadata.name, &number, &type);
+      const auto ok = rocksdb_rs::filename::ParseFileName(file_metadata.name,
+                                                          &number, &type);
       if (!ok) {
         s = rocksdb_rs::status::Status_Corruption("Could not parse file name");
         break;
@@ -465,4 +484,3 @@ rocksdb_rs::status::Status CheckpointImpl::ExportFilesInMetaData(
   return s;
 }
 }  // namespace rocksdb
-

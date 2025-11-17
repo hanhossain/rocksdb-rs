@@ -28,9 +28,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/customizable.h"
 #include "rocksdb/env.h"
-#include "rocksdb-rs/src/io_status.rs.h"
 #include "rocksdb/options.h"
 #include "rocksdb/table.h"
 #include "rocksdb/thread_status.h"
@@ -287,9 +287,9 @@ class FileSystem : public Customizable {
   // @param result On success, returns the loaded FileSystem
   // @return OK if the FileSystem was successfully loaded.
   // @return not-OK if the load failed.
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& options,
-                                 const std::string& value,
-                                 std::shared_ptr<FileSystem>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& options, const std::string& value,
+      std::shared_ptr<FileSystem>* result);
 
   // Return a default FileSystem suitable for the current operating
   // system.
@@ -310,7 +310,8 @@ class FileSystem : public Customizable {
   //
   // Different implementations may take different actions.
   // By default, it's a no-op and returns Status_OK.
-  virtual rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& /*paths*/) {
+  virtual rocksdb_rs::status::Status RegisterDbPaths(
+      const std::vector<std::string>& /*paths*/) {
     return rocksdb_rs::status::Status_OK();
   }
   // Handles the event a DB or a ColumnFamily stops using the specified data
@@ -320,7 +321,8 @@ class FileSystem : public Customizable {
   //
   // Different implementations may take different actions.
   // By default, it's a no-op and returns Status_OK.
-  virtual rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& /*paths*/) {
+  virtual rocksdb_rs::status::Status UnregisterDbPaths(
+      const std::vector<std::string>& /*paths*/) {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -330,10 +332,9 @@ class FileSystem : public Customizable {
   // not exist, returns a non-OK status.
   //
   // The returned file will only be accessed by one thread at a time.
-  virtual rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& fname,
-                                     const FileOptions& file_opts,
-                                     std::unique_ptr<FSSequentialFile>* result,
-                                     IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus NewSequentialFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSSequentialFile>* result, IODebugContext* dbg) = 0;
 
   // Create a brand new random access read-only file with the
   // specified name.  On success, stores a pointer to the new file in
@@ -363,10 +364,9 @@ class FileSystem : public Customizable {
   // returns non-OK.
   //
   // The returned file will only be accessed by one thread at a time.
-  virtual rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname,
-                                   const FileOptions& file_opts,
-                                   std::unique_ptr<FSWritableFile>* result,
-                                   IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus NewWritableFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) = 0;
 
   // Create an object that writes to a file with the specified name.
   // `FSWritableFile::Append()`s will append after any existing content.  If the
@@ -383,21 +383,19 @@ class FileSystem : public Customizable {
   }
 
   // Reuse an existing file by renaming it and opening it as writable.
-  virtual rocksdb_rs::io_status::IOStatus ReuseWritableFile(const std::string& fname,
-                                     const std::string& old_fname,
-                                     const FileOptions& file_opts,
-                                     std::unique_ptr<FSWritableFile>* result,
-                                     IODebugContext* dbg);
+  virtual rocksdb_rs::io_status::IOStatus ReuseWritableFile(
+      const std::string& fname, const std::string& old_fname,
+      const FileOptions& file_opts, std::unique_ptr<FSWritableFile>* result,
+      IODebugContext* dbg);
 
   // Open `fname` for random read and write, if file doesn't exist the file
   // will be created.  On success, stores a pointer to the new file in
   // *result and returns OK.  On failure returns non-OK.
   //
   // The returned file will only be accessed by one thread at a time.
-  virtual rocksdb_rs::io_status::IOStatus NewRandomRWFile(const std::string& /*fname*/,
-                                   const FileOptions& /*options*/,
-                                   std::unique_ptr<FSRandomRWFile>* /*result*/,
-                                   IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus NewRandomRWFile(
+      const std::string& /*fname*/, const FileOptions& /*options*/,
+      std::unique_ptr<FSRandomRWFile>* /*result*/, IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported(
         "RandomRWFile is not implemented in this FileSystem");
   }
@@ -419,10 +417,9 @@ class FileSystem : public Customizable {
   // On success, stores a pointer to the new Directory in
   // *result and returns OK. On failure stores nullptr in *result and
   // returns non-OK.
-  virtual rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name,
-                                const IOOptions& io_opts,
-                                std::unique_ptr<FSDirectory>* result,
-                                IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus NewDirectory(
+      const std::string& name, const IOOptions& io_opts,
+      std::unique_ptr<FSDirectory>* result, IODebugContext* dbg) = 0;
 
   // Returns OK if the named file exists.
   //         NotFound if the named file does not exist,
@@ -430,8 +427,8 @@ class FileSystem : public Customizable {
   //                  whether this file exists, or if the path is invalid.
   //         IOError if an IO Error was encountered
   virtual rocksdb_rs::io_status::IOStatus FileExists(const std::string& fname,
-                              const IOOptions& options,
-                              IODebugContext* dbg) = 0;
+                                                     const IOOptions& options,
+                                                     IODebugContext* dbg) = 0;
 
   // Store in *result the names of the children of the specified directory.
   // The names are relative to "dir".
@@ -440,9 +437,9 @@ class FileSystem : public Customizable {
   //         NotFound if "dir" does not exist, the calling process does not have
   //                  permission to access "dir", or if "dir" is invalid.
   //         IOError if an IO Error was encountered
-  virtual rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& options,
-                               std::vector<std::string>* result,
-                               IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus GetChildren(
+      const std::string& dir, const IOOptions& options,
+      std::vector<std::string>* result, IODebugContext* dbg) = 0;
 
   // Store in *result the attributes of the children of the specified directory.
   // In case the implementation lists the directory prior to iterating the files
@@ -459,7 +456,8 @@ class FileSystem : public Customizable {
       std::vector<FileAttributes>* result, IODebugContext* dbg) {
     assert(result != nullptr);
     std::vector<std::string> child_fnames;
-    rocksdb_rs::io_status::IOStatus s = GetChildren(dir, options, &child_fnames, dbg);
+    rocksdb_rs::io_status::IOStatus s =
+        GetChildren(dir, options, &child_fnames, dbg);
     if (!s.ok()) {
       return s;
     }
@@ -489,66 +487,68 @@ class FileSystem : public Customizable {
 #endif
   // Delete the named file.
   virtual rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& fname,
-                              const IOOptions& options,
-                              IODebugContext* dbg) = 0;
+                                                     const IOOptions& options,
+                                                     IODebugContext* dbg) = 0;
 
   // Truncate the named file to the specified size.
-  virtual rocksdb_rs::io_status::IOStatus Truncate(const std::string& /*fname*/, size_t /*size*/,
-                            const IOOptions& /*options*/,
-                            IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus Truncate(const std::string& /*fname*/,
+                                                   size_t /*size*/,
+                                                   const IOOptions& /*options*/,
+                                                   IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported(
         "Truncate is not supported for this FileSystem");
   }
 
   // Create the specified directory. Returns error if directory exists.
   virtual rocksdb_rs::io_status::IOStatus CreateDir(const std::string& dirname,
-                             const IOOptions& options, IODebugContext* dbg) = 0;
+                                                    const IOOptions& options,
+                                                    IODebugContext* dbg) = 0;
 
   // Creates directory if missing. Return Ok if it exists, or successful in
   // Creating.
-  virtual rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& dirname,
-                                      const IOOptions& options,
-                                      IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus CreateDirIfMissing(
+      const std::string& dirname, const IOOptions& options,
+      IODebugContext* dbg) = 0;
 
   // Delete the specified directory.
   virtual rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& dirname,
-                             const IOOptions& options, IODebugContext* dbg) = 0;
+                                                    const IOOptions& options,
+                                                    IODebugContext* dbg) = 0;
 
   // Store the size of fname in *file_size.
   virtual rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& fname,
-                               const IOOptions& options, uint64_t* file_size,
-                               IODebugContext* dbg) = 0;
+                                                      const IOOptions& options,
+                                                      uint64_t* file_size,
+                                                      IODebugContext* dbg) = 0;
 
   // Store the last modification time of fname in *file_mtime.
-  virtual rocksdb_rs::io_status::IOStatus GetFileModificationTime(const std::string& fname,
-                                           const IOOptions& options,
-                                           uint64_t* file_mtime,
-                                           IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus GetFileModificationTime(
+      const std::string& fname, const IOOptions& options, uint64_t* file_mtime,
+      IODebugContext* dbg) = 0;
   // Rename file src to target.
-  virtual rocksdb_rs::io_status::IOStatus RenameFile(const std::string& src, const std::string& target,
-                              const IOOptions& options,
-                              IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus RenameFile(const std::string& src,
+                                                     const std::string& target,
+                                                     const IOOptions& options,
+                                                     IODebugContext* dbg) = 0;
 
   // Hard Link file src to target.
-  virtual rocksdb_rs::io_status::IOStatus LinkFile(const std::string& /*src*/,
-                            const std::string& /*target*/,
-                            const IOOptions& /*options*/,
-                            IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus LinkFile(
+      const std::string& /*src*/, const std::string& /*target*/,
+      const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported(
         "LinkFile is not supported for this FileSystem");
   }
 
-  virtual rocksdb_rs::io_status::IOStatus NumFileLinks(const std::string& /*fname*/,
-                                const IOOptions& /*options*/,
-                                uint64_t* /*count*/, IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus NumFileLinks(
+      const std::string& /*fname*/, const IOOptions& /*options*/,
+      uint64_t* /*count*/, IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported(
         "Getting number of file links is not supported for this FileSystem");
   }
 
-  virtual rocksdb_rs::io_status::IOStatus AreFilesSame(const std::string& /*first*/,
-                                const std::string& /*second*/,
-                                const IOOptions& /*options*/, bool* /*res*/,
-                                IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus AreFilesSame(
+      const std::string& /*first*/, const std::string& /*second*/,
+      const IOOptions& /*options*/, bool* /*res*/, IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported(
         "AreFilesSame is not supported for this FileSystem");
   }
@@ -567,34 +567,36 @@ class FileSystem : public Customizable {
   // to go away.
   //
   // May create the named file if it does not already exist.
-  virtual rocksdb_rs::io_status::IOStatus LockFile(const std::string& fname, const IOOptions& options,
-                            FileLock** lock, IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus LockFile(const std::string& fname,
+                                                   const IOOptions& options,
+                                                   FileLock** lock,
+                                                   IODebugContext* dbg) = 0;
 
   // Release the lock acquired by a previous successful call to LockFile.
   // REQUIRES: lock was returned by a successful LockFile() call
   // REQUIRES: lock has not already been unlocked.
-  virtual rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* lock, const IOOptions& options,
-                              IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* lock,
+                                                     const IOOptions& options,
+                                                     IODebugContext* dbg) = 0;
 
   // *path is set to a temporary directory that can be used for testing. It may
   // or many not have just been created. The directory may or may not differ
   // between runs of the same process, but subsequent calls will return the
   // same directory.
-  virtual rocksdb_rs::io_status::IOStatus GetTestDirectory(const IOOptions& options, std::string* path,
-                                    IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus GetTestDirectory(
+      const IOOptions& options, std::string* path, IODebugContext* dbg) = 0;
 
   // Create and returns a default logger (an instance of EnvLogger) for storing
   // informational messages. Derived classes can override to provide custom
   // logger.
-  virtual rocksdb_rs::io_status::IOStatus NewLogger(const std::string& fname, const IOOptions& io_opts,
-                             std::shared_ptr<Logger>* result,
-                             IODebugContext* dbg);
+  virtual rocksdb_rs::io_status::IOStatus NewLogger(
+      const std::string& fname, const IOOptions& io_opts,
+      std::shared_ptr<Logger>* result, IODebugContext* dbg);
 
   // Get full directory name for this db.
-  virtual rocksdb_rs::io_status::IOStatus GetAbsolutePath(const std::string& db_path,
-                                   const IOOptions& options,
-                                   std::string* output_path,
-                                   IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus GetAbsolutePath(
+      const std::string& db_path, const IOOptions& options,
+      std::string* output_path, IODebugContext* dbg) = 0;
 
   // Sanitize the FileOptions. Typically called by a FileOptions/EnvOptions
   // copy constructor
@@ -650,16 +652,15 @@ class FileSystem : public Customizable {
 #endif
 
   // Get the amount of free disk space
-  virtual rocksdb_rs::io_status::IOStatus GetFreeSpace(const std::string& /*path*/,
-                                const IOOptions& /*options*/,
-                                uint64_t* /*diskfree*/,
-                                IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus GetFreeSpace(
+      const std::string& /*path*/, const IOOptions& /*options*/,
+      uint64_t* /*diskfree*/, IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported("GetFreeSpace");
   }
 
-  virtual rocksdb_rs::io_status::IOStatus IsDirectory(const std::string& /*path*/,
-                               const IOOptions& options, bool* is_dir,
-                               IODebugContext* /*dgb*/) = 0;
+  virtual rocksdb_rs::io_status::IOStatus IsDirectory(
+      const std::string& /*path*/, const IOOptions& options, bool* is_dir,
+      IODebugContext* /*dgb*/) = 0;
 
   // Poll for completion of read IO requests. The Poll() method should call the
   // callback functions to indicate completion of read requests.
@@ -668,8 +669,8 @@ class FileSystem : public Customizable {
   // after the callback has been called.
   // If Poll returns partial results for any reads, its caller reponsibility to
   // call Read or ReadAsync in order to get the remaining bytes.
-  virtual rocksdb_rs::io_status::IOStatus Poll(std::vector<void*>& /*io_handles*/,
-                        size_t /*min_completions*/) {
+  virtual rocksdb_rs::io_status::IOStatus Poll(
+      std::vector<void*>& /*io_handles*/, size_t /*min_completions*/) {
     return rocksdb_rs::io_status::IOStatus_OK();
   }
 
@@ -677,7 +678,8 @@ class FileSystem : public Customizable {
   // required to support AbortIO API. AbortIO implementation should ensure that
   // the all the read requests related to io_handles should be aborted and
   // it shouldn't call the callback for these io_handles.
-  virtual rocksdb_rs::io_status::IOStatus AbortIO(std::vector<void*>& /*io_handles*/) {
+  virtual rocksdb_rs::io_status::IOStatus AbortIO(
+      std::vector<void*>& /*io_handles*/) {
     return rocksdb_rs::io_status::IOStatus_OK();
   }
 
@@ -721,8 +723,10 @@ class FSSequentialFile {
   // first result->size() < n.
   //
   // REQUIRES: External synchronization
-  virtual rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options, Slice* result,
-                        char* scratch, IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Read(size_t n,
+                                               const IOOptions& options,
+                                               Slice* result, char* scratch,
+                                               IODebugContext* dbg) = 0;
 
   // Skip "n" bytes from the file. This is guaranteed to be no
   // slower that reading the same data, but may be faster.
@@ -744,16 +748,17 @@ class FSSequentialFile {
   // Remove any kind of caching of data from the offset to offset+length
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
-  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return rocksdb_rs::io_status::IOStatus_NotSupported("InvalidateCache not supported.");
+  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/,
+                                                          size_t /*length*/) {
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
+        "InvalidateCache not supported.");
   }
 
   // Positioned Read for direct I/O
   // If Direct I/O enabled, offset, n, and scratch should be properly aligned
-  virtual rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t /*offset*/, size_t /*n*/,
-                                  const IOOptions& /*options*/,
-                                  Slice* /*result*/, char* /*scratch*/,
-                                  IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus PositionedRead(
+      uint64_t /*offset*/, size_t /*n*/, const IOOptions& /*options*/,
+      Slice* /*result*/, char* /*scratch*/, IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported("PositionedRead");
   }
 
@@ -798,7 +803,8 @@ struct FSReadRequest {
 
   // Output parameter set by underlying FileSystem that represents status of
   // read request.
-  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus status =
+      rocksdb_rs::io_status::IOStatus_new();
 
   // fs_scratch is a data buffer allocated and provided by underlying FileSystem
   // to RocksDB during reads, when FS wants to provide its own buffer with data
@@ -858,16 +864,18 @@ class FSRandomAccessFile {
   //
   // Safe for concurrent use by multiple threads.
   // If Direct I/O enabled, offset, n, and scratch should be aligned properly.
-  virtual rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                        Slice* result, char* scratch,
-                        IODebugContext* dbg) const = 0;
+  virtual rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                               const IOOptions& options,
+                                               Slice* result, char* scratch,
+                                               IODebugContext* dbg) const = 0;
 
   // Readahead the file starting from offset by n bytes for caching.
   // If it's not implemented (default: `NotSupported`), RocksDB will create
   // internal prefetch buffer to improve read performance.
-  virtual rocksdb_rs::io_status::IOStatus Prefetch(uint64_t /*offset*/, size_t /*n*/,
-                            const IOOptions& /*options*/,
-                            IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus Prefetch(uint64_t /*offset*/,
+                                                   size_t /*n*/,
+                                                   const IOOptions& /*options*/,
+                                                   IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported("Prefetch");
   }
 
@@ -879,8 +887,10 @@ class FSRandomAccessFile {
   // status will be assumed for all read requests. The function return status
   // is only meant for errors that occur before processing individual read
   // requests.
-  virtual rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
-                             const IOOptions& options, IODebugContext* dbg) {
+  virtual rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs,
+                                                    size_t num_reqs,
+                                                    const IOOptions& options,
+                                                    IODebugContext* dbg) {
     assert(reqs != nullptr);
     for (size_t i = 0; i < num_reqs; ++i) {
       FSReadRequest& req = reqs[i];
@@ -925,8 +935,10 @@ class FSRandomAccessFile {
   // Remove any kind of caching of data from the offset to offset+length
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
-  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return rocksdb_rs::io_status::IOStatus_NotSupported("InvalidateCache not supported.");
+  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/,
+                                                          size_t /*length*/) {
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
+        "InvalidateCache not supported.");
   }
 
   // This API reads the requested data in FSReadRequest asynchronously. This is
@@ -1016,8 +1028,9 @@ class FSWritableFile {
   // Append data to the end of the file
   // Note: A WritableFile object must support either Append or
   // PositionedAppend, so the users cannot mix the two.
-  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
-                          IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data,
+                                                 const IOOptions& options,
+                                                 IODebugContext* dbg) = 0;
 
   // Append data with verification information.
   // Note that this API change is experimental and it might be changed in
@@ -1027,9 +1040,10 @@ class FSWritableFile {
   // ChecksumType::kCRC32C is set as default) is not supported by this
   // FSWritableFile, the information in DataVerificationInfo can be ignored
   // (i.e. does not perform checksum verification).
-  virtual rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
-                          const DataVerificationInfo& /* verification_info */,
-                          IODebugContext* dbg) {
+  virtual rocksdb_rs::io_status::IOStatus Append(
+      const Slice& data, const IOOptions& options,
+      const DataVerificationInfo& /* verification_info */,
+      IODebugContext* dbg) {
     return Append(data, options, dbg);
   }
 
@@ -1053,10 +1067,9 @@ class FSWritableFile {
   //
   // PositionedAppend() requires aligned buffer to be passed in. The alignment
   // required is queried via GetRequiredBufferAlignment()
-  virtual rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& /* data */,
-                                    uint64_t /* offset */,
-                                    const IOOptions& /*options*/,
-                                    IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus PositionedAppend(
+      const Slice& /* data */, uint64_t /* offset */,
+      const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported("PositionedAppend");
   }
 
@@ -1080,8 +1093,9 @@ class FSWritableFile {
   // before closing. It is not always possible to keep track of the file
   // size due to whole pages writes. The behavior is undefined if called
   // with other writes to follow.
-  virtual rocksdb_rs::io_status::IOStatus Truncate(uint64_t /*size*/, const IOOptions& /*options*/,
-                            IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus Truncate(uint64_t /*size*/,
+                                                   const IOOptions& /*options*/,
+                                                   IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_OK();
   }
 
@@ -1091,11 +1105,13 @@ class FSWritableFile {
   // (However, implementations must also clean up properly in the destructor
   // even if Close() is not called.)
   virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
-                         IODebugContext* /*dbg*/) = 0;
+                                                IODebugContext* /*dbg*/) = 0;
 
-  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) = 0;
-  virtual rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
-                        IODebugContext* dbg) = 0;  // sync data
+  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options,
+                                                IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Sync(
+      const IOOptions& options,
+      IODebugContext* dbg) = 0;  // sync data
 
   /*
    * Sync data and/or metadata as well.
@@ -1103,7 +1119,8 @@ class FSWritableFile {
    * Override this method for environments where we need to sync
    * metadata as well.
    */
-  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) {
+  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
+                                                IODebugContext* dbg) {
     return Sync(options, dbg);
   }
 
@@ -1172,8 +1189,10 @@ class FSWritableFile {
   // of this file. If the length is 0, then it refers to the end of file.
   // If the system is not caching the file contents, then this is a noop.
   // This call has no effect on dirty pages in the cache.
-  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/, size_t /*length*/) {
-    return rocksdb_rs::io_status::IOStatus_NotSupported("InvalidateCache not supported.");
+  virtual rocksdb_rs::io_status::IOStatus InvalidateCache(size_t /*offset*/,
+                                                          size_t /*length*/) {
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
+        "InvalidateCache not supported.");
   }
 
   // Sync a file range with disk.
@@ -1182,8 +1201,10 @@ class FSWritableFile {
   // This asks the OS to initiate flushing the cached data to disk,
   // without waiting for completion.
   // Default implementation does nothing.
-  virtual rocksdb_rs::io_status::IOStatus RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/,
-                             const IOOptions& options, IODebugContext* dbg) {
+  virtual rocksdb_rs::io_status::IOStatus RangeSync(uint64_t /*offset*/,
+                                                    uint64_t /*nbytes*/,
+                                                    const IOOptions& options,
+                                                    IODebugContext* dbg) {
     if (strict_bytes_per_sync_) {
       return Sync(options, dbg);
     }
@@ -1216,9 +1237,10 @@ class FSWritableFile {
   }
 
   // Pre-allocates space for a file.
-  virtual rocksdb_rs::io_status::IOStatus Allocate(uint64_t /*offset*/, uint64_t /*len*/,
-                            const IOOptions& /*options*/,
-                            IODebugContext* /*dbg*/) {
+  virtual rocksdb_rs::io_status::IOStatus Allocate(uint64_t /*offset*/,
+                                                   uint64_t /*len*/,
+                                                   const IOOptions& /*options*/,
+                                                   IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_OK();
   }
 
@@ -1261,8 +1283,10 @@ class FSRandomRWFile {
 
   // Write bytes in `data` at  offset `offset`, Returns Status_OK() on success.
   // Pass aligned buffer when use_direct_io() returns true.
-  virtual rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data,
-                         const IOOptions& options, IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Write(uint64_t offset,
+                                                const Slice& data,
+                                                const IOOptions& options,
+                                                IODebugContext* dbg) = 0;
 
   // Read up to `n` bytes starting from offset `offset` and store them in
   // result, provided `scratch` size should be at least `n`.
@@ -1272,15 +1296,19 @@ class FSRandomRWFile {
   // first result->size() < n.
   //
   // Returns Status_OK() on success.
-  virtual rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                        Slice* result, char* scratch,
-                        IODebugContext* dbg) const = 0;
+  virtual rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                               const IOOptions& options,
+                                               Slice* result, char* scratch,
+                                               IODebugContext* dbg) const = 0;
 
-  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options,
+                                                IODebugContext* dbg) = 0;
 
-  virtual rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
+                                               IODebugContext* dbg) = 0;
 
-  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) {
+  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
+                                                IODebugContext* dbg) {
     return Sync(options, dbg);
   }
 
@@ -1289,7 +1317,8 @@ class FSRandomRWFile {
   // The file is considered closed regardless of return status.
   // (However, implementations must also clean up properly in the destructor
   // even if Close() is not called.)
-  virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
+                                                IODebugContext* dbg) = 0;
 
   // EXPERIMENTAL
   // When available, returns the actual temperature for the file. This is
@@ -1337,7 +1366,8 @@ class FSDirectory {
   // and ignore the result, to ensure resources are released.
   virtual ~FSDirectory() {}
   // Fsync directory. Can be called concurrently from multiple threads.
-  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) = 0;
+  virtual rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
+                                                IODebugContext* dbg) = 0;
 
   // FsyncWithDirOptions after renaming a file. Depends on the filesystem, it
   // may fsync directory or just the renaming file (e.g. btrfs). By default, it
@@ -1352,7 +1382,7 @@ class FSDirectory {
   // any errors associated with finishing writes (in case of future features).
   // The directory is considered closed regardless of return status.
   virtual rocksdb_rs::io_status::IOStatus Close(const IOOptions& /*options*/,
-                         IODebugContext* /*dbg*/) {
+                                                IODebugContext* /*dbg*/) {
     return rocksdb_rs::io_status::IOStatus_NotSupported("Close");
   }
 
@@ -1404,39 +1434,35 @@ class FileSystemWrapper : public FileSystem {
   FileSystem* target() const { return target_.get(); }
 
   // The following text is boilerplate that forwards all methods to target()
-  rocksdb_rs::io_status::IOStatus NewSequentialFile(const std::string& f, const FileOptions& file_opts,
-                             std::unique_ptr<FSSequentialFile>* r,
-                             IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewSequentialFile(
+      const std::string& f, const FileOptions& file_opts,
+      std::unique_ptr<FSSequentialFile>* r, IODebugContext* dbg) override {
     return target_->NewSequentialFile(f, file_opts, r, dbg);
   }
-  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& f,
-                               const FileOptions& file_opts,
-                               std::unique_ptr<FSRandomAccessFile>* r,
-                               IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(
+      const std::string& f, const FileOptions& file_opts,
+      std::unique_ptr<FSRandomAccessFile>* r, IODebugContext* dbg) override {
     return target_->NewRandomAccessFile(f, file_opts, r, dbg);
   }
-  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& f, const FileOptions& file_opts,
-                           std::unique_ptr<FSWritableFile>* r,
-                           IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewWritableFile(
+      const std::string& f, const FileOptions& file_opts,
+      std::unique_ptr<FSWritableFile>* r, IODebugContext* dbg) override {
     return target_->NewWritableFile(f, file_opts, r, dbg);
   }
-  rocksdb_rs::io_status::IOStatus ReopenWritableFile(const std::string& fname,
-                              const FileOptions& file_opts,
-                              std::unique_ptr<FSWritableFile>* result,
-                              IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus ReopenWritableFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) override {
     return target_->ReopenWritableFile(fname, file_opts, result, dbg);
   }
-  rocksdb_rs::io_status::IOStatus ReuseWritableFile(const std::string& fname,
-                             const std::string& old_fname,
-                             const FileOptions& file_opts,
-                             std::unique_ptr<FSWritableFile>* r,
-                             IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus ReuseWritableFile(
+      const std::string& fname, const std::string& old_fname,
+      const FileOptions& file_opts, std::unique_ptr<FSWritableFile>* r,
+      IODebugContext* dbg) override {
     return target_->ReuseWritableFile(fname, old_fname, file_opts, r, dbg);
   }
-  rocksdb_rs::io_status::IOStatus NewRandomRWFile(const std::string& fname,
-                           const FileOptions& file_opts,
-                           std::unique_ptr<FSRandomRWFile>* result,
-                           IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewRandomRWFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSRandomRWFile>* result, IODebugContext* dbg) override {
     return target_->NewRandomRWFile(fname, file_opts, result, dbg);
   }
   rocksdb_rs::io_status::IOStatus NewMemoryMappedFileBuffer(
@@ -1444,102 +1470,123 @@ class FileSystemWrapper : public FileSystem {
       std::unique_ptr<MemoryMappedFileBuffer>* result) override {
     return target_->NewMemoryMappedFileBuffer(fname, result);
   }
-  rocksdb_rs::io_status::IOStatus NewDirectory(const std::string& name, const IOOptions& io_opts,
-                        std::unique_ptr<FSDirectory>* result,
-                        IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewDirectory(
+      const std::string& name, const IOOptions& io_opts,
+      std::unique_ptr<FSDirectory>* result, IODebugContext* dbg) override {
     return target_->NewDirectory(name, io_opts, result, dbg);
   }
-  rocksdb_rs::io_status::IOStatus FileExists(const std::string& f, const IOOptions& io_opts,
-                      IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus FileExists(const std::string& f,
+                                             const IOOptions& io_opts,
+                                             IODebugContext* dbg) override {
     return target_->FileExists(f, io_opts, dbg);
   }
-  rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
-                       std::vector<std::string>* r,
-                       IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir,
+                                              const IOOptions& io_opts,
+                                              std::vector<std::string>* r,
+                                              IODebugContext* dbg) override {
     return target_->GetChildren(dir, io_opts, r, dbg);
   }
-  rocksdb_rs::io_status::IOStatus GetChildrenFileAttributes(const std::string& dir,
-                                     const IOOptions& options,
-                                     std::vector<FileAttributes>* result,
-                                     IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus GetChildrenFileAttributes(
+      const std::string& dir, const IOOptions& options,
+      std::vector<FileAttributes>* result, IODebugContext* dbg) override {
     return target_->GetChildrenFileAttributes(dir, options, result, dbg);
   }
-  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& f, const IOOptions& options,
-                      IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus DeleteFile(const std::string& f,
+                                             const IOOptions& options,
+                                             IODebugContext* dbg) override {
     return target_->DeleteFile(f, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Truncate(const std::string& fname, size_t size,
-                    const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Truncate(const std::string& fname,
+                                           size_t size,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     return target_->Truncate(fname, size, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus CreateDir(const std::string& d, const IOOptions& options,
-                     IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus CreateDir(const std::string& d,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override {
     return target_->CreateDir(d, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus CreateDirIfMissing(const std::string& d, const IOOptions& options,
-                              IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus CreateDirIfMissing(
+      const std::string& d, const IOOptions& options,
+      IODebugContext* dbg) override {
     return target_->CreateDirIfMissing(d, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& d, const IOOptions& options,
-                     IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus DeleteDir(const std::string& d,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override {
     return target_->DeleteDir(d, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& f, const IOOptions& options,
-                       uint64_t* s, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus GetFileSize(const std::string& f,
+                                              const IOOptions& options,
+                                              uint64_t* s,
+                                              IODebugContext* dbg) override {
     return target_->GetFileSize(f, options, s, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus GetFileModificationTime(const std::string& fname,
-                                   const IOOptions& options,
-                                   uint64_t* file_mtime,
-                                   IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus GetFileModificationTime(
+      const std::string& fname, const IOOptions& options, uint64_t* file_mtime,
+      IODebugContext* dbg) override {
     return target_->GetFileModificationTime(fname, options, file_mtime, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus GetAbsolutePath(const std::string& db_path, const IOOptions& options,
-                           std::string* output_path,
-                           IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus GetAbsolutePath(
+      const std::string& db_path, const IOOptions& options,
+      std::string* output_path, IODebugContext* dbg) override {
     return target_->GetAbsolutePath(db_path, options, output_path, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus RenameFile(const std::string& s, const std::string& t,
-                      const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus RenameFile(const std::string& s,
+                                             const std::string& t,
+                                             const IOOptions& options,
+                                             IODebugContext* dbg) override {
     return target_->RenameFile(s, t, options, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& s, const std::string& t,
-                    const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& s,
+                                           const std::string& t,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     return target_->LinkFile(s, t, options, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus NumFileLinks(const std::string& fname, const IOOptions& options,
-                        uint64_t* count, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NumFileLinks(const std::string& fname,
+                                               const IOOptions& options,
+                                               uint64_t* count,
+                                               IODebugContext* dbg) override {
     return target_->NumFileLinks(fname, options, count, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus AreFilesSame(const std::string& first, const std::string& second,
-                        const IOOptions& options, bool* res,
-                        IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus AreFilesSame(const std::string& first,
+                                               const std::string& second,
+                                               const IOOptions& options,
+                                               bool* res,
+                                               IODebugContext* dbg) override {
     return target_->AreFilesSame(first, second, options, res, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus LockFile(const std::string& f, const IOOptions& options,
-                    FileLock** l, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus LockFile(const std::string& f,
+                                           const IOOptions& options,
+                                           FileLock** l,
+                                           IODebugContext* dbg) override {
     return target_->LockFile(f, options, l, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* l, const IOOptions& options,
-                      IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus UnlockFile(FileLock* l,
+                                             const IOOptions& options,
+                                             IODebugContext* dbg) override {
     return target_->UnlockFile(l, options, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus GetTestDirectory(const IOOptions& options, std::string* path,
-                            IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus GetTestDirectory(
+      const IOOptions& options, std::string* path,
+      IODebugContext* dbg) override {
     return target_->GetTestDirectory(options, path, dbg);
   }
-  rocksdb_rs::io_status::IOStatus NewLogger(const std::string& fname, const IOOptions& options,
-                     std::shared_ptr<Logger>* result,
-                     IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewLogger(const std::string& fname,
+                                            const IOOptions& options,
+                                            std::shared_ptr<Logger>* result,
+                                            IODebugContext* dbg) override {
     return target_->NewLogger(fname, options, result, dbg);
   }
 
@@ -1579,26 +1626,32 @@ class FileSystemWrapper : public FileSystem {
       const ImmutableDBOptions& db_options) const override {
     return target_->OptimizeForBlobFileRead(file_options, db_options);
   }
-  rocksdb_rs::io_status::IOStatus GetFreeSpace(const std::string& path, const IOOptions& options,
-                        uint64_t* diskfree, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus GetFreeSpace(const std::string& path,
+                                               const IOOptions& options,
+                                               uint64_t* diskfree,
+                                               IODebugContext* dbg) override {
     return target_->GetFreeSpace(path, options, diskfree, dbg);
   }
-  rocksdb_rs::io_status::IOStatus IsDirectory(const std::string& path, const IOOptions& options,
-                       bool* is_dir, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus IsDirectory(const std::string& path,
+                                              const IOOptions& options,
+                                              bool* is_dir,
+                                              IODebugContext* dbg) override {
     return target_->IsDirectory(path, options, is_dir, dbg);
   }
 
   const Customizable* Inner() const override { return target_.get(); }
-  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(
+      const ConfigOptions& options) override;
   std::string SerializeOptions(const ConfigOptions& config_options,
                                const std::string& header) const override;
 
-  virtual rocksdb_rs::io_status::IOStatus Poll(std::vector<void*>& io_handles,
-                        size_t min_completions) override {
+  virtual rocksdb_rs::io_status::IOStatus Poll(
+      std::vector<void*>& io_handles, size_t min_completions) override {
     return target_->Poll(io_handles, min_completions);
   }
 
-  virtual rocksdb_rs::io_status::IOStatus AbortIO(std::vector<void*>& io_handles) override {
+  virtual rocksdb_rs::io_status::IOStatus AbortIO(
+      std::vector<void*>& io_handles) override {
     return target_->AbortIO(io_handles);
   }
 
@@ -1618,21 +1671,26 @@ class FSSequentialFileWrapper : public FSSequentialFile {
 
   FSSequentialFile* target() const { return target_; }
 
-  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options, Slice* result,
-                char* scratch, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& options,
+                                       Slice* result, char* scratch,
+                                       IODebugContext* dbg) override {
     return target_->Read(n, options, result, scratch, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override { return target_->Skip(n); }
+  rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
+    return target_->Skip(n);
+  }
   bool use_direct_io() const override { return target_->use_direct_io(); }
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset,
+                                                  size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
-  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n, const IOOptions& options,
-                          Slice* result, char* scratch,
-                          IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus PositionedRead(uint64_t offset, size_t n,
+                                                 const IOOptions& options,
+                                                 Slice* result, char* scratch,
+                                                 IODebugContext* dbg) override {
     return target_->PositionedRead(offset, n, options, result, scratch, dbg);
   }
   Temperature GetTemperature() const override {
@@ -1662,17 +1720,21 @@ class FSRandomAccessFileWrapper : public FSRandomAccessFile {
 
   FSRandomAccessFile* target() const { return target_; }
 
-  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                Slice* result, char* scratch,
-                IODebugContext* dbg) const override {
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                       const IOOptions& options, Slice* result,
+                                       char* scratch,
+                                       IODebugContext* dbg) const override {
     return target_->Read(offset, n, options, result, scratch, dbg);
   }
-  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
-                     const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs,
+                                            size_t num_reqs,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override {
     return target_->MultiRead(reqs, num_reqs, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
-                    IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     return target_->Prefetch(offset, n, options, dbg);
   }
   size_t GetUniqueId(char* id, size_t max_size) const override {
@@ -1683,13 +1745,14 @@ class FSRandomAccessFileWrapper : public FSRandomAccessFile {
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset,
+                                                  size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
-  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
-                     std::function<void(const FSReadRequest&, void*)> cb,
-                     void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
-                     IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus ReadAsync(
+      FSReadRequest& req, const IOOptions& opts,
+      std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
+      void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) override {
     return target()->ReadAsync(req, opts, cb, cb_arg, io_handle, del_fn, dbg);
   }
   Temperature GetTemperature() const override {
@@ -1721,41 +1784,48 @@ class FSWritableFileWrapper : public FSWritableFile {
 
   FSWritableFile* target() const { return target_; }
 
-  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
-                  IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data,
+                                         const IOOptions& options,
+                                         IODebugContext* dbg) override {
     return target_->Append(data, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
-                  const DataVerificationInfo& verification_info,
-                  IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Append(
+      const Slice& data, const IOOptions& options,
+      const DataVerificationInfo& verification_info,
+      IODebugContext* dbg) override {
     return target_->Append(data, options, verification_info, dbg);
   }
-  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
-                            const IOOptions& options,
-                            IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus PositionedAppend(
+      const Slice& data, uint64_t offset, const IOOptions& options,
+      IODebugContext* dbg) override {
     return target_->PositionedAppend(data, offset, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus PositionedAppend(const Slice& data, uint64_t offset,
-                            const IOOptions& options,
-                            const DataVerificationInfo& verification_info,
-                            IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus PositionedAppend(
+      const Slice& data, uint64_t offset, const IOOptions& options,
+      const DataVerificationInfo& verification_info,
+      IODebugContext* dbg) override {
     return target_->PositionedAppend(data, offset, options, verification_info,
                                      dbg);
   }
-  rocksdb_rs::io_status::IOStatus Truncate(uint64_t size, const IOOptions& options,
-                    IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Truncate(uint64_t size,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     return target_->Truncate(size, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Close(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Flush(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
+                                       IODebugContext* dbg) override {
     return target_->Sync(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Fsync(options, dbg);
   }
   bool IsSyncThreadSafe() const override { return target_->IsSyncThreadSafe(); }
@@ -1791,12 +1861,14 @@ class FSWritableFileWrapper : public FSWritableFile {
     return target_->GetUniqueId(id, max_size);
   }
 
-  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset, size_t length) override {
+  rocksdb_rs::io_status::IOStatus InvalidateCache(size_t offset,
+                                                  size_t length) override {
     return target_->InvalidateCache(offset, length);
   }
 
-  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
-                     IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override {
     return target_->RangeSync(offset, nbytes, options, dbg);
   }
 
@@ -1805,8 +1877,9 @@ class FSWritableFileWrapper : public FSWritableFile {
     target_->PrepareWrite(offset, len, options, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& options,
-                    IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     return target_->Allocate(offset, len, options, dbg);
   }
 
@@ -1837,25 +1910,31 @@ class FSRandomRWFileWrapper : public FSRandomRWFile {
   size_t GetRequiredBufferAlignment() const override {
     return target_->GetRequiredBufferAlignment();
   }
-  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data, const IOOptions& options,
-                 IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Write(uint64_t offset, const Slice& data,
+                                        const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Write(offset, data, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                Slice* result, char* scratch,
-                IODebugContext* dbg) const override {
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                       const IOOptions& options, Slice* result,
+                                       char* scratch,
+                                       IODebugContext* dbg) const override {
     return target_->Read(offset, n, options, result, scratch, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Flush(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
+                                       IODebugContext* dbg) override {
     return target_->Sync(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Fsync(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Close(options, dbg);
   }
   Temperature GetTemperature() const override {
@@ -1890,7 +1969,8 @@ class FSDirectoryWrapper : public FSDirectory {
   // taking ownership of the object
   explicit FSDirectoryWrapper(FSDirectory* t) : target_(t) {}
 
-  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Fsync(options, dbg);
   }
 
@@ -1900,7 +1980,8 @@ class FSDirectoryWrapper : public FSDirectory {
     return target_->FsyncWithDirOptions(options, dbg, dir_fsync_options);
   }
 
-  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     return target_->Close(options, dbg);
   }
 
@@ -1914,12 +1995,12 @@ class FSDirectoryWrapper : public FSDirectory {
 };
 
 // A utility routine: write "data" to the named file.
-extern rocksdb_rs::io_status::IOStatus WriteStringToFile(FileSystem* fs, const Slice& data,
-                                  const std::string& fname,
-                                  bool should_sync = false);
+extern rocksdb_rs::io_status::IOStatus WriteStringToFile(
+    FileSystem* fs, const Slice& data, const std::string& fname,
+    bool should_sync = false);
 
 // A utility routine: read contents of named file into *data
-extern rocksdb_rs::io_status::IOStatus ReadFileToString(FileSystem* fs, const std::string& fname,
-                                 std::string* data);
+extern rocksdb_rs::io_status::IOStatus ReadFileToString(
+    FileSystem* fs, const std::string& fname, std::string* data);
 
 }  // namespace rocksdb

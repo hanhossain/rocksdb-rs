@@ -8,13 +8,12 @@
 #include <unordered_map>
 
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/file_checksum.h"
 #include "util/coding.h"
 #include "util/crc32c.h"
 #include "util/math.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -77,14 +76,16 @@ class FileChecksumListImpl : public FileChecksumList {
       std::vector<uint64_t>* file_numbers, std::vector<std::string>* checksums,
       std::vector<std::string>* checksum_func_names) override;
 
-  rocksdb_rs::status::Status SearchOneFileChecksum(uint64_t file_number, std::string* checksum,
-                               std::string* checksum_func_name) override;
+  rocksdb_rs::status::Status SearchOneFileChecksum(
+      uint64_t file_number, std::string* checksum,
+      std::string* checksum_func_name) override;
 
-  rocksdb_rs::status::Status InsertOneFileChecksum(uint64_t file_number,
-                               const std::string& checksum,
-                               const std::string& checksum_func_name) override;
+  rocksdb_rs::status::Status InsertOneFileChecksum(
+      uint64_t file_number, const std::string& checksum,
+      const std::string& checksum_func_name) override;
 
-  rocksdb_rs::status::Status RemoveOneFileChecksum(uint64_t file_number) override;
+  rocksdb_rs::status::Status RemoveOneFileChecksum(
+      uint64_t file_number) override;
 
  private:
   // Key is the file number, the first portion of the value is checksum, the
@@ -95,8 +96,8 @@ class FileChecksumListImpl : public FileChecksumList {
 
 // If manifest_file_size < std::numeric_limits<uint64_t>::max(), only use
 // that length prefix of the manifest file.
-rocksdb_rs::status::Status GetFileChecksumsFromManifest(Env* src_env, const std::string& abs_path,
-                                    uint64_t manifest_file_size,
-                                    FileChecksumList* checksum_list);
+rocksdb_rs::status::Status GetFileChecksumsFromManifest(
+    Env* src_env, const std::string& abs_path, uint64_t manifest_file_size,
+    FileChecksumList* checksum_list);
 
 }  // namespace rocksdb

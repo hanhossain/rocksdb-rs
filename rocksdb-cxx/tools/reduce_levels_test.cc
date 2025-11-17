@@ -4,7 +4,6 @@
 //  (found in the LICENSE.Apache file in the root directory).
 //
 
-
 #include "db/db_impl/db_impl.h"
 #include "db/version_set.h"
 #include "rocksdb/db.h"
@@ -79,13 +78,13 @@ class ReduceLevelTest : public testing::Test {
   DB* db_;
 };
 
-rocksdb_rs::status::Status ReduceLevelTest::OpenDB(bool create_if_missing, int num_levels) {
+rocksdb_rs::status::Status ReduceLevelTest::OpenDB(bool create_if_missing,
+                                                   int num_levels) {
   rocksdb::Options opt;
   opt.level_compaction_dynamic_level_bytes = false;
   opt.num_levels = num_levels;
   opt.create_if_missing = create_if_missing;
-  rocksdb_rs::status::Status st =
-      rocksdb::DB::Open(opt, dbname_, &db_);
+  rocksdb_rs::status::Status st = rocksdb::DB::Open(opt, dbname_, &db_);
   if (!st.ok()) {
     fprintf(stderr, "Can't open the db:%s\n", st.ToString()->c_str());
   }
@@ -94,8 +93,7 @@ rocksdb_rs::status::Status ReduceLevelTest::OpenDB(bool create_if_missing, int n
 
 bool ReduceLevelTest::ReduceLevels(int target_level) {
   std::vector<std::string> args =
-      rocksdb::ReduceDBLevelsCommand::PrepareArgs(
-          dbname_, target_level, false);
+      rocksdb::ReduceDBLevelsCommand::PrepareArgs(dbname_, target_level, false);
   LDBCommand* level_reducer = LDBCommand::InitFromCmdLineArgs(
       args, Options(), LDBOptions(), nullptr, LDBCommand::SelectCommand);
   level_reducer->Run();
@@ -210,4 +208,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

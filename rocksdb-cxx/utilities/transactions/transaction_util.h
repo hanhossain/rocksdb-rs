@@ -5,18 +5,16 @@
 
 #pragma once
 
-
 #include <string>
 #include <unordered_map>
 
 #include "db/dbformat.h"
 #include "db/read_callback.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/types.h"
 #include "utilities/transactions/lock/lock_tracker.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -57,9 +55,8 @@ class TransactionUtil {
   // This function should only be called on the write thread or if the
   // mutex is held.
   // tracker must support point lock.
-  static rocksdb_rs::status::Status CheckKeysForConflicts(DBImpl* db_impl,
-                                      const LockTracker& tracker,
-                                      bool cache_only);
+  static rocksdb_rs::status::Status CheckKeysForConflicts(
+      DBImpl* db_impl, const LockTracker& tracker, bool cache_only);
 
  private:
   // If `snap_checker` == nullptr, writes are always commited in sequence number
@@ -73,12 +70,12 @@ class TransactionUtil {
   //
   // If user-defined timestamp is enabled, a write conflict is detected if an
   // operation for `key` with timestamp greater than `ts` exists.
-  static rocksdb_rs::status::Status CheckKey(DBImpl* db_impl, SuperVersion* sv,
-                         SequenceNumber earliest_seq, SequenceNumber snap_seq,
-                         const std::string& key, const std::string* const ts,
-                         bool cache_only, ReadCallback* snap_checker = nullptr,
-                         SequenceNumber min_uncommitted = kMaxSequenceNumber);
+  static rocksdb_rs::status::Status CheckKey(
+      DBImpl* db_impl, SuperVersion* sv, SequenceNumber earliest_seq,
+      SequenceNumber snap_seq, const std::string& key,
+      const std::string* const ts, bool cache_only,
+      ReadCallback* snap_checker = nullptr,
+      SequenceNumber min_uncommitted = kMaxSequenceNumber);
 };
 
 }  // namespace rocksdb
-

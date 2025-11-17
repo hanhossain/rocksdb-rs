@@ -65,8 +65,9 @@ std::string GetWindowsErrSz(DWORD err) {
 // Because all the reads/writes happen by the specified offset, the caller in
 // theory should not
 // rely on the current file offset.
-rocksdb_rs::io_status::IOStatus pwrite(const WinFileData* file_data, const Slice& data,
-                uint64_t offset, size_t& bytes_written) {
+rocksdb_rs::io_status::IOStatus pwrite(const WinFileData* file_data,
+                                       const Slice& data, uint64_t offset,
+                                       size_t& bytes_written) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   bytes_written = 0;
 
@@ -101,8 +102,9 @@ rocksdb_rs::io_status::IOStatus pwrite(const WinFileData* file_data, const Slice
 }
 
 // See comments for pwrite above
-rocksdb_rs::io_status::IOStatus pread(const WinFileData* file_data, char* src, size_t num_bytes,
-               uint64_t offset, size_t& bytes_read) {
+rocksdb_rs::io_status::IOStatus pread(const WinFileData* file_data, char* src,
+                                      size_t num_bytes, uint64_t offset,
+                                      size_t& bytes_read) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   bytes_read = 0;
 
@@ -139,9 +141,10 @@ rocksdb_rs::io_status::IOStatus pread(const WinFileData* file_data, char* src, s
 // SetFileInformationByHandle() is capable of fast pre-allocates.
 // However, this does not change the file end position unless the file is
 // truncated and the pre-allocated space is not considered filled with zeros.
-rocksdb_rs::io_status::IOStatus fallocate(const std::string& filename, HANDLE hFile,
-                   uint64_t to_size) {
-  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus fallocate(const std::string& filename,
+                                          HANDLE hFile, uint64_t to_size) {
+  rocksdb_rs::io_status::IOStatus status =
+      rocksdb_rs::io_status::IOStatus_new();
 
   FILE_ALLOCATION_INFO alloc_info;
   alloc_info.AllocationSize.QuadPart = to_size;
@@ -156,8 +159,10 @@ rocksdb_rs::io_status::IOStatus fallocate(const std::string& filename, HANDLE hF
   return status;
 }
 
-rocksdb_rs::io_status::IOStatus ftruncate(const std::string& filename, HANDLE hFile, uint64_t toSize) {
-  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus ftruncate(const std::string& filename,
+                                          HANDLE hFile, uint64_t toSize) {
+  rocksdb_rs::io_status::IOStatus status =
+      rocksdb_rs::io_status::IOStatus_new();
 
   FILE_END_OF_FILE_INFO end_of_file;
   end_of_file.EndOfFile.QuadPart = toSize;
@@ -218,10 +223,9 @@ WinMmapReadableFile::~WinMmapReadableFile() {
   assert(ret);
 }
 
-rocksdb_rs::io_status::IOStatus WinMmapReadableFile::Read(uint64_t offset, size_t n,
-                                   const IOOptions& /*options*/, Slice* result,
-                                   char* scratch,
-                                   IODebugContext* /*dbg*/) const {
+rocksdb_rs::io_status::IOStatus WinMmapReadableFile::Read(
+    uint64_t offset, size_t n, const IOOptions& /*options*/, Slice* result,
+    char* scratch, IODebugContext* /*dbg*/) const {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   if (offset > length_) {
@@ -234,7 +238,8 @@ rocksdb_rs::io_status::IOStatus WinMmapReadableFile::Read(uint64_t offset, size_
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinMmapReadableFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus WinMmapReadableFile::InvalidateCache(
+    size_t offset, size_t length) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
@@ -252,7 +257,8 @@ rocksdb_rs::io_status::IOStatus WinMmapFile::TruncateFile(uint64_t toSize) {
 }
 
 rocksdb_rs::io_status::IOStatus WinMmapFile::UnmapCurrentRegion() {
-  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus status =
+      rocksdb_rs::io_status::IOStatus_new();
 
   if (mapped_begin_ != nullptr) {
     if (!::UnmapViewOfFile(mapped_begin_)) {
@@ -277,9 +283,10 @@ rocksdb_rs::io_status::IOStatus WinMmapFile::UnmapCurrentRegion() {
   return status;
 }
 
-rocksdb_rs::io_status::IOStatus WinMmapFile::MapNewRegion(const IOOptions& options,
-                                   IODebugContext* dbg) {
-  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinMmapFile::MapNewRegion(
+    const IOOptions& options, IODebugContext* dbg) {
+  rocksdb_rs::io_status::IOStatus status =
+      rocksdb_rs::io_status::IOStatus_new();
 
   assert(mapped_begin_ == nullptr);
 
@@ -344,7 +351,8 @@ rocksdb_rs::io_status::IOStatus WinMmapFile::MapNewRegion(const IOOptions& optio
   return status;
 }
 
-rocksdb_rs::io_status::IOStatus WinMmapFile::PreallocateInternal(uint64_t spaceToReserve) {
+rocksdb_rs::io_status::IOStatus WinMmapFile::PreallocateInternal(
+    uint64_t spaceToReserve) {
   return fallocate(filename_, hFile_, spaceToReserve);
 }
 
@@ -389,8 +397,9 @@ WinMmapFile::~WinMmapFile() {
   }
 }
 
-rocksdb_rs::io_status::IOStatus WinMmapFile::Append(const Slice& data, const IOOptions& options,
-                             IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WinMmapFile::Append(const Slice& data,
+                                                    const IOOptions& options,
+                                                    IODebugContext* dbg) {
   const char* src = data.data();
   size_t left = data.size();
 
@@ -428,12 +437,13 @@ rocksdb_rs::io_status::IOStatus WinMmapFile::Append(const Slice& data, const IOO
 
 // Means Close() will properly take care of truncate
 // and it does not need any additional information
-rocksdb_rs::io_status::IOStatus WinMmapFile::Truncate(uint64_t size, const IOOptions& /*options*/,
-                               IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinMmapFile::Truncate(
+    uint64_t size, const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WinMmapFile::Close(const IOOptions& options, IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WinMmapFile::Close(const IOOptions& options,
+                                                   IODebugContext* dbg) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   assert(NULL != hFile_);
@@ -479,13 +489,13 @@ rocksdb_rs::io_status::IOStatus WinMmapFile::Close(const IOOptions& options, IOD
 }
 
 rocksdb_rs::io_status::IOStatus WinMmapFile::Flush(const IOOptions& /*options*/,
-                            IODebugContext* /*dbg*/) {
+                                                   IODebugContext* /*dbg*/) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 // Flush only data
 rocksdb_rs::io_status::IOStatus WinMmapFile::Sync(const IOOptions& /*options*/,
-                           IODebugContext* /*dbg*/) {
+                                                  IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   // Some writes occurred since last sync
@@ -516,7 +526,8 @@ rocksdb_rs::io_status::IOStatus WinMmapFile::Sync(const IOOptions& /*options*/,
 /**
  * Flush data as well as metadata to stable storage.
  */
-rocksdb_rs::io_status::IOStatus WinMmapFile::Fsync(const IOOptions& options, IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WinMmapFile::Fsync(const IOOptions& options,
+                                                   IODebugContext* dbg) {
   rocksdb_rs::io_status::IOStatus s = Sync(options, dbg);
 
   // Flush metadata
@@ -542,14 +553,16 @@ uint64_t WinMmapFile::GetFileSize(const IOOptions& /*options*/,
   return file_offset_ + used;
 }
 
-rocksdb_rs::io_status::IOStatus WinMmapFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus WinMmapFile::InvalidateCache(size_t offset,
+                                                             size_t length) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WinMmapFile::Allocate(uint64_t offset, uint64_t len,
-                               const IOOptions& /*options*/,
-                               IODebugContext* /*dbg*/) {
-  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
+rocksdb_rs::io_status::IOStatus WinMmapFile::Allocate(
+    uint64_t offset, uint64_t len, const IOOptions& /*options*/,
+    IODebugContext* /*dbg*/) {
+  rocksdb_rs::io_status::IOStatus status =
+      rocksdb_rs::io_status::IOStatus_new();
   TEST_KILL_RANDOM("WinMmapFile::Allocate");
 
   // Make sure that we reserve an aligned amount of space
@@ -585,23 +598,24 @@ WinSequentialFile::~WinSequentialFile() {
   assert(hFile_ != INVALID_HANDLE_VALUE);
 }
 
-rocksdb_rs::io_status::IOStatus WinSequentialFile::Read(size_t n, const IOOptions& /*opts*/,
-                                 Slice* result, char* scratch,
-                                 IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinSequentialFile::Read(
+    size_t n, const IOOptions& /*opts*/, Slice* result, char* scratch,
+    IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   size_t r = 0;
 
   assert(result != nullptr);
   if (WinFileData::use_direct_io()) {
-    return rocksdb_rs::io_status::IOStatus_NotSupported("Read() does not support direct_io");
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
+        "Read() does not support direct_io");
   }
 
   // Windows ReadFile API accepts a DWORD.
   // While it is possible to read in a loop if n is too big
   // it is an unlikely case.
   if (n > std::numeric_limits<DWORD>::max()) {
-    return rocksdb_rs::io_status::IOStatus_InvalidArgument("n is too big for a single ReadFile: " +
-                                     filename_);
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(
+        "n is too big for a single ReadFile: " + filename_);
   }
 
   DWORD bytesToRead =
@@ -621,26 +635,25 @@ rocksdb_rs::io_status::IOStatus WinSequentialFile::Read(size_t n, const IOOption
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus WinSequentialFile::PositionedReadInternal(char* src, size_t numBytes,
-                                                   uint64_t offset,
-                                                   size_t& bytes_read) const {
+rocksdb_rs::io_status::IOStatus WinSequentialFile::PositionedReadInternal(
+    char* src, size_t numBytes, uint64_t offset, size_t& bytes_read) const {
   return pread(this, src, numBytes, offset, bytes_read);
 }
 
-rocksdb_rs::io_status::IOStatus WinSequentialFile::PositionedRead(uint64_t offset, size_t n,
-                                           const IOOptions& /*opts*/,
-                                           Slice* result, char* scratch,
-                                           IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinSequentialFile::PositionedRead(
+    uint64_t offset, size_t n, const IOOptions& /*opts*/, Slice* result,
+    char* scratch, IODebugContext* /*dbg*/) {
   if (!WinFileData::use_direct_io()) {
-    return rocksdb_rs::io_status::IOStatus_NotSupported("This function is only used for direct_io");
+    return rocksdb_rs::io_status::IOStatus_NotSupported(
+        "This function is only used for direct_io");
   }
 
   assert(IsSectorAligned(static_cast<size_t>(offset)));
   assert(IsSectorAligned(static_cast<size_t>(n)));
 
   size_t bytes_read = 0;  // out param
-  rocksdb_rs::io_status::IOStatus s = PositionedReadInternal(scratch, static_cast<size_t>(n), offset,
-                                      bytes_read);
+  rocksdb_rs::io_status::IOStatus s = PositionedReadInternal(
+      scratch, static_cast<size_t>(n), offset, bytes_read);
   *result = Slice(scratch, bytes_read);
   return s;
 }
@@ -665,15 +678,18 @@ rocksdb_rs::io_status::IOStatus WinSequentialFile::Skip(uint64_t n) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WinSequentialFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus WinSequentialFile::InvalidateCache(
+    size_t offset, size_t length) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /// WinRandomAccessBase
 
-inline rocksdb_rs::io_status::IOStatus WinRandomAccessImpl::PositionedReadInternal(
-    char* src, size_t numBytes, uint64_t offset, size_t& bytes_read) const {
+inline rocksdb_rs::io_status::IOStatus
+WinRandomAccessImpl::PositionedReadInternal(char* src, size_t numBytes,
+                                            uint64_t offset,
+                                            size_t& bytes_read) const {
   return pread(file_base_, src, numBytes, offset, bytes_read);
 }
 
@@ -685,9 +701,8 @@ inline WinRandomAccessImpl::WinRandomAccessImpl(WinFileData* file_base,
   assert(!options.use_mmap_reads);
 }
 
-inline rocksdb_rs::io_status::IOStatus WinRandomAccessImpl::ReadImpl(uint64_t offset, size_t n,
-                                              Slice* result,
-                                              char* scratch) const {
+inline rocksdb_rs::io_status::IOStatus WinRandomAccessImpl::ReadImpl(
+    uint64_t offset, size_t n, Slice* result, char* scratch) const {
   // Check buffer alignment
   if (file_base_->use_direct_io()) {
     assert(file_base_->IsSectorAligned(static_cast<size_t>(offset)));
@@ -700,7 +715,8 @@ inline rocksdb_rs::io_status::IOStatus WinRandomAccessImpl::ReadImpl(uint64_t of
   }
 
   size_t bytes_read = 0;
-  rocksdb_rs::io_status::IOStatus s = PositionedReadInternal(scratch, n, offset, bytes_read);
+  rocksdb_rs::io_status::IOStatus s =
+      PositionedReadInternal(scratch, n, offset, bytes_read);
   *result = Slice(scratch, bytes_read);
   return s;
 }
@@ -716,14 +732,14 @@ WinRandomAccessFile::WinRandomAccessFile(const std::string& fname, HANDLE hFile,
 
 WinRandomAccessFile::~WinRandomAccessFile() {}
 
-rocksdb_rs::io_status::IOStatus WinRandomAccessFile::Read(uint64_t offset, size_t n,
-                                   const IOOptions& /*options*/, Slice* result,
-                                   char* scratch,
-                                   IODebugContext* /*dbg*/) const {
+rocksdb_rs::io_status::IOStatus WinRandomAccessFile::Read(
+    uint64_t offset, size_t n, const IOOptions& /*options*/, Slice* result,
+    char* scratch, IODebugContext* /*dbg*/) const {
   return ReadImpl(offset, n, result, scratch);
 }
 
-rocksdb_rs::io_status::IOStatus WinRandomAccessFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus WinRandomAccessFile::InvalidateCache(
+    size_t offset, size_t length) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
@@ -739,7 +755,8 @@ size_t WinRandomAccessFile::GetRequiredBufferAlignment() const {
 // WinWritableImpl
 //
 
-inline rocksdb_rs::io_status::IOStatus WinWritableImpl::PreallocateInternal(uint64_t spaceToReserve) {
+inline rocksdb_rs::io_status::IOStatus WinWritableImpl::PreallocateInternal(
+    uint64_t spaceToReserve) {
   return fallocate(file_data_->GetName(), file_data_->GetFileHandle(),
                    spaceToReserve);
 }
@@ -767,12 +784,13 @@ inline WinWritableImpl::WinWritableImpl(WinFileData* file_data,
   }
 }
 
-inline rocksdb_rs::io_status::IOStatus WinWritableImpl::AppendImpl(const Slice& data) {
+inline rocksdb_rs::io_status::IOStatus WinWritableImpl::AppendImpl(
+    const Slice& data) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   if (data.size() > std::numeric_limits<DWORD>::max()) {
-    return rocksdb_rs::io_status::IOStatus_InvalidArgument("data is too long for a single write" +
-                                     file_data_->GetName());
+    return rocksdb_rs::io_status::IOStatus_InvalidArgument(
+        "data is too long for a single write" + file_data_->GetName());
   }
 
   size_t bytes_written = 0;  // out param
@@ -803,16 +821,16 @@ inline rocksdb_rs::io_status::IOStatus WinWritableImpl::AppendImpl(const Slice& 
       // is sector aligned
       next_write_offset_ += bytes_written;
     } else {
-      s = rocksdb_rs::io_status::IOStatus_IOError("Failed to write all bytes: " +
-                            file_data_->GetName());
+      s = rocksdb_rs::io_status::IOStatus_IOError(
+          "Failed to write all bytes: " + file_data_->GetName());
     }
   }
 
   return s;
 }
 
-inline rocksdb_rs::io_status::IOStatus WinWritableImpl::PositionedAppendImpl(const Slice& data,
-                                                      uint64_t offset) {
+inline rocksdb_rs::io_status::IOStatus WinWritableImpl::PositionedAppendImpl(
+    const Slice& data, uint64_t offset) {
   if (file_data_->use_direct_io()) {
     assert(file_data_->IsSectorAligned(static_cast<size_t>(offset)));
     assert(file_data_->IsSectorAligned(data.size()));
@@ -820,7 +838,8 @@ inline rocksdb_rs::io_status::IOStatus WinWritableImpl::PositionedAppendImpl(con
   }
 
   size_t bytes_written = 0;
-  rocksdb_rs::io_status::IOStatus s = pwrite(file_data_, data, offset, bytes_written);
+  rocksdb_rs::io_status::IOStatus s =
+      pwrite(file_data_, data, offset, bytes_written);
 
   if (s.ok()) {
     if (bytes_written == data.size()) {
@@ -831,14 +850,16 @@ inline rocksdb_rs::io_status::IOStatus WinWritableImpl::PositionedAppendImpl(con
         next_write_offset_ = write_end;
       }
     } else {
-      s = rocksdb_rs::io_status::IOStatus_IOError("Failed to write all of the requested data: " +
-                            file_data_->GetName());
+      s = rocksdb_rs::io_status::IOStatus_IOError(
+          "Failed to write all of the requested data: " +
+          file_data_->GetName());
     }
   }
   return s;
 }
 
-inline rocksdb_rs::io_status::IOStatus WinWritableImpl::TruncateImpl(uint64_t size) {
+inline rocksdb_rs::io_status::IOStatus WinWritableImpl::TruncateImpl(
+    uint64_t size) {
   // It is tempting to check for the size for sector alignment
   // but truncation may come at the end and there is not a requirement
   // for this to be sector aligned so long as we do not attempt to write
@@ -874,8 +895,8 @@ inline rocksdb_rs::io_status::IOStatus WinWritableImpl::CloseImpl() {
   return s;
 }
 
-inline rocksdb_rs::io_status::IOStatus WinWritableImpl::SyncImpl(const IOOptions& /*options*/,
-                                          IODebugContext* /*dbg*/) {
+inline rocksdb_rs::io_status::IOStatus WinWritableImpl::SyncImpl(
+    const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (!::FlushFileBuffers(file_data_->GetFileHandle())) {
     auto lastError = GetLastError();
@@ -886,8 +907,10 @@ inline rocksdb_rs::io_status::IOStatus WinWritableImpl::SyncImpl(const IOOptions
   return s;
 }
 
-inline rocksdb_rs::io_status::IOStatus WinWritableImpl::AllocateImpl(uint64_t offset, uint64_t len) {
-  rocksdb_rs::io_status::IOStatus status = rocksdb_rs::io_status::IOStatus_new();
+inline rocksdb_rs::io_status::IOStatus WinWritableImpl::AllocateImpl(
+    uint64_t offset, uint64_t len) {
+  rocksdb_rs::io_status::IOStatus status =
+      rocksdb_rs::io_status::IOStatus_new();
   TEST_KILL_RANDOM("WinWritableFile::Allocate");
 
   // Make sure that we reserve an aligned amount of space
@@ -931,42 +954,43 @@ size_t WinWritableFile::GetRequiredBufferAlignment() const {
   return static_cast<size_t>(GetAlignment());
 }
 
-rocksdb_rs::io_status::IOStatus WinWritableFile::Append(const Slice& data,
-                                 const IOOptions& /*options*/,
-                                 IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinWritableFile::Append(
+    const Slice& data, const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   return AppendImpl(data);
 }
 
-rocksdb_rs::io_status::IOStatus WinWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
-                                           const IOOptions& /*options*/,
-                                           IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinWritableFile::PositionedAppend(
+    const Slice& data, uint64_t offset, const IOOptions& /*options*/,
+    IODebugContext* /*dbg*/) {
   return PositionedAppendImpl(data, offset);
 }
 
 // Need to implement this so the file is truncated correctly
 // when buffered and unbuffered mode
-rocksdb_rs::io_status::IOStatus WinWritableFile::Truncate(uint64_t size, const IOOptions& /*options*/,
-                                   IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinWritableFile::Truncate(
+    uint64_t size, const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   return TruncateImpl(size);
 }
 
-rocksdb_rs::io_status::IOStatus WinWritableFile::Close(const IOOptions& /*options*/,
-                                IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinWritableFile::Close(
+    const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   return CloseImpl();
 }
 
 // write out the cached data to the OS cache
 // This is now taken care of the WritableFileWriter
-rocksdb_rs::io_status::IOStatus WinWritableFile::Flush(const IOOptions& /*options*/,
-                                IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinWritableFile::Flush(
+    const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WinWritableFile::Sync(const IOOptions& options, IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WinWritableFile::Sync(const IOOptions& options,
+                                                      IODebugContext* dbg) {
   return SyncImpl(options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus WinWritableFile::Fsync(const IOOptions& options, IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WinWritableFile::Fsync(const IOOptions& options,
+                                                       IODebugContext* dbg) {
   return SyncImpl(options, dbg);
 }
 
@@ -977,9 +1001,9 @@ uint64_t WinWritableFile::GetFileSize(const IOOptions& /*options*/,
   return GetFileNextWriteOffset();
 }
 
-rocksdb_rs::io_status::IOStatus WinWritableFile::Allocate(uint64_t offset, uint64_t len,
-                                   const IOOptions& /*options*/,
-                                   IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinWritableFile::Allocate(
+    uint64_t offset, uint64_t len, const IOOptions& /*options*/,
+    IODebugContext* /*dbg*/) {
   return AllocateImpl(offset, len);
 }
 
@@ -1007,29 +1031,30 @@ size_t WinRandomRWFile::GetRequiredBufferAlignment() const {
   return static_cast<size_t>(WinRandomAccessImpl::GetAlignment());
 }
 
-rocksdb_rs::io_status::IOStatus WinRandomRWFile::Write(uint64_t offset, const Slice& data,
-                                const IOOptions& /*options*/,
-                                IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinRandomRWFile::Write(
+    uint64_t offset, const Slice& data, const IOOptions& /*options*/,
+    IODebugContext* /*dbg*/) {
   return PositionedAppendImpl(data, offset);
 }
 
-rocksdb_rs::io_status::IOStatus WinRandomRWFile::Read(uint64_t offset, size_t n,
-                               const IOOptions& /*options*/, Slice* result,
-                               char* scratch, IODebugContext* /*dbg*/) const {
+rocksdb_rs::io_status::IOStatus WinRandomRWFile::Read(
+    uint64_t offset, size_t n, const IOOptions& /*options*/, Slice* result,
+    char* scratch, IODebugContext* /*dbg*/) const {
   return ReadImpl(offset, n, result, scratch);
 }
 
-rocksdb_rs::io_status::IOStatus WinRandomRWFile::Flush(const IOOptions& /*options*/,
-                                IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinRandomRWFile::Flush(
+    const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WinRandomRWFile::Sync(const IOOptions& options, IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus WinRandomRWFile::Sync(const IOOptions& options,
+                                                      IODebugContext* dbg) {
   return SyncImpl(options, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus WinRandomRWFile::Close(const IOOptions& /*options*/,
-                                IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinRandomRWFile::Close(
+    const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   return CloseImpl();
 }
 
@@ -1062,13 +1087,13 @@ WinMemoryMappedBuffer::~WinMemoryMappedBuffer() {
 //////////////////////////////////////////////////////////////////////////
 /// WinDirectory
 
-rocksdb_rs::io_status::IOStatus WinDirectory::Fsync(const IOOptions& /*options*/,
-                             IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinDirectory::Fsync(
+    const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus WinDirectory::Close(const IOOptions& /*options*/,
-                             IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus WinDirectory::Close(
+    const IOOptions& /*options*/, IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_OK();
   BOOL ret __attribute__((__unused__));
   if (handle_ != INVALID_HANDLE_VALUE) {

@@ -101,8 +101,9 @@ void TableReaderBenchmark(Options& opts, EnvOptions& env_options,
     tb = opts.table_factory->NewTableBuilder(
         TableBuilderOptions(
             ioptions, moptions, ikc, &int_tbl_prop_collector_factories,
-            rocksdb_rs::compression_type::CompressionType::kNoCompression, CompressionOptions(),
-            0 /* column_family_id */, kDefaultColumnFamilyName, unknown_level),
+            rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            CompressionOptions(), 0 /* column_family_id */,
+            kDefaultColumnFamilyName, unknown_level),
         file_writer.get());
   } else {
     s = DB::Open(opts, dbname, &db);
@@ -294,7 +295,8 @@ int main(int argc, char** argv) {
   rocksdb::ReadOptions ro;
   rocksdb::EnvOptions env_options;
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   if (FLAGS_table_factory == "cuckoo_hash") {
     options.allow_mmap_reads = FLAGS_mmap_read;
@@ -325,10 +327,10 @@ int main(int argc, char** argv) {
     bool measured_by_nanosecond = FLAGS_time_unit == "nanosecond";
 
     options.table_factory = tf;
-    rocksdb::TableReaderBenchmark(
-        options, env_options, ro, FLAGS_num_keys1, FLAGS_num_keys2, FLAGS_iter,
-        FLAGS_prefix_len, FLAGS_query_empty, FLAGS_iterator, FLAGS_through_db,
-        measured_by_nanosecond);
+    rocksdb::TableReaderBenchmark(options, env_options, ro, FLAGS_num_keys1,
+                                  FLAGS_num_keys2, FLAGS_iter, FLAGS_prefix_len,
+                                  FLAGS_query_empty, FLAGS_iterator,
+                                  FLAGS_through_db, measured_by_nanosecond);
   } else {
     return 1;
   }

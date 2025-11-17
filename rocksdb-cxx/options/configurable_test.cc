@@ -46,16 +46,21 @@ class StringLogger : public Logger {
   std::string string_;
 };
 static std::unordered_map<std::string, OptionTypeInfo> struct_option_info = {
-    {"struct", OptionTypeInfo::Struct("struct", &simple_option_info, 0,
-                                      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                                      rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)},
+    {"struct",
+     OptionTypeInfo::Struct(
+         "struct", &simple_option_info, 0,
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable)},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo> imm_struct_option_info =
     {
-        {"struct", OptionTypeInfo::Struct("struct", &simple_option_info, 0,
-                                          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                                          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
+        {"struct",
+         OptionTypeInfo::Struct(
+             "struct", &simple_option_info, 0,
+             rocksdb_rs::utilities::options_type::OptionVerificationType::
+                 kNormal,
+             rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
 };
 
 class SimpleConfigurable : public TestConfigurable<Configurable> {
@@ -209,19 +214,24 @@ TEST_F(ConfigurableTest, InvalidOptionTest) {
 
 static std::unordered_map<std::string, OptionTypeInfo> validated_option_info = {
     {"validated",
-     {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+     {0, rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 static std::unordered_map<std::string, OptionTypeInfo> prepared_option_info = {
     {"prepared",
-     {0, rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+     {0, rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
 };
 static std::unordered_map<std::string, OptionTypeInfo>
     dont_prepare_option_info = {
         {"unique",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-          (rocksdb_rs::utilities::options_type::OptionTypeFlags::kUnique | rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontPrepare)}},
+         {0, rocksdb_rs::utilities::options_type::OptionType::kConfigurable,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          (rocksdb_rs::utilities::options_type::OptionTypeFlags::kUnique |
+           rocksdb_rs::utilities::options_type::OptionTypeFlags::
+               kDontPrepare)}},
 
 };
 
@@ -245,16 +255,19 @@ class ValidatedConfigurable : public SimpleConfigurable {
     }
   }
 
-  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& config_options) override {
+  rocksdb_rs::status::Status PrepareOptions(
+      const ConfigOptions& config_options) override {
     if (++prepared <= 0) {
-      return rocksdb_rs::status::Status_InvalidArgument("Cannot prepare option");
+      return rocksdb_rs::status::Status_InvalidArgument(
+          "Cannot prepare option");
     } else {
       return SimpleConfigurable::PrepareOptions(config_options);
     }
   }
 
-  rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                         const ColumnFamilyOptions& cf_opts) const override {
+  rocksdb_rs::status::Status ValidateOptions(
+      const DBOptions& db_opts,
+      const ColumnFamilyOptions& cf_opts) const override {
     if (!validated) {
       return rocksdb_rs::status::Status_InvalidArgument("Not Validated");
     } else {
@@ -320,12 +333,14 @@ TEST_F(ConfigurableTest, CopyObjectTest) {
   class CopyConfigurable : public Configurable {
    public:
     CopyConfigurable() : prepared_(0), validated_(0) {}
-    rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override {
+    rocksdb_rs::status::Status PrepareOptions(
+        const ConfigOptions& options) override {
       prepared_++;
       return Configurable::PrepareOptions(options);
     }
-    rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_opts,
-                           const ColumnFamilyOptions& cf_opts) const override {
+    rocksdb_rs::status::Status ValidateOptions(
+        const DBOptions& db_opts,
+        const ColumnFamilyOptions& cf_opts) const override {
       validated_++;
       return Configurable::ValidateOptions(db_opts, cf_opts);
     }
@@ -352,9 +367,11 @@ TEST_F(ConfigurableTest, CopyObjectTest) {
 
 TEST_F(ConfigurableTest, MutableOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> imm_option_info = {
-      {"imm", OptionTypeInfo::Struct("imm", &simple_option_info, 0,
-                                     rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                                     rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
+      {"imm",
+       OptionTypeInfo::Struct(
+           "imm", &simple_option_info, 0,
+           rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
   };
 
   class MutableConfigurable : public SimpleConfigurable {
@@ -415,8 +432,11 @@ TEST_F(ConfigurableTest, DeprecatedOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo>
       deprecated_option_info = {
           {"deprecated",
-           {offsetof(struct TestOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-            rocksdb_rs::utilities::options_type::OptionVerificationType::kDeprecated, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}}};
+           {offsetof(struct TestOptions, b),
+            rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+            rocksdb_rs::utilities::options_type::OptionVerificationType::
+                kDeprecated,
+            rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}}};
   std::unique_ptr<Configurable> orig;
   orig.reset(SimpleConfigurable::Create("simple", TestConfigMode::kDefaultMode,
                                         &deprecated_option_info));
@@ -432,11 +452,15 @@ TEST_F(ConfigurableTest, DeprecatedOptionsTest) {
 TEST_F(ConfigurableTest, AliasOptionsTest) {
   static std::unordered_map<std::string, OptionTypeInfo> alias_option_info = {
       {"bool",
-       {offsetof(struct TestOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+       {offsetof(struct TestOptions, b),
+        rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+        rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
       {"alias",
-       {offsetof(struct TestOptions, b), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-        rocksdb_rs::utilities::options_type::OptionVerificationType::kAlias, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone, 0}}};
+       {offsetof(struct TestOptions, b),
+        rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kAlias,
+        rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone, 0}}};
   std::unique_ptr<Configurable> orig;
   orig.reset(SimpleConfigurable::Create("simple", TestConfigMode::kDefaultMode,
                                         &alias_option_info));
@@ -596,8 +620,11 @@ TEST_F(ConfigurableTest, ConfigurableEnumTest) {
 static std::unordered_map<std::string, OptionTypeInfo> noserialize_option_info =
     {
         {"int",
-         {offsetof(struct TestOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
-          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize}},
+         {offsetof(struct TestOptions, i),
+          rocksdb_rs::utilities::options_type::OptionType::kInt,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::
+              kDontSerialize}},
 };
 
 TEST_F(ConfigurableTest, TestNoSerialize) {
@@ -614,13 +641,17 @@ TEST_F(ConfigurableTest, TestNoSerialize) {
 TEST_F(ConfigurableTest, TestNoCompare) {
   std::unordered_map<std::string, OptionTypeInfo> nocomp_option_info = {
       {"int",
-       {offsetof(struct TestOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
-        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever}},
+       {offsetof(struct TestOptions, i),
+        rocksdb_rs::utilities::options_type::OptionType::kInt,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+        rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever}},
   };
   std::unordered_map<std::string, OptionTypeInfo> normal_option_info = {
       {"int",
-       {offsetof(struct TestOptions, i), rocksdb_rs::utilities::options_type::OptionType::kInt,
-        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+       {offsetof(struct TestOptions, i),
+        rocksdb_rs::utilities::options_type::OptionType::kInt,
+        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+        rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
   };
 
   std::unique_ptr<Configurable> base, copy;
@@ -760,7 +791,8 @@ void ConfigurableParamTest::TestConfigureOptions(
   bool found_one = false;
   for (auto name : names) {
     std::string value;
-    rocksdb_rs::status::Status s = base->GetOption(config_options, name, &value);
+    rocksdb_rs::status::Status s =
+        base->GetOption(config_options, name, &value);
     if (s.ok()) {
       s = copy->ConfigureOption(config_options, name, value);
       if (s.ok() || s.IsNotSupported()) {

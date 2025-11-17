@@ -37,8 +37,9 @@ PersistentCache::StatsType VolatileCacheTier::Stats() {
   return out;
 }
 
-rocksdb_rs::status::Status VolatileCacheTier::Insert(const Slice& page_key, const char* data,
-                                 const size_t size) {
+rocksdb_rs::status::Status VolatileCacheTier::Insert(const Slice& page_key,
+                                                     const char* data,
+                                                     const size_t size) {
   // precondition
   assert(data);
   assert(size);
@@ -70,7 +71,8 @@ rocksdb_rs::status::Status VolatileCacheTier::Insert(const Slice& page_key, cons
     assert(size_ >= size);
     size_ -= size;
     // failed to insert to cache, block already in cache
-    return rocksdb_rs::status::Status_TryAgain("key already exists in volatile cache");
+    return rocksdb_rs::status::Status_TryAgain(
+        "key already exists in volatile cache");
   }
 
   cache_data.release();
@@ -78,9 +80,8 @@ rocksdb_rs::status::Status VolatileCacheTier::Insert(const Slice& page_key, cons
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status VolatileCacheTier::Lookup(const Slice& page_key,
-                                 std::unique_ptr<char[]>* result,
-                                 size_t* size) {
+rocksdb_rs::status::Status VolatileCacheTier::Lookup(
+    const Slice& page_key, std::unique_ptr<char[]>* result, size_t* size) {
   CacheData key(std::move(page_key.ToString()));
   CacheData* kv;
   bool ok = index_.Find(&key, &kv);
@@ -122,8 +123,8 @@ bool VolatileCacheTier::Evict() {
   // push the evicted object to the next level
   if (next_tier()) {
     // TODO: Should the insert error be ignored?
-    rocksdb_rs::status::Status s = next_tier()->Insert(Slice(edata->key), edata->value.c_str(),
-                                   edata->value.size());
+    rocksdb_rs::status::Status s = next_tier()->Insert(
+        Slice(edata->key), edata->value.c_str(), edata->value.size());
   }
 
   // adjust size and destroy data
@@ -134,4 +135,3 @@ bool VolatileCacheTier::Evict() {
 }
 
 }  // namespace rocksdb
-

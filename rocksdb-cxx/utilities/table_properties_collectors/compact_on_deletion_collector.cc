@@ -35,11 +35,10 @@ CompactOnDeletionCollector::CompactOnDeletionCollector(
 // @params key    the user key that is inserted into the table.
 // @params value  the value that is inserted into the table.
 // @params file_size  file size up to now
-rocksdb_rs::status::Status CompactOnDeletionCollector::AddUserKey(const Slice& /*key*/,
-                                              const Slice& /*value*/,
-                                              rocksdb_rs::types::EntryType type,
-                                              SequenceNumber /*seq*/,
-                                              uint64_t /*file_size*/) {
+rocksdb_rs::status::Status CompactOnDeletionCollector::AddUserKey(
+    const Slice& /*key*/, const Slice& /*value*/,
+    rocksdb_rs::types::EntryType type, SequenceNumber /*seq*/,
+    uint64_t /*file_size*/) {
   assert(!finished_);
   if (!bucket_size_ && !deletion_ratio_enabled_) {
     // This collector is effectively disabled
@@ -100,8 +99,10 @@ rocksdb_rs::status::Status CompactOnDeletionCollector::Finish(
 static std::unordered_map<std::string, OptionTypeInfo>
     on_deletion_collector_type_info = {
         {"window_size",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever | rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever |
+              rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {
             auto* factory =
@@ -118,8 +119,10 @@ static std::unordered_map<std::string, OptionTypeInfo>
           },
           nullptr}},
         {"deletion_trigger",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever | rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever |
+              rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {
             auto* factory =
@@ -136,8 +139,10 @@ static std::unordered_map<std::string, OptionTypeInfo>
           },
           nullptr}},
         {"deletion_ratio",
-         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever | rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUnknown,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kCompareNever |
+              rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable,
           [](const ConfigOptions&, const std::string&, const std::string& value,
              void* addr) {
             auto* factory =

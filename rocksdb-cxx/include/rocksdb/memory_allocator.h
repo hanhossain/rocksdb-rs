@@ -7,9 +7,8 @@
 
 #include <memory>
 
-#include "rocksdb/customizable.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/customizable.h"
 
 namespace rocksdb {
 
@@ -20,9 +19,9 @@ namespace rocksdb {
 class MemoryAllocator : public Customizable {
  public:
   static const char* Type() { return "MemoryAllocator"; }
-  static rocksdb_rs::status::Status CreateFromString(const ConfigOptions& options,
-                                 const std::string& value,
-                                 std::shared_ptr<MemoryAllocator>* result);
+  static rocksdb_rs::status::Status CreateFromString(
+      const ConfigOptions& options, const std::string& value,
+      std::shared_ptr<MemoryAllocator>* result);
 
   // Allocate a block of at least size. Has to be thread-safe.
   virtual void* Allocate(size_t size) = 0;

@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "utilities/transactions/optimistic_transaction.h"
 
 #include <cstdint>
@@ -11,6 +10,7 @@
 
 #include "db/column_family.h"
 #include "db/db_impl/db_impl.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
 #include "rocksdb/utilities/optimistic_transaction_db.h"
@@ -21,8 +21,6 @@
 #include "utilities/transactions/optimistic_transaction.h"
 #include "utilities/transactions/optimistic_transaction_db_impl.h"
 #include "utilities/transactions/transaction_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -136,8 +134,8 @@ rocksdb_rs::status::Status OptimisticTransaction::CommitWithParallelValidate() {
     }
   });
 
-  rocksdb_rs::status::Status s = TransactionUtil::CheckKeysForConflicts(db_impl, *tracked_locks_,
-                                                    true /* cache_only */);
+  rocksdb_rs::status::Status s = TransactionUtil::CheckKeysForConflicts(
+      db_impl, *tracked_locks_, true /* cache_only */);
   if (!s.ok()) {
     return s;
   }
@@ -158,10 +156,9 @@ rocksdb_rs::status::Status OptimisticTransaction::Rollback() {
 // Record this key so that we can check it for conflicts at commit time.
 //
 // 'exclusive' is unused for OptimisticTransaction.
-rocksdb_rs::status::Status OptimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
-                                      const Slice& key, bool read_only,
-                                      bool exclusive, const bool do_validate,
-                                      const bool assume_tracked) {
+rocksdb_rs::status::Status OptimisticTransaction::TryLock(
+    ColumnFamilyHandle* column_family, const Slice& key, bool read_only,
+    bool exclusive, const bool do_validate, const bool assume_tracked) {
   assert(!assume_tracked);  // not supported
   (void)assume_tracked;
   if (!do_validate) {
@@ -192,7 +189,8 @@ rocksdb_rs::status::Status OptimisticTransaction::TryLock(ColumnFamilyHandle* co
 //
 // Should only be called on writer thread in order to avoid any race conditions
 // in detecting write conflicts.
-rocksdb_rs::status::Status OptimisticTransaction::CheckTransactionForConflicts(DB* db) {
+rocksdb_rs::status::Status OptimisticTransaction::CheckTransactionForConflicts(
+    DB* db) {
   auto db_impl = static_cast_with_check<DBImpl>(db);
 
   // Since we are on the write thread and do not want to block other writers,
@@ -203,8 +201,10 @@ rocksdb_rs::status::Status OptimisticTransaction::CheckTransactionForConflicts(D
                                                 true /* cache_only */);
 }
 
-rocksdb_rs::status::Status OptimisticTransaction::SetName(const TransactionName& /* unused */) {
-  return rocksdb_rs::status::Status_InvalidArgument("Optimistic transactions cannot be named.");
+rocksdb_rs::status::Status OptimisticTransaction::SetName(
+    const TransactionName& /* unused */) {
+  return rocksdb_rs::status::Status_InvalidArgument(
+      "Optimistic transactions cannot be named.");
 }
 
 }  // namespace rocksdb

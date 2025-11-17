@@ -144,9 +144,9 @@ std::unique_ptr<FilterBlockReader> FullFilterBlockReader::Create(
 
   CachableEntry<ParsedFullFilterBlock> filter_block;
   if (prefetch || !use_cache) {
-    const rocksdb_rs::status::Status s = ReadFilterBlock(table, prefetch_buffer, ro, use_cache,
-                                     nullptr /* get_context */, lookup_context,
-                                     &filter_block);
+    const rocksdb_rs::status::Status s = ReadFilterBlock(
+        table, prefetch_buffer, ro, use_cache, nullptr /* get_context */,
+        lookup_context, &filter_block);
     if (!s.ok()) {
       IGNORE_STATUS_IF_ERROR(s);
       return std::unique_ptr<FilterBlockReader>();
@@ -174,8 +174,8 @@ bool FullFilterBlockReader::MayMatch(const Slice& entry, bool no_io,
                                      const ReadOptions& read_options) const {
   CachableEntry<ParsedFullFilterBlock> filter_block;
 
-  const rocksdb_rs::status::Status s = GetOrReadFilterBlock(no_io, get_context, lookup_context,
-                                        &filter_block, read_options);
+  const rocksdb_rs::status::Status s = GetOrReadFilterBlock(
+      no_io, get_context, lookup_context, &filter_block, read_options);
   if (!s.ok()) {
     IGNORE_STATUS_IF_ERROR(s);
     return true;
