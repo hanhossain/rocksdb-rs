@@ -1112,20 +1112,20 @@ string(REGEX REPLACE "[^0-9: /-]+" "" GIT_DATE "${GIT_DATE}")
 set(BUILD_VERSION_CC ${CMAKE_BINARY_DIR}/build_version.cc)
 configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
-set(ROCKSDBRS_TRIPLE_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/cargo/build/${Rust_CARGO_TARGET_CACHED})
-set(ROCKSDBRS_CXXBRDIGE ${ROCKSDBRS_TRIPLE_OUT_DIR}/cxxbridge)
+set(ROCKSDBRS_TRIPLE_OUT_DIR ${CMAKE_BINARY_DIR}/cargo/build/${Rust_CARGO_TARGET_CACHED})
+set(ROCKSDBRS_CXXBRIDGE ${ROCKSDBRS_TRIPLE_OUT_DIR}/cxxbridge)
 
 corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
 
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})
-target_include_directories(${ROCKSDB_STATIC_LIB} PUBLIC ${ROCKSDBRS_CXXBRDIGE})
+target_include_directories(${ROCKSDB_STATIC_LIB} PUBLIC ${ROCKSDBRS_CXXBRIDGE})
 target_link_libraries(${ROCKSDB_STATIC_LIB}
         PUBLIC rocksdb_rs
         PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
 if (ROCKSDB_BUILD_SHARED)
     add_library(${ROCKSDB_SHARED_LIB} SHARED ${SOURCES} ${BUILD_VERSION_CC})
-    target_include_directories(${ROCKSDB_SHARED_LIB} PUBLIC ${ROCKSDBRS_CXXBRDIGE})
+    target_include_directories(${ROCKSDB_SHARED_LIB} PUBLIC ${ROCKSDBRS_CXXBRIDGE})
     target_link_libraries(${ROCKSDB_SHARED_LIB}
             PUBLIC rocksdb_rs
             PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
@@ -1174,7 +1174,7 @@ if (WITH_TESTS OR WITH_BENCHMARK_TOOLS)
             test_util/mock_time_env.cc
             test_util/secondary_cache_test_util.cc
             test_util/testharness.cc)
-    target_include_directories(testharness PUBLIC ${ROCKSDBRS_CXXBRDIGE})
+    target_include_directories(testharness PUBLIC ${ROCKSDBRS_CXXBRIDGE})
     target_link_libraries(testharness gtest rocksdb_rs)
 endif ()
 
