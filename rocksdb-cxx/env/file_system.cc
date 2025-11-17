@@ -46,7 +46,8 @@ static int RegisterBuiltinFileSystems(ObjectLibrary& library,
       EncryptedFileSystem::kClassName(),
       [](const std::string& /*uri*/, std::unique_ptr<FileSystem>* guard,
          std::string* errmsg) {
-        rocksdb_rs::status::Status s = NewEncryptedFileSystemImpl(nullptr, nullptr, guard);
+        rocksdb_rs::status::Status s =
+            NewEncryptedFileSystemImpl(nullptr, nullptr, guard);
         if (!s.ok()) {
           *errmsg = *s.ToString();
         }
@@ -79,9 +80,9 @@ static int RegisterBuiltinFileSystems(ObjectLibrary& library,
   return static_cast<int>(library.GetFactoryCount(&num_types));
 }
 
-rocksdb_rs::status::Status FileSystem::CreateFromString(const ConfigOptions& config_options,
-                                    const std::string& value,
-                                    std::shared_ptr<FileSystem>* result) {
+rocksdb_rs::status::Status FileSystem::CreateFromString(
+    const ConfigOptions& config_options, const std::string& value,
+    std::shared_ptr<FileSystem>* result) {
   auto default_fs = FileSystem::Default();
   if (default_fs->IsInstanceOf(value)) {
     *result = default_fs;
@@ -95,28 +96,28 @@ rocksdb_rs::status::Status FileSystem::CreateFromString(const ConfigOptions& con
   }
 }
 
-rocksdb_rs::io_status::IOStatus FileSystem::ReuseWritableFile(const std::string& fname,
-                                       const std::string& old_fname,
-                                       const FileOptions& opts,
-                                       std::unique_ptr<FSWritableFile>* result,
-                                       IODebugContext* dbg) {
-  rocksdb_rs::io_status::IOStatus s = RenameFile(old_fname, fname, opts.io_options, dbg);
+rocksdb_rs::io_status::IOStatus FileSystem::ReuseWritableFile(
+    const std::string& fname, const std::string& old_fname,
+    const FileOptions& opts, std::unique_ptr<FSWritableFile>* result,
+    IODebugContext* dbg) {
+  rocksdb_rs::io_status::IOStatus s =
+      RenameFile(old_fname, fname, opts.io_options, dbg);
   if (!s.ok()) {
     return s;
   }
   return NewWritableFile(fname, opts, result, dbg);
 }
 
-rocksdb_rs::io_status::IOStatus FileSystem::NewLogger(const std::string& fname,
-                               const IOOptions& io_opts,
-                               std::shared_ptr<Logger>* result,
-                               IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus FileSystem::NewLogger(
+    const std::string& fname, const IOOptions& io_opts,
+    std::shared_ptr<Logger>* result, IODebugContext* dbg) {
   FileOptions options;
   options.io_options = io_opts;
   // TODO: Tune the buffer size.
   options.writable_file_max_buffer_size = 1024 * 1024;
   std::unique_ptr<FSWritableFile> writable_file;
-  const rocksdb_rs::io_status::IOStatus status = NewWritableFile(fname, options, &writable_file, dbg);
+  const rocksdb_rs::io_status::IOStatus status =
+      NewWritableFile(fname, options, &writable_file, dbg);
   if (!status.ok()) {
     return status.Clone();
   }
@@ -179,11 +180,14 @@ FileOptions FileSystem::OptimizeForBlobFileRead(
   return optimized_file_options;
 }
 
-rocksdb_rs::io_status::IOStatus WriteStringToFile(FileSystem* fs, const Slice& data,
-                           const std::string& fname, bool should_sync) {
+rocksdb_rs::io_status::IOStatus WriteStringToFile(FileSystem* fs,
+                                                  const Slice& data,
+                                                  const std::string& fname,
+                                                  bool should_sync) {
   std::unique_ptr<FSWritableFile> file;
   EnvOptions soptions;
-  rocksdb_rs::io_status::IOStatus s = fs->NewWritableFile(fname, soptions, &file, nullptr);
+  rocksdb_rs::io_status::IOStatus s =
+      fs->NewWritableFile(fname, soptions, &file, nullptr);
   if (!s.ok()) {
     return s;
   }
@@ -197,12 +201,14 @@ rocksdb_rs::io_status::IOStatus WriteStringToFile(FileSystem* fs, const Slice& d
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus ReadFileToString(FileSystem* fs, const std::string& fname,
-                          std::string* data) {
+rocksdb_rs::io_status::IOStatus ReadFileToString(FileSystem* fs,
+                                                 const std::string& fname,
+                                                 std::string* data) {
   FileOptions soptions;
   data->clear();
   std::unique_ptr<FSSequentialFile> file;
-  rocksdb_rs::io_status::IOStatus s = fs->NewSequentialFile(fname, soptions, &file, nullptr);
+  rocksdb_rs::io_status::IOStatus s =
+      fs->NewSequentialFile(fname, soptions, &file, nullptr);
   if (!s.ok()) {
     return s;
   }
@@ -227,7 +233,9 @@ namespace {
 static std::unordered_map<std::string, OptionTypeInfo> fs_wrapper_type_info = {
     {"target",
      OptionTypeInfo::AsCustomSharedPtr<FileSystem>(
-         0, rocksdb_rs::utilities::options_type::OptionVerificationType::kByName, rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize)},
+         0,
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kByName,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kDontSerialize)},
 };
 }  // namespace
 FileSystemWrapper::FileSystemWrapper(const std::shared_ptr<FileSystem>& t)
@@ -235,7 +243,8 @@ FileSystemWrapper::FileSystemWrapper(const std::shared_ptr<FileSystem>& t)
   RegisterOptions("", &target_, &fs_wrapper_type_info);
 }
 
-rocksdb_rs::status::Status FileSystemWrapper::PrepareOptions(const ConfigOptions& options) {
+rocksdb_rs::status::Status FileSystemWrapper::PrepareOptions(
+    const ConfigOptions& options) {
   if (target_ == nullptr) {
     target_ = FileSystem::Default();
   }

@@ -21,21 +21,24 @@ class ChrootFileSystem : public RemapFileSystem {
   static const char* kClassName() { return "ChrootFS"; }
   const char* Name() const override { return kClassName(); }
 
-  rocksdb_rs::io_status::IOStatus GetTestDirectory(const IOOptions& options, std::string* path,
-                            IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus GetTestDirectory(
+      const IOOptions& options, std::string* path,
+      IODebugContext* dbg) override;
 
-  rocksdb_rs::status::Status PrepareOptions(const ConfigOptions& options) override;
+  rocksdb_rs::status::Status PrepareOptions(
+      const ConfigOptions& options) override;
 
  protected:
   // Returns status and expanded absolute path including the chroot directory.
   // Checks whether the provided path breaks out of the chroot. If it returns
   // non-OK status, the returned path should not be used.
-  std::pair<rocksdb_rs::io_status::IOStatus, std::string> EncodePath(const std::string& path) override;
+  std::pair<rocksdb_rs::io_status::IOStatus, std::string> EncodePath(
+      const std::string& path) override;
 
   // Similar to EncodePath() except assumes the basename in the path hasn't been
   // created yet.
-  std::pair<rocksdb_rs::io_status::IOStatus, std::string> EncodePathWithNewBasename(
-      const std::string& path) override;
+  std::pair<rocksdb_rs::io_status::IOStatus, std::string>
+  EncodePathWithNewBasename(const std::string& path) override;
 
  private:
   std::string chroot_dir_;

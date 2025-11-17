@@ -5,7 +5,6 @@
 
 #pragma once
 
-
 #include "rocksdb/env_encryption.h"
 
 namespace rocksdb {
@@ -24,17 +23,19 @@ class CTRCipherStream final : public BlockAccessCipherStream {
  public:
   CTRCipherStream(const std::shared_ptr<BlockCipher>& c, const char* iv,
                   uint64_t initialCounter)
-      : cipher_(c), iv_(iv, c->BlockSize()), initialCounter_(initialCounter){};
-  virtual ~CTRCipherStream(){};
+      : cipher_(c), iv_(iv, c->BlockSize()), initialCounter_(initialCounter) {};
+  virtual ~CTRCipherStream() {};
 
   size_t BlockSize() override { return cipher_->BlockSize(); }
 
  protected:
   void AllocateScratch(std::string&) override;
 
-  rocksdb_rs::status::Status EncryptBlock(uint64_t blockIndex, char* data, char* scratch) override;
+  rocksdb_rs::status::Status EncryptBlock(uint64_t blockIndex, char* data,
+                                          char* scratch) override;
 
-  rocksdb_rs::status::Status DecryptBlock(uint64_t blockIndex, char* data, char* scratch) override;
+  rocksdb_rs::status::Status DecryptBlock(uint64_t blockIndex, char* data,
+                                          char* scratch) override;
 };
 
 // This encryption provider uses a CTR cipher stream, with a given block cipher
@@ -61,14 +62,16 @@ class CTREncryptionProvider : public EncryptionProvider {
   const char* Name() const override { return kClassName(); }
   bool IsInstanceOf(const std::string& name) const override;
   size_t GetPrefixLength() const override;
-  rocksdb_rs::status::Status CreateNewPrefix(const std::string& fname, char* prefix,
-                         size_t prefixLength) const override;
+  rocksdb_rs::status::Status CreateNewPrefix(
+      const std::string& fname, char* prefix,
+      size_t prefixLength) const override;
   rocksdb_rs::status::Status CreateCipherStream(
       const std::string& fname, const EnvOptions& options, Slice& prefix,
       std::unique_ptr<BlockAccessCipherStream>* result) override;
 
-  rocksdb_rs::status::Status AddCipher(const std::string& descriptor, const char* /*cipher*/,
-                   size_t /*len*/, bool /*for_write*/) override;
+  rocksdb_rs::status::Status AddCipher(const std::string& descriptor,
+                                       const char* /*cipher*/, size_t /*len*/,
+                                       bool /*for_write*/) override;
 
  protected:
   // PopulateSecretPrefixPart initializes the data into a new prefix block
@@ -94,4 +97,3 @@ rocksdb_rs::status::Status NewEncryptedFileSystemImpl(
     std::unique_ptr<FileSystem>* fs);
 
 }  // namespace rocksdb
-

@@ -5,13 +5,14 @@
 
 #include "env/unique_id_gen.h"
 
+#include <rocksdb-rs/src/hash.rs.h>
+
 #include <algorithm>
 #include <array>
 #include <atomic>
 #include <cstdint>
 #include <cstring>
 #include <random>
-#include <rocksdb-rs/src/hash.rs.h>
 
 #include "port/lang.h"
 #include "port/port.h"
@@ -131,7 +132,9 @@ void GenerateRawUniqueIdImpl(uint64_t* a, uint64_t* b,
   e.Populate(opts);
   uint64_t upper;
   uint64_t lower;
-  rocksdb_rs::hash::hash2x64(rust::Slice(reinterpret_cast<const uint8_t*>(&e), sizeof(e)), upper, lower);
+  rocksdb_rs::hash::hash2x64(
+      rust::Slice(reinterpret_cast<const uint8_t*>(&e), sizeof(e)), upper,
+      lower);
   *a = upper;
   *b = lower;
 }

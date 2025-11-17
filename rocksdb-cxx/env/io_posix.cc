@@ -56,23 +56,26 @@ std::string IOErrorMsg(const std::string& context,
 }
 
 // file_name can be left empty if it is not unkown.
-rocksdb_rs::io_status::IOStatus IOError(const std::string& context, const std::string& file_name,
-                 int err_number) {
+rocksdb_rs::io_status::IOStatus IOError(const std::string& context,
+                                        const std::string& file_name,
+                                        int err_number) {
   switch (err_number) {
     case ENOSPC: {
-      rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_NoSpace(IOErrorMsg(context, file_name),
-                                     errnoStr(err_number).c_str());
+      rocksdb_rs::io_status::IOStatus s =
+          rocksdb_rs::io_status::IOStatus_NoSpace(
+              IOErrorMsg(context, file_name), errnoStr(err_number).c_str());
       s.SetRetryable(true);
       return s;
     }
     case ESTALE:
-      return rocksdb_rs::io_status::IOStatus_IOError(rocksdb_rs::status::SubCode::kStaleFile);
+      return rocksdb_rs::io_status::IOStatus_IOError(
+          rocksdb_rs::status::SubCode::kStaleFile);
     case ENOENT:
-      return rocksdb_rs::io_status::IOStatus_PathNotFound(IOErrorMsg(context, file_name),
-                                    errnoStr(err_number).c_str());
+      return rocksdb_rs::io_status::IOStatus_PathNotFound(
+          IOErrorMsg(context, file_name), errnoStr(err_number).c_str());
     default:
-      return rocksdb_rs::io_status::IOStatus_IOError(IOErrorMsg(context, file_name),
-                               errnoStr(err_number).c_str());
+      return rocksdb_rs::io_status::IOStatus_IOError(
+          IOErrorMsg(context, file_name), errnoStr(err_number).c_str());
   }
 }
 
@@ -225,9 +228,9 @@ PosixSequentialFile::~PosixSequentialFile() {
   }
 }
 
-rocksdb_rs::io_status::IOStatus PosixSequentialFile::Read(size_t n, const IOOptions& /*opts*/,
-                                   Slice* result, char* scratch,
-                                   IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixSequentialFile::Read(
+    size_t n, const IOOptions& /*opts*/, Slice* result, char* scratch,
+    IODebugContext* /*dbg*/) {
   assert(result != nullptr && !use_direct_io());
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   size_t r = 0;
@@ -250,10 +253,9 @@ rocksdb_rs::io_status::IOStatus PosixSequentialFile::Read(size_t n, const IOOpti
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus PosixSequentialFile::PositionedRead(uint64_t offset, size_t n,
-                                             const IOOptions& /*opts*/,
-                                             Slice* result, char* scratch,
-                                             IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixSequentialFile::PositionedRead(
+    uint64_t offset, size_t n, const IOOptions& /*opts*/, Slice* result,
+    char* scratch, IODebugContext* /*dbg*/) {
   assert(use_direct_io());
   assert(IsSectorAligned(offset, GetRequiredBufferAlignment()));
   assert(IsSectorAligned(n, GetRequiredBufferAlignment()));
@@ -298,7 +300,8 @@ rocksdb_rs::io_status::IOStatus PosixSequentialFile::Skip(uint64_t n) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixSequentialFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus PosixSequentialFile::InvalidateCache(
+    size_t offset, size_t length) {
 #ifndef OS_LINUX
   (void)offset;
   (void)length;
@@ -452,12 +455,13 @@ size_t LogicalBlockSizeCache::GetLogicalBlockSize(const std::string& fname,
 }
 #endif
 
-rocksdb_rs::status::Status PosixHelper::GetLogicalBlockSizeOfDirectory(const std::string& directory,
-                                                   size_t* size) {
+rocksdb_rs::status::Status PosixHelper::GetLogicalBlockSizeOfDirectory(
+    const std::string& directory, size_t* size) {
   int fd = open(directory.c_str(), O_DIRECTORY | O_RDONLY);
   if (fd == -1) {
     close(fd);
-    return rocksdb_rs::status::Status_IOError("Cannot open directory " + directory);
+    return rocksdb_rs::status::Status_IOError("Cannot open directory " +
+                                              directory);
   }
   *size = PosixHelper::GetLogicalBlockSizeOfFd(fd);
   close(fd);
@@ -562,10 +566,9 @@ PosixRandomAccessFile::PosixRandomAccessFile(
 
 PosixRandomAccessFile::~PosixRandomAccessFile() { close(fd_); }
 
-rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::Read(uint64_t offset, size_t n,
-                                     const IOOptions& /*opts*/, Slice* result,
-                                     char* scratch,
-                                     IODebugContext* /*dbg*/) const {
+rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::Read(
+    uint64_t offset, size_t n, const IOOptions& /*opts*/, Slice* result,
+    char* scratch, IODebugContext* /*dbg*/) const {
   if (use_direct_io()) {
     assert(IsSectorAligned(offset, GetRequiredBufferAlignment()));
     assert(IsSectorAligned(n, GetRequiredBufferAlignment()));
@@ -603,9 +606,9 @@ rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::Read(uint64_t offset, siz
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::MultiRead(FSReadRequest* reqs, size_t num_reqs,
-                                          const IOOptions& options,
-                                          IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::MultiRead(
+    FSReadRequest* reqs, size_t num_reqs, const IOOptions& options,
+    IODebugContext* dbg) {
   if (use_direct_io()) {
     for (size_t i = 0; i < num_reqs; i++) {
       assert(IsSectorAligned(reqs[i].offset, GetRequiredBufferAlignment()));
@@ -701,9 +704,9 @@ rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::MultiRead(FSReadRequest* 
           io_uring_cqe_seen(iu, cqe);
         }
       }
-      return rocksdb_rs::io_status::IOStatus_IOError("io_uring_submit_and_wait() requested " +
-                               std::to_string(this_reqs) + " but returned " +
-                               std::to_string(ret));
+      return rocksdb_rs::io_status::IOStatus_IOError(
+          "io_uring_submit_and_wait() requested " + std::to_string(this_reqs) +
+          " but returned " + std::to_string(ret));
     }
 
     for (size_t i = 0; i < this_reqs; i++) {
@@ -716,8 +719,8 @@ rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::MultiRead(FSReadRequest* 
       TEST_SYNC_POINT_CALLBACK(
           "PosixRandomAccessFile::MultiRead:io_uring_wait_cqe:return", &ret);
       if (ret) {
-        ios = rocksdb_rs::io_status::IOStatus_IOError("io_uring_wait_cqe() returns " +
-                                std::to_string(ret));
+        ios = rocksdb_rs::io_status::IOStatus_IOError(
+            "io_uring_wait_cqe() returns " + std::to_string(ret));
 
         if (cqe != nullptr) {
           io_uring_cqe_seen(iu, cqe);
@@ -736,8 +739,9 @@ rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::MultiRead(FSReadRequest* 
                 "Bad cqe data from IO uring - %p\n",
                 req_wrap);
         port::PrintStack();
-        ios = rocksdb_rs::io_status::IOStatus_IOError("io_uring_cqe_get_data() returned " +
-                                std::to_string((uint64_t)req_wrap));
+        ios = rocksdb_rs::io_status::IOStatus_IOError(
+            "io_uring_cqe_get_data() returned " +
+            std::to_string((uint64_t)req_wrap));
         continue;
       }
       wrap_cache.erase(wrap_check);
@@ -776,9 +780,9 @@ rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::MultiRead(FSReadRequest* 
 #endif
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::Prefetch(uint64_t offset, size_t n,
-                                         const IOOptions& /*opts*/,
-                                         IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::Prefetch(
+    uint64_t offset, size_t n, const IOOptions& /*opts*/,
+    IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (!use_direct_io()) {
     ssize_t r = 0;
@@ -832,7 +836,8 @@ void PosixRandomAccessFile::Hint(AccessPattern pattern) {
   }
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::InvalidateCache(
+    size_t offset, size_t length) {
   if (use_direct_io()) {
     return rocksdb_rs::io_status::IOStatus_OK();
   }
@@ -910,8 +915,8 @@ rocksdb_rs::io_status::IOStatus PosixRandomAccessFile::ReadAsync(
   ssize_t ret = io_uring_submit(iu);
   if (ret < 0) {
     fprintf(stderr, "io_uring_submit error: %ld\n", long(ret));
-    return rocksdb_rs::io_status::IOStatus_IOError("io_uring_submit() requested but returned " +
-                             std::to_string(ret));
+    return rocksdb_rs::io_status::IOStatus_IOError(
+        "io_uring_submit() requested but returned " + std::to_string(ret));
   }
   return rocksdb_rs::io_status::IOStatus_OK();
 #else
@@ -952,10 +957,9 @@ PosixMmapReadableFile::~PosixMmapReadableFile() {
   close(fd_);
 }
 
-rocksdb_rs::io_status::IOStatus PosixMmapReadableFile::Read(uint64_t offset, size_t n,
-                                     const IOOptions& /*opts*/, Slice* result,
-                                     char* /*scratch*/,
-                                     IODebugContext* /*dbg*/) const {
+rocksdb_rs::io_status::IOStatus PosixMmapReadableFile::Read(
+    uint64_t offset, size_t n, const IOOptions& /*opts*/, Slice* result,
+    char* /*scratch*/, IODebugContext* /*dbg*/) const {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   if (offset > length_) {
     *result = Slice();
@@ -992,7 +996,8 @@ void PosixMmapReadableFile::Hint(AccessPattern pattern) {
   }
 }
 
-rocksdb_rs::io_status::IOStatus PosixMmapReadableFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus PosixMmapReadableFile::InvalidateCache(
+    size_t offset, size_t length) {
 #ifndef OS_LINUX
   (void)offset;
   (void)length;
@@ -1051,8 +1056,9 @@ rocksdb_rs::io_status::IOStatus PosixMmapFile::MapNewRegion() {
       alloc_status = posix_fallocate(fd_, file_offset_, map_size_);
     }
     if (alloc_status != 0) {
-      return rocksdb_rs::io_status::IOStatus_IOError("Error allocating space to file : " + filename_ +
-                               "Error : " + errnoStr(alloc_status).c_str());
+      return rocksdb_rs::io_status::IOStatus_IOError(
+          "Error allocating space to file : " + filename_ +
+          "Error : " + errnoStr(alloc_status).c_str());
     }
   }
 
@@ -1060,7 +1066,8 @@ rocksdb_rs::io_status::IOStatus PosixMmapFile::MapNewRegion() {
   void* ptr = mmap(nullptr, map_size_, PROT_READ | PROT_WRITE, MAP_SHARED, fd_,
                    file_offset_);
   if (ptr == MAP_FAILED) {
-    return rocksdb_rs::io_status::IOStatus_IOError("MMap failed on " + filename_);
+    return rocksdb_rs::io_status::IOStatus_IOError("MMap failed on " +
+                                                   filename_);
   }
   TEST_KILL_RANDOM("PosixMmapFile::Append:2");
 
@@ -1070,7 +1077,8 @@ rocksdb_rs::io_status::IOStatus PosixMmapFile::MapNewRegion() {
   last_sync_ = base_;
   return rocksdb_rs::io_status::IOStatus_OK();
 #else
-  return rocksdb_rs::io_status::IOStatus_NotSupported("This platform doesn't support fallocate()");
+  return rocksdb_rs::io_status::IOStatus_NotSupported(
+      "This platform doesn't support fallocate()");
 #endif
 }
 
@@ -1114,12 +1122,14 @@ PosixMmapFile::PosixMmapFile(const std::string& fname, int fd, size_t page_size,
 
 PosixMmapFile::~PosixMmapFile() {
   if (fd_ >= 0) {
-    rocksdb_rs::io_status::IOStatus s = PosixMmapFile::Close(IOOptions(), nullptr);
+    rocksdb_rs::io_status::IOStatus s =
+        PosixMmapFile::Close(IOOptions(), nullptr);
   }
 }
 
-rocksdb_rs::io_status::IOStatus PosixMmapFile::Append(const Slice& data, const IOOptions& /*opts*/,
-                               IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixMmapFile::Append(const Slice& data,
+                                                      const IOOptions& /*opts*/,
+                                                      IODebugContext* /*dbg*/) {
   const char* src = data.data();
   size_t left = data.size();
   while (left > 0) {
@@ -1149,7 +1159,7 @@ rocksdb_rs::io_status::IOStatus PosixMmapFile::Append(const Slice& data, const I
 }
 
 rocksdb_rs::io_status::IOStatus PosixMmapFile::Close(const IOOptions& /*opts*/,
-                              IODebugContext* /*dbg*/) {
+                                                     IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   size_t unused = limit_ - dst_;
 
@@ -1176,12 +1186,12 @@ rocksdb_rs::io_status::IOStatus PosixMmapFile::Close(const IOOptions& /*opts*/,
 }
 
 rocksdb_rs::io_status::IOStatus PosixMmapFile::Flush(const IOOptions& /*opts*/,
-                              IODebugContext* /*dbg*/) {
+                                                     IODebugContext* /*dbg*/) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
 rocksdb_rs::io_status::IOStatus PosixMmapFile::Sync(const IOOptions& /*opts*/,
-                             IODebugContext* /*dbg*/) {
+                                                    IODebugContext* /*dbg*/) {
 #ifdef HAVE_FULLFSYNC
   if (::fcntl(fd_, F_FULLFSYNC) < 0) {
     return IOError("while fcntl(F_FULLSYNC) mmapped file", filename_, errno);
@@ -1199,7 +1209,7 @@ rocksdb_rs::io_status::IOStatus PosixMmapFile::Sync(const IOOptions& /*opts*/,
  * Flush data as well as metadata to stable storage.
  */
 rocksdb_rs::io_status::IOStatus PosixMmapFile::Fsync(const IOOptions& /*opts*/,
-                              IODebugContext* /*dbg*/) {
+                                                     IODebugContext* /*dbg*/) {
 #ifdef HAVE_FULLFSYNC
   if (::fcntl(fd_, F_FULLFSYNC) < 0) {
     return IOError("While fcntl(F_FULLSYNC) on mmaped file", filename_, errno);
@@ -1224,7 +1234,8 @@ uint64_t PosixMmapFile::GetFileSize(const IOOptions& /*opts*/,
   return file_offset_ + used;
 }
 
-rocksdb_rs::io_status::IOStatus PosixMmapFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus PosixMmapFile::InvalidateCache(size_t offset,
+                                                               size_t length) {
 #ifndef OS_LINUX
   (void)offset;
   (void)length;
@@ -1240,9 +1251,9 @@ rocksdb_rs::io_status::IOStatus PosixMmapFile::InvalidateCache(size_t offset, si
 }
 
 #ifdef ROCKSDB_FALLOCATE_PRESENT
-rocksdb_rs::io_status::IOStatus PosixMmapFile::Allocate(uint64_t offset, uint64_t len,
-                                 const IOOptions& /*opts*/,
-                                 IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixMmapFile::Allocate(
+    uint64_t offset, uint64_t len, const IOOptions& /*opts*/,
+    IODebugContext* /*dbg*/) {
   assert(offset <= static_cast<uint64_t>(std::numeric_limits<off_t>::max()));
   assert(len <= static_cast<uint64_t>(std::numeric_limits<off_t>::max()));
   TEST_KILL_RANDOM("PosixMmapFile::Allocate:0");
@@ -1288,12 +1299,13 @@ PosixWritableFile::PosixWritableFile(const std::string& fname, int fd,
 
 PosixWritableFile::~PosixWritableFile() {
   if (fd_ >= 0) {
-    rocksdb_rs::io_status::IOStatus s = PosixWritableFile::Close(IOOptions(), nullptr);
+    rocksdb_rs::io_status::IOStatus s =
+        PosixWritableFile::Close(IOOptions(), nullptr);
   }
 }
 
-rocksdb_rs::io_status::IOStatus PosixWritableFile::Append(const Slice& data, const IOOptions& /*opts*/,
-                                   IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::Append(
+    const Slice& data, const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
   if (use_direct_io()) {
     assert(IsSectorAligned(data.size(), GetRequiredBufferAlignment()));
     assert(IsSectorAligned(data.data(), GetRequiredBufferAlignment()));
@@ -1309,9 +1321,9 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::Append(const Slice& data, con
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
-                                             const IOOptions& /*opts*/,
-                                             IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::PositionedAppend(
+    const Slice& data, uint64_t offset, const IOOptions& /*opts*/,
+    IODebugContext* /*dbg*/) {
   if (use_direct_io()) {
     assert(IsSectorAligned(offset, GetRequiredBufferAlignment()));
     assert(IsSectorAligned(data.size(), GetRequiredBufferAlignment()));
@@ -1328,8 +1340,8 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::PositionedAppend(const Slice&
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixWritableFile::Truncate(uint64_t size, const IOOptions& /*opts*/,
-                                     IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::Truncate(
+    uint64_t size, const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
   int r = ftruncate(fd_, size);
   if (r < 0) {
@@ -1341,8 +1353,8 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::Truncate(uint64_t size, const
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus PosixWritableFile::Close(const IOOptions& /*opts*/,
-                                  IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::Close(
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
 
   size_t block_size;
@@ -1392,13 +1404,13 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::Close(const IOOptions& /*opts
 }
 
 // write out the cached data to the OS cache
-rocksdb_rs::io_status::IOStatus PosixWritableFile::Flush(const IOOptions& /*opts*/,
-                                  IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::Flush(
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixWritableFile::Sync(const IOOptions& /*opts*/,
-                                 IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::Sync(
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
 #ifdef HAVE_FULLFSYNC
   if (::fcntl(fd_, F_FULLFSYNC) < 0) {
     return IOError("while fcntl(F_FULLFSYNC)", filename_, errno);
@@ -1411,8 +1423,8 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::Sync(const IOOptions& /*opts*
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixWritableFile::Fsync(const IOOptions& /*opts*/,
-                                  IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::Fsync(
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
 #ifdef HAVE_FULLFSYNC
   if (::fcntl(fd_, F_FULLFSYNC) < 0) {
     return IOError("while fcntl(F_FULLFSYNC)", filename_, errno);
@@ -1450,7 +1462,8 @@ void PosixWritableFile::SetWriteLifeTimeHint(Env::WriteLifeTimeHint hint) {
 #endif  // OS_LINUX
 }
 
-rocksdb_rs::io_status::IOStatus PosixWritableFile::InvalidateCache(size_t offset, size_t length) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::InvalidateCache(
+    size_t offset, size_t length) {
   if (use_direct_io()) {
     return rocksdb_rs::io_status::IOStatus_OK();
   }
@@ -1469,9 +1482,9 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::InvalidateCache(size_t offset
 }
 
 #ifdef ROCKSDB_FALLOCATE_PRESENT
-rocksdb_rs::io_status::IOStatus PosixWritableFile::Allocate(uint64_t offset, uint64_t len,
-                                     const IOOptions& /*opts*/,
-                                     IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::Allocate(
+    uint64_t offset, uint64_t len, const IOOptions& /*opts*/,
+    IODebugContext* /*dbg*/) {
   assert(offset <= static_cast<uint64_t>(std::numeric_limits<off_t>::max()));
   assert(len <= static_cast<uint64_t>(std::numeric_limits<off_t>::max()));
   TEST_KILL_RANDOM("PosixWritableFile::Allocate:0");
@@ -1492,9 +1505,9 @@ rocksdb_rs::io_status::IOStatus PosixWritableFile::Allocate(uint64_t offset, uin
 }
 #endif
 
-rocksdb_rs::io_status::IOStatus PosixWritableFile::RangeSync(uint64_t offset, uint64_t nbytes,
-                                      const IOOptions& opts,
-                                      IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus PosixWritableFile::RangeSync(
+    uint64_t offset, uint64_t nbytes, const IOOptions& opts,
+    IODebugContext* dbg) {
 #ifdef ROCKSDB_RANGESYNC_PRESENT
   assert(offset <= static_cast<uint64_t>(std::numeric_limits<off_t>::max()));
   assert(nbytes <= static_cast<uint64_t>(std::numeric_limits<off_t>::max()));
@@ -1541,9 +1554,9 @@ PosixRandomRWFile::~PosixRandomRWFile() {
   }
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Write(uint64_t offset, const Slice& data,
-                                  const IOOptions& /*opts*/,
-                                  IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Write(
+    uint64_t offset, const Slice& data, const IOOptions& /*opts*/,
+    IODebugContext* /*dbg*/) {
   const char* src = data.data();
   size_t nbytes = data.size();
   if (!PosixPositionedWrite(fd_, src, nbytes, static_cast<off_t>(offset))) {
@@ -1555,9 +1568,9 @@ rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Write(uint64_t offset, const 
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Read(uint64_t offset, size_t n,
-                                 const IOOptions& /*opts*/, Slice* result,
-                                 char* scratch, IODebugContext* /*dbg*/) const {
+rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Read(
+    uint64_t offset, size_t n, const IOOptions& /*opts*/, Slice* result,
+    char* scratch, IODebugContext* /*dbg*/) const {
   size_t left = n;
   char* ptr = scratch;
   while (left > 0) {
@@ -1586,13 +1599,13 @@ rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Read(uint64_t offset, size_t 
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Flush(const IOOptions& /*opts*/,
-                                  IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Flush(
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Sync(const IOOptions& /*opts*/,
-                                 IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Sync(
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
 #ifdef HAVE_FULLFSYNC
   if (::fcntl(fd_, F_FULLFSYNC) < 0) {
     return IOError("while fcntl(F_FULLFSYNC) random rw file", filename_, errno);
@@ -1605,8 +1618,8 @@ rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Sync(const IOOptions& /*opts*
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Fsync(const IOOptions& /*opts*/,
-                                  IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Fsync(
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
 #ifdef HAVE_FULLFSYNC
   if (::fcntl(fd_, F_FULLFSYNC) < 0) {
     return IOError("While fcntl(F_FULLSYNC) random rw file", filename_, errno);
@@ -1619,8 +1632,8 @@ rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Fsync(const IOOptions& /*opts
   return rocksdb_rs::io_status::IOStatus_OK();
 }
 
-rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Close(const IOOptions& /*opts*/,
-                                  IODebugContext* /*dbg*/) {
+rocksdb_rs::io_status::IOStatus PosixRandomRWFile::Close(
+    const IOOptions& /*opts*/, IODebugContext* /*dbg*/) {
   if (close(fd_) < 0) {
     return IOError("While close random read/write file", filename_, errno);
   }
@@ -1653,18 +1666,20 @@ PosixDirectory::PosixDirectory(int fd, const std::string& directory_name)
 
 PosixDirectory::~PosixDirectory() {
   if (fd_ >= 0) {
-    rocksdb_rs::io_status::IOStatus s = PosixDirectory::Close(IOOptions(), nullptr);
+    rocksdb_rs::io_status::IOStatus s =
+        PosixDirectory::Close(IOOptions(), nullptr);
   }
 }
 
-rocksdb_rs::io_status::IOStatus PosixDirectory::Fsync(const IOOptions& opts, IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus PosixDirectory::Fsync(const IOOptions& opts,
+                                                      IODebugContext* dbg) {
   return FsyncWithDirOptions(opts, dbg, DirFsyncOptions());
 }
 
 // Users who want the file entries synced in Directory project must call a
 // Fsync or FsyncWithDirOptions function before Close
 rocksdb_rs::io_status::IOStatus PosixDirectory::Close(const IOOptions& /*opts*/,
-                               IODebugContext* /*dbg*/) {
+                                                      IODebugContext* /*dbg*/) {
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_OK();
   if (close(fd_) < 0) {
     s = IOError("While closing directory ", directory_name_, errno);

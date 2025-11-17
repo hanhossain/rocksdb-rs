@@ -107,7 +107,8 @@ class PosixDynamicLibrary : public DynamicLibrary {
       : name_(name), handle_(handle) {}
   ~PosixDynamicLibrary() override { dlclose(handle_); }
 
-  rocksdb_rs::status::Status LoadSymbol(const std::string& sym_name, void** func) override {
+  rocksdb_rs::status::Status LoadSymbol(const std::string& sym_name,
+                                        void** func) override {
     assert(nullptr != func);
     dlerror();  // Clear any old error
     *func = dlsym(handle_, sym_name.c_str());
@@ -115,7 +116,8 @@ class PosixDynamicLibrary : public DynamicLibrary {
       return rocksdb_rs::status::Status_OK();
     } else {
       char* err = dlerror();
-      return rocksdb_rs::status::Status_NotFound("Error finding symbol: " + sym_name, err);
+      return rocksdb_rs::status::Status_NotFound(
+          "Error finding symbol: " + sym_name, err);
     }
   }
 
@@ -246,8 +248,9 @@ class PosixEnv : public CompositeEnv {
   // be loaded using the default path (LD_LIBRARY_PATH) If search_path is
   // specified, the shared library will be searched for in the directories
   // provided by the search path
-  rocksdb_rs::status::Status LoadLibrary(const std::string& name, const std::string& path,
-                     std::shared_ptr<DynamicLibrary>* result) override {
+  rocksdb_rs::status::Status LoadLibrary(
+      const std::string& name, const std::string& path,
+      std::shared_ptr<DynamicLibrary>* result) override {
     assert(result != nullptr);
     if (name.empty()) {
       void* hndl = dlopen(NULL, RTLD_NOW);
@@ -308,7 +311,8 @@ class PosixEnv : public CompositeEnv {
 
   int ReleaseThreads(int threads_to_be_released, Priority pri) override;
 
-  rocksdb_rs::status::Status GetThreadList(std::vector<ThreadStatus>* thread_list) override {
+  rocksdb_rs::status::Status GetThreadList(
+      std::vector<ThreadStatus>* thread_list) override {
     assert(thread_status_updater_);
     return thread_status_updater_->GetThreadList(thread_list);
   }
@@ -334,10 +338,12 @@ class PosixEnv : public CompositeEnv {
     int ret = gethostname(name, max_len);
     if (ret < 0) {
       if (errno == EFAULT || errno == EINVAL) {
-        return rocksdb_rs::status::Status_InvalidArgument(errnoStr(errno).c_str());
+        return rocksdb_rs::status::Status_InvalidArgument(
+            errnoStr(errno).c_str());
       } else if (errno == ENAMETOOLONG) {
         return IOError("GetHostName", std::string(name, strnlen(name, max_len)),
-                       errno).status();
+                       errno)
+            .status();
       } else {
         return IOError("GetHostName", "", errno).status();
       }
@@ -362,7 +368,8 @@ class PosixEnv : public CompositeEnv {
     return thread_pools_[pri].GetBackgroundThreads();
   }
 
-  rocksdb_rs::status::Status SetAllowNonOwnerAccess(bool allow_non_owner_access) override {
+  rocksdb_rs::status::Status SetAllowNonOwnerAccess(
+      bool allow_non_owner_access) override {
     allow_non_owner_access_ = allow_non_owner_access;
     return rocksdb_rs::status::Status_OK();
   }
@@ -384,10 +391,12 @@ class PosixEnv : public CompositeEnv {
 
   void LowerThreadPoolCPUPriority(Priority pool) override {
     assert(pool >= Priority::BOTTOM && pool <= Priority::HIGH);
-    thread_pools_[pool].LowerCPUPriority(rocksdb_rs::port_defs::CpuPriority::kLow);
+    thread_pools_[pool].LowerCPUPriority(
+        rocksdb_rs::port_defs::CpuPriority::kLow);
   }
 
-  rocksdb_rs::status::Status LowerThreadPoolCPUPriority(Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
+  rocksdb_rs::status::Status LowerThreadPoolCPUPriority(
+      Priority pool, rocksdb_rs::port_defs::CpuPriority pri) override {
     assert(pool >= Priority::BOTTOM && pool <= Priority::HIGH);
     thread_pools_[pool].LowerCPUPriority(pri);
     return rocksdb_rs::status::Status_OK();

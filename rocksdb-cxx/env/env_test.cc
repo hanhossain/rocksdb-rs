@@ -235,15 +235,19 @@ TEST_F(EnvPosixTest, DISABLED_FilePermission) {
 }
 
 TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
-  std::atomic<rocksdb_rs::port_defs::CpuPriority> from_priority(rocksdb_rs::port_defs::CpuPriority::kNormal);
-  std::atomic<rocksdb_rs::port_defs::CpuPriority> to_priority(rocksdb_rs::port_defs::CpuPriority::kNormal);
+  std::atomic<rocksdb_rs::port_defs::CpuPriority> from_priority(
+      rocksdb_rs::port_defs::CpuPriority::kNormal);
+  std::atomic<rocksdb_rs::port_defs::CpuPriority> to_priority(
+      rocksdb_rs::port_defs::CpuPriority::kNormal);
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "ThreadPoolImpl::BGThread::BeforeSetCpuPriority", [&](void* pri) {
-        from_priority.store(*reinterpret_cast<rocksdb_rs::port_defs::CpuPriority*>(pri));
+        from_priority.store(
+            *reinterpret_cast<rocksdb_rs::port_defs::CpuPriority*>(pri));
       });
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "ThreadPoolImpl::BGThread::AfterSetCpuPriority", [&](void* pri) {
-        to_priority.store(*reinterpret_cast<rocksdb_rs::port_defs::CpuPriority*>(pri));
+        to_priority.store(
+            *reinterpret_cast<rocksdb_rs::port_defs::CpuPriority*>(pri));
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
@@ -264,8 +268,8 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Same priority, no-op.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM,
-                                     rocksdb_rs::port_defs::CpuPriority::kNormal);
+    env_->LowerThreadPoolCPUPriority(
+        Env::Priority::BOTTOM, rocksdb_rs::port_defs::CpuPriority::kNormal);
     RunTask(Env::Priority::BOTTOM);
     ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
     ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
@@ -273,7 +277,8 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Higher priority, no-op.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, rocksdb_rs::port_defs::CpuPriority::kHigh);
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM,
+                                     rocksdb_rs::port_defs::CpuPriority::kHigh);
     RunTask(Env::Priority::BOTTOM);
     ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
     ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
@@ -281,7 +286,8 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Lower priority from kNormal -> kLow.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, rocksdb_rs::port_defs::CpuPriority::kLow);
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM,
+                                     rocksdb_rs::port_defs::CpuPriority::kLow);
     RunTask(Env::Priority::BOTTOM);
     ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
     ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kLow);
@@ -289,7 +295,8 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Lower priority from kLow -> kIdle.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM, rocksdb_rs::port_defs::CpuPriority::kIdle);
+    env_->LowerThreadPoolCPUPriority(Env::Priority::BOTTOM,
+                                     rocksdb_rs::port_defs::CpuPriority::kIdle);
     RunTask(Env::Priority::BOTTOM);
     ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kLow);
     ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kIdle);
@@ -297,7 +304,8 @@ TEST_F(EnvPosixTest, LowerThreadPoolCpuPriority) {
 
   {
     // Lower priority from kNormal -> kIdle for another pool.
-    env_->LowerThreadPoolCPUPriority(Env::Priority::HIGH, rocksdb_rs::port_defs::CpuPriority::kIdle);
+    env_->LowerThreadPoolCPUPriority(Env::Priority::HIGH,
+                                     rocksdb_rs::port_defs::CpuPriority::kIdle);
     RunTask(Env::Priority::HIGH);
     ASSERT_EQ(from_priority, rocksdb_rs::port_defs::CpuPriority::kNormal);
     ASSERT_EQ(to_priority, rocksdb_rs::port_defs::CpuPriority::kIdle);
@@ -323,7 +331,8 @@ TEST_F(EnvPosixTest, MemoryMappedFileBuffer) {
   }
 
   std::unique_ptr<MemoryMappedFileBuffer> mmap_buffer;
-  rocksdb_rs::status::Status status = env_->NewMemoryMappedFileBuffer(fname, &mmap_buffer);
+  rocksdb_rs::status::Status status =
+      env_->NewMemoryMappedFileBuffer(fname, &mmap_buffer);
   // it should be supported at least on linux
 #if !defined(OS_LINUX)
   if (status.IsNotSupported()) {
@@ -347,7 +356,8 @@ TEST_F(EnvPosixTest, MemoryMappedFileBuffer) {
 TEST_F(EnvPosixTest, LoadRocksDBLibrary) {
   std::shared_ptr<DynamicLibrary> library;
   std::function<void*(void*, const char*)> function;
-  rocksdb_rs::status::Status status = env_->LoadLibrary("no-such-library", "", &library);
+  rocksdb_rs::status::Status status =
+      env_->LoadLibrary("no-such-library", "", &library);
   ASSERT_NOK(status);
   ASSERT_EQ(nullptr, library.get());
   status = env_->LoadLibrary("rocksdb", "", &library);
@@ -373,7 +383,8 @@ TEST_F(EnvPosixTest, LoadRocksDBLibraryWithSearchPath) {
   ASSERT_EQ(nullptr, library.get());
   ASSERT_NOK(env_->LoadLibrary("dl", "/tmp", &library));
   ASSERT_EQ(nullptr, library.get());
-  rocksdb_rs::status::Status status = env_->LoadLibrary("rocksdb", "/tmp:./", &library);
+  rocksdb_rs::status::Status status =
+      env_->LoadLibrary("rocksdb", "/tmp:./", &library);
   if (status.ok()) {
     ASSERT_NE(nullptr, library.get());
     ASSERT_OK(env_->LoadLibrary(library->Name(), "", &library));
@@ -2045,7 +2056,7 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
     }
 
     rocksdb_rs::status::Status PositionedAppend(const Slice& /*data*/,
-                            uint64_t /*offset*/) override {
+                                                uint64_t /*offset*/) override {
       inc(2);
       return rocksdb_rs::status::Status_OK();
     }
@@ -2130,19 +2141,22 @@ TEST_P(EnvPosixTestWithParam, WritableFileWrapper) {
       return 0;
     }
 
-    rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/, size_t /*length*/) override {
+    rocksdb_rs::status::Status InvalidateCache(size_t /*offset*/,
+                                               size_t /*length*/) override {
       inc(19);
       return rocksdb_rs::status::Status_OK();
     }
 
-    rocksdb_rs::status::Status RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/) override {
+    rocksdb_rs::status::Status RangeSync(uint64_t /*offset*/,
+                                         uint64_t /*nbytes*/) override {
       inc(20);
       return rocksdb_rs::status::Status_OK();
     }
 
     void PrepareWrite(size_t /*offset*/, size_t /*len*/) override { inc(21); }
 
-    rocksdb_rs::status::Status Allocate(uint64_t /*offset*/, uint64_t /*len*/) override {
+    rocksdb_rs::status::Status Allocate(uint64_t /*offset*/,
+                                        uint64_t /*len*/) override {
       inc(22);
       return rocksdb_rs::status::Status_OK();
     }
@@ -2392,8 +2406,8 @@ class TestEnv : public EnvWrapper {
 
   int GetCloseCount() { return close_count; }
 
-  rocksdb_rs::status::Status NewLogger(const std::string& /*fname*/,
-                   std::shared_ptr<Logger>* result) override {
+  rocksdb_rs::status::Status NewLogger(
+      const std::string& /*fname*/, std::shared_ptr<Logger>* result) override {
     result->reset(new TestLogger(this));
     return rocksdb_rs::status::Status_OK();
   }
@@ -2581,7 +2595,8 @@ TEST_F(EnvTest, MultipleCompositeEnv) {
 }
 
 TEST_F(EnvTest, IsDirectory) {
-  rocksdb_rs::status::Status s = Env::Default()->CreateDirIfMissing(test_directory_);
+  rocksdb_rs::status::Status s =
+      Env::Default()->CreateDirIfMissing(test_directory_);
   ASSERT_OK(s);
   const std::string test_sub_dir = test_directory_ + "sub1";
   const std::string test_file_path = test_directory_ + "file1";
@@ -2591,8 +2606,11 @@ TEST_F(EnvTest, IsDirectory) {
   ASSERT_TRUE(is_dir);
   {
     std::unique_ptr<FSWritableFile> wfile;
-    s = Env::Default()->GetFileSystem()->NewWritableFile(
-        test_file_path, FileOptions(), &wfile, /*dbg=*/nullptr).status();
+    s = Env::Default()
+            ->GetFileSystem()
+            ->NewWritableFile(test_file_path, FileOptions(), &wfile,
+                              /*dbg=*/nullptr)
+            .status();
     ASSERT_OK(s);
     std::unique_ptr<WritableFileWriter> fwriter;
     fwriter.reset(new WritableFileWriter(std::move(wfile), test_file_path,
@@ -2607,7 +2625,8 @@ TEST_F(EnvTest, IsDirectory) {
 }
 
 TEST_F(EnvTest, EnvWriteVerificationTest) {
-  rocksdb_rs::status::Status s = Env::Default()->CreateDirIfMissing(test_directory_);
+  rocksdb_rs::status::Status s =
+      Env::Default()->CreateDirIfMissing(test_directory_);
   const std::string test_file_path = test_directory_ + "file1";
   ASSERT_OK(s);
   std::shared_ptr<FaultInjectionTestFS> fault_fs(
@@ -2921,7 +2940,6 @@ TEST_F(CreateEnvTest, CreateEncryptedFileSystem) {
   ASSERT_OK(FileSystem::CreateFromString(config_options_, opts_str, &copy));
   ASSERT_TRUE(fs->AreEquivalent(config_options_, copy.get(), &mismatch));
 }
-
 
 namespace {
 
@@ -3445,10 +3463,10 @@ class ReadAsyncRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
                             std::unique_ptr<FSRandomAccessFile>& file)
       : FSRandomAccessFileOwnerWrapper(std::move(file)), fs_(fs) {}
 
-  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
-                     std::function<void(const FSReadRequest&, void*)> cb,
-                     void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
-                     IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus ReadAsync(
+      FSReadRequest& req, const IOOptions& opts,
+      std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
+      void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) override;
 
  private:
   ReadAsyncFS& fs_;
@@ -3464,19 +3482,20 @@ class ReadAsyncFS : public FileSystemWrapper {
   static const char* kClassName() { return "ReadAsyncFS"; }
   const char* Name() const override { return kClassName(); }
 
-  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
-                               const FileOptions& opts,
-                               std::unique_ptr<FSRandomAccessFile>* result,
-                               IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(
+      const std::string& fname, const FileOptions& opts,
+      std::unique_ptr<FSRandomAccessFile>* result,
+      IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
-    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
+    rocksdb_rs::io_status::IOStatus s =
+        target()->NewRandomAccessFile(fname, opts, &file, dbg);
     EXPECT_OK(s);
     result->reset(new ReadAsyncRandomAccessFile(*this, file));
     return s;
   }
 
   rocksdb_rs::io_status::IOStatus Poll(std::vector<void*>& io_handles,
-                size_t /*min_completions*/) override {
+                                       size_t /*min_completions*/) override {
     // Wait for the threads completion.
     for (auto& t : workers) {
       t.join();

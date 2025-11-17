@@ -19,7 +19,8 @@
 namespace rocksdb {
 namespace {
 static std::unordered_map<std::string, OptionTypeInfo> chroot_fs_type_info = {
-    {"chroot_dir", {0, rocksdb_rs::utilities::options_type::OptionType::kString}}};
+    {"chroot_dir",
+     {0, rocksdb_rs::utilities::options_type::OptionType::kString}}};
 }  // namespace
 ChrootFileSystem::ChrootFileSystem(const std::shared_ptr<FileSystem>& base,
                                    const std::string& chroot_dir)
@@ -27,12 +28,14 @@ ChrootFileSystem::ChrootFileSystem(const std::shared_ptr<FileSystem>& base,
   RegisterOptions("chroot_dir", &chroot_dir_, &chroot_fs_type_info);
 }
 
-rocksdb_rs::status::Status ChrootFileSystem::PrepareOptions(const ConfigOptions& options) {
+rocksdb_rs::status::Status ChrootFileSystem::PrepareOptions(
+    const ConfigOptions& options) {
   rocksdb_rs::status::Status s = FileSystemWrapper::PrepareOptions(options);
   if (!s.ok()) {
     return s;
   } else if (chroot_dir_.empty()) {
-    s = rocksdb_rs::status::Status_InvalidArgument("ChRootFileSystem requires a chroot dir");
+    s = rocksdb_rs::status::Status_InvalidArgument(
+        "ChRootFileSystem requires a chroot dir");
   } else {
     s = target_->FileExists(chroot_dir_, IOOptions(), nullptr).status();
   }
@@ -53,9 +56,8 @@ rocksdb_rs::status::Status ChrootFileSystem::PrepareOptions(const ConfigOptions&
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus ChrootFileSystem::GetTestDirectory(const IOOptions& options,
-                                            std::string* path,
-                                            IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus ChrootFileSystem::GetTestDirectory(
+    const IOOptions& options, std::string* path, IODebugContext* dbg) {
   // Adapted from PosixEnv's implementation since it doesn't provide a way to
   // create directory in the chroot.
   char buf[256];
@@ -69,10 +71,12 @@ rocksdb_rs::io_status::IOStatus ChrootFileSystem::GetTestDirectory(const IOOptio
 // Returns status and expanded absolute path including the chroot directory.
 // Checks whether the provided path breaks out of the chroot. If it returns
 // non-OK status, the returned path should not be used.
-std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::EncodePath(
-    const std::string& path) {
+std::pair<rocksdb_rs::io_status::IOStatus, std::string>
+ChrootFileSystem::EncodePath(const std::string& path) {
   if (path.empty() || path[0] != '/') {
-    return {rocksdb_rs::io_status::IOStatus_InvalidArgument(path, "Not an absolute path"), ""};
+    return {rocksdb_rs::io_status::IOStatus_InvalidArgument(
+                path, "Not an absolute path"),
+            ""};
   }
   std::pair<rocksdb_rs::io_status::IOStatus, std::string> res;
   res.second = chroot_dir_ + path;
@@ -83,12 +87,13 @@ std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::Encode
   char* normalized_path = realpath(res.second.c_str(), nullptr);
 #endif
   if (normalized_path == nullptr) {
-    res.first = rocksdb_rs::io_status::IOStatus_NotFound(res.second, errnoStr(errno).c_str());
+    res.first = rocksdb_rs::io_status::IOStatus_NotFound(
+        res.second, errnoStr(errno).c_str());
   } else if (strlen(normalized_path) < chroot_dir_.size() ||
              strncmp(normalized_path, chroot_dir_.c_str(),
                      chroot_dir_.size()) != 0) {
-    res.first = rocksdb_rs::io_status::IOStatus_IOError(res.second,
-                                  "Attempted to access path outside chroot");
+    res.first = rocksdb_rs::io_status::IOStatus_IOError(
+        res.second, "Attempted to access path outside chroot");
   } else {
     res.first = rocksdb_rs::io_status::IOStatus_OK();
   }
@@ -100,10 +105,12 @@ std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::Encode
 
 // Similar to EncodePath() except assumes the basename in the path hasn't been
 // created yet.
-std::pair<rocksdb_rs::io_status::IOStatus, std::string> ChrootFileSystem::EncodePathWithNewBasename(
-    const std::string& path) {
+std::pair<rocksdb_rs::io_status::IOStatus, std::string>
+ChrootFileSystem::EncodePathWithNewBasename(const std::string& path) {
   if (path.empty() || path[0] != '/') {
-    return {rocksdb_rs::io_status::IOStatus_InvalidArgument(path, "Not an absolute path"), ""};
+    return {rocksdb_rs::io_status::IOStatus_InvalidArgument(
+                path, "Not an absolute path"),
+            ""};
   }
   // Basename may be followed by trailing slashes
   size_t final_idx = path.find_last_not_of('/');

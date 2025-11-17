@@ -11,9 +11,8 @@
 #include <atomic>
 #include <string>
 
-#include "rocksdb/system_clock.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/system_clock.h"
 
 namespace rocksdb {
 // A SystemClock that can "mock" sleep and counts its operations.
@@ -71,7 +70,8 @@ class EmulatedSystemClock : public SystemClockWrapper {
 
   int GetSleepCounter() const { return sleep_counter_.load(); }
 
-  virtual rocksdb_rs::status::Status GetCurrentTime(int64_t* unix_time) override {
+  virtual rocksdb_rs::status::Status GetCurrentTime(
+      int64_t* unix_time) override {
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
     if (time_elapse_only_sleep_) {
       *unix_time = maybe_starting_time_;
