@@ -13,12 +13,11 @@
 #include "cache/cache_key.h"
 #include "cache/typed_cache.h"
 #include "port/lang.h"
+#include "rocksdb-rs/src/coding_lean.rs.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/system_clock.h"
 #include "test_util/sync_point.h"
-
-#include "rocksdb-rs/src/coding_lean.rs.h"
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -112,10 +111,12 @@ class CacheEntryStatsCollector {
   // Gets or creates a shared instance of CacheEntryStatsCollector in the
   // cache itself, and saves into `ptr`. This shared_ptr will hold the
   // entry in cache until all refs are destroyed.
-  static rocksdb_rs::status::Status GetShared(Cache *raw_cache, SystemClock *clock,
-                          std::shared_ptr<CacheEntryStatsCollector> *ptr) {
+  static rocksdb_rs::status::Status GetShared(
+      Cache *raw_cache, SystemClock *clock,
+      std::shared_ptr<CacheEntryStatsCollector> *ptr) {
     assert(raw_cache);
-    BasicTypedCacheInterface<CacheEntryStatsCollector, rocksdb_rs::cache::CacheEntryRole::kMisc>
+    BasicTypedCacheInterface<CacheEntryStatsCollector,
+                             rocksdb_rs::cache::CacheEntryRole::kMisc>
         cache{raw_cache};
 
     const Slice &cache_key = GetCacheKey();

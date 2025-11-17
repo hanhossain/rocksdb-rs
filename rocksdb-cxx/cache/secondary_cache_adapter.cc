@@ -83,8 +83,8 @@ CacheWithSecondaryAdapter::CacheWithSecondaryAdapter(
   if (distribute_cache_res_) {
     size_t sec_capacity = 0;
     pri_cache_res_ = std::make_shared<ConcurrentCacheReservationManager>(
-        std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
-            target_));
+        std::make_shared<CacheReservationManagerImpl<
+            rocksdb_rs::cache::CacheEntryRole::kMisc>>(target_));
     rocksdb_rs::status::Status s = secondary_cache_->GetCapacity(sec_capacity);
     assert(s.ok());
     // Initially, the primary cache is sized to uncompressed cache budget plsu
@@ -190,8 +190,9 @@ Cache::Handle* CacheWithSecondaryAdapter::Promote(
     // Insert dummy to record recent use
     // TODO: try to avoid case where inserting this dummy could overwrite a
     // regular entry
-    rocksdb_rs::status::Status s = Insert(key, kDummyObj, &kNoopCacheItemHelper, /*charge=*/0,
-                      /*handle=*/nullptr, priority);
+    rocksdb_rs::status::Status s =
+        Insert(key, kDummyObj, &kNoopCacheItemHelper, /*charge=*/0,
+               /*handle=*/nullptr, priority);
     // Nothing to do or clean up on dummy insertion failure
   } else {
     // Insert regular entry into primary cache.
@@ -214,11 +215,11 @@ Cache::Handle* CacheWithSecondaryAdapter::Promote(
   return result;
 }
 
-rocksdb_rs::status::Status CacheWithSecondaryAdapter::Insert(const Slice& key, ObjectPtr value,
-                                         const CacheItemHelper* helper,
-                                         size_t charge, Handle** handle,
-                                         Priority priority) {
-  rocksdb_rs::status::Status s = target_->Insert(key, value, helper, charge, handle, priority);
+rocksdb_rs::status::Status CacheWithSecondaryAdapter::Insert(
+    const Slice& key, ObjectPtr value, const CacheItemHelper* helper,
+    size_t charge, Handle** handle, Priority priority) {
+  rocksdb_rs::status::Status s =
+      target_->Insert(key, value, helper, charge, handle, priority);
   if (s.ok() && value == nullptr && distribute_cache_res_) {
     size_t sec_charge = static_cast<size_t>(charge * (sec_cache_res_ratio_));
     s = secondary_cache_->Deflate(sec_charge);

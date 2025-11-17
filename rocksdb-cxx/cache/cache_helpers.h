@@ -129,10 +129,10 @@ std::shared_ptr<T> MakeSharedCacheHandleGuard(Cache* cache,
 // Given the persistable data (saved) for a block cache entry, parse that
 // into a cache entry object and insert it into the given cache. The charge
 // of the new entry can be returned to the caller through `out_charge`.
-rocksdb_rs::status::Status WarmInCache(Cache* cache, const Slice& key, const Slice& saved,
-                   Cache::CreateContext* create_context,
-                   const Cache::CacheItemHelper* helper,
-                   Cache::Priority priority = Cache::Priority::LOW,
-                   size_t* out_charge = nullptr);
+rocksdb_rs::status::Status WarmInCache(
+    Cache* cache, const Slice& key, const Slice& saved,
+    Cache::CreateContext* create_context, const Cache::CacheItemHelper* helper,
+    Cache::Priority priority = Cache::Priority::LOW,
+    size_t* out_charge = nullptr);
 
 }  // namespace rocksdb

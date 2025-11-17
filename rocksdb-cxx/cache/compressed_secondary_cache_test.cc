@@ -136,11 +136,13 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     if (sec_cache_is_compressed) {
       if (!LZ4_Supported()) {
         ROCKSDB_GTEST_SKIP("This test requires LZ4 support.");
-        opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+        opts.compression_type =
+            rocksdb_rs::compression_type::CompressionType::kNoCompression;
         sec_cache_is_compressed = false;
       }
     } else {
-      opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      opts.compression_type =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
     }
 
     if (use_jemalloc) {
@@ -148,7 +150,8 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
       std::shared_ptr<MemoryAllocator> allocator;
       std::string msg;
       if (JemallocNodumpAllocator::IsSupported(&msg)) {
-        rocksdb_rs::status::Status s = NewJemallocNodumpAllocator(jopts, &allocator);
+        rocksdb_rs::status::Status s =
+            NewJemallocNodumpAllocator(jopts, &allocator);
         if (s.ok()) {
           opts.memory_allocator = allocator;
         }
@@ -167,10 +170,12 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     if (sec_cache_is_compressed) {
       if (!LZ4_Supported()) {
         ROCKSDB_GTEST_SKIP("This test requires LZ4 support.");
-        secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+        secondary_cache_opts.compression_type =
+            rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }
     } else {
-      secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      secondary_cache_opts.compression_type =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
     }
 
     secondary_cache_opts.capacity = 1100;
@@ -241,11 +246,13 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     if (sec_cache_is_compressed) {
       if (!LZ4_Supported()) {
         ROCKSDB_GTEST_SKIP("This test requires LZ4 support.");
-        secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+        secondary_cache_opts.compression_type =
+            rocksdb_rs::compression_type::CompressionType::kNoCompression;
         sec_cache_is_compressed = false;
       }
     } else {
-      secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      secondary_cache_opts.compression_type =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
     }
 
     secondary_cache_opts.capacity = 6000;
@@ -410,10 +417,12 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     if (sec_cache_is_compressed) {
       if (!LZ4_Supported()) {
         ROCKSDB_GTEST_SKIP("This test requires LZ4 support.");
-        secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+        secondary_cache_opts.compression_type =
+            rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }
     } else {
-      secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      secondary_cache_opts.compression_type =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
     }
 
     secondary_cache_opts.capacity = 6000;
@@ -456,10 +465,12 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     if (sec_cache_is_compressed) {
       if (!LZ4_Supported()) {
         ROCKSDB_GTEST_SKIP("This test requires LZ4 support.");
-        secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+        secondary_cache_opts.compression_type =
+            rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }
     } else {
-      secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      secondary_cache_opts.compression_type =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
     }
 
     secondary_cache_opts.capacity = 6000;
@@ -504,10 +515,12 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     if (sec_cache_is_compressed) {
       if (!LZ4_Supported()) {
         ROCKSDB_GTEST_SKIP("This test requires LZ4 support.");
-        secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+        secondary_cache_opts.compression_type =
+            rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }
     } else {
-      secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      secondary_cache_opts.compression_type =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
     }
 
     secondary_cache_opts.capacity = 6000;
@@ -553,10 +566,12 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     if (sec_cache_is_compressed) {
       if (!LZ4_Supported()) {
         ROCKSDB_GTEST_SKIP("This test requires LZ4 support.");
-        secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+        secondary_cache_opts.compression_type =
+            rocksdb_rs::compression_type::CompressionType::kNoCompression;
       }
     } else {
-      secondary_cache_opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      secondary_cache_opts.compression_type =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
     }
 
     secondary_cache_opts.capacity = 6000;
@@ -618,7 +633,8 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     std::shared_ptr<MemoryAllocator> allocator;
     std::string msg;
     if (JemallocNodumpAllocator::IsSupported(&msg)) {
-      rocksdb_rs::status::Status s = NewJemallocNodumpAllocator(jopts, &allocator);
+      rocksdb_rs::status::Status s =
+          NewJemallocNodumpAllocator(jopts, &allocator);
       if (!s.ok()) {
         ROCKSDB_GTEST_BYPASS("JEMALLOC not supported");
       }
@@ -636,8 +652,9 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     size_t str_size{8500};
     std::string str = rnd.RandomString(static_cast<int>(str_size));
     size_t charge{0};
-    CacheValueChunk* chunks_head =
-        sec_cache->SplitValueIntoChunks(str, rocksdb_rs::compression_type::CompressionType::kLZ4Compression, charge);
+    CacheValueChunk* chunks_head = sec_cache->SplitValueIntoChunks(
+        str, rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+        charge);
     ASSERT_EQ(charge, str_size + 3 * (sizeof(CacheValueChunk) - 1));
 
     CacheValueChunk* current_chunk = chunks_head;
@@ -702,7 +719,8 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     std::shared_ptr<MemoryAllocator> allocator;
     std::string msg;
     if (JemallocNodumpAllocator::IsSupported(&msg)) {
-      rocksdb_rs::status::Status s = NewJemallocNodumpAllocator(jopts, &allocator);
+      rocksdb_rs::status::Status s =
+          NewJemallocNodumpAllocator(jopts, &allocator);
       if (!s.ok()) {
         ROCKSDB_GTEST_BYPASS("JEMALLOC not supported");
       }
@@ -720,8 +738,9 @@ class CompressedSecondaryCacheTestBase : public testing::Test,
     size_t str_size{8500};
     std::string str = rnd.RandomString(static_cast<int>(str_size));
     size_t charge{0};
-    CacheValueChunk* chunks_head =
-        sec_cache->SplitValueIntoChunks(str, rocksdb_rs::compression_type::CompressionType::kLZ4Compression, charge);
+    CacheValueChunk* chunks_head = sec_cache->SplitValueIntoChunks(
+        str, rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+        charge);
     ASSERT_EQ(charge, str_size + 3 * (sizeof(CacheValueChunk) - 1));
 
     CacheAllocationPtr value =
@@ -793,15 +812,15 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam, BasicTestFromString) {
           "capacity=2048;num_shard_bits=0;compression_type=kNoCompression";
       sec_cache_is_compressed_ = false;
     }
-    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
-                                                &sec_cache);
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(
+        ConfigOptions(), sec_cache_uri, &sec_cache);
     EXPECT_OK(s);
   } else {
     sec_cache_uri =
         "compressed_secondary_cache://"
         "capacity=2048;num_shard_bits=0;compression_type=kNoCompression";
-    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
-                                                &sec_cache);
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(
+        ConfigOptions(), sec_cache_uri, &sec_cache);
     EXPECT_OK(s);
   }
   BasicTestHelper(sec_cache, sec_cache_is_compressed_);
@@ -825,21 +844,20 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam,
           "enable_custom_split_merge=true";
       sec_cache_is_compressed_ = false;
     }
-    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
-                                                &sec_cache);
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(
+        ConfigOptions(), sec_cache_uri, &sec_cache);
     EXPECT_OK(s);
   } else {
     sec_cache_uri =
         "compressed_secondary_cache://"
         "capacity=2048;num_shard_bits=0;compression_type=kNoCompression;"
         "enable_custom_split_merge=true";
-    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(ConfigOptions(), sec_cache_uri,
-                                                &sec_cache);
+    rocksdb_rs::status::Status s = SecondaryCache::CreateFromString(
+        ConfigOptions(), sec_cache_uri, &sec_cache);
     EXPECT_OK(s);
   }
   BasicTestHelper(sec_cache, sec_cache_is_compressed_);
 }
-
 
 TEST_P(CompressedSecondaryCacheTestWithCompressionParam, FailsTest) {
   FailsTest(sec_cache_is_compressed_);
@@ -876,7 +894,8 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam, EntryRoles) {
       return;
     }
   } else {
-    opts.compression_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    opts.compression_type =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
 
   // Select a random subset to include, for fast test
@@ -896,7 +915,8 @@ TEST_P(CompressedSecondaryCacheTestWithCompressionParam, EntryRoles) {
   std::string junk(Random(301).RandomString(1000));
 
   for (uint32_t i = 0; i < kNumCacheEntryRoles; ++i) {
-    rocksdb_rs::cache::CacheEntryRole role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
+    rocksdb_rs::cache::CacheEntryRole role =
+        static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
 
     // Uniquify `junk`
     junk[0] = static_cast<char>(i);
@@ -986,9 +1006,9 @@ class CompressedSecCacheTestWithTiered : public ::testing::Test {
     opts.cache_type = PrimaryCacheType::kCacheTypeLRU;
     opts.comp_cache_opts.capacity = 30 << 20;
     cache_ = NewTieredVolatileCache(opts);
-    cache_res_mgr_ =
-        std::make_shared<CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
-            cache_);
+    cache_res_mgr_ = std::make_shared<
+        CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>>(
+        cache_);
   }
 
  protected:

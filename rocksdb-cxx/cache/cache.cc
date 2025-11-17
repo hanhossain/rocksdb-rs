@@ -21,22 +21,29 @@ const Cache::CacheItemHelper kNoopCacheItemHelper{};
 static std::unordered_map<std::string, OptionTypeInfo>
     lru_cache_options_type_info = {
         {"capacity",
-         {offsetof(struct LRUCacheOptions, capacity), rocksdb_rs::utilities::options_type::OptionType::kSizeT,
-          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
+         {offsetof(struct LRUCacheOptions, capacity),
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"num_shard_bits",
-         {offsetof(struct LRUCacheOptions, num_shard_bits), rocksdb_rs::utilities::options_type::OptionType::kInt,
-          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
+         {offsetof(struct LRUCacheOptions, num_shard_bits),
+          rocksdb_rs::utilities::options_type::OptionType::kInt,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"strict_capacity_limit",
          {offsetof(struct LRUCacheOptions, strict_capacity_limit),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"high_pri_pool_ratio",
          {offsetof(struct LRUCacheOptions, high_pri_pool_ratio),
-          rocksdb_rs::utilities::options_type::OptionType::kDouble, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kDouble,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"low_pri_pool_ratio",
          {offsetof(struct LRUCacheOptions, low_pri_pool_ratio),
-          rocksdb_rs::utilities::options_type::OptionType::kDouble, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kDouble,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
 };
 
@@ -44,25 +51,30 @@ static std::unordered_map<std::string, OptionTypeInfo>
     comp_sec_cache_options_type_info = {
         {"capacity",
          {offsetof(struct CompressedSecondaryCacheOptions, capacity),
-          rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"num_shard_bits",
          {offsetof(struct CompressedSecondaryCacheOptions, num_shard_bits),
-          rocksdb_rs::utilities::options_type::OptionType::kInt, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kInt,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"compression_type",
          {offsetof(struct CompressedSecondaryCacheOptions, compression_type),
-          rocksdb_rs::utilities::options_type::OptionType::kCompressionType, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kCompressionType,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"compress_format_version",
          {offsetof(struct CompressedSecondaryCacheOptions,
                    compress_format_version),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt32T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt32T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
         {"enable_custom_split_merge",
          {offsetof(struct CompressedSecondaryCacheOptions,
                    enable_custom_split_merge),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kMutable}},
 };
 
@@ -83,7 +95,6 @@ rocksdb_rs::status::Status SecondaryCache::CreateFromString(
       sec_cache = NewCompressedSecondaryCache(sec_cache_opts);
     }
 
-
     if (status.ok()) {
       result->swap(sec_cache);
     }
@@ -93,9 +104,9 @@ rocksdb_rs::status::Status SecondaryCache::CreateFromString(
   }
 }
 
-rocksdb_rs::status::Status Cache::CreateFromString(const ConfigOptions& config_options,
-                               const std::string& value,
-                               std::shared_ptr<Cache>* result) {
+rocksdb_rs::status::Status Cache::CreateFromString(
+    const ConfigOptions& config_options, const std::string& value,
+    std::shared_ptr<Cache>* result) {
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::shared_ptr<Cache> cache;
   if (value.find('=') == std::string::npos) {

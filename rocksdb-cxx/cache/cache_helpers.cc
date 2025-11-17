@@ -17,16 +17,18 @@ void ReleaseCacheHandleCleanup(void* arg1, void* arg2) {
   cache->Release(cache_handle);
 }
 
-rocksdb_rs::status::Status WarmInCache(Cache* cache, const Slice& key, const Slice& saved,
-                   Cache::CreateContext* create_context,
-                   const Cache::CacheItemHelper* helper,
-                   Cache::Priority priority, size_t* out_charge) {
+rocksdb_rs::status::Status WarmInCache(Cache* cache, const Slice& key,
+                                       const Slice& saved,
+                                       Cache::CreateContext* create_context,
+                                       const Cache::CacheItemHelper* helper,
+                                       Cache::Priority priority,
+                                       size_t* out_charge) {
   assert(helper);
   assert(helper->create_cb);
   Cache::ObjectPtr value;
   size_t charge;
-  rocksdb_rs::status::Status st = helper->create_cb(saved, create_context,
-                                cache->memory_allocator(), &value, &charge);
+  rocksdb_rs::status::Status st = helper->create_cb(
+      saved, create_context, cache->memory_allocator(), &value, &charge);
   if (st.ok()) {
     st =
         cache->Insert(key, value, helper, charge, /*handle*/ nullptr, priority);

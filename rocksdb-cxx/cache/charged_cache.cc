@@ -13,14 +13,15 @@ ChargedCache::ChargedCache(std::shared_ptr<Cache> cache,
                            std::shared_ptr<Cache> block_cache)
     : CacheWrapper(cache),
       cache_res_mgr_(std::make_shared<ConcurrentCacheReservationManager>(
-          std::make_shared<
-              CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kBlobCache>>(
-              block_cache))) {}
+          std::make_shared<CacheReservationManagerImpl<
+              rocksdb_rs::cache::CacheEntryRole::kBlobCache>>(block_cache))) {}
 
 rocksdb_rs::status::Status ChargedCache::Insert(const Slice& key, ObjectPtr obj,
-                            const CacheItemHelper* helper, size_t charge,
-                            Handle** handle, Priority priority) {
-  rocksdb_rs::status::Status s = target_->Insert(key, obj, helper, charge, handle, priority);
+                                                const CacheItemHelper* helper,
+                                                size_t charge, Handle** handle,
+                                                Priority priority) {
+  rocksdb_rs::status::Status s =
+      target_->Insert(key, obj, helper, charge, handle, priority);
   if (s.ok()) {
     // Insert may cause the cache entry eviction if the cache is full. So we
     // directly call the reservation manager to update the total memory used
@@ -61,8 +62,8 @@ bool ChargedCache::Release(Cache::Handle* handle, bool useful,
   bool erased = target_->Release(handle, useful, erase_if_last_ref);
   if (erased) {
     assert(cache_res_mgr_);
-    cache_res_mgr_
-        ->UpdateCacheReservation(memory_used_delta, /* increase */ false);
+    cache_res_mgr_->UpdateCacheReservation(memory_used_delta,
+                                           /* increase */ false);
   }
   return erased;
 }
@@ -72,8 +73,8 @@ bool ChargedCache::Release(Cache::Handle* handle, bool erase_if_last_ref) {
   bool erased = target_->Release(handle, erase_if_last_ref);
   if (erased) {
     assert(cache_res_mgr_);
-    cache_res_mgr_
-        ->UpdateCacheReservation(memory_used_delta, /* increase */ false);
+    cache_res_mgr_->UpdateCacheReservation(memory_used_delta,
+                                           /* increase */ false);
   }
   return erased;
 }

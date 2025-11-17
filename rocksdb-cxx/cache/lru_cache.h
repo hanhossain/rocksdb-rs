@@ -110,11 +110,17 @@ struct LRUHandle {
 
   bool InCache() const { return m_flags & (uint8_t)MFlags::M_IN_CACHE; }
   bool IsHighPri() const { return im_flags & (uint8_t)ImFlags::IM_IS_HIGH_PRI; }
-  bool InHighPriPool() const { return m_flags & (uint8_t)MFlags::M_IN_HIGH_PRI_POOL; }
+  bool InHighPriPool() const {
+    return m_flags & (uint8_t)MFlags::M_IN_HIGH_PRI_POOL;
+  }
   bool IsLowPri() const { return im_flags & (uint8_t)ImFlags::IM_IS_LOW_PRI; }
-  bool InLowPriPool() const { return m_flags & (uint8_t)MFlags::M_IN_LOW_PRI_POOL; }
+  bool InLowPriPool() const {
+    return m_flags & (uint8_t)MFlags::M_IN_LOW_PRI_POOL;
+  }
   bool HasHit() const { return m_flags & (uint8_t)MFlags::M_HAS_HIT; }
-  bool IsStandalone() const { return im_flags & (uint8_t)ImFlags::IM_IS_STANDALONE; }
+  bool IsStandalone() const {
+    return im_flags & (uint8_t)ImFlags::IM_IS_STANDALONE;
+  }
 
   void SetInCache(bool in_cache) {
     if (in_cache) {
@@ -298,9 +304,11 @@ class ALIGN_AS(CACHE_LINE_SIZE) LRUCacheShard final : public CacheShardBase {
   void SetLowPriorityPoolRatio(double low_pri_pool_ratio);
 
   // Like Cache methods, but with an extra "hash" parameter.
-  rocksdb_rs::status::Status Insert(const Slice& key, uint32_t hash, Cache::ObjectPtr value,
-                const Cache::CacheItemHelper* helper, size_t charge,
-                LRUHandle** handle, Cache::Priority priority);
+  rocksdb_rs::status::Status Insert(const Slice& key, uint32_t hash,
+                                    Cache::ObjectPtr value,
+                                    const Cache::CacheItemHelper* helper,
+                                    size_t charge, LRUHandle** handle,
+                                    Cache::Priority priority);
 
   LRUHandle* CreateStandalone(const Slice& key, uint32_t hash,
                               Cache::ObjectPtr obj,

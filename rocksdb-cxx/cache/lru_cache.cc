@@ -93,9 +93,8 @@ void LRUHandleTable::Resize() {
 
   uint32_t old_length = uint32_t{1} << length_bits_;
   int new_length_bits = length_bits_ + 1;
-  std::unique_ptr<LRUHandle* []> new_list {
-    new LRUHandle* [size_t{1} << new_length_bits] {}
-  };
+  std::unique_ptr<LRUHandle*[]> new_list{
+      new LRUHandle* [size_t{1} << new_length_bits] {}};
   [[maybe_unused]] uint32_t count = 0;
   for (uint32_t i = 0; i < old_length; i++) {
     LRUHandle* h = list_[i];
@@ -368,7 +367,8 @@ void LRUCacheShard::SetStrictCapacityLimit(bool strict_capacity_limit) {
   strict_capacity_limit_ = strict_capacity_limit;
 }
 
-rocksdb_rs::status::Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** handle) {
+rocksdb_rs::status::Status LRUCacheShard::InsertItem(LRUHandle* e,
+                                                     LRUHandle** handle) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
   autovector<LRUHandle*> last_reference_list;
 
@@ -390,7 +390,8 @@ rocksdb_rs::status::Status LRUCacheShard::InsertItem(LRUHandle* e, LRUHandle** h
         free(e);
         e = nullptr;
         *handle = nullptr;
-        s = rocksdb_rs::status::Status_MemoryLimit("Insert failed due to LRU cache being full.");
+        s = rocksdb_rs::status::Status_MemoryLimit(
+            "Insert failed due to LRU cache being full.");
       }
     } else {
       // Insert into the cache. Note that the cache might get larger than its
@@ -543,11 +544,10 @@ LRUHandle* LRUCacheShard::CreateHandle(const Slice& key, uint32_t hash,
   return e;
 }
 
-rocksdb_rs::status::Status LRUCacheShard::Insert(const Slice& key, uint32_t hash,
-                             Cache::ObjectPtr value,
-                             const Cache::CacheItemHelper* helper,
-                             size_t charge, LRUHandle** handle,
-                             Cache::Priority priority) {
+rocksdb_rs::status::Status LRUCacheShard::Insert(
+    const Slice& key, uint32_t hash, Cache::ObjectPtr value,
+    const Cache::CacheItemHelper* helper, size_t charge, LRUHandle** handle,
+    Cache::Priority priority) {
   LRUHandle* e = CreateHandle(key, hash, value, helper, charge);
   e->SetPriority(priority);
   e->SetInCache(true);

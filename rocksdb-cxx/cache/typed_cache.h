@@ -74,15 +74,16 @@ class BaseCacheInterface {
 };
 
 // PlaceholderCacheInterface - Used for making cache reservations, with
-// entries that have a charge but no value. rocksdb_rs::cache::CacheEntryRole is required as
-// a template parameter.
+// entries that have a charge but no value. rocksdb_rs::cache::CacheEntryRole is
+// required as a template parameter.
 template <rocksdb_rs::cache::CacheEntryRole kRole, typename CachePtr = Cache*>
 class PlaceholderCacheInterface : public BaseCacheInterface<CachePtr> {
  public:
   CACHE_TYPE_DEFS();
   using BaseCacheInterface<CachePtr>::BaseCacheInterface;
 
-  inline rocksdb_rs::status::Status Insert(const Slice& key, size_t charge, Handle** handle) {
+  inline rocksdb_rs::status::Status Insert(const Slice& key, size_t charge,
+                                           Handle** handle) {
     return this->cache_->Insert(key, /*value=*/nullptr, GetHelper(), charge,
                                 handle);
   }
@@ -142,7 +143,8 @@ class BasicTypedCacheHelper : public BasicTypedCacheHelperFns<TValue> {
 // type TValue, which can be cleaned up with std::default_delete<TValue>. The
 // role is provided by TValue::kCacheEntryRole or given in an optional
 // template parameter.
-template <class TValue, rocksdb_rs::cache::CacheEntryRole kRole = TValue::kCacheEntryRole,
+template <class TValue,
+          rocksdb_rs::cache::CacheEntryRole kRole = TValue::kCacheEntryRole,
           typename CachePtr = Cache*>
 class BasicTypedCacheInterface : public BaseCacheInterface<CachePtr>,
                                  public BasicTypedCacheHelper<TValue, kRole> {
@@ -159,9 +161,10 @@ class BasicTypedCacheInterface : public BaseCacheInterface<CachePtr>,
     }
   };
 
-  inline rocksdb_rs::status::Status Insert(const Slice& key, TValuePtr value, size_t charge,
-                       TypedHandle** handle = nullptr,
-                       Priority priority = Priority::LOW) {
+  inline rocksdb_rs::status::Status Insert(const Slice& key, TValuePtr value,
+                                           size_t charge,
+                                           TypedHandle** handle = nullptr,
+                                           Priority priority = Priority::LOW) {
     auto untyped_handle = reinterpret_cast<Handle**>(handle);
     return this->cache_->Insert(
         key, BasicTypedCacheHelperFns<TValue>::UpCastValue(value),
@@ -202,7 +205,8 @@ class BasicTypedCacheInterface : public BaseCacheInterface<CachePtr>,
 
 // BasicTypedSharedCacheInterface - Like BasicTypedCacheInterface but with a
 // shared_ptr<Cache> for keeping Cache alive.
-template <class TValue, rocksdb_rs::cache::CacheEntryRole kRole = TValue::kCacheEntryRole>
+template <class TValue,
+          rocksdb_rs::cache::CacheEntryRole kRole = TValue::kCacheEntryRole>
 using BasicTypedSharedCacheInterface =
     BasicTypedCacheInterface<TValue, kRole, std::shared_ptr<Cache>>;
 
@@ -224,8 +228,8 @@ class FullTypedCacheHelperFns : public BasicTypedCacheHelperFns<TValue> {
     return slice.size();
   }
 
-  static rocksdb_rs::status::Status SaveTo(ObjectPtr v, size_t from_offset, size_t length,
-                       char* out) {
+  static rocksdb_rs::status::Status SaveTo(ObjectPtr v, size_t from_offset,
+                                           size_t length, char* out) {
     TValuePtr value = DownCastValue(v);
     auto slice = value->ContentSlice();
     assert(from_offset < slice.size());
@@ -234,9 +238,11 @@ class FullTypedCacheHelperFns : public BasicTypedCacheHelperFns<TValue> {
     return rocksdb_rs::status::Status_OK();
   }
 
-  static rocksdb_rs::status::Status Create(const Slice& data, CreateContext* context,
-                       MemoryAllocator* allocator, ObjectPtr* out_obj,
-                       size_t* out_charge) {
+  static rocksdb_rs::status::Status Create(const Slice& data,
+                                           CreateContext* context,
+                                           MemoryAllocator* allocator,
+                                           ObjectPtr* out_obj,
+                                           size_t* out_charge) {
     std::unique_ptr<TValue> value = nullptr;
     if constexpr (sizeof(TCreateContext) > 0) {
       TCreateContext* tcontext = static_cast<TCreateContext*>(context);
@@ -251,7 +257,8 @@ class FullTypedCacheHelperFns : public BasicTypedCacheHelperFns<TValue> {
 
 // In its own class to try to minimize the number of distinct CacheItemHelper
 // instances (e.g. don't vary by CachePtr)
-template <class TValue, class TCreateContext, rocksdb_rs::cache::CacheEntryRole kRole>
+template <class TValue, class TCreateContext,
+          rocksdb_rs::cache::CacheEntryRole kRole>
 class FullTypedCacheHelper
     : public FullTypedCacheHelperFns<TValue, TCreateContext> {
  public:
@@ -319,9 +326,9 @@ class FullTypedCacheInterface
       size_t* out_charge = nullptr) {
     ObjectPtr value;
     size_t charge;
-    rocksdb_rs::status::Status st = GetFullHelper()->create_cb(data, create_context,
-                                           this->cache_->memory_allocator(),
-                                           &value, &charge);
+    rocksdb_rs::status::Status st = GetFullHelper()->create_cb(
+        data, create_context, this->cache_->memory_allocator(), &value,
+        &charge);
     if (out_charge) {
       *out_charge = charge;
     }

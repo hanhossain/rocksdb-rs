@@ -13,12 +13,11 @@
 #include <cstring>
 #include <memory>
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/slice.h"
 #include "table/block_based/reader_common.h"
 #include "util/coding.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -34,7 +33,8 @@ CacheReservationManagerImpl<R>::CacheReservationHandle::CacheReservationHandle(
 template <rocksdb_rs::cache::CacheEntryRole R>
 CacheReservationManagerImpl<
     R>::CacheReservationHandle::~CacheReservationHandle() {
-  rocksdb_rs::status::Status s = cache_res_mgr_->ReleaseCacheReservation(incremental_memory_used_);
+  rocksdb_rs::status::Status s =
+      cache_res_mgr_->ReleaseCacheReservation(incremental_memory_used_);
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
@@ -55,7 +55,8 @@ CacheReservationManagerImpl<R>::~CacheReservationManagerImpl() {
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-rocksdb_rs::status::Status CacheReservationManagerImpl<R>::UpdateCacheReservation(
+rocksdb_rs::status::Status
+CacheReservationManagerImpl<R>::UpdateCacheReservation(
     std::size_t new_mem_used) {
   memory_used_ = new_mem_used;
   std::size_t cur_cache_allocated_size =
@@ -99,7 +100,8 @@ rocksdb_rs::status::Status CacheReservationManagerImpl<R>::MakeCacheReservation(
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-rocksdb_rs::status::Status CacheReservationManagerImpl<R>::ReleaseCacheReservation(
+rocksdb_rs::status::Status
+CacheReservationManagerImpl<R>::ReleaseCacheReservation(
     std::size_t incremental_memory_used) {
   assert(GetTotalMemoryUsed() >= incremental_memory_used);
   std::size_t updated_total_mem_used =
@@ -109,7 +111,8 @@ rocksdb_rs::status::Status CacheReservationManagerImpl<R>::ReleaseCacheReservati
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-rocksdb_rs::status::Status CacheReservationManagerImpl<R>::IncreaseCacheReservation(
+rocksdb_rs::status::Status
+CacheReservationManagerImpl<R>::IncreaseCacheReservation(
     std::size_t new_mem_used) {
   rocksdb_rs::status::Status return_status = rocksdb_rs::status::Status_OK();
   while (new_mem_used > cache_allocated_size_.load(std::memory_order_relaxed)) {
@@ -127,7 +130,8 @@ rocksdb_rs::status::Status CacheReservationManagerImpl<R>::IncreaseCacheReservat
 }
 
 template <rocksdb_rs::cache::CacheEntryRole R>
-rocksdb_rs::status::Status CacheReservationManagerImpl<R>::DecreaseCacheReservation(
+rocksdb_rs::status::Status
+CacheReservationManagerImpl<R>::DecreaseCacheReservation(
     std::size_t new_mem_used) {
   rocksdb_rs::status::Status return_status = rocksdb_rs::status::Status_OK();
 
@@ -176,9 +180,14 @@ template class CacheReservationManagerImpl<
     rocksdb_rs::cache::CacheEntryRole::kBlockBasedTableReader>;
 template class CacheReservationManagerImpl<
     rocksdb_rs::cache::CacheEntryRole::kCompressionDictionaryBuildingBuffer>;
-template class CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>;
-template class CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kMisc>;
-template class CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kWriteBuffer>;
-template class CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kFileMetadata>;
-template class CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kBlobCache>;
+template class CacheReservationManagerImpl<
+    rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>;
+template class CacheReservationManagerImpl<
+    rocksdb_rs::cache::CacheEntryRole::kMisc>;
+template class CacheReservationManagerImpl<
+    rocksdb_rs::cache::CacheEntryRole::kWriteBuffer>;
+template class CacheReservationManagerImpl<
+    rocksdb_rs::cache::CacheEntryRole::kFileMetadata>;
+template class CacheReservationManagerImpl<
+    rocksdb_rs::cache::CacheEntryRole::kBlobCache>;
 }  // namespace rocksdb

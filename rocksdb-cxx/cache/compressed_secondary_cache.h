@@ -12,12 +12,11 @@
 #include "cache/cache_reservation_manager.h"
 #include "cache/lru_cache.h"
 #include "memory/memory_allocator_impl.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/secondary_cache.h"
 #include "rocksdb/slice.h"
 #include "util/compression.h"
 #include "util/mutexlock.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -77,8 +76,9 @@ class CompressedSecondaryCache : public SecondaryCache {
 
   const char* Name() const override { return "CompressedSecondaryCache"; }
 
-  rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
-                const Cache::CacheItemHelper* helper) override;
+  rocksdb_rs::status::Status Insert(
+      const Slice& key, Cache::ObjectPtr value,
+      const Cache::CacheItemHelper* helper) override;
 
   std::unique_ptr<SecondaryCacheResultHandle> Lookup(
       const Slice& key, const Cache::CacheItemHelper* helper,
@@ -121,9 +121,10 @@ class CompressedSecondaryCache : public SecondaryCache {
   // Split value into chunks to better fit into jemalloc bins. The chunks
   // are stored in CacheValueChunk and extra charge is needed for each chunk,
   // so the cache charge is recalculated here.
-  CacheValueChunk* SplitValueIntoChunks(const Slice& value,
-                                        rocksdb_rs::compression_type::CompressionType compression_type,
-                                        size_t& charge);
+  CacheValueChunk* SplitValueIntoChunks(
+      const Slice& value,
+      rocksdb_rs::compression_type::CompressionType compression_type,
+      size_t& charge);
 
   // After merging chunks, the extra charge for each chunk is removed, so
   // the charge is recalculated.

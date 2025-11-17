@@ -240,15 +240,18 @@ Cache::ObjectPtr createValue(Random64& rnd) {
 // Callbacks for secondary cache
 size_t SizeFn(Cache::ObjectPtr /*obj*/) { return FLAGS_value_bytes; }
 
-rocksdb_rs::status::Status SaveToFn(Cache::ObjectPtr from_obj, size_t /*from_offset*/,
-                size_t length, char* out) {
+rocksdb_rs::status::Status SaveToFn(Cache::ObjectPtr from_obj,
+                                    size_t /*from_offset*/, size_t length,
+                                    char* out) {
   memcpy(out, from_obj, length);
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status CreateFn(const Slice& data, Cache::CreateContext* /*context*/,
-                MemoryAllocator* /*allocator*/, Cache::ObjectPtr* out_obj,
-                size_t* out_charge) {
+rocksdb_rs::status::Status CreateFn(const Slice& data,
+                                    Cache::CreateContext* /*context*/,
+                                    MemoryAllocator* /*allocator*/,
+                                    Cache::ObjectPtr* out_obj,
+                                    size_t* out_charge) {
   *out_obj = new char[data.size()];
   memcpy(*out_obj, data.data(), data.size());
   *out_charge = data.size();
@@ -259,15 +262,21 @@ void DeleteFn(Cache::ObjectPtr value, MemoryAllocator* /*alloc*/) {
   delete[] static_cast<char*>(value);
 }
 
-Cache::CacheItemHelper helper1_wos(rocksdb_rs::cache::CacheEntryRole::kDataBlock, DeleteFn);
-Cache::CacheItemHelper helper1(rocksdb_rs::cache::CacheEntryRole::kDataBlock, DeleteFn, SizeFn,
-                               SaveToFn, CreateFn, &helper1_wos);
-Cache::CacheItemHelper helper2_wos(rocksdb_rs::cache::CacheEntryRole::kIndexBlock, DeleteFn);
-Cache::CacheItemHelper helper2(rocksdb_rs::cache::CacheEntryRole::kIndexBlock, DeleteFn, SizeFn,
-                               SaveToFn, CreateFn, &helper2_wos);
-Cache::CacheItemHelper helper3_wos(rocksdb_rs::cache::CacheEntryRole::kFilterBlock, DeleteFn);
-Cache::CacheItemHelper helper3(rocksdb_rs::cache::CacheEntryRole::kFilterBlock, DeleteFn, SizeFn,
-                               SaveToFn, CreateFn, &helper3_wos);
+Cache::CacheItemHelper helper1_wos(
+    rocksdb_rs::cache::CacheEntryRole::kDataBlock, DeleteFn);
+Cache::CacheItemHelper helper1(rocksdb_rs::cache::CacheEntryRole::kDataBlock,
+                               DeleteFn, SizeFn, SaveToFn, CreateFn,
+                               &helper1_wos);
+Cache::CacheItemHelper helper2_wos(
+    rocksdb_rs::cache::CacheEntryRole::kIndexBlock, DeleteFn);
+Cache::CacheItemHelper helper2(rocksdb_rs::cache::CacheEntryRole::kIndexBlock,
+                               DeleteFn, SizeFn, SaveToFn, CreateFn,
+                               &helper2_wos);
+Cache::CacheItemHelper helper3_wos(
+    rocksdb_rs::cache::CacheEntryRole::kFilterBlock, DeleteFn);
+Cache::CacheItemHelper helper3(rocksdb_rs::cache::CacheEntryRole::kFilterBlock,
+                               DeleteFn, SizeFn, SaveToFn, CreateFn,
+                               &helper3_wos);
 }  // namespace
 
 class CacheBench {
@@ -336,8 +345,9 @@ class CacheBench {
     Random64 rnd(1);
     KeyGen keygen;
     for (uint64_t i = 0; i < 2 * FLAGS_cache_size; i += FLAGS_value_bytes) {
-      rocksdb_rs::status::Status s = cache_->Insert(keygen.GetRand(rnd, max_key_, max_log_),
-                                createValue(rnd), &helper1, FLAGS_value_bytes);
+      rocksdb_rs::status::Status s =
+          cache_->Insert(keygen.GetRand(rnd, max_key_, max_log_),
+                         createValue(rnd), &helper1, FLAGS_value_bytes);
       assert(s.ok());
     }
   }
@@ -560,8 +570,9 @@ class CacheBench {
           }
         } else {
           // do insert
-          rocksdb_rs::status::Status s = cache_->Insert(key, createValue(thread->rnd), &helper2,
-                                    FLAGS_value_bytes, &handle);
+          rocksdb_rs::status::Status s =
+              cache_->Insert(key, createValue(thread->rnd), &helper2,
+                             FLAGS_value_bytes, &handle);
           assert(s.ok());
         }
       } else if (random_op < insert_threshold_) {
@@ -570,8 +581,9 @@ class CacheBench {
           handle = nullptr;
         }
         // do insert
-        rocksdb_rs::status::Status s = cache_->Insert(key, createValue(thread->rnd), &helper3,
-                                  FLAGS_value_bytes, &handle);
+        rocksdb_rs::status::Status s =
+            cache_->Insert(key, createValue(thread->rnd), &helper3,
+                           FLAGS_value_bytes, &handle);
         assert(s.ok());
       } else if (random_op < lookup_threshold_) {
         if (handle) {
@@ -849,11 +861,16 @@ class StressCacheKey {
         reduced_key = GetSliceHash64(ck.AsSlice()) >> shift_away;
       } else if (FLAGS_sck_footer_unique_id) {
         // Special case: keep only file number, not session counter
-        reduced_key = rocksdb_rs::coding_lean::DecodeFixed64(ck.AsSlice().data()) >> shift_away;
+        reduced_key =
+            rocksdb_rs::coding_lean::DecodeFixed64(ck.AsSlice().data()) >>
+            shift_away;
       } else {
         // Try to keep file number and session counter (shift away other bits)
-        uint32_t a = rocksdb_rs::coding_lean::DecodeFixed32(ck.AsSlice().data()) << shift_away_a;
-        uint32_t b = rocksdb_rs::coding_lean::DecodeFixed32(ck.AsSlice().data() + 4) >> shift_away_b;
+        uint32_t a = rocksdb_rs::coding_lean::DecodeFixed32(ck.AsSlice().data())
+                     << shift_away_a;
+        uint32_t b =
+            rocksdb_rs::coding_lean::DecodeFixed32(ck.AsSlice().data() + 4) >>
+            shift_away_b;
         reduced_key = (uint64_t{a} << 32) + b;
       }
       if (reduced_key == 0) {

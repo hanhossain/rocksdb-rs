@@ -44,7 +44,8 @@ std::string EncodeKey16Bytes(int k) {
 
 int DecodeKey16Bytes(const Slice& k) {
   assert(k.size() == 16);
-  return rocksdb_rs::coding_lean::DecodeFixed32(k.data());  // Decodes only the first 4 bytes of k.
+  return rocksdb_rs::coding_lean::DecodeFixed32(
+      k.data());  // Decodes only the first 4 bytes of k.
 }
 
 std::string EncodeKey32Bits(int k) {
@@ -173,8 +174,8 @@ class CacheTest : public testing::Test,
   void Erase2(int key) { Erase(cache2_, key); }
 };
 
-const Cache::CacheItemHelper CacheTest::kHelper{rocksdb_rs::cache::CacheEntryRole::kMisc,
-                                                &CacheTest::Deleter};
+const Cache::CacheItemHelper CacheTest::kHelper{
+    rocksdb_rs::cache::CacheEntryRole::kMisc, &CacheTest::Deleter};
 
 CacheTest* CacheTest::current_;
 std::string CacheTest::type_;
@@ -670,7 +671,8 @@ class Value {
 
   int v_;
 
-  static constexpr auto kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kMisc;
+  static constexpr auto kCacheEntryRole =
+      rocksdb_rs::cache::CacheEntryRole::kMisc;
 };
 
 using SharedCache = BasicTypedSharedCacheInterface<Value>;
@@ -694,7 +696,8 @@ TEST_P(CacheTest, SetCapacity) {
   // Insert 5 entries, but not releasing.
   for (int i = 0; i < 5; i++) {
     std::string key = EncodeKey(i + 1);
-    rocksdb_rs::status::Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
+    rocksdb_rs::status::Status s =
+        cache.Insert(key, new Value(i + 1), 1, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
   ASSERT_EQ(5U, cache.get()->GetCapacity());
@@ -709,7 +712,8 @@ TEST_P(CacheTest, SetCapacity) {
   // and usage should be 7
   for (int i = 5; i < 10; i++) {
     std::string key = EncodeKey(i + 1);
-    rocksdb_rs::status::Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
+    rocksdb_rs::status::Status s =
+        cache.Insert(key, new Value(i + 1), 1, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
   ASSERT_EQ(10U, cache.get()->GetCapacity());
@@ -793,7 +797,8 @@ TEST_P(CacheTest, OverCapacity) {
   // Insert n+1 entries, but not releasing.
   for (int i = 0; i < static_cast<int>(n + 1); i++) {
     std::string key = EncodeKey(i + 1);
-    rocksdb_rs::status::Status s = cache.Insert(key, new Value(i + 1), 1, &handles[i]);
+    rocksdb_rs::status::Status s =
+        cache.Insert(key, new Value(i + 1), 1, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
 

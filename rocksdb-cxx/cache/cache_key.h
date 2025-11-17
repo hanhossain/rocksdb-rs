@@ -103,7 +103,8 @@ class OffsetableCacheKey : private CacheKey {
   // * Empty (all zeros) input -> empty (all zeros) output
   // * Lower 64 input is non-zero -> lower 64 output (file_num_etc64_) is
   //   non-zero
-  static OffsetableCacheKey FromInternalUniqueId(rocksdb_rs::unique_id::UniqueIdPtr id);
+  static OffsetableCacheKey FromInternalUniqueId(
+      rocksdb_rs::unique_id::UniqueIdPtr id);
 
   // This is the inverse transformation to the above, assuming either empty
   // or lower 64 bits (file_num_etc64_) is non-zero. Perhaps only useful for
