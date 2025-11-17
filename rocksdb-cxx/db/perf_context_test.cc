@@ -33,8 +33,7 @@ int FLAGS_min_write_buffer_number_to_merge = 7;
 bool FLAGS_verbose = false;
 
 // Path to the database on file system
-const std::string kDbName =
-    rocksdb::test::PerThreadDBPath("perf_context_test");
+const std::string kDbName = rocksdb::test::PerThreadDBPath("perf_context_test");
 
 namespace rocksdb {
 
@@ -49,8 +48,7 @@ std::shared_ptr<DB> OpenDb(bool read_only = false) {
       FLAGS_min_write_buffer_number_to_merge;
 
   if (FLAGS_use_set_based_memetable) {
-    options.prefix_extractor.reset(
-        rocksdb::NewFixedPrefixTransform(0));
+    options.prefix_extractor.reset(rocksdb::NewFixedPrefixTransform(0));
     options.memtable_factory.reset(NewHashSkipListRepFactory());
   }
 
@@ -1046,7 +1044,8 @@ TEST_F(PerfContextTest, MergeOperandCount) {
       // MultiGet
       {
         std::vector<PinnableSlice> results(num_keys);
-        rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+        rust::Vec<rocksdb_rs::status::Status> statuses =
+            rocksdb_rs::status::Status_new().create_vec(num_keys);
 
         db->MultiGet(ReadOptions(), db->DefaultColumnFamily(), num_keys,
                      &key_slices[0], &results[0], &statuses[0]);
@@ -1064,7 +1063,8 @@ TEST_F(PerfContextTest, MergeOperandCount) {
       // MultiGetEntity
       {
         std::vector<PinnableWideColumns> results(num_keys);
-        rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+        rust::Vec<rocksdb_rs::status::Status> statuses =
+            rocksdb_rs::status::Status_new().create_vec(num_keys);
 
         db->MultiGetEntity(ReadOptions(), db->DefaultColumnFamily(), num_keys,
                            &key_slices[0], &results[0], &statuses[0]);

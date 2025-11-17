@@ -228,7 +228,8 @@ TEST_F(TimestampCompatibleCompactionTest, CompactFilesRangeCheckL0) {
     ASSERT_OK(env_->GetChildren(dbname_, &files));
     for (const auto& f : files) {
       uint64_t file_num = 0;
-      rocksdb_rs::types::FileType file_type = rocksdb_rs::types::FileType::kWalFile;
+      rocksdb_rs::types::FileType file_type =
+          rocksdb_rs::types::FileType::kWalFile;
       if (!ParseFileName(f, &file_num, &file_type) ||
           file_type != rocksdb_rs::types::FileType::kTableFile) {
         continue;

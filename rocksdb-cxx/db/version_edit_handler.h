@@ -26,7 +26,8 @@ class VersionEditHandlerBase {
 
   virtual ~VersionEditHandlerBase() {}
 
-  void Iterate(log::Reader& reader, rocksdb_rs::status::Status* log_read_status);
+  void Iterate(log::Reader& reader,
+               rocksdb_rs::status::Status* log_read_status);
 
   const rocksdb_rs::status::Status& status() const { return status_; }
 
@@ -35,11 +36,15 @@ class VersionEditHandlerBase {
  protected:
   explicit VersionEditHandlerBase(const ReadOptions& read_options,
                                   uint64_t max_read_size)
-      : status_(rocksdb_rs::status::Status_new()), read_options_(read_options), max_manifest_read_size_(max_read_size) {}
-  virtual rocksdb_rs::status::Status Initialize() { return rocksdb_rs::status::Status_OK(); }
+      : status_(rocksdb_rs::status::Status_new()),
+        read_options_(read_options),
+        max_manifest_read_size_(max_read_size) {}
+  virtual rocksdb_rs::status::Status Initialize() {
+    return rocksdb_rs::status::Status_OK();
+  }
 
-  virtual rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit,
-                                  ColumnFamilyData** cfd) = 0;
+  virtual rocksdb_rs::status::Status ApplyVersionEdit(
+      VersionEdit& edit, ColumnFamilyData** cfd) = 0;
 
   virtual void CheckIterationResult(const log::Reader& /*reader*/,
                                     rocksdb_rs::status::Status* /*s*/) {}
@@ -67,8 +72,8 @@ class ListColumnFamiliesHandler : public VersionEditHandlerBase {
   }
 
  protected:
-  rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit,
-                          ColumnFamilyData** /*unused*/) override;
+  rocksdb_rs::status::Status ApplyVersionEdit(
+      VersionEdit& edit, ColumnFamilyData** /*unused*/) override;
 
  private:
   // default column family is always implicitly there
@@ -86,8 +91,8 @@ class FileChecksumRetriever : public VersionEditHandlerBase {
   ~FileChecksumRetriever() override {}
 
  protected:
-  rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit,
-                          ColumnFamilyData** /*unused*/) override;
+  rocksdb_rs::status::Status ApplyVersionEdit(
+      VersionEdit& edit, ColumnFamilyData** /*unused*/) override;
 
  private:
   FileChecksumList& file_checksum_list_;
@@ -149,13 +154,17 @@ class VersionEditHandler : public VersionEditHandlerBase {
       EpochNumberRequirement epoch_number_requirement =
           EpochNumberRequirement::kMustPresent);
 
-  rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit, ColumnFamilyData** cfd) override;
+  rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit,
+                                              ColumnFamilyData** cfd) override;
 
-  virtual rocksdb_rs::status::Status OnColumnFamilyAdd(VersionEdit& edit, ColumnFamilyData** cfd);
+  virtual rocksdb_rs::status::Status OnColumnFamilyAdd(VersionEdit& edit,
+                                                       ColumnFamilyData** cfd);
 
-  rocksdb_rs::status::Status OnColumnFamilyDrop(VersionEdit& edit, ColumnFamilyData** cfd);
+  rocksdb_rs::status::Status OnColumnFamilyDrop(VersionEdit& edit,
+                                                ColumnFamilyData** cfd);
 
-  rocksdb_rs::status::Status OnNonCfOperation(VersionEdit& edit, ColumnFamilyData** cfd);
+  rocksdb_rs::status::Status OnNonCfOperation(VersionEdit& edit,
+                                              ColumnFamilyData** cfd);
 
   rocksdb_rs::status::Status OnWalAddition(VersionEdit& edit);
 
@@ -166,20 +175,21 @@ class VersionEditHandler : public VersionEditHandlerBase {
   void CheckColumnFamilyId(const VersionEdit& edit, bool* cf_in_not_found,
                            bool* cf_in_builders) const;
 
-  void CheckIterationResult(const log::Reader& reader, rocksdb_rs::status::Status* s) override;
+  void CheckIterationResult(const log::Reader& reader,
+                            rocksdb_rs::status::Status* s) override;
 
   ColumnFamilyData* CreateCfAndInit(const ColumnFamilyOptions& cf_options,
                                     const VersionEdit& edit);
 
   virtual ColumnFamilyData* DestroyCfAndCleanup(const VersionEdit& edit);
 
-  virtual rocksdb_rs::status::Status MaybeCreateVersion(const VersionEdit& edit,
-                                    ColumnFamilyData* cfd,
-                                    bool force_create_version);
+  virtual rocksdb_rs::status::Status MaybeCreateVersion(
+      const VersionEdit& edit, ColumnFamilyData* cfd,
+      bool force_create_version);
 
-  virtual rocksdb_rs::status::Status LoadTables(ColumnFamilyData* cfd,
-                            bool prefetch_index_and_filter_in_cache,
-                            bool is_initial_load);
+  virtual rocksdb_rs::status::Status LoadTables(
+      ColumnFamilyData* cfd, bool prefetch_index_and_filter_in_cache,
+      bool is_initial_load);
 
   virtual bool MustOpenAllColumnFamilies() const { return !read_only_; }
 
@@ -205,8 +215,8 @@ class VersionEditHandler : public VersionEditHandlerBase {
   EpochNumberRequirement epoch_number_requirement_;
 
  private:
-  rocksdb_rs::status::Status ExtractInfoFromVersionEdit(ColumnFamilyData* cfd,
-                                    const VersionEdit& edit);
+  rocksdb_rs::status::Status ExtractInfoFromVersionEdit(
+      ColumnFamilyData* cfd, const VersionEdit& edit);
 
   // When `FileMetaData.user_defined_timestamps_persisted` is false and
   // user-defined timestamp size is non-zero. User-defined timestamps are
@@ -216,8 +226,8 @@ class VersionEditHandler : public VersionEditHandlerBase {
   // path for this scenario: to pad a minimum timestamp to the user key in
   // `smallest` and `largest` so their format are consistent with the running
   // user comparator.
-  rocksdb_rs::status::Status MaybeHandleFileBoundariesForNewFiles(VersionEdit& edit,
-                                              const ColumnFamilyData* cfd);
+  rocksdb_rs::status::Status MaybeHandleFileBoundariesForNewFiles(
+      VersionEdit& edit, const ColumnFamilyData* cfd);
 };
 
 // A class similar to its base class, i.e. VersionEditHandler.
@@ -237,18 +247,23 @@ class VersionEditHandlerPointInTime : public VersionEditHandler {
   ~VersionEditHandlerPointInTime() override;
 
  protected:
-  void CheckIterationResult(const log::Reader& reader, rocksdb_rs::status::Status* s) override;
+  void CheckIterationResult(const log::Reader& reader,
+                            rocksdb_rs::status::Status* s) override;
   ColumnFamilyData* DestroyCfAndCleanup(const VersionEdit& edit) override;
-  rocksdb_rs::status::Status MaybeCreateVersion(const VersionEdit& edit, ColumnFamilyData* cfd,
-                            bool force_create_version) override;
-  virtual rocksdb_rs::status::Status VerifyFile(ColumnFamilyData* cfd, const std::string& fpath,
-                            int level, const FileMetaData& fmeta);
-  virtual rocksdb_rs::status::Status VerifyBlobFile(ColumnFamilyData* cfd, uint64_t blob_file_num,
-                                const BlobFileAddition& blob_addition);
+  rocksdb_rs::status::Status MaybeCreateVersion(
+      const VersionEdit& edit, ColumnFamilyData* cfd,
+      bool force_create_version) override;
+  virtual rocksdb_rs::status::Status VerifyFile(ColumnFamilyData* cfd,
+                                                const std::string& fpath,
+                                                int level,
+                                                const FileMetaData& fmeta);
+  virtual rocksdb_rs::status::Status VerifyBlobFile(
+      ColumnFamilyData* cfd, uint64_t blob_file_num,
+      const BlobFileAddition& blob_addition);
 
   rocksdb_rs::status::Status LoadTables(ColumnFamilyData* cfd,
-                    bool prefetch_index_and_filter_in_cache,
-                    bool is_initial_load) override;
+                                        bool prefetch_index_and_filter_in_cache,
+                                        bool is_initial_load) override;
 
   std::unordered_map<uint32_t, Version*> versions_;
 };
@@ -280,14 +295,18 @@ class ManifestTailer : public VersionEditHandlerPointInTime {
 
   bool MustOpenAllColumnFamilies() const override { return false; }
 
-  rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit, ColumnFamilyData** cfd) override;
+  rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit,
+                                              ColumnFamilyData** cfd) override;
 
-  rocksdb_rs::status::Status OnColumnFamilyAdd(VersionEdit& edit, ColumnFamilyData** cfd) override;
+  rocksdb_rs::status::Status OnColumnFamilyAdd(VersionEdit& edit,
+                                               ColumnFamilyData** cfd) override;
 
-  void CheckIterationResult(const log::Reader& reader, rocksdb_rs::status::Status* s) override;
+  void CheckIterationResult(const log::Reader& reader,
+                            rocksdb_rs::status::Status* s) override;
 
-  rocksdb_rs::status::Status VerifyFile(ColumnFamilyData* cfd, const std::string& fpath, int level,
-                    const FileMetaData& fmeta) override;
+  rocksdb_rs::status::Status VerifyFile(ColumnFamilyData* cfd,
+                                        const std::string& fpath, int level,
+                                        const FileMetaData& fmeta) override;
 
   enum Mode : uint8_t {
     kRecovery = 0,
@@ -319,7 +338,8 @@ class DumpManifestHandler : public VersionEditHandler {
 
   ~DumpManifestHandler() override {}
 
-  rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit, ColumnFamilyData** cfd) override {
+  rocksdb_rs::status::Status ApplyVersionEdit(VersionEdit& edit,
+                                              ColumnFamilyData** cfd) override {
     // Write out each individual edit
     if (verbose_ && !json_) {
       // Print out DebugStrings. Can include non-terminating null characters.
@@ -334,7 +354,8 @@ class DumpManifestHandler : public VersionEditHandler {
     return VersionEditHandler::ApplyVersionEdit(edit, cfd);
   }
 
-  void CheckIterationResult(const log::Reader& reader, rocksdb_rs::status::Status* s) override;
+  void CheckIterationResult(const log::Reader& reader,
+                            rocksdb_rs::status::Status* s) override;
 
  private:
   const bool verbose_;

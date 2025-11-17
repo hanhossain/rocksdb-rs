@@ -8,10 +8,9 @@
 #include <cassert>
 
 #include "db/blob/blob_garbage_meter.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "table/internal_iterator.h"
 #include "test_util/sync_point.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -22,7 +21,9 @@ class BlobCountingIterator : public InternalIterator {
  public:
   BlobCountingIterator(InternalIterator* iter,
                        BlobGarbageMeter* blob_garbage_meter)
-      : iter_(iter), blob_garbage_meter_(blob_garbage_meter), status_(rocksdb_rs::status::Status_new()) {
+      : iter_(iter),
+        blob_garbage_meter_(blob_garbage_meter),
+        status_(rocksdb_rs::status::Status_new()) {
     assert(iter_);
     assert(blob_garbage_meter_);
 
@@ -119,7 +120,8 @@ class BlobCountingIterator : public InternalIterator {
     return iter_->IsValuePinned();
   }
 
-  rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop) override {
+  rocksdb_rs::status::Status GetProperty(std::string prop_name,
+                                         std::string* prop) override {
     return iter_->GetProperty(prop_name, prop);
   }
 

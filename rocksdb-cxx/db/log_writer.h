@@ -14,13 +14,12 @@
 #include <vector>
 
 #include "db/log_format.h"
-#include "rocksdb/env.h"
+#include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb-rs/src/io_status.rs.h"
+#include "rocksdb/env.h"
 #include "rocksdb/slice.h"
 #include "util/compression.h"
 #include "util/hash_containers.h"
-
-#include "rocksdb-rs/src/compression_type.rs.h"
 
 namespace rocksdb {
 
@@ -76,18 +75,20 @@ class Writer {
   // Create a writer that will append data to "*dest".
   // "*dest" must be initially empty.
   // "*dest" must remain live while this Writer is in use.
-  explicit Writer(std::unique_ptr<WritableFileWriter>&& dest,
-                  uint64_t log_number, bool recycle_log_files,
-                  bool manual_flush = false,
-                  rocksdb_rs::compression_type::CompressionType compressionType = rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  explicit Writer(
+      std::unique_ptr<WritableFileWriter>&& dest, uint64_t log_number,
+      bool recycle_log_files, bool manual_flush = false,
+      rocksdb_rs::compression_type::CompressionType compressionType =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression);
   // No copying allowed
   Writer(const Writer&) = delete;
   void operator=(const Writer&) = delete;
 
   ~Writer();
 
-  rocksdb_rs::io_status::IOStatus AddRecord(const Slice& slice,
-                     Env::IOPriority rate_limiter_priority = Env::IO_TOTAL);
+  rocksdb_rs::io_status::IOStatus AddRecord(
+      const Slice& slice,
+      Env::IOPriority rate_limiter_priority = Env::IO_TOTAL);
   rocksdb_rs::io_status::IOStatus AddCompressionTypeRecord();
 
   // If there are column families in `cf_to_ts_sz` not included in

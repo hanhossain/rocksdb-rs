@@ -214,7 +214,7 @@ class FaultInjectionTest
   }
 
   rocksdb_rs::status::Status Verify(int start_idx, int num_vals,
-                ExpectedVerifResult expected) const {
+                                    ExpectedVerifResult expected) const {
     std::string val;
     std::string value_space;
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
@@ -292,7 +292,7 @@ class FaultInjectionTest
   void ResetDBState(ResetMethod reset_method, Random* rnd = nullptr) {
     env_->AssertNoOpenFile();
     switch (reset_method) {
-        case ResetMethod::kResetDropUnsyncedData:
+      case ResetMethod::kResetDropUnsyncedData:
         ASSERT_OK(env_->DropUnsyncedFileData());
         break;
       case ResetMethod::kResetDropRandomUnsyncedData:
@@ -331,13 +331,17 @@ class FaultInjectionTest
     CloseDB();
     ResetDBState(reset_method, rnd);
     ASSERT_OK(OpenDB());
-    ASSERT_OK(Verify(0, num_pre_sync, FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
-    ASSERT_OK(Verify(num_pre_sync, num_post_sync,
-                     FaultInjectionTest::ExpectedVerifResult::kValExpectNoError));
+    ASSERT_OK(Verify(0, num_pre_sync,
+                     FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
+    ASSERT_OK(
+        Verify(num_pre_sync, num_post_sync,
+               FaultInjectionTest::ExpectedVerifResult::kValExpectNoError));
     WaitCompactionFinish();
-    ASSERT_OK(Verify(0, num_pre_sync, FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
-    ASSERT_OK(Verify(num_pre_sync, num_post_sync,
-                     FaultInjectionTest::ExpectedVerifResult::kValExpectNoError));
+    ASSERT_OK(Verify(0, num_pre_sync,
+                     FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
+    ASSERT_OK(
+        Verify(num_pre_sync, num_post_sync,
+               FaultInjectionTest::ExpectedVerifResult::kValExpectNoError));
   }
 
   void NoWriteTestPreFault() {}
@@ -369,30 +373,32 @@ TEST_P(FaultInjectionTestSplitted, FaultTest) {
       int num_post_sync = rnd.Uniform(kMaxNumValues);
 
       PartialCompactTestPreFault(num_pre_sync, num_post_sync);
-      PartialCompactTestReopenWithFault(ResetMethod::kResetDropUnsyncedData, num_pre_sync,
-                                        num_post_sync);
+      PartialCompactTestReopenWithFault(ResetMethod::kResetDropUnsyncedData,
+                                        num_pre_sync, num_post_sync);
       NoWriteTestPreFault();
       NoWriteTestReopenWithFault(ResetMethod::kResetDropUnsyncedData);
 
       PartialCompactTestPreFault(num_pre_sync, num_post_sync);
-      PartialCompactTestReopenWithFault(ResetMethod::kResetDropRandomUnsyncedData,
-                                        num_pre_sync, num_post_sync, &rnd);
+      PartialCompactTestReopenWithFault(
+          ResetMethod::kResetDropRandomUnsyncedData, num_pre_sync,
+          num_post_sync, &rnd);
       NoWriteTestPreFault();
       NoWriteTestReopenWithFault(ResetMethod::kResetDropUnsyncedData);
 
       // Setting a separate data path won't pass the test as we don't sync
       // it after creating new files,
       PartialCompactTestPreFault(num_pre_sync, num_post_sync);
-      PartialCompactTestReopenWithFault(ResetMethod::kResetDropAndDeleteUnsynced,
-                                        num_pre_sync, num_post_sync);
+      PartialCompactTestReopenWithFault(
+          ResetMethod::kResetDropAndDeleteUnsynced, num_pre_sync,
+          num_post_sync);
       NoWriteTestPreFault();
       NoWriteTestReopenWithFault(ResetMethod::kResetDropAndDeleteUnsynced);
 
       PartialCompactTestPreFault(num_pre_sync, num_post_sync);
       // No new files created so we expect all values since no files will be
       // dropped.
-      PartialCompactTestReopenWithFault(ResetMethod::kResetDeleteUnsyncedFiles, num_pre_sync,
-                                        num_post_sync);
+      PartialCompactTestReopenWithFault(ResetMethod::kResetDeleteUnsyncedFiles,
+                                        num_pre_sync, num_post_sync);
       NoWriteTestPreFault();
       NoWriteTestReopenWithFault(ResetMethod::kResetDeleteUnsyncedFiles);
     }
@@ -479,9 +485,11 @@ TEST_P(FaultInjectionTest, UninstalledCompaction) {
       [&](void* /*arg*/) { ASSERT_TRUE(opened.load()); });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
   ASSERT_OK(OpenDB());
-  ASSERT_OK(Verify(0, kNumKeys, FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
+  ASSERT_OK(Verify(0, kNumKeys,
+                   FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
   WaitCompactionFinish();
-  ASSERT_OK(Verify(0, kNumKeys, FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
+  ASSERT_OK(Verify(0, kNumKeys,
+                   FaultInjectionTest::ExpectedVerifResult::kValExpectFound));
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
 }
@@ -544,20 +552,23 @@ TEST_P(FaultInjectionTest, WriteBatchWalTerminationTest) {
   std::string val;
   ASSERT_OK(db_->Get(ro, "cats", &val));
   ASSERT_EQ("dogs", val);
-  ASSERT_TRUE(db_->Get(ro, "boys", &val).eq(rocksdb_rs::status::Status_NotFound()));
+  ASSERT_TRUE(
+      db_->Get(ro, "boys", &val).eq(rocksdb_rs::status::Status_NotFound()));
 }
 
 TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
   auto fault_fs = std::make_shared<FaultInjectionTestFS>(FileSystem::Default());
   fault_fs->EnableWriteErrorInjection();
   fault_fs->SetFilesystemDirectWritable(false);
-  const std::string file_name = static_cast<std::string>(NormalizePath(dbname_ + "/test_file"));
+  const std::string file_name =
+      static_cast<std::string>(NormalizePath(dbname_ + "/test_file"));
   std::unique_ptr<log::Writer> log_writer = nullptr;
   constexpr uint64_t log_number = 0;
   {
     std::unique_ptr<FSWritableFile> file;
     const rocksdb_rs::status::Status s =
-        fault_fs->NewWritableFile(file_name, FileOptions(), &file, nullptr).status();
+        fault_fs->NewWritableFile(file_name, FileOptions(), &file, nullptr)
+            .status();
     ASSERT_OK(s);
     std::unique_ptr<WritableFileWriter> fwriter(
         new WritableFileWriter(std::move(file), file_name, FileOptions()));
@@ -566,7 +577,8 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
   }
 
   fault_fs->SetRandomWriteError(
-      0xdeadbeef, /*one_in=*/1, rocksdb_rs::io_status::IOStatus_IOError("Injected IOError"),
+      0xdeadbeef, /*one_in=*/1,
+      rocksdb_rs::io_status::IOStatus_IOError("Injected IOError"),
       /*inject_for_all_file_types=*/true, /*types=*/{});
 
   {
@@ -587,7 +599,8 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
   {
     std::unique_ptr<FSSequentialFile> file;
     rocksdb_rs::status::Status s =
-        fault_fs->NewSequentialFile(file_name, FileOptions(), &file, nullptr).status();
+        fault_fs->NewSequentialFile(file_name, FileOptions(), &file, nullptr)
+            .status();
     ASSERT_OK(s);
     std::unique_ptr<SequentialFileReader> freader(
         new SequentialFileReader(std::move(file), file_name));
@@ -596,7 +609,8 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
      public:
       rocksdb_rs::status::Status* status_;
       explicit LogReporter(rocksdb_rs::status::Status* _s) : status_(_s) {}
-      void Corruption(size_t /*bytes*/, const rocksdb_rs::status::Status& _s) override {
+      void Corruption(size_t /*bytes*/,
+                      const rocksdb_rs::status::Status& _s) override {
         if (status_->ok()) {
           status_->copy_from(_s);
         }
@@ -619,15 +633,24 @@ TEST_P(FaultInjectionTest, NoDuplicateTrailingEntries) {
 
 INSTANTIATE_TEST_CASE_P(
     FaultTest, FaultInjectionTest,
-    ::testing::Values(std::make_tuple(false, FaultInjectionOptionConfig::kDefault, FaultInjectionOptionConfig::kEnd),
-                      std::make_tuple(true, FaultInjectionOptionConfig::kDefault, FaultInjectionOptionConfig::kEnd)));
+    ::testing::Values(std::make_tuple(false,
+                                      FaultInjectionOptionConfig::kDefault,
+                                      FaultInjectionOptionConfig::kEnd),
+                      std::make_tuple(true,
+                                      FaultInjectionOptionConfig::kDefault,
+                                      FaultInjectionOptionConfig::kEnd)));
 
 INSTANTIATE_TEST_CASE_P(
     FaultTest, FaultInjectionTestSplitted,
-    ::testing::Values(std::make_tuple(false, FaultInjectionOptionConfig::kDefault, FaultInjectionOptionConfig::kSyncWal),
-                      std::make_tuple(true, FaultInjectionOptionConfig::kDefault, FaultInjectionOptionConfig::kSyncWal),
-                      std::make_tuple(false, FaultInjectionOptionConfig::kSyncWal, FaultInjectionOptionConfig::kEnd),
-                      std::make_tuple(true, FaultInjectionOptionConfig::kSyncWal, FaultInjectionOptionConfig::kEnd)));
+    ::testing::Values(
+        std::make_tuple(false, FaultInjectionOptionConfig::kDefault,
+                        FaultInjectionOptionConfig::kSyncWal),
+        std::make_tuple(true, FaultInjectionOptionConfig::kDefault,
+                        FaultInjectionOptionConfig::kSyncWal),
+        std::make_tuple(false, FaultInjectionOptionConfig::kSyncWal,
+                        FaultInjectionOptionConfig::kEnd),
+        std::make_tuple(true, FaultInjectionOptionConfig::kSyncWal,
+                        FaultInjectionOptionConfig::kEnd)));
 
 }  // namespace rocksdb
 

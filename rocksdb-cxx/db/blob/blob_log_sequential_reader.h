@@ -13,7 +13,7 @@
 #define MAX_HEADER_SIZE(a, b, c) (a > b ? (a > c ? a : c) : (b > c ? b : c))
 
 namespace rocksdb_rs::status {
- struct Status;
+struct Status;
 }
 
 namespace rocksdb {
@@ -56,8 +56,9 @@ class BlobLogSequentialReader {
   // *record will only be valid until the next mutating operation on this
   // reader.
   // If blob_offset is non-null, return offset of the blob through it.
-  rocksdb_rs::status::Status ReadRecord(BlobLogRecord* record, ReadLevel level = ReadLevel::kReadHeader,
-                    uint64_t* blob_offset = nullptr);
+  rocksdb_rs::status::Status ReadRecord(
+      BlobLogRecord* record, ReadLevel level = ReadLevel::kReadHeader,
+      uint64_t* blob_offset = nullptr);
 
   rocksdb_rs::status::Status ReadFooter(BlobLogFooter* footer);
 

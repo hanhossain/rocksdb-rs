@@ -14,7 +14,8 @@ class DBBlobCorruptionTest : public DBTestBase {
   DBBlobCorruptionTest()
       : DBTestBase("db_blob_corruption_test", /* env_do_fsync */ false) {}
 
-  void Corrupt(rocksdb_rs::types::FileType filetype, int offset, int bytes_to_corrupt) {
+  void Corrupt(rocksdb_rs::types::FileType filetype, int offset,
+               int bytes_to_corrupt) {
     // Pick file to corrupt
     std::vector<std::string> filenames;
     ASSERT_OK(env_->GetChildren(dbname_, &filenames));
@@ -57,7 +58,8 @@ TEST_F(DBBlobCorruptionTest, VerifyWholeBlobFileChecksum) {
   int count{0};
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::VerifyFullFileChecksum:mismatch", [&](void* arg) {
-        const rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(arg);
+        const rocksdb_rs::status::Status* s =
+            static_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_NE(s, nullptr);
         ++count;
         ASSERT_NOK(*s);

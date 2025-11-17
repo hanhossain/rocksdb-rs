@@ -35,19 +35,20 @@ static const std::map<PeriodicTaskType, std::string> kPeriodicTaskTypeNames = {
     {PeriodicTaskType::kRecordSeqnoTime, "record_seq_time"},
 };
 
-rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
-                                       const PeriodicTaskFunc& fn) {
+rocksdb_rs::status::Status PeriodicTaskScheduler::Register(
+    PeriodicTaskType task_type, const PeriodicTaskFunc& fn) {
   return Register(task_type, fn, kDefaultPeriodSeconds.at(task_type));
 }
 
-rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task_type,
-                                       const PeriodicTaskFunc& fn,
-                                       uint64_t repeat_period_seconds) {
+rocksdb_rs::status::Status PeriodicTaskScheduler::Register(
+    PeriodicTaskType task_type, const PeriodicTaskFunc& fn,
+    uint64_t repeat_period_seconds) {
   MutexLock l(&timer_mutex);
   static std::atomic<uint64_t> initial_delay(0);
 
   if (repeat_period_seconds == kInvalidPeriodSec) {
-    return rocksdb_rs::status::Status_InvalidArgument("Invalid task repeat period");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Invalid task repeat period");
   }
   auto it = tasks_map_.find(task_type);
   if (it != tasks_map_.end()) {
@@ -70,7 +71,8 @@ rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task
       (initial_delay.fetch_add(1) % repeat_period_seconds) * kMicrosInSecond,
       repeat_period_seconds * kMicrosInSecond);
   if (!succeeded) {
-    return rocksdb_rs::status::Status_Aborted("Failed to register periodic task");
+    return rocksdb_rs::status::Status_Aborted(
+        "Failed to register periodic task");
   }
   auto result = tasks_map_.try_emplace(
       task_type, TaskInfo{unique_id, repeat_period_seconds});
@@ -80,7 +82,8 @@ rocksdb_rs::status::Status PeriodicTaskScheduler::Register(PeriodicTaskType task
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status PeriodicTaskScheduler::Unregister(PeriodicTaskType task_type) {
+rocksdb_rs::status::Status PeriodicTaskScheduler::Unregister(
+    PeriodicTaskType task_type) {
   MutexLock l(&timer_mutex);
   auto it = tasks_map_.find(task_type);
   if (it != tasks_map_.end()) {
@@ -108,4 +111,3 @@ void PeriodicTaskScheduler::TEST_OverrideTimer(SystemClock* clock) {
 #endif  // NDEBUG
 
 }  // namespace rocksdb
-

@@ -19,8 +19,9 @@
 
 namespace rocksdb {
 // Convenience methods
-rocksdb_rs::status::Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle* column_family,
-                   const Slice& key, const Slice& val) {
+rocksdb_rs::status::Status DBImpl::Put(const WriteOptions& o,
+                                       ColumnFamilyHandle* column_family,
+                                       const Slice& key, const Slice& val) {
   const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
     return s.Clone();
@@ -28,9 +29,12 @@ rocksdb_rs::status::Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle
   return DB::Put(o, column_family, key, val);
 }
 
-rocksdb_rs::status::Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle* column_family,
-                   const Slice& key, const Slice& ts, const Slice& val) {
-  const rocksdb_rs::status::Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
+rocksdb_rs::status::Status DBImpl::Put(const WriteOptions& o,
+                                       ColumnFamilyHandle* column_family,
+                                       const Slice& key, const Slice& ts,
+                                       const Slice& val) {
+  const rocksdb_rs::status::Status s =
+      FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -38,8 +42,9 @@ rocksdb_rs::status::Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle
 }
 
 rocksdb_rs::status::Status DBImpl::PutEntity(const WriteOptions& options,
-                         ColumnFamilyHandle* column_family, const Slice& key,
-                         const WideColumns& columns) {
+                                             ColumnFamilyHandle* column_family,
+                                             const Slice& key,
+                                             const WideColumns& columns) {
   const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
     return s.Clone();
@@ -48,23 +53,28 @@ rocksdb_rs::status::Status DBImpl::PutEntity(const WriteOptions& options,
   return DB::PutEntity(options, column_family, key, columns);
 }
 
-rocksdb_rs::status::Status DBImpl::Merge(const WriteOptions& o, ColumnFamilyHandle* column_family,
-                     const Slice& key, const Slice& val) {
+rocksdb_rs::status::Status DBImpl::Merge(const WriteOptions& o,
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key, const Slice& val) {
   const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
     return s.Clone();
   }
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   if (!cfh->cfd()->ioptions()->merge_operator) {
-    return rocksdb_rs::status::Status_NotSupported("Provide a merge_operator when opening DB");
+    return rocksdb_rs::status::Status_NotSupported(
+        "Provide a merge_operator when opening DB");
   } else {
     return DB::Merge(o, column_family, key, val);
   }
 }
 
-rocksdb_rs::status::Status DBImpl::Merge(const WriteOptions& o, ColumnFamilyHandle* column_family,
-                     const Slice& key, const Slice& ts, const Slice& val) {
-  const rocksdb_rs::status::Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
+rocksdb_rs::status::Status DBImpl::Merge(const WriteOptions& o,
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key, const Slice& ts,
+                                         const Slice& val) {
+  const rocksdb_rs::status::Status s =
+      FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -72,7 +82,8 @@ rocksdb_rs::status::Status DBImpl::Merge(const WriteOptions& o, ColumnFamilyHand
 }
 
 rocksdb_rs::status::Status DBImpl::Delete(const WriteOptions& write_options,
-                      ColumnFamilyHandle* column_family, const Slice& key) {
+                                          ColumnFamilyHandle* column_family,
+                                          const Slice& key) {
   const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
     return s.Clone();
@@ -81,18 +92,19 @@ rocksdb_rs::status::Status DBImpl::Delete(const WriteOptions& write_options,
 }
 
 rocksdb_rs::status::Status DBImpl::Delete(const WriteOptions& write_options,
-                      ColumnFamilyHandle* column_family, const Slice& key,
-                      const Slice& ts) {
-  const rocksdb_rs::status::Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
+                                          ColumnFamilyHandle* column_family,
+                                          const Slice& key, const Slice& ts) {
+  const rocksdb_rs::status::Status s =
+      FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
     return s.Clone();
   }
   return DB::Delete(write_options, column_family, key, ts);
 }
 
-rocksdb_rs::status::Status DBImpl::SingleDelete(const WriteOptions& write_options,
-                            ColumnFamilyHandle* column_family,
-                            const Slice& key) {
+rocksdb_rs::status::Status DBImpl::SingleDelete(
+    const WriteOptions& write_options, ColumnFamilyHandle* column_family,
+    const Slice& key) {
   const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
     return s.Clone();
@@ -100,19 +112,20 @@ rocksdb_rs::status::Status DBImpl::SingleDelete(const WriteOptions& write_option
   return DB::SingleDelete(write_options, column_family, key);
 }
 
-rocksdb_rs::status::Status DBImpl::SingleDelete(const WriteOptions& write_options,
-                            ColumnFamilyHandle* column_family, const Slice& key,
-                            const Slice& ts) {
-  const rocksdb_rs::status::Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
+rocksdb_rs::status::Status DBImpl::SingleDelete(
+    const WriteOptions& write_options, ColumnFamilyHandle* column_family,
+    const Slice& key, const Slice& ts) {
+  const rocksdb_rs::status::Status s =
+      FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
     return s.Clone();
   }
   return DB::SingleDelete(write_options, column_family, key, ts);
 }
 
-rocksdb_rs::status::Status DBImpl::DeleteRange(const WriteOptions& write_options,
-                           ColumnFamilyHandle* column_family,
-                           const Slice& begin_key, const Slice& end_key) {
+rocksdb_rs::status::Status DBImpl::DeleteRange(
+    const WriteOptions& write_options, ColumnFamilyHandle* column_family,
+    const Slice& begin_key, const Slice& end_key) {
   const rocksdb_rs::status::Status s = FailIfCfHasTs(column_family);
   if (!s.ok()) {
     return s.Clone();
@@ -120,11 +133,11 @@ rocksdb_rs::status::Status DBImpl::DeleteRange(const WriteOptions& write_options
   return DB::DeleteRange(write_options, column_family, begin_key, end_key);
 }
 
-rocksdb_rs::status::Status DBImpl::DeleteRange(const WriteOptions& write_options,
-                           ColumnFamilyHandle* column_family,
-                           const Slice& begin_key, const Slice& end_key,
-                           const Slice& ts) {
-  const rocksdb_rs::status::Status s = FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
+rocksdb_rs::status::Status DBImpl::DeleteRange(
+    const WriteOptions& write_options, ColumnFamilyHandle* column_family,
+    const Slice& begin_key, const Slice& end_key, const Slice& ts) {
+  const rocksdb_rs::status::Status s =
+      FailIfTsMismatchCf(column_family, ts, /*ts_for_read=*/false);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -136,7 +149,8 @@ void DBImpl::SetRecoverableStatePreReleaseCallback(
   recoverable_state_pre_release_callback_.reset(callback);
 }
 
-rocksdb_rs::status::Status DBImpl::Write(const WriteOptions& write_options, WriteBatch* my_batch) {
+rocksdb_rs::status::Status DBImpl::Write(const WriteOptions& write_options,
+                                         WriteBatch* my_batch) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (write_options.protection_bytes_per_key > 0) {
     s = WriteBatchInternal::UpdateProtectionInfo(
@@ -149,9 +163,9 @@ rocksdb_rs::status::Status DBImpl::Write(const WriteOptions& write_options, Writ
   return s;
 }
 
-rocksdb_rs::status::Status DBImpl::WriteWithCallback(const WriteOptions& write_options,
-                                 WriteBatch* my_batch,
-                                 WriteCallback* callback) {
+rocksdb_rs::status::Status DBImpl::WriteWithCallback(
+    const WriteOptions& write_options, WriteBatch* my_batch,
+    WriteCallback* callback) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (write_options.protection_bytes_per_key > 0) {
     s = WriteBatchInternal::UpdateProtectionInfo(
@@ -166,13 +180,12 @@ rocksdb_rs::status::Status DBImpl::WriteWithCallback(const WriteOptions& write_o
 // The main write queue. This is the only write queue that updates LastSequence.
 // When using one write queue, the same sequence also indicates the last
 // published sequence.
-rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
-                         WriteBatch* my_batch, WriteCallback* callback,
-                         uint64_t* log_used, uint64_t log_ref,
-                         bool disable_memtable, uint64_t* seq_used,
-                         size_t batch_cnt,
-                         PreReleaseCallback* pre_release_callback,
-                         PostMemTableCallback* post_memtable_callback) {
+rocksdb_rs::status::Status DBImpl::WriteImpl(
+    const WriteOptions& write_options, WriteBatch* my_batch,
+    WriteCallback* callback, uint64_t* log_used, uint64_t log_ref,
+    bool disable_memtable, uint64_t* seq_used, size_t batch_cnt,
+    PreReleaseCallback* pre_release_callback,
+    PostMemTableCallback* post_memtable_callback) {
   assert(!seq_per_batch_ || batch_cnt != 0);
   assert(my_batch == nullptr || my_batch->Count() == 0 ||
          write_options.protection_bytes_per_key == 0 ||
@@ -192,7 +205,8 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
     // without inserting to memtable. The keys in the batch do not have to be
     // assigned timestamps because they will be used only during recovery if
     // there is a commit marker which includes their commit timestamp.
-    return rocksdb_rs::status::Status_InvalidArgument("write batch must have timestamp(s) set");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "write batch must have timestamp(s) set");
   } else if (write_options.rate_limiter_priority != Env::IO_TOTAL &&
              write_options.rate_limiter_priority != Env::IO_USER) {
     return rocksdb_rs::status::Status_InvalidArgument(
@@ -223,7 +237,8 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
     }
   }
   if (write_options.sync && write_options.disableWAL) {
-    return rocksdb_rs::status::Status_InvalidArgument("Sync writes has to enable WAL.");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Sync writes has to enable WAL.");
   }
   if (two_write_queues_ && immutable_db_options_.enable_pipelined_write) {
     return rocksdb_rs::status::Status_NotSupported(
@@ -253,21 +268,22 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
          disable_memtable);
 
   if (write_options.low_pri) {
-    rocksdb_rs::status::Status s = ThrottleLowPriWritesIfNeeded(write_options, my_batch);
+    rocksdb_rs::status::Status s =
+        ThrottleLowPriWritesIfNeeded(write_options, my_batch);
     if (!s.ok()) {
       return s;
     }
   }
 
   if (two_write_queues_ && disable_memtable) {
-    AssignOrder assign_order =
-        seq_per_batch_ ? AssignOrder::kDoAssignOrder : AssignOrder::kDontAssignOrder;
+    AssignOrder assign_order = seq_per_batch_ ? AssignOrder::kDoAssignOrder
+                                              : AssignOrder::kDontAssignOrder;
     // Otherwise it is WAL-only Prepare batches in WriteCommitted policy and
     // they don't consume sequence.
-    return WriteImplWALOnly(&nonmem_write_thread_, write_options, my_batch,
-                            callback, log_used, log_ref, seq_used, batch_cnt,
-                            pre_release_callback, assign_order,
-                            PublishLastSeq::kDontPublishLastSeq, disable_memtable);
+    return WriteImplWALOnly(
+        &nonmem_write_thread_, write_options, my_batch, callback, log_used,
+        log_ref, seq_used, batch_cnt, pre_release_callback, assign_order,
+        PublishLastSeq::kDontPublishLastSeq, disable_memtable);
   }
 
   if (immutable_db_options_.unordered_write) {
@@ -401,7 +417,8 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
       write_thread_.EnterAsBatchGroupLeader(&w, &write_group);
 
   rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
-  rocksdb_rs::status::Status pre_release_cb_status = rocksdb_rs::status::Status_new();
+  rocksdb_rs::status::Status pre_release_cb_status =
+      rocksdb_rs::status::Status_new();
   if (status.ok()) {
     // TODO: this use of operator bool on `tracer_` can avoid unnecessary lock
     // grabs but does not seem thread-safe.
@@ -525,9 +542,10 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
         }
         writer->sequence = next_sequence;
         if (writer->pre_release_callback) {
-          rocksdb_rs::status::Status ws = writer->pre_release_callback->Callback(
-              writer->sequence, disable_memtable, writer->log_used, index++,
-              pre_release_callback_cnt);
+          rocksdb_rs::status::Status ws =
+              writer->pre_release_callback->Callback(
+                  writer->sequence, disable_memtable, writer->log_used, index++,
+                  pre_release_callback_cnt);
           if (!ws.ok()) {
             pre_release_cb_status.copy_from(ws);
             status.copy_from(pre_release_cb_status);
@@ -655,10 +673,10 @@ rocksdb_rs::status::Status DBImpl::WriteImpl(const WriteOptions& write_options,
   return status;
 }
 
-rocksdb_rs::status::Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_options,
-                                  WriteBatch* my_batch, WriteCallback* callback,
-                                  uint64_t* log_used, uint64_t log_ref,
-                                  bool disable_memtable, uint64_t* seq_used) {
+rocksdb_rs::status::Status DBImpl::PipelinedWriteImpl(
+    const WriteOptions& write_options, WriteBatch* my_batch,
+    WriteCallback* callback, uint64_t* log_used, uint64_t log_ref,
+    bool disable_memtable, uint64_t* seq_used) {
   PERF_TIMER_GUARD(write_pre_and_post_process_time);
   StopWatch write_sw(immutable_db_options_.clock, stats_, DB_WRITE);
 
@@ -729,7 +747,8 @@ rocksdb_rs::status::Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_
 
     PERF_TIMER_STOP(write_pre_and_post_process_time);
 
-    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
+    rocksdb_rs::io_status::IOStatus io_s =
+        rocksdb_rs::io_status::IOStatus_new();
 
     if (w.status.ok() && !write_options.disableWAL) {
       PERF_TIMER_GUARD(write_wal_time);
@@ -827,11 +846,10 @@ rocksdb_rs::status::Status DBImpl::PipelinedWriteImpl(const WriteOptions& write_
   return w.FinalStatus();
 }
 
-rocksdb_rs::status::Status DBImpl::UnorderedWriteMemtable(const WriteOptions& write_options,
-                                      WriteBatch* my_batch,
-                                      WriteCallback* callback, uint64_t log_ref,
-                                      SequenceNumber seq,
-                                      const size_t sub_batch_cnt) {
+rocksdb_rs::status::Status DBImpl::UnorderedWriteMemtable(
+    const WriteOptions& write_options, WriteBatch* my_batch,
+    WriteCallback* callback, uint64_t log_ref, SequenceNumber seq,
+    const size_t sub_batch_cnt) {
   PERF_TIMER_GUARD(write_pre_and_post_process_time);
   StopWatch write_sw(immutable_db_options_.clock, stats_, DB_WRITE);
 
@@ -1085,7 +1103,8 @@ rocksdb_rs::status::Status DBImpl::WriteImplWALOnly(
   return status;
 }
 
-void DBImpl::WriteStatusCheckOnLocked(const rocksdb_rs::status::Status& status) {
+void DBImpl::WriteStatusCheckOnLocked(
+    const rocksdb_rs::status::Status& status) {
   // Is setting bg_error_ enough here?  This will at least stop
   // compaction and fail any further writes.
   InstrumentedMutexLock l(&mutex_);
@@ -1118,7 +1137,8 @@ void DBImpl::IOStatusCheck(const rocksdb_rs::io_status::IOStatus& io_status) {
       io_status.IsIOFenced()) {
     mutex_.Lock();
     // Maybe change the return status to void?
-    error_handler_.SetBGError(io_status.status(), BackgroundErrorReason::kWriteCallback);
+    error_handler_.SetBGError(io_status.status(),
+                              BackgroundErrorReason::kWriteCallback);
     mutex_.Unlock();
   } else {
     // Force writable file to be continue writable.
@@ -1126,7 +1146,8 @@ void DBImpl::IOStatusCheck(const rocksdb_rs::io_status::IOStatus& io_status) {
   }
 }
 
-void DBImpl::MemTableInsertStatusCheck(const rocksdb_rs::status::Status& status) {
+void DBImpl::MemTableInsertStatusCheck(
+    const rocksdb_rs::status::Status& status) {
   // A non-OK status here indicates that the state implied by the
   // WAL has diverged from the in-memory state.  This could be
   // because of a corrupt write_batch (very bad), or because the
@@ -1141,9 +1162,9 @@ void DBImpl::MemTableInsertStatusCheck(const rocksdb_rs::status::Status& status)
   }
 }
 
-rocksdb_rs::status::Status DBImpl::PreprocessWrite(const WriteOptions& write_options,
-                               LogContext* log_context,
-                               WriteContext* write_context) {
+rocksdb_rs::status::Status DBImpl::PreprocessWrite(
+    const WriteOptions& write_options, LogContext* log_context,
+    WriteContext* write_context) {
   assert(write_context != nullptr && log_context != nullptr);
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
 
@@ -1254,10 +1275,10 @@ rocksdb_rs::status::Status DBImpl::PreprocessWrite(const WriteOptions& write_opt
   return status;
 }
 
-rocksdb_rs::status::Status DBImpl::MergeBatch(const WriteThread::WriteGroup& write_group,
-                          WriteBatch* tmp_batch, WriteBatch** merged_batch,
-                          size_t* write_with_wal,
-                          WriteBatch** to_be_cached_state) {
+rocksdb_rs::status::Status DBImpl::MergeBatch(
+    const WriteThread::WriteGroup& write_group, WriteBatch* tmp_batch,
+    WriteBatch** merged_batch, size_t* write_with_wal,
+    WriteBatch** to_be_cached_state) {
   assert(write_with_wal != nullptr);
   assert(tmp_batch != nullptr);
   assert(*to_be_cached_state == nullptr);
@@ -1281,8 +1302,9 @@ rocksdb_rs::status::Status DBImpl::MergeBatch(const WriteThread::WriteGroup& wri
     *merged_batch = tmp_batch;
     for (auto writer : write_group) {
       if (!writer->CallbackFailed()) {
-        rocksdb_rs::status::Status s = WriteBatchInternal::Append(*merged_batch, writer->batch,
-                                              /*WAL_only*/ true);
+        rocksdb_rs::status::Status s =
+            WriteBatchInternal::Append(*merged_batch, writer->batch,
+                                       /*WAL_only*/ true);
         if (!s.ok()) {
           tmp_batch->Clear();
           return s;
@@ -1301,11 +1323,10 @@ rocksdb_rs::status::Status DBImpl::MergeBatch(const WriteThread::WriteGroup& wri
 
 // When two_write_queues_ is disabled, this function is called from the only
 // write thread. Otherwise this must be called holding log_write_mutex_.
-rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteBatch& merged_batch,
-                            log::Writer* log_writer, uint64_t* log_used,
-                            uint64_t* log_size,
-                            Env::IOPriority rate_limiter_priority,
-                            LogFileNumberSize& log_file_number_size) {
+rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(
+    const WriteBatch& merged_batch, log::Writer* log_writer, uint64_t* log_used,
+    uint64_t* log_size, Env::IOPriority rate_limiter_priority,
+    LogFileNumberSize& log_file_number_size) {
   assert(log_size != nullptr);
 
   Slice log_entry = WriteBatchInternal::Contents(&merged_batch);
@@ -1326,9 +1347,10 @@ rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteBatch& merged_batc
   if (UNLIKELY(needs_locking)) {
     log_write_mutex_.Lock();
   }
-  rocksdb_rs::io_status::IOStatus io_s = log_writer->MaybeAddUserDefinedTimestampSizeRecord(
-      versions_->GetColumnFamiliesTimestampSizeForRecord(),
-      rate_limiter_priority);
+  rocksdb_rs::io_status::IOStatus io_s =
+      log_writer->MaybeAddUserDefinedTimestampSizeRecord(
+          versions_->GetColumnFamiliesTimestampSizeForRecord(),
+          rate_limiter_priority);
   if (!io_s.ok()) {
     return io_s;
   }
@@ -1346,11 +1368,10 @@ rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteBatch& merged_batc
   return io_s;
 }
 
-rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteThread::WriteGroup& write_group,
-                            log::Writer* log_writer, uint64_t* log_used,
-                            bool need_log_sync, bool need_log_dir_sync,
-                            SequenceNumber sequence,
-                            LogFileNumberSize& log_file_number_size) {
+rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(
+    const WriteThread::WriteGroup& write_group, log::Writer* log_writer,
+    uint64_t* log_used, bool need_log_sync, bool need_log_dir_sync,
+    SequenceNumber sequence, LogFileNumberSize& log_file_number_size) {
   rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   assert(!two_write_queues_);
   assert(!write_group.leader->disable_wal);
@@ -1358,8 +1379,9 @@ rocksdb_rs::io_status::IOStatus DBImpl::WriteToWAL(const WriteThread::WriteGroup
   size_t write_with_wal = 0;
   WriteBatch* to_be_cached_state = nullptr;
   WriteBatch* merged_batch;
-  io_s = rocksdb_rs::io_status::IOStatus_new(MergeBatch(write_group, &tmp_batch_, &merged_batch,
-                                        &write_with_wal, &to_be_cached_state));
+  io_s = rocksdb_rs::io_status::IOStatus_new(
+      MergeBatch(write_group, &tmp_batch_, &merged_batch, &write_with_wal,
+                 &to_be_cached_state));
   if (UNLIKELY(!io_s.ok())) {
     return io_s;
   }
@@ -1454,8 +1476,9 @@ rocksdb_rs::io_status::IOStatus DBImpl::ConcurrentWriteToWAL(
   size_t write_with_wal = 0;
   WriteBatch* to_be_cached_state = nullptr;
   WriteBatch* merged_batch;
-  io_s = rocksdb_rs::io_status::IOStatus_new(MergeBatch(write_group, &tmp_batch, &merged_batch,
-                                        &write_with_wal, &to_be_cached_state));
+  io_s = rocksdb_rs::io_status::IOStatus_new(
+      MergeBatch(write_group, &tmp_batch, &merged_batch, &write_with_wal,
+                 &to_be_cached_state));
   if (UNLIKELY(!io_s.ok())) {
     return io_s;
   }
@@ -1703,7 +1726,8 @@ rocksdb_rs::status::Status DBImpl::SwitchWAL(WriteContext* write_context) {
   return status;
 }
 
-rocksdb_rs::status::Status DBImpl::HandleWriteBufferManagerFlush(WriteContext* write_context) {
+rocksdb_rs::status::Status DBImpl::HandleWriteBufferManagerFlush(
+    WriteContext* write_context) {
   mutex_.AssertHeld();
   assert(write_context != nullptr);
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
@@ -1806,8 +1830,9 @@ uint64_t DBImpl::GetMaxTotalWalSize() const {
 
 // REQUIRES: mutex_ is held
 // REQUIRES: this thread is currently at the leader for write_thread
-rocksdb_rs::status::Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& write_thread,
-                          const WriteOptions& write_options) {
+rocksdb_rs::status::Status DBImpl::DelayWrite(
+    uint64_t num_bytes, WriteThread& write_thread,
+    const WriteOptions& write_options) {
   mutex_.AssertHeld();
   uint64_t time_delayed = 0;
   bool delayed = false;
@@ -1895,7 +1920,8 @@ rocksdb_rs::status::Status DBImpl::DelayWrite(uint64_t num_bytes, WriteThread& w
     if (!shutting_down_.load(std::memory_order_relaxed)) {
       // If writes are still stopped and db not shutdown, it means we bailed
       // due to a background error
-      s = rocksdb_rs::status::Status_Incomplete(*error_handler_.GetBGError().ToString());
+      s = rocksdb_rs::status::Status_Incomplete(
+          *error_handler_.GetBGError().ToString());
     } else {
       s = rocksdb_rs::status::Status_ShutdownInProgress("stalled writes");
     }
@@ -1929,8 +1955,8 @@ void DBImpl::WriteBufferManagerStallWrites() {
   write_thread_.EndWriteStall();
 }
 
-rocksdb_rs::status::Status DBImpl::ThrottleLowPriWritesIfNeeded(const WriteOptions& write_options,
-                                            WriteBatch* my_batch) {
+rocksdb_rs::status::Status DBImpl::ThrottleLowPriWritesIfNeeded(
+    const WriteOptions& write_options, WriteBatch* my_batch) {
   assert(write_options.low_pri);
   // This is called outside the DB mutex. Although it is safe to make the call,
   // the consistency condition is not guaranteed to hold. It's OK to live with
@@ -2092,7 +2118,8 @@ void DBImpl::NotifyOnMemTableSealed(ColumnFamilyData* /*cfd*/,
 // REQUIRES: this thread is currently at the front of the writer queue
 // REQUIRES: this thread is currently at the front of the 2nd writer queue if
 // two_write_queues_ is true (This is to simplify the reasoning.)
-rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context) {
+rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd,
+                                                  WriteContext* context) {
   mutex_.AssertHeld();
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
@@ -2210,7 +2237,8 @@ rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteCo
     // We may have lost data from the WritableFileBuffer in-memory buffer for
     // the current log, so treat it as a fatal error and set bg_error
     if (!io_s.ok()) {
-      error_handler_.SetBGError(io_s.status(), BackgroundErrorReason::kMemTable);
+      error_handler_.SetBGError(io_s.status(),
+                                BackgroundErrorReason::kMemTable);
     } else {
       error_handler_.SetBGError(s, BackgroundErrorReason::kMemTable);
     }
@@ -2250,7 +2278,8 @@ rocksdb_rs::status::Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteCo
       s = versions_->LogAndApplyToDefaultColumnFamily(
           read_options, &wal_deletion, &mutex_, directories_.GetDbDir());
       if (!s.ok() && versions_->io_status().IsIOError()) {
-        s.copy_from(error_handler_.SetBGError(versions_->io_status().status(),
+        s.copy_from(
+            error_handler_.SetBGError(versions_->io_status().status(),
                                       BackgroundErrorReason::kManifestWrite));
       }
       if (!s.ok()) {
@@ -2324,8 +2353,9 @@ size_t DBImpl::GetWalPreallocateBlockSize(uint64_t write_buffer_size) const {
 
 // Default implementations of convenience methods that subclasses of DB
 // can call if they wish
-rocksdb_rs::status::Status DB::Put(const WriteOptions& opt, ColumnFamilyHandle* column_family,
-               const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status DB::Put(const WriteOptions& opt,
+                                   ColumnFamilyHandle* column_family,
+                                   const Slice& key, const Slice& value) {
   // Pre-allocate size of write batch conservatively.
   // 8 bytes are taken by header, 4 bytes for count, 1 byte for type,
   // and we allocate 11 extra bytes for key length, as well as value length.
@@ -2338,8 +2368,10 @@ rocksdb_rs::status::Status DB::Put(const WriteOptions& opt, ColumnFamilyHandle* 
   return Write(opt, &batch);
 }
 
-rocksdb_rs::status::Status DB::Put(const WriteOptions& opt, ColumnFamilyHandle* column_family,
-               const Slice& key, const Slice& ts, const Slice& value) {
+rocksdb_rs::status::Status DB::Put(const WriteOptions& opt,
+                                   ColumnFamilyHandle* column_family,
+                                   const Slice& key, const Slice& ts,
+                                   const Slice& value) {
   ColumnFamilyHandle* default_cf = DefaultColumnFamily();
   assert(default_cf);
   const Comparator* const default_cf_ucmp = default_cf->GetComparator();
@@ -2355,8 +2387,9 @@ rocksdb_rs::status::Status DB::Put(const WriteOptions& opt, ColumnFamilyHandle* 
 }
 
 rocksdb_rs::status::Status DB::PutEntity(const WriteOptions& options,
-                     ColumnFamilyHandle* column_family, const Slice& key,
-                     const WideColumns& columns) {
+                                         ColumnFamilyHandle* column_family,
+                                         const Slice& key,
+                                         const WideColumns& columns) {
   const ColumnFamilyHandle* const default_cf = DefaultColumnFamily();
   assert(default_cf);
 
@@ -2367,7 +2400,8 @@ rocksdb_rs::status::Status DB::PutEntity(const WriteOptions& options,
                    options.protection_bytes_per_key,
                    default_cf_ucmp->timestamp_size());
 
-  const rocksdb_rs::status::Status s = batch.PutEntity(column_family, key, columns);
+  const rocksdb_rs::status::Status s =
+      batch.PutEntity(column_family, key, columns);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -2375,8 +2409,9 @@ rocksdb_rs::status::Status DB::PutEntity(const WriteOptions& options,
   return Write(options, &batch);
 }
 
-rocksdb_rs::status::Status DB::Delete(const WriteOptions& opt, ColumnFamilyHandle* column_family,
-                  const Slice& key) {
+rocksdb_rs::status::Status DB::Delete(const WriteOptions& opt,
+                                      ColumnFamilyHandle* column_family,
+                                      const Slice& key) {
   WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
                    opt.protection_bytes_per_key, 0 /* default_cf_ts_sz */);
   rocksdb_rs::status::Status s = batch.Delete(column_family, key);
@@ -2386,8 +2421,9 @@ rocksdb_rs::status::Status DB::Delete(const WriteOptions& opt, ColumnFamilyHandl
   return Write(opt, &batch);
 }
 
-rocksdb_rs::status::Status DB::Delete(const WriteOptions& opt, ColumnFamilyHandle* column_family,
-                  const Slice& key, const Slice& ts) {
+rocksdb_rs::status::Status DB::Delete(const WriteOptions& opt,
+                                      ColumnFamilyHandle* column_family,
+                                      const Slice& key, const Slice& ts) {
   ColumnFamilyHandle* default_cf = DefaultColumnFamily();
   assert(default_cf);
   const Comparator* const default_cf_ucmp = default_cf->GetComparator();
@@ -2403,7 +2439,8 @@ rocksdb_rs::status::Status DB::Delete(const WriteOptions& opt, ColumnFamilyHandl
 }
 
 rocksdb_rs::status::Status DB::SingleDelete(const WriteOptions& opt,
-                        ColumnFamilyHandle* column_family, const Slice& key) {
+                                            ColumnFamilyHandle* column_family,
+                                            const Slice& key) {
   WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
                    opt.protection_bytes_per_key, 0 /* default_cf_ts_sz */);
   rocksdb_rs::status::Status s = batch.SingleDelete(column_family, key);
@@ -2414,8 +2451,8 @@ rocksdb_rs::status::Status DB::SingleDelete(const WriteOptions& opt,
 }
 
 rocksdb_rs::status::Status DB::SingleDelete(const WriteOptions& opt,
-                        ColumnFamilyHandle* column_family, const Slice& key,
-                        const Slice& ts) {
+                                            ColumnFamilyHandle* column_family,
+                                            const Slice& key, const Slice& ts) {
   ColumnFamilyHandle* default_cf = DefaultColumnFamily();
   assert(default_cf);
   const Comparator* const default_cf_ucmp = default_cf->GetComparator();
@@ -2431,11 +2468,13 @@ rocksdb_rs::status::Status DB::SingleDelete(const WriteOptions& opt,
 }
 
 rocksdb_rs::status::Status DB::DeleteRange(const WriteOptions& opt,
-                       ColumnFamilyHandle* column_family,
-                       const Slice& begin_key, const Slice& end_key) {
+                                           ColumnFamilyHandle* column_family,
+                                           const Slice& begin_key,
+                                           const Slice& end_key) {
   WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
                    opt.protection_bytes_per_key, 0 /* default_cf_ts_sz */);
-  rocksdb_rs::status::Status s = batch.DeleteRange(column_family, begin_key, end_key);
+  rocksdb_rs::status::Status s =
+      batch.DeleteRange(column_family, begin_key, end_key);
   if (!s.ok()) {
     return s;
   }
@@ -2443,9 +2482,10 @@ rocksdb_rs::status::Status DB::DeleteRange(const WriteOptions& opt,
 }
 
 rocksdb_rs::status::Status DB::DeleteRange(const WriteOptions& opt,
-                       ColumnFamilyHandle* column_family,
-                       const Slice& begin_key, const Slice& end_key,
-                       const Slice& ts) {
+                                           ColumnFamilyHandle* column_family,
+                                           const Slice& begin_key,
+                                           const Slice& end_key,
+                                           const Slice& ts) {
   ColumnFamilyHandle* default_cf = DefaultColumnFamily();
   assert(default_cf);
   const Comparator* const default_cf_ucmp = default_cf->GetComparator();
@@ -2453,15 +2493,17 @@ rocksdb_rs::status::Status DB::DeleteRange(const WriteOptions& opt,
   WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
                    opt.protection_bytes_per_key,
                    default_cf_ucmp->timestamp_size());
-  rocksdb_rs::status::Status s = batch.DeleteRange(column_family, begin_key, end_key, ts);
+  rocksdb_rs::status::Status s =
+      batch.DeleteRange(column_family, begin_key, end_key, ts);
   if (!s.ok()) {
     return s;
   }
   return Write(opt, &batch);
 }
 
-rocksdb_rs::status::Status DB::Merge(const WriteOptions& opt, ColumnFamilyHandle* column_family,
-                 const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status DB::Merge(const WriteOptions& opt,
+                                     ColumnFamilyHandle* column_family,
+                                     const Slice& key, const Slice& value) {
   WriteBatch batch(0 /* reserved_bytes */, 0 /* max_bytes */,
                    opt.protection_bytes_per_key, 0 /* default_cf_ts_sz */);
   rocksdb_rs::status::Status s = batch.Merge(column_family, key, value);
@@ -2471,8 +2513,10 @@ rocksdb_rs::status::Status DB::Merge(const WriteOptions& opt, ColumnFamilyHandle
   return Write(opt, &batch);
 }
 
-rocksdb_rs::status::Status DB::Merge(const WriteOptions& opt, ColumnFamilyHandle* column_family,
-                 const Slice& key, const Slice& ts, const Slice& value) {
+rocksdb_rs::status::Status DB::Merge(const WriteOptions& opt,
+                                     ColumnFamilyHandle* column_family,
+                                     const Slice& key, const Slice& ts,
+                                     const Slice& value) {
   ColumnFamilyHandle* default_cf = DefaultColumnFamily();
   assert(default_cf);
   const Comparator* const default_cf_ucmp = default_cf->GetComparator();

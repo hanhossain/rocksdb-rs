@@ -66,7 +66,8 @@ rocksdb_rs::status::Status BuildTable(
     SequenceNumber earliest_write_conflict_snapshot,
     SequenceNumber job_snapshot, SnapshotChecker* snapshot_checker,
     bool paranoid_file_checks, InternalStats* internal_stats,
-    rocksdb_rs::io_status::IOStatus* io_status, const std::shared_ptr<IOTracer>& io_tracer,
+    rocksdb_rs::io_status::IOStatus* io_status,
+    const std::shared_ptr<IOTracer>& io_tracer,
     rocksdb_rs::types::BlobFileCreationReason blob_creation_reason,
     const SeqnoToTimeMapping& seqno_to_time_mapping, EventLogger* event_logger,
     int job_id, const Env::IOPriority io_priority,
@@ -103,8 +104,9 @@ rocksdb_rs::status::Status BuildTable(
     range_del_agg->AddTombstones(std::move(range_del_iter));
   }
 
-  std::string fname = static_cast<std::string>(rocksdb_rs::filename::TableFileName(ioptions.cf_paths, meta->fd.GetNumber(),
-                                                                                   meta->fd.GetPathId()));
+  std::string fname =
+      static_cast<std::string>(rocksdb_rs::filename::TableFileName(
+          ioptions.cf_paths, meta->fd.GetNumber(), meta->fd.GetPathId()));
   std::vector<std::string> blob_file_paths;
   std::string file_checksum = kUnknownFileChecksum;
   std::string file_checksum_func_name = kUnknownFileChecksumFuncName;
@@ -146,7 +148,8 @@ rocksdb_rs::status::Status BuildTable(
       bool use_direct_writes = file_options.use_direct_writes;
       TEST_SYNC_POINT_CALLBACK("BuildTable:create_file", &use_direct_writes);
 #endif  // !NDEBUG
-      rocksdb_rs::io_status::IOStatus io_s = NewWritableFile(fs, fname, &file, file_options);
+      rocksdb_rs::io_status::IOStatus io_s =
+          NewWritableFile(fs, fname, &file, file_options);
       assert(s.ok());
       s = io_s.status();
       if (io_status->ok()) {
@@ -357,8 +360,11 @@ rocksdb_rs::status::Status BuildTable(
       file_checksum_func_name = meta->file_checksum_func_name;
       // Set unique_id only if db_id and db_session_id exist
       if (!tboptions.db_id.empty() && !tboptions.db_session_id.empty()) {
-        if (!meta->unique_id.get_sst_internal_unique_id(tboptions.db_id, tboptions.db_session_id,
-                                    meta->fd.GetNumber(), false).ok()) {
+        if (!meta->unique_id
+                 .get_sst_internal_unique_id(tboptions.db_id,
+                                             tboptions.db_session_id,
+                                             meta->fd.GetNumber(), false)
+                 .ok()) {
           // if failed to get unique id, just set it Null
           meta->unique_id = rocksdb_rs::unique_id::UniqueId64x2_null();
         }
@@ -413,7 +419,8 @@ rocksdb_rs::status::Status BuildTable(
         }
         s = it->status();
         if (s.ok() && !output_validator.CompareValidator(file_validator)) {
-          s = rocksdb_rs::status::Status_Corruption("Paranoid checksums do not match");
+          s = rocksdb_rs::status::Status_Corruption(
+              "Paranoid checksums do not match");
         }
       }
     }
@@ -430,15 +437,17 @@ rocksdb_rs::status::Status BuildTable(
     constexpr IODebugContext* dbg = nullptr;
 
     if (table_file_created) {
-      rocksdb_rs::status::Status ignored = fs->DeleteFile(fname, IOOptions(), dbg).status();
+      rocksdb_rs::status::Status ignored =
+          fs->DeleteFile(fname, IOOptions(), dbg).status();
     }
 
     assert(blob_file_additions || blob_file_paths.empty());
 
     if (blob_file_additions) {
       for (const std::string& blob_file_path : blob_file_paths) {
-        rocksdb_rs::status::Status ignored = DeleteDBFile(&db_options, blob_file_path, dbname,
-                                      /*force_bg=*/false, /*force_fg=*/false);
+        rocksdb_rs::status::Status ignored =
+            DeleteDBFile(&db_options, blob_file_path, dbname,
+                         /*force_bg=*/false, /*force_fg=*/false);
         TEST_SYNC_POINT("BuildTable::AfterDeleteFile");
       }
     }
@@ -448,7 +457,8 @@ rocksdb_rs::status::Status BuildTable(
   if (meta->fd.GetFileSize() == 0) {
     fname = "(nil)";
     if (s.ok()) {
-      status_for_listener = rocksdb_rs::status::Status_Aborted("Empty SST file not kept");
+      status_for_listener =
+          rocksdb_rs::status::Status_Aborted("Empty SST file not kept");
     }
   }
   // Output to event logger and fire events.

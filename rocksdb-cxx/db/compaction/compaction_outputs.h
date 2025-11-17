@@ -19,9 +19,10 @@
 namespace rocksdb {
 
 class CompactionOutputs;
-using CompactionFileOpenFunc = std::function<rocksdb_rs::status::Status(CompactionOutputs&)>;
-using CompactionFileCloseFunc =
-    std::function<rocksdb_rs::status::Status(CompactionOutputs&, const rocksdb_rs::status::Status&, const Slice&)>;
+using CompactionFileOpenFunc =
+    std::function<rocksdb_rs::status::Status(CompactionOutputs&)>;
+using CompactionFileCloseFunc = std::function<rocksdb_rs::status::Status(
+    CompactionOutputs&, const rocksdb_rs::status::Status&, const Slice&)>;
 
 // Files produced by subcompaction, most of the functions are used by
 // compaction_job Open/Close compaction file functions.
@@ -106,8 +107,9 @@ class CompactionOutputs {
   }
 
   // Finish the current output file
-  rocksdb_rs::status::Status Finish(const rocksdb_rs::status::Status& intput_status,
-                const SeqnoToTimeMapping& seqno_time_mapping);
+  rocksdb_rs::status::Status Finish(
+      const rocksdb_rs::status::Status& intput_status,
+      const SeqnoToTimeMapping& seqno_time_mapping);
 
   // Update output table properties from table builder
   void UpdateTableProperties() {
@@ -115,8 +117,9 @@ class CompactionOutputs {
         std::make_shared<TableProperties>(GetTableProperties());
   }
 
-  rocksdb_rs::io_status::IOStatus WriterSyncClose(const rocksdb_rs::status::Status& intput_status, SystemClock* clock,
-                           Statistics* statistics, bool use_fsync);
+  rocksdb_rs::io_status::IOStatus WriterSyncClose(
+      const rocksdb_rs::status::Status& intput_status, SystemClock* clock,
+      Statistics* statistics, bool use_fsync);
 
   TableProperties GetTableProperties() {
     return builder_->GetTableProperties();
@@ -177,13 +180,11 @@ class CompactionOutputs {
   // @param next_table_min_key internal key lower bound for the next compaction
   // output.
   // @param full_history_ts_low used for range tombstone garbage collection.
-  rocksdb_rs::status::Status AddRangeDels(const Slice* comp_start_user_key,
-                      const Slice* comp_end_user_key,
-                      CompactionIterationStats& range_del_out_stats,
-                      bool bottommost_level, const InternalKeyComparator& icmp,
-                      SequenceNumber earliest_snapshot,
-                      const Slice& next_table_min_key,
-                      const std::string& full_history_ts_low);
+  rocksdb_rs::status::Status AddRangeDels(
+      const Slice* comp_start_user_key, const Slice* comp_end_user_key,
+      CompactionIterationStats& range_del_out_stats, bool bottommost_level,
+      const InternalKeyComparator& icmp, SequenceNumber earliest_snapshot,
+      const Slice& next_table_min_key, const std::string& full_history_ts_low);
 
   // if the outputs have range delete, range delete is also data
   bool HasRangeDel() const {
@@ -247,15 +248,17 @@ class CompactionOutputs {
 
   // Add current key from compaction_iterator to the output file. If needed
   // close and open new compaction output with the functions provided.
-  rocksdb_rs::status::Status AddToOutput(const CompactionIterator& c_iter,
-                     const CompactionFileOpenFunc& open_file_func,
-                     const CompactionFileCloseFunc& close_file_func);
+  rocksdb_rs::status::Status AddToOutput(
+      const CompactionIterator& c_iter,
+      const CompactionFileOpenFunc& open_file_func,
+      const CompactionFileCloseFunc& close_file_func);
 
   // Close the current output. `open_file_func` is needed for creating new file
   // for range-dels only output file.
-  rocksdb_rs::status::Status CloseOutput(const rocksdb_rs::status::Status& curr_status,
-                     const CompactionFileOpenFunc& open_file_func,
-                     const CompactionFileCloseFunc& close_file_func) {
+  rocksdb_rs::status::Status CloseOutput(
+      const rocksdb_rs::status::Status& curr_status,
+      const CompactionFileOpenFunc& open_file_func,
+      const CompactionFileCloseFunc& close_file_func) {
     rocksdb_rs::status::Status status = curr_status.Clone();
     // handle subcompaction containing only range deletions
     if (status.ok() && !HasBuilder() && !HasOutput() && HasRangeDel()) {

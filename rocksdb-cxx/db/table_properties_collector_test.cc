@@ -65,7 +65,8 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
  public:
   const char* Name() const override { return "RegularKeysStartWithA"; }
 
-  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* properties) override {
     std::string encoded;
     std::string encoded_num_puts;
     std::string encoded_num_deletes;
@@ -87,9 +88,11 @@ class RegularKeysStartWithA : public TablePropertiesCollector {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status AddUserKey(const Slice& user_key, const Slice& /*value*/,
-                    rocksdb_rs::types::EntryType type, SequenceNumber /*seq*/,
-                    uint64_t file_size) override {
+  rocksdb_rs::status::Status AddUserKey(const Slice& user_key,
+                                        const Slice& /*value*/,
+                                        rocksdb_rs::types::EntryType type,
+                                        SequenceNumber /*seq*/,
+                                        uint64_t file_size) override {
     // simply asssume all user keys are not empty.
     if (user_key.data()[0] == 'A') {
       ++count_;
@@ -131,7 +134,8 @@ class RegularKeysStartWithABackwardCompatible
  public:
   const char* Name() const override { return "RegularKeysStartWithA"; }
 
-  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* properties) override {
     std::string encoded;
     PutVarint32(&encoded, count_);
     *properties = UserCollectedProperties{{"TablePropertiesTest", "Rocksdb"},
@@ -139,7 +143,8 @@ class RegularKeysStartWithABackwardCompatible
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status Add(const Slice& user_key, const Slice& /*value*/) override {
+  rocksdb_rs::status::Status Add(const Slice& user_key,
+                                 const Slice& /*value*/) override {
     // simply asssume all user keys are not empty.
     if (user_key.data()[0] == 'A') {
       ++count_;
@@ -159,7 +164,8 @@ class RegularKeysStartWithAInternal : public IntTblPropCollector {
  public:
   const char* Name() const override { return "RegularKeysStartWithA"; }
 
-  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* properties) override {
     std::string encoded;
     PutVarint32(&encoded, count_);
     *properties = UserCollectedProperties{{"TablePropertiesTest", "Rocksdb"},
@@ -167,8 +173,9 @@ class RegularKeysStartWithAInternal : public IntTblPropCollector {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status InternalAdd(const Slice& user_key, const Slice& /*value*/,
-                     uint64_t /*file_size*/) override {
+  rocksdb_rs::status::Status InternalAdd(const Slice& user_key,
+                                         const Slice& /*value*/,
+                                         uint64_t /*file_size*/) override {
     // simply asssume all user keys are not empty.
     if (user_key.data()[0] == 'A') {
       ++count_;
@@ -293,8 +300,9 @@ void TestCustomizedTablePropertiesCollector(
 
   std::unique_ptr<TableProperties> props;
   const ReadOptions read_options;
-  rocksdb_rs::status::Status s = ReadTableProperties(fake_file_reader.get(), fwf->contents().size(),
-                                 magic_number, ioptions, read_options, &props);
+  rocksdb_rs::status::Status s =
+      ReadTableProperties(fake_file_reader.get(), fwf->contents().size(),
+                          magic_number, ioptions, read_options, &props);
   ASSERT_OK(s);
 
   auto user_collected = props->user_collected_properties;

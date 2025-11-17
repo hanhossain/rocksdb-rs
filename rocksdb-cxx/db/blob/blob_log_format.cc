@@ -28,30 +28,35 @@ void BlobLogHeader::EncodeTo(std::string* dst) {
 rocksdb_rs::status::Status BlobLogHeader::DecodeFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob log header";
   if (src.size() != BlobLogHeader::kSize) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
-                              "Unexpected blob file header size");
+    return rocksdb_rs::status::Status_Corruption(
+        kErrorMessage, "Unexpected blob file header size");
   }
   uint32_t magic_number;
   unsigned char flags;
-  if (!rocksdb_rs::coding::GetFixed32(src, magic_number) || !rocksdb_rs::coding::GetFixed32(src, version) ||
+  if (!rocksdb_rs::coding::GetFixed32(src, magic_number) ||
+      !rocksdb_rs::coding::GetFixed32(src, version) ||
       !rocksdb_rs::coding::GetFixed32(src, column_family_id)) {
     return rocksdb_rs::status::Status_Corruption(
         kErrorMessage,
         "Error decoding magic number, version and column family id");
   }
   if (magic_number != kMagicNumber) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Magic number mismatch");
+    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
+                                                 "Magic number mismatch");
   }
   if (version != kVersion1) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Unknown header version");
+    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
+                                                 "Unknown header version");
   }
   flags = src.data()[0];
-  compression = static_cast<rocksdb_rs::compression_type::CompressionType>(src.data()[1]);
+  compression =
+      static_cast<rocksdb_rs::compression_type::CompressionType>(src.data()[1]);
   has_ttl = (flags & 1) == 1;
   src.remove_prefix(2);
   if (!rocksdb_rs::coding::GetFixed64(src, expiration_range.first) ||
       !rocksdb_rs::coding::GetFixed64(src, expiration_range.second)) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Error decoding expiration range");
+    return rocksdb_rs::status::Status_Corruption(
+        kErrorMessage, "Error decoding expiration range");
   }
   return rocksdb_rs::status::Status_OK();
 }
@@ -72,20 +77,24 @@ void BlobLogFooter::EncodeTo(std::string* dst) {
 rocksdb_rs::status::Status BlobLogFooter::DecodeFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob log footer";
   if (src.size() != BlobLogFooter::kSize) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
-                              "Unexpected blob file footer size");
+    return rocksdb_rs::status::Status_Corruption(
+        kErrorMessage, "Unexpected blob file footer size");
   }
   uint32_t src_crc = 0;
   src_crc = crc32c::Value(src.data(), BlobLogFooter::kSize - sizeof(uint32_t));
   src_crc = crc32c::Mask(src_crc);
   uint32_t magic_number = 0;
-  if (!rocksdb_rs::coding::GetFixed32(src, magic_number) || !rocksdb_rs::coding::GetFixed64(src, blob_count) ||
+  if (!rocksdb_rs::coding::GetFixed32(src, magic_number) ||
+      !rocksdb_rs::coding::GetFixed64(src, blob_count) ||
       !rocksdb_rs::coding::GetFixed64(src, expiration_range.first) ||
-      !rocksdb_rs::coding::GetFixed64(src, expiration_range.second) || !rocksdb_rs::coding::GetFixed32(src, crc)) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Error decoding content");
+      !rocksdb_rs::coding::GetFixed64(src, expiration_range.second) ||
+      !rocksdb_rs::coding::GetFixed32(src, crc)) {
+    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
+                                                 "Error decoding content");
   }
   if (magic_number != kMagicNumber) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Magic number mismatch");
+    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
+                                                 "Magic number mismatch");
   }
   if (src_crc != crc) {
     return rocksdb_rs::status::Status_Corruption(kErrorMessage, "CRC mismatch");
@@ -112,19 +121,23 @@ void BlobLogRecord::EncodeHeaderTo(std::string* dst) {
 rocksdb_rs::status::Status BlobLogRecord::DecodeHeaderFrom(Slice src) {
   const char* kErrorMessage = "Error while decoding blob record";
   if (src.size() != BlobLogRecord::kHeaderSize) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
-                              "Unexpected blob record header size");
+    return rocksdb_rs::status::Status_Corruption(
+        kErrorMessage, "Unexpected blob record header size");
   }
   uint32_t src_crc = 0;
   src_crc = crc32c::Value(src.data(), BlobLogRecord::kHeaderSize - 8);
   src_crc = crc32c::Mask(src_crc);
-  if (!rocksdb_rs::coding::GetFixed64(src, key_size) || !rocksdb_rs::coding::GetFixed64(src, value_size) ||
-      !rocksdb_rs::coding::GetFixed64(src, expiration) || !rocksdb_rs::coding::GetFixed32(src, header_crc) ||
+  if (!rocksdb_rs::coding::GetFixed64(src, key_size) ||
+      !rocksdb_rs::coding::GetFixed64(src, value_size) ||
+      !rocksdb_rs::coding::GetFixed64(src, expiration) ||
+      !rocksdb_rs::coding::GetFixed32(src, header_crc) ||
       !rocksdb_rs::coding::GetFixed32(src, blob_crc)) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Error decoding content");
+    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
+                                                 "Error decoding content");
   }
   if (src_crc != header_crc) {
-    return rocksdb_rs::status::Status_Corruption(kErrorMessage, "Header CRC mismatch");
+    return rocksdb_rs::status::Status_Corruption(kErrorMessage,
+                                                 "Header CRC mismatch");
   }
   return rocksdb_rs::status::Status_OK();
 }

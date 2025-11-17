@@ -16,14 +16,13 @@
 
 #include "db/log_format.h"
 #include "file/sequence_file_reader.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/options.h"
 #include "rocksdb/slice.h"
 #include "util/compression.h"
 #include "util/hash_containers.h"
 #include "util/udt_util.h"
 #include "util/xxhash.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 class Logger;
@@ -45,7 +44,8 @@ class Reader {
 
     // Some corruption was detected.  "size" is the approximate number
     // of bytes dropped due to the corruption.
-    virtual void Corruption(size_t bytes, const rocksdb_rs::status::Status& status) = 0;
+    virtual void Corruption(size_t bytes,
+                            const rocksdb_rs::status::Status& status) = 0;
   };
 
   // Create a reader that will return log records from "*file".

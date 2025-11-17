@@ -359,8 +359,7 @@ TEST_P(DBTestTailingIterator, TailingIteratorDeletes) {
 
     // make sure we can read all new records using the existing iterator
     int count = 0;
-    for (; iter->Valid(); iter->Next(), ++count)
-      ;
+    for (; iter->Valid(); iter->Next(), ++count);
 
     ASSERT_EQ(count, num_records);
   }
@@ -699,7 +698,6 @@ TEST_P(DBTestTailingIterator, SeekToFirstWithUpperBoundBug) {
 }
 
 }  // namespace rocksdb
-
 
 int main(int argc, char** argv) {
   rocksdb::port::InstallStackTraceHandler();

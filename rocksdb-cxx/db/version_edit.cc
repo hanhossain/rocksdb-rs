@@ -27,9 +27,9 @@ uint64_t PackFileNumberAndPathId(uint64_t number, uint64_t path_id) {
   return number | (path_id * (kFileNumberMask + 1));
 }
 
-rocksdb_rs::status::Status FileMetaData::UpdateBoundaries(const Slice& key, const Slice& value,
-                                      SequenceNumber seqno,
-                                      ValueType value_type) {
+rocksdb_rs::status::Status FileMetaData::UpdateBoundaries(
+    const Slice& key, const Slice& value, SequenceNumber seqno,
+    ValueType value_type) {
   if (value_type == kTypeBlobIndex) {
     BlobIndex blob_index;
     const rocksdb_rs::status::Status s = blob_index.DecodeFrom(value);
@@ -39,7 +39,8 @@ rocksdb_rs::status::Status FileMetaData::UpdateBoundaries(const Slice& key, cons
 
     if (!blob_index.IsInlined() && !blob_index.HasTTL()) {
       if (blob_index.file_number() == kInvalidBlobFileNumber) {
-        return rocksdb_rs::status::Status_Corruption("Invalid blob file number");
+        return rocksdb_rs::status::Status_Corruption(
+            "Invalid blob file number");
       }
 
       if (oldest_blob_file_number == kInvalidBlobFileNumber ||
@@ -216,7 +217,8 @@ bool VersionEdit::EncodeTo(std::string* dst,
     if (has_min_log_number_to_keep_ && !min_log_num_written) {
       PutVarint32(dst, NewFileCustomTag::kMinLogNumberToKeepHack);
       std::string varint_log_number;
-      rocksdb_rs::coding::PutFixed64(varint_log_number, min_log_number_to_keep_);
+      rocksdb_rs::coding::PutFixed64(varint_log_number,
+                                     min_log_number_to_keep_);
       PutLengthPrefixedSlice(dst, Slice(varint_log_number));
       min_log_num_written = true;
     }
@@ -658,7 +660,8 @@ rocksdb_rs::status::Status VersionEdit::DecodeFrom(const Slice& src) {
       case kBlobFileAddition:
       case kBlobFileAddition_DEPRECATED: {
         BlobFileAddition blob_file_addition;
-        const rocksdb_rs::status::Status s = blob_file_addition.DecodeFrom(&input);
+        const rocksdb_rs::status::Status s =
+            blob_file_addition.DecodeFrom(&input);
         if (!s.ok()) {
           return s.Clone();
         }
@@ -670,7 +673,8 @@ rocksdb_rs::status::Status VersionEdit::DecodeFrom(const Slice& src) {
       case kBlobFileGarbage:
       case kBlobFileGarbage_DEPRECATED: {
         BlobFileGarbage blob_file_garbage;
-        const rocksdb_rs::status::Status s = blob_file_garbage.DecodeFrom(&input);
+        const rocksdb_rs::status::Status s =
+            blob_file_garbage.DecodeFrom(&input);
         if (!s.ok()) {
           return s.Clone();
         }
@@ -893,7 +897,8 @@ std::string VersionEdit::DebugString(bool hex_key) const {
       r.append(std::string(id.to_internal_human_string()));
       r.append(" public_unique_id: ");
       InternalUniqueIdToExternal(id.as_unique_id_ptr());
-      r.append(std::string(rocksdb_rs::unique_id::UniqueIdToHumanString(*id.encode_bytes())));
+      r.append(std::string(
+          rocksdb_rs::unique_id::UniqueIdToHumanString(*id.encode_bytes())));
     }
     r.append(" tail size: ");
     AppendNumberTo(&r, f.tail_size);

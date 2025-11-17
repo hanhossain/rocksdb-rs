@@ -223,7 +223,8 @@ TEST_F(DBBasicTest, CompactedDB) {
   options.write_buffer_size = kFileSize;
   options.target_file_size_base = kFileSize;
   options.max_bytes_for_level_base = 1 << 30;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Reopen(options);
   // 1 L0 file, use CompactedDB if max_open_files = -1
   ASSERT_OK(Put("aaa", DummyString(kFileSize / 2, '1')));
@@ -353,7 +354,8 @@ TEST_F(DBBasicTest, LevelLimitReopen) {
 
   options.num_levels = 1;
   options.max_bytes_for_level_multiplier_additional.resize(1, 1);
-  rocksdb_rs::status::Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status s =
+      TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ(s.IsInvalidArgument(), true);
   ASSERT_EQ(*s.ToString(),
             "Invalid argument: db has more levels than options.num_levels");
@@ -600,7 +602,8 @@ TEST_F(DBBasicTest, IdentityAcrossRestarts) {
   constexpr size_t kMinIdSize = 10;
   do {
     for (bool with_manifest : {false, true}) {
-      std::string idfilename = static_cast<std::string>(IdentityFileName(dbname_));
+      std::string idfilename =
+          static_cast<std::string>(IdentityFileName(dbname_));
       std::string id1, tmp;
       ASSERT_OK(db_->GetDbIdentity(id1));
       ASSERT_GE(id1.size(), kMinIdSize);
@@ -765,7 +768,6 @@ TEST_F(DBBasicTest, Snapshot) {
     ASSERT_EQ("1v4", Get(1, "foo"));
   } while (ChangeOptions());
 }
-
 
 class DBBasicMultiConfigs : public DBBasicTest,
                             public ::testing::WithParamInterface<int> {
@@ -1012,7 +1014,8 @@ TEST_F(DBBasicTest, MultiGetSimple) {
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
 
     get_perf_context()->Reset();
-    rust::Vec<rocksdb_rs::status::Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
+    rust::Vec<rocksdb_rs::status::Status> s =
+        db_->MultiGet(ReadOptions(), cfs, keys, &values);
     ASSERT_EQ(values.size(), keys.size());
     ASSERT_EQ(values[0], "v1");
     ASSERT_EQ(values[1], "v2");
@@ -1038,7 +1041,8 @@ TEST_F(DBBasicTest, MultiGetEmpty) {
     std::vector<Slice> keys;
     std::vector<std::string> values;
     std::vector<ColumnFamilyHandle*> cfs;
-    rust::Vec<rocksdb_rs::status::Status> s = db_->MultiGet(ReadOptions(), cfs, keys, &values);
+    rust::Vec<rocksdb_rs::status::Status> s =
+        db_->MultiGet(ReadOptions(), cfs, keys, &values);
     ASSERT_EQ(s.size(), 0U);
 
     // Empty Database, Empty Key Set
@@ -1166,8 +1170,8 @@ class TestEnv : public EnvWrapper {
 
   int GetCloseCount() { return close_count; }
 
-  rocksdb_rs::status::Status NewLogger(const std::string& /*fname*/,
-                   std::shared_ptr<Logger>* result) override {
+  rocksdb_rs::status::Status NewLogger(
+      const std::string& /*fname*/, std::shared_ptr<Logger>* result) override {
     result->reset(new TestLogger(this));
     return rocksdb_rs::status::Status_OK();
   }
@@ -1585,7 +1589,8 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedSimpleUnsorted) {
     std::vector<Slice> keys({"no_key", "k5", "k4", "k3", "k2", "k1"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s =
+        rocksdb_rs::status::Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.async_io = std::get<1>(GetParam());
@@ -1643,7 +1648,8 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedSortedMultiFile) {
     std::vector<Slice> keys({"k1", "k2", "k3", "k4", "k5", "no_key"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s =
+        rocksdb_rs::status::Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.async_io = std::get<1>(GetParam());
@@ -1709,7 +1715,8 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedDuplicateKeys) {
   std::vector<Slice> keys({"k8", "k8", "k8", "k4", "k4", "k1", "k3"});
   std::vector<PinnableSlice> values(keys.size());
   std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-  rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> s =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   ReadOptions ro;
   ro.async_io = std::get<1>(GetParam());
@@ -1938,7 +1945,8 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeInMemory) {
   ASSERT_OK(Put(1, "k6", "v_6"));
   std::vector<Slice> keys = {"k1", "k2", "k3", "k4", "k5", "k6"};
   std::vector<PinnableSlice> values(keys.size());
-  rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> s =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
   std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
 
   get_perf_context()->Reset();
@@ -2008,7 +2016,8 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSize) {
                              "k8", "k9", "no_key"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s =
+        rocksdb_rs::status::Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     ro.value_size_soft_limit = 20;
@@ -2125,7 +2134,8 @@ TEST_P(DBMultiGetTestWithParam, MultiGetBatchedValueSizeMultiLevelMerge) {
   }
 
   std::vector<PinnableSlice> values(keys_str.size());
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys_str.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys_str.size());
   ReadOptions read_options;
   read_options.verify_checksums = true;
   read_options.value_size_soft_limit = 380;
@@ -2250,8 +2260,7 @@ class DBMultiGetAsyncIOTest : public DBBasicTest,
     // Warm up the block cache so we don't need to use the IO uring
     Iterator* iter = dbfull()->NewIterator(ReadOptions());
     for (iter->SeekToFirst(); iter->Valid() && iter->status().ok();
-         iter->Next())
-      ;
+         iter->Next());
     EXPECT_OK(iter->status());
     delete iter;
 #endif  // ROCKSDB_IOURING_PRESENT
@@ -2373,7 +2382,8 @@ TEST_P(DBMultiGetAsyncIOTest, GetFromL1Error) {
         // Fail the last table reader open, which is the 6th SST file
         // since 3 overlapping L0 files + 3 L1 files containing the keys
         if (count == 6) {
-          rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
+          rocksdb_rs::status::Status* s =
+              static_cast<rocksdb_rs::status::Status*>(status);
           *s = rocksdb_rs::status::Status_IOError();
         }
       });
@@ -2666,7 +2676,8 @@ TEST_F(DBBasicTest, MultiGetStats) {
   std::vector<Slice> keys(total_keys);
   static size_t kMultiGetBatchSize = 100;
   std::vector<PinnableSlice> values(kMultiGetBatchSize);
-  rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(kMultiGetBatchSize);
+  rust::Vec<rocksdb_rs::status::Status> s =
+      rocksdb_rs::status::Status_new().create_vec(kMultiGetBatchSize);
   ReadOptions read_opts;
 
   Random rnd(309);
@@ -2834,7 +2845,8 @@ TEST_P(DBMultiGetRowCacheTest, MultiGetBatched) {
     std::vector<Slice> keys({"no_key", "k5", "k4", "k3", "k1"});
     std::vector<PinnableSlice> values(keys.size());
     std::vector<ColumnFamilyHandle*> cfs(keys.size(), handles_[1]);
-    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_new().create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s =
+        rocksdb_rs::status::Status_new().create_vec(keys.size());
 
     ReadOptions ro;
     bool use_snapshots = GetParam();
@@ -2995,7 +3007,8 @@ TEST_F(DBBasicTest, MultiGetIOBufferOverrun) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3090,7 +3103,8 @@ TEST_F(DBBasicTest, LastSstFileNotInManifest) {
 
   // Manually add a sst file.
   constexpr uint64_t kSstFileNumber = 100;
-  const std::string kSstFile = static_cast<std::string>(MakeTableFileName(dbname_, kSstFileNumber));
+  const std::string kSstFile =
+      static_cast<std::string>(MakeTableFileName(dbname_, kSstFileNumber));
   ASSERT_OK(WriteStringToFile(env_, /* data = */ "bad sst file content",
                               /* fname = */ kSstFile,
                               /* should_sync = */ true));
@@ -3244,7 +3258,8 @@ TEST_F(DBBasicTest, RecoverWithNoManifest) {
     for (const auto& file : files) {
       uint64_t number = 0;
       rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kWalFile;
-      if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kDescriptorFile) {
+      if (ParseFileName(file, &number, &type) &&
+          type == rocksdb_rs::types::FileType::kDescriptorFile) {
         ASSERT_OK(env_->DeleteFile(dbname_ + "/" + file));
       }
     }
@@ -3455,18 +3470,22 @@ class DBBasicTestMultiGet : public DBTestBase {
     BlockBasedTableOptions table_options;
 
     if (compression_enabled_) {
-      std::vector<rocksdb_rs::compression_type::CompressionType> compression_types;
+      std::vector<rocksdb_rs::compression_type::CompressionType>
+          compression_types;
       compression_types = GetSupportedCompressions();
       // Not every platform may have compression libraries available, so
       // dynamically pick based on what's available
-      rocksdb_rs::compression_type::CompressionType tmp_type = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      rocksdb_rs::compression_type::CompressionType tmp_type =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
       for (auto c_type : compression_types) {
-        if (c_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+        if (c_type !=
+            rocksdb_rs::compression_type::CompressionType::kNoCompression) {
           tmp_type = c_type;
           break;
         }
       }
-      if (tmp_type != rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+      if (tmp_type !=
+          rocksdb_rs::compression_type::CompressionType::kNoCompression) {
         options.compression = tmp_type;
       } else {
         compression_enabled_ = false;
@@ -3483,7 +3502,8 @@ class DBBasicTestMultiGet : public DBTestBase {
         new MyFlushBlockPolicyFactory());
     options.table_factory.reset(NewBlockBasedTableFactory(table_options));
     if (!compression_enabled_) {
-      options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      options.compression =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
     } else {
       options.compression_opts.parallel_threads = compression_parallel_threads;
     }
@@ -3505,7 +3525,8 @@ class DBBasicTestMultiGet : public DBTestBase {
         // and the resultant data block will not be compressed
         values_.emplace_back(rnd.RandomString(128) + zero_str);
         assert(((num_cfs == 1) ? Put(Key(i), values_[i])
-                               : Put(cf, Key(i), values_[i])).eq(rocksdb_rs::status::Status_OK()));
+                               : Put(cf, Key(i), values_[i]))
+                   .eq(rocksdb_rs::status::Status_OK()));
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3518,7 +3539,8 @@ class DBBasicTestMultiGet : public DBTestBase {
         uncompressable_values_.emplace_back(rnd.RandomString(256) + '\0');
         std::string tmp_key = "a" + Key(i);
         assert(((num_cfs == 1) ? Put(tmp_key, uncompressable_values_[i])
-                               : Put(cf, tmp_key, uncompressable_values_[i])).eq(rocksdb_rs::status::Status_OK()));
+                               : Put(cf, tmp_key, uncompressable_values_[i]))
+                   .eq(rocksdb_rs::status::Status_OK()));
       }
       if (num_cfs == 1) {
         EXPECT_OK(Flush());
@@ -3617,10 +3639,10 @@ class DBBasicTestMultiGet : public DBTestBase {
 
     const char* Name() const override { return "MyBlockCache"; }
 
-    rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
-                  const CacheItemHelper* helper, size_t charge,
-                  Handle** handle = nullptr,
-                  Priority priority = Priority::LOW) override {
+    rocksdb_rs::status::Status Insert(
+        const Slice& key, Cache::ObjectPtr value, const CacheItemHelper* helper,
+        size_t charge, Handle** handle = nullptr,
+        Priority priority = Priority::LOW) override {
       num_inserts_++;
       return target_->Insert(key, value, helper, charge, handle, priority);
     }
@@ -3684,7 +3706,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGet) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3802,14 +3825,15 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetDirectIO) {
     static const char* kClassName() { return "FakeDirectIOEnv"; }
     const char* Name() const override { return kClassName(); }
 
-    rocksdb_rs::status::Status NewRandomAccessFile(const std::string& fname,
-                               std::unique_ptr<RandomAccessFile>* result,
-                               const EnvOptions& options) override {
+    rocksdb_rs::status::Status NewRandomAccessFile(
+        const std::string& fname, std::unique_ptr<RandomAccessFile>* result,
+        const EnvOptions& options) override {
       std::unique_ptr<RandomAccessFile> file;
       assert(options.use_direct_reads);
       EnvOptions opts = options;
       opts.use_direct_reads = false;
-      rocksdb_rs::status::Status s = target()->NewRandomAccessFile(fname, &file, opts);
+      rocksdb_rs::status::Status s =
+          target()->NewRandomAccessFile(fname, &file, opts);
       if (!s.ok()) {
         return s;
       }
@@ -3864,7 +3888,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetDirectIO) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3920,7 +3945,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "RetrieveMultipleBlocks:VerifyChecksum", [&](void* status) {
-        rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
+        rocksdb_rs::status::Status* s =
+            static_cast<rocksdb_rs::status::Status*>(status);
         read_count++;
         if (read_count == 2) {
           *s = rocksdb_rs::status::Status_Corruption();
@@ -3933,7 +3959,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithChecksumMismatch) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -3956,7 +3983,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "TableCache::MultiGet:FindTable", [&](void* status) {
-        rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(status);
+        rocksdb_rs::status::Status* s =
+            static_cast<rocksdb_rs::status::Status*>(status);
         *s = rocksdb_rs::status::Status_IOError();
       });
   // DB open will create table readers unless we reduce the table cache
@@ -3980,7 +4008,8 @@ TEST_P(DBBasicTestWithParallelIO, MultiGetWithMissingFile) {
   keys.emplace_back(Slice(key_data.back()));
   key_data.emplace_back(Key(50));
   keys.emplace_back(Slice(key_data.back()));
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(keys.size());
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(keys.size());
 
   dbfull()->MultiGet(ro, dbfull()->DefaultColumnFamily(), keys.size(),
                      keys.data(), values.data(), statuses.data(), true);
@@ -4009,17 +4038,20 @@ class DeadlineRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
                            std::unique_ptr<FSRandomAccessFile>& file)
       : FSRandomAccessFileOwnerWrapper(std::move(file)), fs_(fs) {}
 
-  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t len, const IOOptions& opts,
-                Slice* result, char* scratch,
-                IODebugContext* dbg) const override;
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t len,
+                                       const IOOptions& opts, Slice* result,
+                                       char* scratch,
+                                       IODebugContext* dbg) const override;
 
-  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs, size_t num_reqs,
-                     const IOOptions& options, IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus MultiRead(FSReadRequest* reqs,
+                                            size_t num_reqs,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override;
 
-  rocksdb_rs::io_status::IOStatus ReadAsync(FSReadRequest& req, const IOOptions& opts,
-                     std::function<void(const FSReadRequest&, void*)> cb,
-                     void* cb_arg, void** io_handle, IOHandleDeleter* del_fn,
-                     IODebugContext* dbg) override;
+  rocksdb_rs::io_status::IOStatus ReadAsync(
+      FSReadRequest& req, const IOOptions& opts,
+      std::function<void(const FSReadRequest&, void*)> cb, void* cb_arg,
+      void** io_handle, IOHandleDeleter* del_fn, IODebugContext* dbg) override;
 
  private:
   DeadlineFS& fs_;
@@ -4044,12 +4076,13 @@ class DeadlineFS : public FileSystemWrapper {
   static const char* kClassName() { return "DeadlineFileSystem"; }
   const char* Name() const override { return kClassName(); }
 
-  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
-                               const FileOptions& opts,
-                               std::unique_ptr<FSRandomAccessFile>* result,
-                               IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(
+      const std::string& fname, const FileOptions& opts,
+      std::unique_ptr<FSRandomAccessFile>* result,
+      IODebugContext* dbg) override {
     std::unique_ptr<FSRandomAccessFile> file;
-    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, opts, &file, dbg);
+    rocksdb_rs::io_status::IOStatus s =
+        target()->NewRandomAccessFile(fname, opts, &file, dbg);
     EXPECT_OK(s);
     result->reset(new DeadlineRandomAccessFile(*this, file));
 
@@ -4141,10 +4174,9 @@ class DeadlineFS : public FileSystemWrapper {
   bool error_on_delay_;
 };
 
-rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::Read(uint64_t offset, size_t len,
-                                        const IOOptions& opts, Slice* result,
-                                        char* scratch,
-                                        IODebugContext* dbg) const {
+rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::Read(
+    uint64_t offset, size_t len, const IOOptions& opts, Slice* result,
+    char* scratch, IODebugContext* dbg) const {
   const std::chrono::microseconds deadline = fs_.GetDeadline();
   const std::chrono::microseconds io_timeout = fs_.GetIOTimeout();
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
@@ -4181,10 +4213,9 @@ rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::ReadAsync(
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::MultiRead(FSReadRequest* reqs,
-                                             size_t num_reqs,
-                                             const IOOptions& options,
-                                             IODebugContext* dbg) {
+rocksdb_rs::io_status::IOStatus DeadlineRandomAccessFile::MultiRead(
+    FSReadRequest* reqs, size_t num_reqs, const IOOptions& options,
+    IODebugContext* dbg) {
   const std::chrono::microseconds deadline = fs_.GetDeadline();
   const std::chrono::microseconds io_timeout = fs_.GetIOTimeout();
   rocksdb_rs::io_status::IOStatus s = rocksdb_rs::io_status::IOStatus_new();
@@ -4212,7 +4243,8 @@ class DBBasicTestMultiGetDeadline : public DBBasicTestMultiGet,
             true /*compression enabled*/, true /*ReadOptions.fill_cache*/,
             1 /*# of parallel compression threads*/) {}
 
-  inline void CheckStatus(const rust::Vec<rocksdb_rs::status::Status>& statuses, size_t num_ok) {
+  inline void CheckStatus(const rust::Vec<rocksdb_rs::status::Status>& statuses,
+                          size_t num_ok) {
     for (size_t i = 0; i < statuses.size(); ++i) {
       if (i < num_ok) {
         EXPECT_OK(statuses[i]);
@@ -4266,7 +4298,8 @@ TEST_P(DBBasicTestMultiGetDeadline, MultiGetDeadlineExceeded) {
   // Delay the first IO
   fs->SetDelayTrigger(ro.deadline, ro.io_timeout, 0);
 
-  rust::Vec<rocksdb_rs::status::Status> statuses = dbfull()->MultiGet(ro, cfs, keys, &values);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      dbfull()->MultiGet(ro, cfs, keys, &values);
   // The first key is successful because we check after the lookup, but
   // subsequent keys fail due to deadline exceeded
   CheckStatus(statuses, 1);

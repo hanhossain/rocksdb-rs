@@ -35,7 +35,8 @@ void WriteBlobFile(const ImmutableOptions& immutable_options,
                    const ExpirationRange& expiration_range_header,
                    const ExpirationRange& expiration_range_footer,
                    uint64_t blob_file_number, const std::vector<Slice>& keys,
-                   const std::vector<Slice>& blobs, rocksdb_rs::compression_type::CompressionType compression,
+                   const std::vector<Slice>& blobs,
+                   rocksdb_rs::compression_type::CompressionType compression,
                    std::vector<uint64_t>& blob_offsets,
                    std::vector<uint64_t>& blob_sizes) {
   assert(!immutable_options.cf_paths.empty());
@@ -44,8 +45,8 @@ void WriteBlobFile(const ImmutableOptions& immutable_options,
   assert(num == blob_offsets.size());
   assert(num == blob_sizes.size());
 
-  const std::string blob_file_path =
-      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
+  const std::string blob_file_path = static_cast<std::string>(
+      BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
   std::unique_ptr<FSWritableFile> file;
   ASSERT_OK(NewWritableFile(immutable_options.fs.get(), blob_file_path, &file,
                             FileOptions()));
@@ -68,7 +69,8 @@ void WriteBlobFile(const ImmutableOptions& immutable_options,
 
   std::vector<std::string> compressed_blobs(num);
   std::vector<Slice> blobs_to_write(num);
-  if (rocksdb_rs::compression_type::CompressionType::kNoCompression == compression) {
+  if (rocksdb_rs::compression_type::CompressionType::kNoCompression ==
+      compression) {
     for (size_t i = 0; i < num; ++i) {
       blobs_to_write[i] = blobs[i];
       blob_sizes[i] = blobs[i].size();
@@ -114,7 +116,8 @@ void WriteBlobFile(const ImmutableOptions& immutable_options,
                    const ExpirationRange& expiration_range_header,
                    const ExpirationRange& expiration_range_footer,
                    uint64_t blob_file_number, const Slice& key,
-                   const Slice& blob, rocksdb_rs::compression_type::CompressionType compression,
+                   const Slice& blob,
+                   rocksdb_rs::compression_type::CompressionType compression,
                    uint64_t* blob_offset, uint64_t* blob_size) {
   std::vector<Slice> keys{key};
   std::vector<Slice> blobs{blob};
@@ -166,7 +169,8 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
   std::vector<uint64_t> blob_sizes(keys.size());
 
   WriteBlobFile(immutable_options, column_family_id, has_ttl, expiration_range,
-                expiration_range, blob_file_number, keys, blobs, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                expiration_range, blob_file_number, keys, blobs,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
                 blob_offsets, blob_sizes);
 
   constexpr HistogramImpl* blob_file_read_hist = nullptr;
@@ -188,9 +192,10 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_OK(reader->GetBlob(read_options, keys[0], blob_offsets[0],
-                              blob_sizes[0], rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer,
-                              allocator, &value, &bytes_read));
+    ASSERT_OK(reader->GetBlob(
+        read_options, keys[0], blob_offsets[0], blob_sizes[0],
+        rocksdb_rs::compression_type::CompressionType::kNoCompression,
+        prefetch_buffer, allocator, &value, &bytes_read));
     ASSERT_NE(value, nullptr);
     ASSERT_EQ(value->data(), blobs[0]);
     ASSERT_EQ(bytes_read, blob_sizes[0]);
@@ -199,15 +204,17 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     bytes_read = 0;
     size_t total_size = 0;
 
-    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf =
+        rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
 
     for (size_t i = 0; i < num_blobs; ++i) {
-      requests_buf[i] =
-          BlobReadRequest(keys[i], blob_offsets[i], blob_sizes[i],
-                          rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr, &statuses_buf[i]);
+      requests_buf[i] = BlobReadRequest(
+          keys[i], blob_offsets[i], blob_sizes[i],
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          nullptr, &statuses_buf[i]);
       blob_reqs.emplace_back(&requests_buf[i], std::unique_ptr<BlobContents>());
     }
 
@@ -230,9 +237,10 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_OK(reader->GetBlob(read_options, keys[1], blob_offsets[1],
-                              blob_sizes[1], rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer,
-                              allocator, &value, &bytes_read));
+    ASSERT_OK(reader->GetBlob(
+        read_options, keys[1], blob_offsets[1], blob_sizes[1],
+        rocksdb_rs::compression_type::CompressionType::kNoCompression,
+        prefetch_buffer, allocator, &value, &bytes_read));
     ASSERT_NE(value, nullptr);
     ASSERT_EQ(value->data(), blobs[1]);
 
@@ -247,11 +255,13 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_TRUE(reader
-                    ->GetBlob(read_options, keys[0], blob_offsets[0] - 1,
-                              blob_sizes[0], rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer,
-                              allocator, &value, &bytes_read)
-                    .IsCorruption());
+    ASSERT_TRUE(
+        reader
+            ->GetBlob(
+                read_options, keys[0], blob_offsets[0] - 1, blob_sizes[0],
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                prefetch_buffer, allocator, &value, &bytes_read)
+            .IsCorruption());
     ASSERT_EQ(value, nullptr);
     ASSERT_EQ(bytes_read, 0);
   }
@@ -261,11 +271,13 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_TRUE(reader
-                    ->GetBlob(read_options, keys[2], blob_offsets[2] + 1,
-                              blob_sizes[2], rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer,
-                              allocator, &value, &bytes_read)
-                    .IsCorruption());
+    ASSERT_TRUE(
+        reader
+            ->GetBlob(
+                read_options, keys[2], blob_offsets[2] + 1, blob_sizes[2],
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                prefetch_buffer, allocator, &value, &bytes_read)
+            .IsCorruption());
     ASSERT_EQ(value, nullptr);
     ASSERT_EQ(bytes_read, 0);
   }
@@ -275,11 +287,12 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_TRUE(reader
-                    ->GetBlob(read_options, keys[0], blob_offsets[0],
-                              blob_sizes[0], rocksdb_rs::compression_type::CompressionType::kZSTD, prefetch_buffer, allocator,
-                              &value, &bytes_read)
-                    .IsCorruption());
+    ASSERT_TRUE(
+        reader
+            ->GetBlob(read_options, keys[0], blob_offsets[0], blob_sizes[0],
+                      rocksdb_rs::compression_type::CompressionType::kZSTD,
+                      prefetch_buffer, allocator, &value, &bytes_read)
+            .IsCorruption());
     ASSERT_EQ(value, nullptr);
     ASSERT_EQ(bytes_read, 0);
   }
@@ -290,13 +303,15 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_TRUE(reader
-                    ->GetBlob(read_options, shorter_key,
-                              blob_offsets[0] -
-                                  (keys[0].size() - sizeof(shorter_key) + 1),
-                              blob_sizes[0], rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer,
-                              allocator, &value, &bytes_read)
-                    .IsCorruption());
+    ASSERT_TRUE(
+        reader
+            ->GetBlob(
+                read_options, shorter_key,
+                blob_offsets[0] - (keys[0].size() - sizeof(shorter_key) + 1),
+                blob_sizes[0],
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                prefetch_buffer, allocator, &value, &bytes_read)
+            .IsCorruption());
     ASSERT_EQ(value, nullptr);
     ASSERT_EQ(bytes_read, 0);
 
@@ -313,15 +328,17 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
         blob_offsets[1] - (keys[1].size() - key_refs[1].get().size()),
         blob_offsets[2]};
 
-    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf =
+        rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
 
     for (size_t i = 0; i < num_blobs; ++i) {
-      requests_buf[i] =
-          BlobReadRequest(key_refs[i], offsets[i], blob_sizes[i],
-                          rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr, &statuses_buf[i]);
+      requests_buf[i] = BlobReadRequest(
+          key_refs[i], offsets[i], blob_sizes[i],
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          nullptr, &statuses_buf[i]);
       blob_reqs.emplace_back(&requests_buf[i], std::unique_ptr<BlobContents>());
     }
 
@@ -342,11 +359,13 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_TRUE(reader
-                    ->GetBlob(read_options, incorrect_key, blob_offsets[0],
-                              blob_sizes[0], rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer,
-                              allocator, &value, &bytes_read)
-                    .IsCorruption());
+    ASSERT_TRUE(
+        reader
+            ->GetBlob(
+                read_options, incorrect_key, blob_offsets[0], blob_sizes[0],
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                prefetch_buffer, allocator, &value, &bytes_read)
+            .IsCorruption());
     ASSERT_EQ(value, nullptr);
     ASSERT_EQ(bytes_read, 0);
 
@@ -358,15 +377,17 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     Slice wrong_key_slice(incorrect_key, sizeof(incorrect_key) - 1);
     key_refs[2] = std::cref(wrong_key_slice);
 
-    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf =
+        rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
 
     for (size_t i = 0; i < num_blobs; ++i) {
-      requests_buf[i] =
-          BlobReadRequest(key_refs[i], blob_offsets[i], blob_sizes[i],
-                          rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr, &statuses_buf[i]);
+      requests_buf[i] = BlobReadRequest(
+          key_refs[i], blob_offsets[i], blob_sizes[i],
+          rocksdb_rs::compression_type::CompressionType::kNoCompression,
+          nullptr, &statuses_buf[i]);
       blob_reqs.emplace_back(&requests_buf[i], std::unique_ptr<BlobContents>());
     }
 
@@ -386,11 +407,13 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_TRUE(reader
-                    ->GetBlob(read_options, keys[1], blob_offsets[1],
-                              blob_sizes[1] + 1, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                              prefetch_buffer, allocator, &value, &bytes_read)
-                    .IsCorruption());
+    ASSERT_TRUE(
+        reader
+            ->GetBlob(
+                read_options, keys[1], blob_offsets[1], blob_sizes[1] + 1,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                prefetch_buffer, allocator, &value, &bytes_read)
+            .IsCorruption());
     ASSERT_EQ(value, nullptr);
     ASSERT_EQ(bytes_read, 0);
 
@@ -400,18 +423,22 @@ TEST_F(BlobFileReaderTest, CreateReaderAndGetBlob) {
       key_refs.emplace_back(std::cref(key_ref));
     }
 
-    rust::Vec<rocksdb_rs::status::Status> statuses_buf = rocksdb_rs::status::Status_new().create_vec(num_blobs);
+    rust::Vec<rocksdb_rs::status::Status> statuses_buf =
+        rocksdb_rs::status::Status_new().create_vec(num_blobs);
     std::array<BlobReadRequest, num_blobs> requests_buf;
 
-    requests_buf[0] =
-        BlobReadRequest(key_refs[0], blob_offsets[0], blob_sizes[0],
-                        rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr, &statuses_buf[0]);
-    requests_buf[1] =
-        BlobReadRequest(key_refs[1], blob_offsets[1], blob_sizes[1] + 1,
-                        rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr, &statuses_buf[1]);
-    requests_buf[2] =
-        BlobReadRequest(key_refs[2], blob_offsets[2], blob_sizes[2],
-                        rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr, &statuses_buf[2]);
+    requests_buf[0] = BlobReadRequest(
+        key_refs[0], blob_offsets[0], blob_sizes[0],
+        rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr,
+        &statuses_buf[0]);
+    requests_buf[1] = BlobReadRequest(
+        key_refs[1], blob_offsets[1], blob_sizes[1] + 1,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr,
+        &statuses_buf[1]);
+    requests_buf[2] = BlobReadRequest(
+        key_refs[2], blob_offsets[2], blob_sizes[2],
+        rocksdb_rs::compression_type::CompressionType::kNoCompression, nullptr,
+        &statuses_buf[2]);
 
     autovector<std::pair<BlobReadRequest*, std::unique_ptr<BlobContents>>>
         blob_reqs;
@@ -452,8 +479,8 @@ TEST_F(BlobFileReaderTest, Malformed) {
     constexpr bool has_ttl = false;
     constexpr ExpirationRange expiration_range;
 
-    const std::string blob_file_path =
-        static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
+    const std::string blob_file_path = static_cast<std::string>(BlobFileName(
+        immutable_options.cf_paths.front().path, blob_file_number));
 
     std::unique_ptr<FSWritableFile> file;
     ASSERT_OK(NewWritableFile(immutable_options.fs.get(), blob_file_path, &file,
@@ -471,8 +498,10 @@ TEST_F(BlobFileReaderTest, Malformed) {
                                   immutable_options.clock, statistics,
                                   blob_file_number, use_fsync, do_flush);
 
-    BlobLogHeader header(column_family_id, rocksdb_rs::compression_type::CompressionType::kNoCompression, has_ttl,
-                         expiration_range);
+    BlobLogHeader header(
+        column_family_id,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression, has_ttl,
+        expiration_range);
 
     ASSERT_OK(blob_log_writer.WriteHeader(header));
   }
@@ -508,7 +537,8 @@ TEST_F(BlobFileReaderTest, TTL) {
   uint64_t blob_size = 0;
 
   WriteBlobFile(immutable_options, column_family_id, has_ttl, expiration_range,
-                expiration_range, blob_file_number, key, blob, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                expiration_range, blob_file_number, key, blob,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
                 &blob_offset, &blob_size);
 
   constexpr HistogramImpl* blob_file_read_hist = nullptr;
@@ -547,8 +577,9 @@ TEST_F(BlobFileReaderTest, ExpirationRangeInHeader) {
 
   WriteBlobFile(immutable_options, column_family_id, has_ttl,
                 expiration_range_header, expiration_range_footer,
-                blob_file_number, key, blob, rocksdb_rs::compression_type::CompressionType::kNoCompression, &blob_offset,
-                &blob_size);
+                blob_file_number, key, blob,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                &blob_offset, &blob_size);
 
   constexpr HistogramImpl* blob_file_read_hist = nullptr;
 
@@ -586,8 +617,9 @@ TEST_F(BlobFileReaderTest, ExpirationRangeInFooter) {
 
   WriteBlobFile(immutable_options, column_family_id, has_ttl,
                 expiration_range_header, expiration_range_footer,
-                blob_file_number, key, blob, rocksdb_rs::compression_type::CompressionType::kNoCompression, &blob_offset,
-                &blob_size);
+                blob_file_number, key, blob,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                &blob_offset, &blob_size);
 
   constexpr HistogramImpl* blob_file_read_hist = nullptr;
 
@@ -622,7 +654,8 @@ TEST_F(BlobFileReaderTest, IncorrectColumnFamily) {
   uint64_t blob_size = 0;
 
   WriteBlobFile(immutable_options, column_family_id, has_ttl, expiration_range,
-                expiration_range, blob_file_number, key, blob, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                expiration_range, blob_file_number, key, blob,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
                 &blob_offset, &blob_size);
 
   constexpr HistogramImpl* blob_file_read_hist = nullptr;
@@ -659,7 +692,8 @@ TEST_F(BlobFileReaderTest, BlobCRCError) {
   uint64_t blob_size = 0;
 
   WriteBlobFile(immutable_options, column_family_id, has_ttl, expiration_range,
-                expiration_range, blob_file_number, key, blob, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                expiration_range, blob_file_number, key, blob,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
                 &blob_offset, &blob_size);
 
   constexpr HistogramImpl* blob_file_read_hist = nullptr;
@@ -686,11 +720,13 @@ TEST_F(BlobFileReaderTest, BlobCRCError) {
   std::unique_ptr<BlobContents> value;
   uint64_t bytes_read = 0;
 
-  ASSERT_TRUE(reader
-                  ->GetBlob(ReadOptions(), key, blob_offset, blob_size,
-                            rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer, allocator, &value,
-                            &bytes_read)
-                  .IsCorruption());
+  ASSERT_TRUE(
+      reader
+          ->GetBlob(
+              ReadOptions(), key, blob_offset, blob_size,
+              rocksdb_rs::compression_type::CompressionType::kNoCompression,
+              prefetch_buffer, allocator, &value, &bytes_read)
+          .IsCorruption());
   ASSERT_EQ(value, nullptr);
   ASSERT_EQ(bytes_read, 0);
 
@@ -722,9 +758,11 @@ TEST_F(BlobFileReaderTest, Compression) {
   uint64_t blob_offset = 0;
   uint64_t blob_size = 0;
 
-  WriteBlobFile(immutable_options, column_family_id, has_ttl, expiration_range,
-                expiration_range, blob_file_number, key, blob,
-                rocksdb_rs::compression_type::CompressionType::kSnappyCompression, &blob_offset, &blob_size);
+  WriteBlobFile(
+      immutable_options, column_family_id, has_ttl, expiration_range,
+      expiration_range, blob_file_number, key, blob,
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+      &blob_offset, &blob_size);
 
   constexpr HistogramImpl* blob_file_read_hist = nullptr;
 
@@ -744,9 +782,10 @@ TEST_F(BlobFileReaderTest, Compression) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_OK(reader->GetBlob(read_options, key, blob_offset, blob_size,
-                              rocksdb_rs::compression_type::CompressionType::kSnappyCompression, prefetch_buffer, allocator,
-                              &value, &bytes_read));
+    ASSERT_OK(reader->GetBlob(
+        read_options, key, blob_offset, blob_size,
+        rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+        prefetch_buffer, allocator, &value, &bytes_read));
     ASSERT_NE(value, nullptr);
     ASSERT_EQ(value->data(), blob);
     ASSERT_EQ(bytes_read, blob_size);
@@ -758,9 +797,10 @@ TEST_F(BlobFileReaderTest, Compression) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_OK(reader->GetBlob(read_options, key, blob_offset, blob_size,
-                              rocksdb_rs::compression_type::CompressionType::kSnappyCompression, prefetch_buffer, allocator,
-                              &value, &bytes_read));
+    ASSERT_OK(reader->GetBlob(
+        read_options, key, blob_offset, blob_size,
+        rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+        prefetch_buffer, allocator, &value, &bytes_read));
     ASSERT_NE(value, nullptr);
     ASSERT_EQ(value->data(), blob);
 
@@ -796,9 +836,11 @@ TEST_F(BlobFileReaderTest, UncompressionError) {
   uint64_t blob_offset = 0;
   uint64_t blob_size = 0;
 
-  WriteBlobFile(immutable_options, column_family_id, has_ttl, expiration_range,
-                expiration_range, blob_file_number, key, blob,
-                rocksdb_rs::compression_type::CompressionType::kSnappyCompression, &blob_offset, &blob_size);
+  WriteBlobFile(
+      immutable_options, column_family_id, has_ttl, expiration_range,
+      expiration_range, blob_file_number, key, blob,
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+      &blob_offset, &blob_size);
 
   constexpr HistogramImpl* blob_file_read_hist = nullptr;
 
@@ -825,11 +867,13 @@ TEST_F(BlobFileReaderTest, UncompressionError) {
   std::unique_ptr<BlobContents> value;
   uint64_t bytes_read = 0;
 
-  ASSERT_TRUE(reader
-                  ->GetBlob(ReadOptions(), key, blob_offset, blob_size,
-                            rocksdb_rs::compression_type::CompressionType::kSnappyCompression, prefetch_buffer, allocator,
-                            &value, &bytes_read)
-                  .IsCorruption());
+  ASSERT_TRUE(
+      reader
+          ->GetBlob(
+              ReadOptions(), key, blob_offset, blob_size,
+              rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+              prefetch_buffer, allocator, &value, &bytes_read)
+          .IsCorruption());
   ASSERT_EQ(value, nullptr);
   ASSERT_EQ(bytes_read, 0);
 
@@ -883,12 +927,13 @@ TEST_P(BlobFileReaderIOErrorTest, IOError) {
   uint64_t blob_size = 0;
 
   WriteBlobFile(immutable_options, column_family_id, has_ttl, expiration_range,
-                expiration_range, blob_file_number, key, blob, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                expiration_range, blob_file_number, key, blob,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
                 &blob_offset, &blob_size);
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* /* arg */) {
-    fault_injection_env_->SetFilesystemActive(false,
-                                              rocksdb_rs::status::Status_IOError(sync_point_));
+    fault_injection_env_->SetFilesystemActive(
+        false, rocksdb_rs::status::Status_IOError(sync_point_));
   });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -914,11 +959,13 @@ TEST_P(BlobFileReaderIOErrorTest, IOError) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_TRUE(reader
-                    ->GetBlob(ReadOptions(), key, blob_offset, blob_size,
-                              rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer, allocator,
-                              &value, &bytes_read)
-                    .IsIOError());
+    ASSERT_TRUE(
+        reader
+            ->GetBlob(
+                ReadOptions(), key, blob_offset, blob_size,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                prefetch_buffer, allocator, &value, &bytes_read)
+            .IsIOError());
     ASSERT_EQ(value, nullptr);
     ASSERT_EQ(bytes_read, 0);
   }
@@ -967,7 +1014,8 @@ TEST_P(BlobFileReaderDecodingErrorTest, DecodingError) {
   uint64_t blob_size = 0;
 
   WriteBlobFile(immutable_options, column_family_id, has_ttl, expiration_range,
-                expiration_range, blob_file_number, key, blob, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                expiration_range, blob_file_number, key, blob,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
                 &blob_offset, &blob_size);
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [](void* arg) {
@@ -1002,11 +1050,13 @@ TEST_P(BlobFileReaderDecodingErrorTest, DecodingError) {
     std::unique_ptr<BlobContents> value;
     uint64_t bytes_read = 0;
 
-    ASSERT_TRUE(reader
-                    ->GetBlob(ReadOptions(), key, blob_offset, blob_size,
-                              rocksdb_rs::compression_type::CompressionType::kNoCompression, prefetch_buffer, allocator,
-                              &value, &bytes_read)
-                    .IsCorruption());
+    ASSERT_TRUE(
+        reader
+            ->GetBlob(
+                ReadOptions(), key, blob_offset, blob_size,
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                prefetch_buffer, allocator, &value, &bytes_read)
+            .IsCorruption());
     ASSERT_EQ(value, nullptr);
     ASSERT_EQ(bytes_read, 0);
   }

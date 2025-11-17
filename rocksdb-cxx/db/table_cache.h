@@ -59,12 +59,14 @@ class TableCache {
 
   // Cache interface for table cache
   using CacheInterface =
-      BasicTypedCacheInterface<TableReader, rocksdb_rs::cache::CacheEntryRole::kMisc>;
+      BasicTypedCacheInterface<TableReader,
+                               rocksdb_rs::cache::CacheEntryRole::kMisc>;
   using TypedHandle = CacheInterface::TypedHandle;
 
   // Cache interface for row cache
   using RowCacheInterface =
-      BasicTypedCacheInterface<std::string, rocksdb_rs::cache::CacheEntryRole::kMisc>;
+      BasicTypedCacheInterface<std::string,
+                               rocksdb_rs::cache::CacheEntryRole::kMisc>;
   using RowHandle = RowCacheInterface::TypedHandle;
 
   // Return an iterator for the specified file number (the corresponding
@@ -192,11 +194,10 @@ class TableCache {
       const std::shared_ptr<const SliceTransform>& prefix_extractor = nullptr,
       bool no_io = false);
 
-  rocksdb_rs::status::Status ApproximateKeyAnchors(const ReadOptions& ro,
-                               const InternalKeyComparator& internal_comparator,
-                               const FileMetaData& file_meta,
-                               uint8_t block_protection_bytes_per_key,
-                               std::vector<TableReader::Anchor>& anchors);
+  rocksdb_rs::status::Status ApproximateKeyAnchors(
+      const ReadOptions& ro, const InternalKeyComparator& internal_comparator,
+      const FileMetaData& file_meta, uint8_t block_protection_bytes_per_key,
+      std::vector<TableReader::Anchor>& anchors);
 
   // Return total memory usage of the table reader of the file.
   // 0 if table reader of the file is not loaded.

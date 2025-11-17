@@ -60,10 +60,10 @@ struct SuperVersionContext {
 #endif
   }
 
-  void PushWriteStallNotification(rocksdb_rs::types::WriteStallCondition old_cond,
-                                  rocksdb_rs::types::WriteStallCondition new_cond,
-                                  const std::string& name,
-                                  const ImmutableOptions* ioptions) {
+  void PushWriteStallNotification(
+      rocksdb_rs::types::WriteStallCondition old_cond,
+      rocksdb_rs::types::WriteStallCondition new_cond, const std::string& name,
+      const ImmutableOptions* ioptions) {
 #if !defined(ROCKSDB_DISABLE_STALL_NOTIFICATION)
     WriteStallNotification notif;
     notif.write_stall_info.cf_name = name;

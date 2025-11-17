@@ -78,30 +78,36 @@ class MockTestWritableFile : public FSWritableFileOwnerWrapper {
                        Env::IOPriority io_priority)
       : FSWritableFileOwnerWrapper(std::move(file)),
         write_io_priority_(io_priority) {}
-  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
-                  IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Append(const Slice& data,
+                                         const IOOptions& options,
+                                         IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Append(data, options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Append(const Slice& data, const IOOptions& options,
-                  const DataVerificationInfo& verification_info,
-                  IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Append(
+      const Slice& data, const IOOptions& options,
+      const DataVerificationInfo& verification_info,
+      IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Append(data, options, verification_info, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Close(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Close(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Flush(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Flush(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Sync(const IOOptions& options,
+                                       IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Sync(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Fsync(const IOOptions& options,
+                                        IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Fsync(options, dbg);
   }
@@ -109,8 +115,9 @@ class MockTestWritableFile : public FSWritableFileOwnerWrapper {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->GetFileSize(options, dbg);
   }
-  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes, const IOOptions& options,
-                     IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus RangeSync(uint64_t offset, uint64_t nbytes,
+                                            const IOOptions& options,
+                                            IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->RangeSync(offset, nbytes, options, dbg);
   }
@@ -121,8 +128,9 @@ class MockTestWritableFile : public FSWritableFileOwnerWrapper {
     target()->PrepareWrite(offset, len, options, dbg);
   }
 
-  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len, const IOOptions& options,
-                    IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Allocate(uint64_t offset, uint64_t len,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, write_io_priority_);
     return target()->Allocate(offset, len, options, dbg);
   }
@@ -140,14 +148,16 @@ class MockTestRandomAccessFile : public FSRandomAccessFileOwnerWrapper {
       : FSRandomAccessFileOwnerWrapper(std::move(file)),
         read_io_priority_(io_priority) {}
 
-  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n, const IOOptions& options,
-                Slice* result, char* scratch,
-                IODebugContext* dbg) const override {
+  rocksdb_rs::io_status::IOStatus Read(uint64_t offset, size_t n,
+                                       const IOOptions& options, Slice* result,
+                                       char* scratch,
+                                       IODebugContext* dbg) const override {
     EXPECT_EQ(options.rate_limiter_priority, read_io_priority_);
     return target()->Read(offset, n, options, result, scratch, dbg);
   }
-  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n, const IOOptions& options,
-                    IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus Prefetch(uint64_t offset, size_t n,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     EXPECT_EQ(options.rate_limiter_priority, read_io_priority_);
     return target()->Prefetch(offset, n, options, dbg);
   }
@@ -169,21 +179,22 @@ class MockTestFileSystem : public FileSystemWrapper {
   static const char* kClassName() { return "MockTestFileSystem"; }
   const char* Name() const override { return kClassName(); }
 
-  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(const std::string& fname,
-                               const FileOptions& file_opts,
-                               std::unique_ptr<FSRandomAccessFile>* result,
-                               IODebugContext* dbg) override {
-    rocksdb_rs::io_status::IOStatus s = target()->NewRandomAccessFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus NewRandomAccessFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSRandomAccessFile>* result,
+      IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus s =
+        target()->NewRandomAccessFile(fname, file_opts, result, dbg);
     EXPECT_OK(s);
     result->reset(
         new MockTestRandomAccessFile(std::move(*result), read_io_priority_));
     return s;
   }
-  rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname,
-                           const FileOptions& file_opts,
-                           std::unique_ptr<FSWritableFile>* result,
-                           IODebugContext* dbg) override {
-    rocksdb_rs::io_status::IOStatus s = target()->NewWritableFile(fname, file_opts, result, dbg);
+  rocksdb_rs::io_status::IOStatus NewWritableFile(
+      const std::string& fname, const FileOptions& file_opts,
+      std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus s =
+        target()->NewWritableFile(fname, file_opts, result, dbg);
     EXPECT_OK(s);
     result->reset(
         new MockTestWritableFile(std::move(*result), write_io_priority_));
@@ -254,7 +265,8 @@ class CompactionJobTestBase : public testing::Test {
     std::vector<DbPath> db_paths;
     db_paths.emplace_back(dbname_, std::numeric_limits<uint64_t>::max());
     meta.fd = FileDescriptor(file_number, 0, 0);
-    return static_cast<std::string>(TableFileName(db_paths, meta.fd.GetNumber(), meta.fd.GetPathId()));
+    return static_cast<std::string>(
+        TableFileName(db_paths, meta.fd.GetNumber(), meta.fd.GetPathId()));
   }
 
   std::string KeyStr(const std::string& user_key, const SequenceNumber seq_num,
@@ -266,16 +278,18 @@ class CompactionJobTestBase : public testing::Test {
   static std::string BlobStr(uint64_t blob_file_number, uint64_t offset,
                              uint64_t size) {
     std::string blob_index;
-    BlobIndex::EncodeBlob(&blob_index, blob_file_number, offset, size,
-                          rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    BlobIndex::EncodeBlob(
+        &blob_index, blob_file_number, offset, size,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression);
     return blob_index;
   }
 
   static std::string BlobStrTTL(uint64_t blob_file_number, uint64_t offset,
                                 uint64_t size, uint64_t expiration) {
     std::string blob_index;
-    BlobIndex::EncodeBlobTTL(&blob_index, expiration, blob_file_number, offset,
-                             size, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    BlobIndex::EncodeBlobTTL(
+        &blob_index, expiration, blob_file_number, offset, size,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression);
     return blob_index;
   }
 
@@ -290,17 +304,20 @@ class CompactionJobTestBase : public testing::Test {
   void CreateTable(const std::string& table_name,
                    const mock::KVVector& contents, uint64_t& file_size) {
     std::unique_ptr<WritableFileWriter> file_writer;
-    rocksdb_rs::status::Status s = WritableFileWriter::Create(fs_, table_name, FileOptions(),
-                                          &file_writer, nullptr).status();
+    rocksdb_rs::status::Status s =
+        WritableFileWriter::Create(fs_, table_name, FileOptions(), &file_writer,
+                                   nullptr)
+            .status();
     ASSERT_OK(s);
     std::unique_ptr<TableBuilder> table_builder(
         cf_options_.table_factory->NewTableBuilder(
-            TableBuilderOptions(*cfd_->ioptions(), mutable_cf_options_,
-                                cfd_->internal_comparator(),
-                                cfd_->int_tbl_prop_collector_factories(),
-                                rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                                CompressionOptions(), 0 /* column_family_id */,
-                                kDefaultColumnFamilyName, -1 /* level */),
+            TableBuilderOptions(
+                *cfd_->ioptions(), mutable_cf_options_,
+                cfd_->internal_comparator(),
+                cfd_->int_tbl_prop_collector_factories(),
+                rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                CompressionOptions(), 0 /* column_family_id */,
+                kDefaultColumnFamilyName, -1 /* level */),
             file_writer.get()));
     // Build table.
     for (auto kv : contents) {
@@ -385,7 +402,8 @@ class CompactionJobTestBase : public testing::Test {
         oldest_blob_file_number, kUnknownOldestAncesterTime,
         kUnknownFileCreationTime,
         versions_->GetColumnFamilySet()->GetDefault()->NewEpochNumber(),
-        kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
+        kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+        rocksdb_rs::unique_id::UniqueId64x2_null(),
         /*compensated_range_deletion_size=*/0, /*tail_size=*/0,
         /*user_defined_timestamps_persisted=*/true);
 
@@ -536,7 +554,8 @@ class CompactionJobTestBase : public testing::Test {
 
     std::shared_ptr<Logger> info_log;
     DBOptions db_opts = BuildDBOptions(db_options_, mutable_db_options_);
-    rocksdb_rs::status::Status s = CreateLoggerFromOptions(dbname_, db_opts, &info_log);
+    rocksdb_rs::status::Status s =
+        CreateLoggerFromOptions(dbname_, db_opts, &info_log);
     ASSERT_OK(s);
     db_options_.info_log = info_log;
 
@@ -553,12 +572,14 @@ class CompactionJobTestBase : public testing::Test {
     new_db.SetNextFile(2);
     new_db.SetLastSequence(0);
 
-    const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
+    const std::string manifest =
+        static_cast<std::string>(DescriptorFileName(dbname_, 1));
     std::unique_ptr<WritableFileWriter> file_writer;
     const auto& fs = env_->GetFileSystem();
     s = WritableFileWriter::Create(fs, manifest,
                                    fs->OptimizeForManifestWrite(env_options_),
-                                   &file_writer, nullptr).status();
+                                   &file_writer, nullptr)
+            .status();
 
     ASSERT_OK(s);
     {
@@ -641,7 +662,8 @@ class CompactionJobTestBase : public testing::Test {
         *cfd->GetLatestMutableCFOptions(), mutable_db_options_,
         compaction_input_files, output_level,
         mutable_cf_options_.target_file_size_base,
-        mutable_cf_options_.max_compaction_bytes, 0, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+        mutable_cf_options_.max_compaction_bytes, 0,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression,
         cfd->GetLatestMutableCFOptions()->compression_opts,
         Temperature::kUnknown, max_subcompactions, grandparents, true);
     compaction.SetInputVersion(cfd->current());
@@ -1560,7 +1582,8 @@ TEST_F(CompactionJobTest, InputSerialization) {
   input.column_family.options.max_bytes_for_level_base =
       rnd64.Uniform(UINT64_MAX);
   input.column_family.options.disable_auto_compactions = rnd.OneIn(2);
-  input.column_family.options.compression = rocksdb_rs::compression_type::CompressionType::kZSTD;
+  input.column_family.options.compression =
+      rocksdb_rs::compression_type::CompressionType::kZSTD;
   input.column_family.options.compression_opts.level = 4;
   input.db_options.max_background_flushes = 10;
   input.db_options.paranoid_checks = rnd.OneIn(2);
@@ -1632,9 +1655,11 @@ TEST_F(CompactionJobTest, InputSerialization) {
   ASSERT_EQ(data_version,
             1U);  // Update once the default data version is changed
   char buf[kDataVersionSize];
-  rocksdb_rs::coding_lean::EncodeFixed32(buf, data_version + 10);  // make sure it's not valid
+  rocksdb_rs::coding_lean::EncodeFixed32(
+      buf, data_version + 10);  // make sure it's not valid
   output.replace(0, kDataVersionSize, buf, kDataVersionSize);
-  rocksdb_rs::status::Status s = CompactionServiceInput::Read(output, &deserialized3);
+  rocksdb_rs::status::Status s =
+      CompactionServiceInput::Read(output, &deserialized3);
   ASSERT_TRUE(s.IsNotSupported());
 }
 
@@ -1646,13 +1671,16 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   Random64 rnd64(time(nullptr));
   std::vector<rocksdb_rs::status::Status> status_list;
   status_list.push_back(rocksdb_rs::status::Status_OK());
-  status_list.push_back(rocksdb_rs::status::Status_InvalidArgument("invalid option"));
+  status_list.push_back(
+      rocksdb_rs::status::Status_InvalidArgument("invalid option"));
   status_list.push_back(rocksdb_rs::status::Status_Aborted("failed to run"));
-  status_list.push_back(rocksdb_rs::status::Status_NotSupported("not supported option"));
+  status_list.push_back(
+      rocksdb_rs::status::Status_NotSupported("not supported option"));
   result.status.copy_from(
       status_list.at(rnd.Uniform(static_cast<int>(status_list.size()))));
   while (!rnd.OneIn(10)) {
-    rocksdb_rs::unique_id::UniqueId64x2 id{rnd64.Uniform(UINT64_MAX), rnd64.Uniform(UINT64_MAX)};
+    rocksdb_rs::unique_id::UniqueId64x2 id{rnd64.Uniform(UINT64_MAX),
+                                           rnd64.Uniform(UINT64_MAX)};
     result.output_files.emplace_back(
         rnd.RandomString(rnd.Uniform(kStrMaxLen)), rnd64.Uniform(UINT64_MAX),
         rnd64.Uniform(UINT64_MAX),
@@ -1729,9 +1757,11 @@ TEST_F(CompactionJobTest, ResultSerialization) {
   ASSERT_EQ(data_version,
             1U);  // Update once the default data version is changed
   char buf[kDataVersionSize];
-  rocksdb_rs::coding_lean::EncodeFixed32(buf, data_version + 10);  // make sure it's not valid
+  rocksdb_rs::coding_lean::EncodeFixed32(
+      buf, data_version + 10);  // make sure it's not valid
   output.replace(0, kDataVersionSize, buf, kDataVersionSize);
-  rocksdb_rs::status::Status s = CompactionServiceResult::Read(output, &deserialized3);
+  rocksdb_rs::status::Status s =
+      CompactionServiceResult::Read(output, &deserialized3);
   ASSERT_TRUE(s.IsNotSupported());
 }
 

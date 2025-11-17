@@ -921,7 +921,8 @@ class ChargeFilterConstructionTestWithParam
       // two partitions.
       num_key_ = 18 *
                  CacheReservationManagerImpl<
-                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
+                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::
+                     GetDummyEntrySize() /
                  sizeof(FilterConstructionReserveMemoryHash);
     } else if (policy_ == kFastLocalBloom) {
       // For Bloom Filter + FullFilter case, since we design the num_key_ to
@@ -933,7 +934,8 @@ class ChargeFilterConstructionTestWithParam
       // filter is a lot smaller than hash entries.
       num_key_ = 1 *
                  CacheReservationManagerImpl<
-                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
+                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::
+                     GetDummyEntrySize() /
                  sizeof(FilterConstructionReserveMemoryHash);
     } else {
       // For Ribbon Filter + FullFilter case, we need a large enough number of
@@ -943,7 +945,8 @@ class ChargeFilterConstructionTestWithParam
       // reservation might not be a multiple of dummy entry.
       num_key_ = 12 *
                  CacheReservationManagerImpl<
-                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize() /
+                     rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::
+                     GetDummyEntrySize() /
                  sizeof(FilterConstructionReserveMemoryHash);
     }
   }
@@ -975,8 +978,8 @@ class ChargeFilterConstructionTestWithParam
     lo.capacity = kCacheCapacity;
     lo.num_shard_bits = 0;  // 2^0 shard
     lo.strict_capacity_limit = true;
-    cache_ = std::make_shared<
-        TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
+    cache_ = std::make_shared<TargetCacheChargeTrackingCache<
+        rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>(
         (NewLRUCache(lo)));
     table_options.block_cache = cache_;
 
@@ -993,8 +996,8 @@ class ChargeFilterConstructionTestWithParam
 
   bool PartitionFilters() { return partition_filters_; }
 
-  std::shared_ptr<
-      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
+  std::shared_ptr<TargetCacheChargeTrackingCache<
+      rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
   GetCache() {
     return cache_;
   }
@@ -1004,8 +1007,8 @@ class ChargeFilterConstructionTestWithParam
   CacheEntryRoleOptions::Decision charge_filter_construction_;
   std::string policy_;
   bool partition_filters_;
-  std::shared_ptr<
-      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
+  std::shared_ptr<TargetCacheChargeTrackingCache<
+      rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
       cache_;
   bool detect_filter_construct_corruption_;
 };
@@ -1074,8 +1077,8 @@ TEST_P(ChargeFilterConstructionTestWithParam, Basic) {
   options.write_buffer_size = 640 << 20;
   BlockBasedTableOptions table_options = GetBlockBasedTableOptions();
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
-  std::shared_ptr<
-      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
+  std::shared_ptr<TargetCacheChargeTrackingCache<
+      rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>>
       cache = GetCache();
   options.create_if_missing = true;
   // Disable auto compaction to prevent its unexpected side effect
@@ -1118,8 +1121,9 @@ TEST_P(ChargeFilterConstructionTestWithParam, Basic) {
     return;
   }
 
-  const std::size_t kDummyEntrySize = CacheReservationManagerImpl<
-      rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize();
+  const std::size_t kDummyEntrySize =
+      CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::
+                                      kFilterConstruction>::GetDummyEntrySize();
 
   const std::size_t predicted_hash_entries_cache_res =
       num_key * sizeof(FilterConstructionReserveMemoryHash);
@@ -1311,7 +1315,8 @@ TEST_P(ChargeFilterConstructionTestWithParam, Basic) {
           std::floor(
               1.0 * predicted_final_filter_cache_res /
               CacheReservationManagerImpl<
-                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::GetDummyEntrySize()),
+                  rocksdb_rs::cache::CacheEntryRole::kFilterConstruction>::
+                  GetDummyEntrySize()),
           1)
           << "Final filter cache charging too small for this test - please "
              "increase the number of keys";
@@ -1636,7 +1641,8 @@ class LevelAndStyleCustomFilterPolicy : public FilterPolicy {
 
 static std::map<rocksdb_rs::types::TableFileCreationReason, std::string>
     table_file_creation_reason_to_string{
-        {rocksdb_rs::types::TableFileCreationReason::kCompaction, "kCompaction"},
+        {rocksdb_rs::types::TableFileCreationReason::kCompaction,
+         "kCompaction"},
         {rocksdb_rs::types::TableFileCreationReason::kFlush, "kFlush"},
         {rocksdb_rs::types::TableFileCreationReason::kMisc, "kMisc"},
         {rocksdb_rs::types::TableFileCreationReason::kRecovery, "kRecovery"},
@@ -1862,8 +1868,7 @@ TEST_F(DBBloomFilterTest, MemtableWholeKeyBloomFilter) {
   Options options = CurrentOptions();
   options.memtable_prefix_bloom_size_ratio =
       static_cast<double>(kMemtablePrefixFilterSize) / kMemtableSize;
-  options.prefix_extractor.reset(
-      rocksdb::NewFixedPrefixTransform(kPrefixLen));
+  options.prefix_extractor.reset(rocksdb::NewFixedPrefixTransform(kPrefixLen));
   options.write_buffer_size = kMemtableSize;
   options.memtable_whole_key_filtering = false;
   Reopen(options);
@@ -2041,7 +2046,8 @@ TEST_P(DBBloomFilterTestVaryPrefixAndFormatVer, PartitionedMultiGet) {
   std::array<Slice, Q> key_slices;
   std::array<ColumnFamilyHandle*, Q> column_families;
   // MultiGet Out
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(Q);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(Q);
   std::array<PinnableSlice, Q> values;
 
   PopTicker(options, BLOCK_CACHE_FILTER_HIT);
@@ -2191,8 +2197,7 @@ class BloomStatsTestWithParam
     partition_filters_ = std::get<1>(GetParam());
 
     options_.create_if_missing = true;
-    options_.prefix_extractor.reset(
-        rocksdb::NewFixedPrefixTransform(4));
+    options_.prefix_extractor.reset(rocksdb::NewFixedPrefixTransform(4));
     options_.memtable_prefix_bloom_size_ratio =
         8.0 * 1024.0 / static_cast<double>(options_.write_buffer_size);
     if (bfp_impl_ == kPlainTable) {
@@ -2460,7 +2465,8 @@ TEST_F(DBBloomFilterTest, OptimizeFiltersForHits) {
   options.max_write_buffer_number = 2;
   options.max_background_compactions = 8;
   options.max_background_flushes = 8;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.compaction_style = kCompactionStyleLevel;
   options.level_compaction_dynamic_level_bytes = true;
   BlockBasedTableOptions bbto;
@@ -3087,7 +3093,8 @@ TEST_F(DBBloomFilterTest, SeekForPrevWithPartitionedFilters) {
   options.create_if_missing = true;
   constexpr size_t kPrefixLength = 4;
   options.prefix_extractor.reset(NewFixedPrefixTransform(kPrefixLength));
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions bbto;
   bbto.filter_policy.reset(NewBloomFilterPolicy(50));
   bbto.index_shortening =
@@ -3502,7 +3509,6 @@ TEST_F(DBBloomFilterTest, WeirdPrefixExtractorWithFilter3) {
     }
   }
 }
-
 
 }  // namespace rocksdb
 

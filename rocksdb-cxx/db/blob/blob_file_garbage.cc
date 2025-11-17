@@ -9,11 +9,10 @@
 #include <sstream>
 
 #include "logging/event_logger.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/slice.h"
 #include "test_util/sync_point.h"
 #include "util/coding.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -50,36 +49,41 @@ rocksdb_rs::status::Status BlobFileGarbage::DecodeFrom(Slice* input) {
   constexpr char class_name[] = "BlobFileGarbage";
 
   if (!GetVarint64(input, &blob_file_number_)) {
-    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding blob file number");
+    return rocksdb_rs::status::Status_Corruption(
+        class_name, "Error decoding blob file number");
   }
 
   if (!GetVarint64(input, &garbage_blob_count_)) {
-    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding garbage blob count");
+    return rocksdb_rs::status::Status_Corruption(
+        class_name, "Error decoding garbage blob count");
   }
 
   if (!GetVarint64(input, &garbage_blob_bytes_)) {
-    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding garbage blob bytes");
+    return rocksdb_rs::status::Status_Corruption(
+        class_name, "Error decoding garbage blob bytes");
   }
 
   while (true) {
     uint32_t custom_field_tag = 0;
     if (!GetVarint32(input, &custom_field_tag)) {
-      return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding custom field tag");
+      return rocksdb_rs::status::Status_Corruption(
+          class_name, "Error decoding custom field tag");
     }
 
     if (custom_field_tag == (uint32_t)CustomFieldTags::kEndMarker) {
       break;
     }
 
-    if (custom_field_tag & (uint32_t)CustomFieldTags::kForwardIncompatibleMask) {
+    if (custom_field_tag &
+        (uint32_t)CustomFieldTags::kForwardIncompatibleMask) {
       return rocksdb_rs::status::Status_Corruption(
           class_name, "Forward incompatible custom field encountered");
     }
 
     Slice custom_field_value;
     if (!GetLengthPrefixedSlice(input, &custom_field_value)) {
-      return rocksdb_rs::status::Status_Corruption(class_name,
-                                "Error decoding custom field value");
+      return rocksdb_rs::status::Status_Corruption(
+          class_name, "Error decoding custom field value");
     }
   }
 

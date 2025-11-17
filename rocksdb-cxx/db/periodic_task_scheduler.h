@@ -6,7 +6,6 @@
 
 #pragma once
 
-
 #include "util/timer.h"
 
 namespace rocksdb {
@@ -43,12 +42,14 @@ class PeriodicTaskScheduler {
   PeriodicTaskScheduler& operator=(PeriodicTaskScheduler&&) = delete;
 
   // Register a task with its default repeat period
-  rocksdb_rs::status::Status Register(PeriodicTaskType task_type, const PeriodicTaskFunc& fn);
+  rocksdb_rs::status::Status Register(PeriodicTaskType task_type,
+                                      const PeriodicTaskFunc& fn);
 
   // Register a task with specified repeat period. 0 is an invalid argument
   // (kInvalidPeriodSec). To stop the task, please use Unregister() specifically
-  rocksdb_rs::status::Status Register(PeriodicTaskType task_type, const PeriodicTaskFunc& fn,
-                  uint64_t repeat_period_seconds);
+  rocksdb_rs::status::Status Register(PeriodicTaskType task_type,
+                                      const PeriodicTaskFunc& fn,
+                                      uint64_t repeat_period_seconds);
 
   // Unregister the task
   rocksdb_rs::status::Status Unregister(PeriodicTaskType task_type);
@@ -105,4 +106,3 @@ class PeriodicTaskScheduler {
 };
 
 }  // namespace rocksdb
-

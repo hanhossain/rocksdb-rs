@@ -48,7 +48,7 @@ class DBBlobIndexTest : public DBTestBase {
   }
 
   rocksdb_rs::status::Status PutBlobIndex(WriteBatch* batch, const Slice& key,
-                      const Slice& blob_index) {
+                                          const Slice& blob_index) {
     return WriteBatchInternal::PutBlobIndex(batch, cfd()->GetID(), key,
                                             blob_index);
   }
@@ -299,7 +299,8 @@ TEST_F(DBBlobIndexTest, Iterate) {
     return get_key(index) + "_value" + std::to_string(version);
   };
 
-  auto check_iterator = [&](Iterator* iterator, rocksdb_rs::status::Code expected_status,
+  auto check_iterator = [&](Iterator* iterator,
+                            rocksdb_rs::status::Code expected_status,
                             const Slice& expected_value) {
     ASSERT_EQ(expected_status, iterator->status().code());
     if (expected_status == rocksdb_rs::status::Code::kOk) {
@@ -415,21 +416,24 @@ TEST_F(DBBlobIndexTest, Iterate) {
     MoveDataTo(tier);
 
     // Normal iterator
-    verify(1, rocksdb_rs::status::Code::kCorruption, "", "", create_normal_iterator);
-    verify(3, rocksdb_rs::status::Code::kCorruption, "", "", create_normal_iterator);
+    verify(1, rocksdb_rs::status::Code::kCorruption, "", "",
+           create_normal_iterator);
+    verify(3, rocksdb_rs::status::Code::kCorruption, "", "",
+           create_normal_iterator);
     verify(5, rocksdb_rs::status::Code::kOk, get_value(5, 0), get_value(5, 0),
            create_normal_iterator);
     verify(7, rocksdb_rs::status::Code::kOk, get_value(8, 0), get_value(6, 0),
            create_normal_iterator);
     verify(9, rocksdb_rs::status::Code::kOk, get_value(10, 0), get_value(8, 0),
            create_normal_iterator);
-    verify(11, rocksdb_rs::status::Code::kCorruption, "", "", create_normal_iterator);
+    verify(11, rocksdb_rs::status::Code::kCorruption, "", "",
+           create_normal_iterator);
     verify(13, rocksdb_rs::status::Code::kOk,
            get_value(13, 2) + "," + get_value(13, 1) + "," + get_value(13, 0),
            get_value(13, 2) + "," + get_value(13, 1) + "," + get_value(13, 0),
            create_normal_iterator);
-    verify(15, rocksdb_rs::status::Code::kOk, get_value(16, 0), get_value(14, 0),
-           create_normal_iterator);
+    verify(15, rocksdb_rs::status::Code::kOk, get_value(16, 0),
+           get_value(14, 0), create_normal_iterator);
 
     // Iterator with blob support
     verify(1, rocksdb_rs::status::Code::kOk, get_value(1, 0), get_value(1, 0),
@@ -443,16 +447,18 @@ TEST_F(DBBlobIndexTest, Iterate) {
     verify(9, rocksdb_rs::status::Code::kOk, get_value(10, 0), get_value(8, 0),
            create_blob_iterator, check_is_blob(false));
     if (tier <= Tier::kImmutableMemtables) {
-      verify(11, rocksdb_rs::status::Code::kNotSupported, "", "", create_blob_iterator);
+      verify(11, rocksdb_rs::status::Code::kNotSupported, "", "",
+             create_blob_iterator);
     } else {
-      verify(11, rocksdb_rs::status::Code::kCorruption, "", "", create_blob_iterator);
+      verify(11, rocksdb_rs::status::Code::kCorruption, "", "",
+             create_blob_iterator);
     }
     verify(13, rocksdb_rs::status::Code::kOk,
            get_value(13, 2) + "," + get_value(13, 1) + "," + get_value(13, 0),
            get_value(13, 2) + "," + get_value(13, 1) + "," + get_value(13, 0),
            create_blob_iterator, check_is_blob(false));
-    verify(15, rocksdb_rs::status::Code::kOk, get_value(16, 0), get_value(14, 0),
-           create_blob_iterator, check_is_blob(false));
+    verify(15, rocksdb_rs::status::Code::kOk, get_value(16, 0),
+           get_value(14, 0), create_blob_iterator, check_is_blob(false));
 
     // Iterator with blob support and using seek.
     ASSERT_OK(dbfull()->SetOptions(
@@ -468,16 +474,18 @@ TEST_F(DBBlobIndexTest, Iterate) {
     verify(9, rocksdb_rs::status::Code::kOk, get_value(10, 0), get_value(8, 0),
            create_blob_iterator, check_is_blob(false));
     if (tier <= Tier::kImmutableMemtables) {
-      verify(11, rocksdb_rs::status::Code::kNotSupported, "", "", create_blob_iterator);
+      verify(11, rocksdb_rs::status::Code::kNotSupported, "", "",
+             create_blob_iterator);
     } else {
-      verify(11, rocksdb_rs::status::Code::kCorruption, "", "", create_blob_iterator);
+      verify(11, rocksdb_rs::status::Code::kCorruption, "", "",
+             create_blob_iterator);
     }
     verify(13, rocksdb_rs::status::Code::kOk,
            get_value(13, 2) + "," + get_value(13, 1) + "," + get_value(13, 0),
            get_value(13, 2) + "," + get_value(13, 1) + "," + get_value(13, 0),
            create_blob_iterator, check_is_blob(false));
-    verify(15, rocksdb_rs::status::Code::kOk, get_value(16, 0), get_value(14, 0),
-           create_blob_iterator, check_is_blob(false));
+    verify(15, rocksdb_rs::status::Code::kOk, get_value(16, 0),
+           get_value(14, 0), create_blob_iterator, check_is_blob(false));
 
     for (auto* snapshot : snapshots) {
       dbfull()->ReleaseSnapshot(snapshot);
@@ -497,7 +505,8 @@ TEST_F(DBBlobIndexTest, IntegratedBlobIterate) {
     return get_key(index) + "_value" + std::to_string(version);
   };
 
-  auto check_iterator = [&](Iterator* iterator, rocksdb_rs::status::Status expected_status,
+  auto check_iterator = [&](Iterator* iterator,
+                            rocksdb_rs::status::Status expected_status,
                             const Slice& expected_value) {
     ASSERT_TRUE(expected_status.eq(iterator->status()));
     if (expected_status.ok()) {

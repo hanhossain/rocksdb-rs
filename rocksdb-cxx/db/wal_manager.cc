@@ -34,8 +34,8 @@
 
 namespace rocksdb {
 
-
-rocksdb_rs::status::Status WalManager::DeleteFile(const std::string& fname, uint64_t number) {
+rocksdb_rs::status::Status WalManager::DeleteFile(const std::string& fname,
+                                                  uint64_t number) {
   auto s = env_->DeleteFile(wal_dir_ + "/" + fname);
   if (s.ok()) {
     MutexLock l(&read_first_record_cache_mutex_);
@@ -51,7 +51,8 @@ rocksdb_rs::status::Status WalManager::GetSortedWalFiles(VectorLogPtr& files) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   // list wal files in main db dir.
   VectorLogPtr logs;
-  s = GetSortedWalsOfType(wal_dir_, logs, rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
+  s = GetSortedWalsOfType(
+      wal_dir_, logs, rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
   if (!s.ok()) {
     return s;
   }
@@ -64,10 +65,13 @@ rocksdb_rs::status::Status WalManager::GetSortedWalFiles(VectorLogPtr& files) {
 
   files.clear();
   // list wal files in archive dir.
-  std::string archivedir = static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir_));
+  std::string archivedir = static_cast<std::string>(
+      rocksdb_rs::filename::ArchivalDirectory(wal_dir_));
   rocksdb_rs::status::Status exists = env_->FileExists(archivedir);
   if (exists.ok()) {
-    s = GetSortedWalsOfType(archivedir, files, rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile);
+    s = GetSortedWalsOfType(
+        archivedir, files,
+        rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile);
     if (!s.ok()) {
       return s;
     }
@@ -145,7 +149,8 @@ void WalManager::PurgeObsoleteWALFiles() {
   }
 
   int64_t current_time = 0;
-  rocksdb_rs::status::Status s = db_options_.clock->GetCurrentTime(&current_time);
+  rocksdb_rs::status::Status s =
+      db_options_.clock->GetCurrentTime(&current_time);
   if (!s.ok()) {
     ROCKS_LOG_ERROR(db_options_.info_log, "Can't get current time: %s",
                     s.ToString()->c_str());
@@ -163,7 +168,8 @@ void WalManager::PurgeObsoleteWALFiles() {
 
   purge_wal_files_last_run_ = now_seconds;
 
-  std::string archival_dir = static_cast<std::string>(rocksdb_rs::filename::ArchivalDirectory(wal_dir_));
+  std::string archival_dir = static_cast<std::string>(
+      rocksdb_rs::filename::ArchivalDirectory(wal_dir_));
   std::vector<std::string> files;
   s = env_->GetChildren(archival_dir, &files);
   if (!s.ok()) {
@@ -178,7 +184,8 @@ void WalManager::PurgeObsoleteWALFiles() {
   for (auto& f : files) {
     uint64_t number;
     rocksdb_rs::types::FileType type;
-    if (rocksdb_rs::filename::ParseFileName(f, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
+    if (rocksdb_rs::filename::ParseFileName(f, &number, &type) &&
+        type == rocksdb_rs::types::FileType::kWalFile) {
       std::string const file_path = archival_dir + "/" + f;
       if (ttl_enabled) {
         uint64_t file_m_time;
@@ -246,7 +253,9 @@ void WalManager::PurgeObsoleteWALFiles() {
 
   size_t files_del_num = log_files_num - files_keep_num;
   VectorLogPtr archived_logs;
-  s = GetSortedWalsOfType(archival_dir, archived_logs, rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile);
+  s = GetSortedWalsOfType(
+      archival_dir, archived_logs,
+      rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile);
   if (!s.ok()) {
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Unable to get archived WALs from: %s: %s",
@@ -275,7 +284,8 @@ void WalManager::PurgeObsoleteWALFiles() {
 }
 
 void WalManager::ArchiveWALFile(const std::string& fname, uint64_t number) {
-  auto archived_log_name = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(wal_dir_, number));
+  auto archived_log_name = static_cast<std::string>(
+      rocksdb_rs::filename::ArchivedLogFileName(wal_dir_, number));
   // The sync point below is used in (DBTest,TransactionLogIteratorRace)
   TEST_SYNC_POINT("WalManager::PurgeObsoleteFiles:1");
   rocksdb_rs::status::Status s = env_->RenameFile(fname, archived_log_name);
@@ -286,9 +296,9 @@ void WalManager::ArchiveWALFile(const std::string& fname, uint64_t number) {
                  s.ToString()->c_str());
 }
 
-rocksdb_rs::status::Status WalManager::GetSortedWalsOfType(const std::string& path,
-                                       VectorLogPtr& log_files,
-                                       rocksdb_rs::transaction_log::WalFileType log_type) {
+rocksdb_rs::status::Status WalManager::GetSortedWalsOfType(
+    const std::string& path, VectorLogPtr& log_files,
+    rocksdb_rs::transaction_log::WalFileType log_type) {
   std::vector<std::string> all_files;
   const rocksdb_rs::status::Status status = env_->GetChildren(path, &all_files);
   if (!status.ok()) {
@@ -298,9 +308,11 @@ rocksdb_rs::status::Status WalManager::GetSortedWalsOfType(const std::string& pa
   for (const auto& f : all_files) {
     uint64_t number;
     rocksdb_rs::types::FileType type;
-    if (rocksdb_rs::filename::ParseFileName(f, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
+    if (rocksdb_rs::filename::ParseFileName(f, &number, &type) &&
+        type == rocksdb_rs::types::FileType::kWalFile) {
       SequenceNumber sequence;
-      rocksdb_rs::status::Status s = ReadFirstRecord(log_type, number, &sequence);
+      rocksdb_rs::status::Status s =
+          ReadFirstRecord(log_type, number, &sequence);
       if (!s.ok()) {
         return s;
       }
@@ -316,10 +328,13 @@ rocksdb_rs::status::Status WalManager::GetSortedWalsOfType(const std::string& pa
       TEST_SYNC_POINT("WalManager::GetSortedWalsOfType:2");
 
       uint64_t size_bytes;
-      s = env_->GetFileSize(rocksdb_rs::filename::LogFileName(path, number), &size_bytes);
+      s = env_->GetFileSize(rocksdb_rs::filename::LogFileName(path, number),
+                            &size_bytes);
       // re-try in case the alive log file has been moved to archive.
-      if (!s.ok() && log_type == rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) {
-        std::string archived_file = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(path, number));
+      if (!s.ok() &&
+          log_type == rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) {
+        std::string archived_file = static_cast<std::string>(
+            rocksdb_rs::filename::ArchivedLogFileName(path, number));
         if (env_->FileExists(archived_file).ok()) {
           s = env_->GetFileSize(archived_file, &size_bytes);
           if (!s.ok() && env_->FileExists(archived_file).IsNotFound()) {
@@ -347,8 +362,8 @@ rocksdb_rs::status::Status WalManager::GetSortedWalsOfType(const std::string& pa
   return status.Clone();
 }
 
-rocksdb_rs::status::Status WalManager::RetainProbableWalFiles(VectorLogPtr& all_logs,
-                                          const SequenceNumber target) {
+rocksdb_rs::status::Status WalManager::RetainProbableWalFiles(
+    VectorLogPtr& all_logs, const SequenceNumber target) {
   int64_t start = 0;  // signed to avoid overflow when target is < first file.
   int64_t end = static_cast<int64_t>(all_logs.size()) - 1;
   // Binary Search. avoid opening all files.
@@ -373,14 +388,16 @@ rocksdb_rs::status::Status WalManager::RetainProbableWalFiles(VectorLogPtr& all_
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type,
-                                   const uint64_t number,
-                                   SequenceNumber* sequence) {
+rocksdb_rs::status::Status WalManager::ReadFirstRecord(
+    const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
+    SequenceNumber* sequence) {
   *sequence = 0;
-  if (type != rocksdb_rs::transaction_log::WalFileType::kAliveLogFile && type != rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
+  if (type != rocksdb_rs::transaction_log::WalFileType::kAliveLogFile &&
+      type != rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
     ROCKS_LOG_ERROR(db_options_.info_log, "[WalManger] Unknown file type %s",
                     std::to_string(static_cast<int>(type)).c_str());
-    return rocksdb_rs::status::Status_NotSupported("File Type Not Known " + std::to_string(static_cast<int>(type)));
+    return rocksdb_rs::status::Status_NotSupported(
+        "File Type Not Known " + std::to_string(static_cast<int>(type)));
   }
   {
     MutexLock l(&read_first_record_cache_mutex_);
@@ -392,7 +409,8 @@ rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transac
   }
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   if (type == rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) {
-    std::string fname = static_cast<std::string>(rocksdb_rs::filename::LogFileName(wal_dir_, number));
+    std::string fname = static_cast<std::string>(
+        rocksdb_rs::filename::LogFileName(wal_dir_, number));
     s = ReadFirstLine(fname, number, sequence);
     if (!s.ok() && env_->FileExists(fname).ok()) {
       // return any error that is not caused by non-existing file
@@ -400,9 +418,11 @@ rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transac
     }
   }
 
-  if (type == rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile || !s.ok()) {
+  if (type == rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile ||
+      !s.ok()) {
     //  check if the file got moved to archive.
-    std::string archived_file = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(wal_dir_, number));
+    std::string archived_file = static_cast<std::string>(
+        rocksdb_rs::filename::ArchivedLogFileName(wal_dir_, number));
     s = ReadFirstLine(archived_file, number, sequence);
     // maybe the file was deleted from archive dir. If that's the case, return
     // Status_OK(). The caller with identify this as empty file because
@@ -419,10 +439,11 @@ rocksdb_rs::status::Status WalManager::ReadFirstRecord(const rocksdb_rs::transac
   return s;
 }
 
-rocksdb_rs::status::Status WalManager::GetLiveWalFile(uint64_t number,
-                                  std::unique_ptr<LogFile>* log_file) {
+rocksdb_rs::status::Status WalManager::GetLiveWalFile(
+    uint64_t number, std::unique_ptr<LogFile>* log_file) {
   if (!log_file) {
-    return rocksdb_rs::status::Status_InvalidArgument("log_file not preallocated.");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "log_file not preallocated.");
   }
 
   if (!number) {
@@ -430,15 +451,17 @@ rocksdb_rs::status::Status WalManager::GetLiveWalFile(uint64_t number,
   }
 
   uint64_t size_bytes;
-  rocksdb_rs::status::Status s = env_->GetFileSize(rocksdb_rs::filename::LogFileName(wal_dir_, number), &size_bytes);
+  rocksdb_rs::status::Status s = env_->GetFileSize(
+      rocksdb_rs::filename::LogFileName(wal_dir_, number), &size_bytes);
 
   if (!s.ok()) {
     return s;
   }
 
-  log_file->reset(new LogFileImpl(number, rocksdb_rs::transaction_log::WalFileType::kAliveLogFile,
-                                  0,  // SequenceNumber
-                                  size_bytes));
+  log_file->reset(new LogFileImpl(
+      number, rocksdb_rs::transaction_log::WalFileType::kAliveLogFile,
+      0,  // SequenceNumber
+      size_bytes));
 
   return rocksdb_rs::status::Status_OK();
 }
@@ -446,8 +469,8 @@ rocksdb_rs::status::Status WalManager::GetLiveWalFile(uint64_t number,
 // the function returns status.ok() and sequence == 0 if the file exists, but is
 // empty
 rocksdb_rs::status::Status WalManager::ReadFirstLine(const std::string& fname,
-                                 const uint64_t number,
-                                 SequenceNumber* sequence) {
+                                                     const uint64_t number,
+                                                     SequenceNumber* sequence) {
   struct LogReporter : public log::Reader::Reporter {
     Env* env;
     Logger* info_log;
@@ -455,7 +478,8 @@ rocksdb_rs::status::Status WalManager::ReadFirstLine(const std::string& fname,
 
     rocksdb_rs::status::Status* status;
     bool ignore_error;  // true if db_options_.paranoid_checks==false
-    void Corruption(size_t bytes, const rocksdb_rs::status::Status& s) override {
+    void Corruption(size_t bytes,
+                    const rocksdb_rs::status::Status& s) override {
       ROCKS_LOG_WARN(info_log, "[WalManager] %s%s: dropping %d bytes; %s",
                      (this->ignore_error ? "(ignoring error) " : ""), fname,
                      static_cast<int>(bytes), s.ToString()->c_str());
@@ -467,8 +491,10 @@ rocksdb_rs::status::Status WalManager::ReadFirstLine(const std::string& fname,
   };
 
   std::unique_ptr<FSSequentialFile> file;
-  rocksdb_rs::status::Status status = fs_->NewSequentialFile(
-      fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr).status();
+  rocksdb_rs::status::Status status =
+      fs_->NewSequentialFile(fname, fs_->OptimizeForLogRead(file_options_),
+                             &file, nullptr)
+          .status();
   std::unique_ptr<SequentialFileReader> file_reader(
       new SequentialFileReader(std::move(file), fname, io_tracer_));
 
@@ -490,8 +516,8 @@ rocksdb_rs::status::Status WalManager::ReadFirstLine(const std::string& fname,
   if (reader.ReadRecord(&record, &scratch) &&
       (status.ok() || !db_options_.paranoid_checks)) {
     if (record.size() < WriteBatchInternal::kHeader) {
-      reporter.Corruption(record.size(),
-                          rocksdb_rs::status::Status_Corruption("log record too small"));
+      reporter.Corruption(record.size(), rocksdb_rs::status::Status_Corruption(
+                                             "log record too small"));
       // TODO read record's till the first no corrupt entry?
     } else {
       WriteBatch batch;

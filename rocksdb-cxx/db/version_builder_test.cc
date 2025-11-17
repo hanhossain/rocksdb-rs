@@ -73,7 +73,8 @@ class VersionBuilderTest : public testing::Test {
         /* marked_for_compact */ false, Temperature::kUnknown,
         oldest_blob_file_number, kUnknownOldestAncesterTime,
         kUnknownFileCreationTime, epoch_number, kUnknownFileChecksum,
-        kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+        kUnknownFileChecksumFuncName,
+        rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
         /* user_defined_timestamps_persisted */ true);
     f->compensated_file_size = file_size;
     f->num_entries = num_entries;
@@ -136,8 +137,9 @@ class VersionBuilderTest : public testing::Test {
         GetInternalKey(largest), smallest_seqno, largest_seqno,
         marked_for_compaction, Temperature::kUnknown, blob_file_number,
         kUnknownOldestAncesterTime, kUnknownFileCreationTime, epoch_number,
-        kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
-        0, 0, /* user_defined_timestamps_persisted */ true);
+        kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+        rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+        /* user_defined_timestamps_persisted */ true);
   }
 
   void UpdateVersionStorageInfo(VersionStorageInfo* vstorage) {
@@ -188,8 +190,9 @@ TEST_F(VersionBuilderTest, ApplyAndSaveTo) {
       2, 666, 0, 100U, GetInternalKey("301"), GetInternalKey("350"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.DeleteFile(3, 27U);
 
   EnvOptions env_options;
@@ -236,8 +239,9 @@ TEST_F(VersionBuilderTest, ApplyAndSaveToDynamic) {
       3, 666, 0, 100U, GetInternalKey("301"), GetInternalKey("350"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
 
   version_edit.DeleteFile(0, 1U);
   version_edit.DeleteFile(0, 88U);
@@ -288,8 +292,9 @@ TEST_F(VersionBuilderTest, ApplyAndSaveToDynamic2) {
       4, 666, 0, 100U, GetInternalKey("301"), GetInternalKey("350"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.DeleteFile(0, 1U);
   version_edit.DeleteFile(0, 88U);
   version_edit.DeleteFile(4, 6U);
@@ -325,32 +330,37 @@ TEST_F(VersionBuilderTest, ApplyMultipleAndSaveTo) {
       2, 666, 0, 100U, GetInternalKey("301"), GetInternalKey("350"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.AddFile(
       2, 676, 0, 100U, GetInternalKey("401"), GetInternalKey("450"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.AddFile(
       2, 636, 0, 100U, GetInternalKey("601"), GetInternalKey("650"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.AddFile(
       2, 616, 0, 100U, GetInternalKey("501"), GetInternalKey("550"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.AddFile(
       2, 606, 0, 100U, GetInternalKey("701"), GetInternalKey("750"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
 
   EnvOptions env_options;
   constexpr TableCache* table_cache = nullptr;
@@ -389,32 +399,37 @@ TEST_F(VersionBuilderTest, ApplyDeleteAndSaveTo) {
       2, 666, 0, 100U, GetInternalKey("301"), GetInternalKey("350"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.AddFile(
       2, 676, 0, 100U, GetInternalKey("401"), GetInternalKey("450"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.AddFile(
       2, 636, 0, 100U, GetInternalKey("601"), GetInternalKey("650"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.AddFile(
       2, 616, 0, 100U, GetInternalKey("501"), GetInternalKey("550"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit.AddFile(
       2, 606, 0, 100U, GetInternalKey("701"), GetInternalKey("750"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   ASSERT_OK(version_builder.Apply(&version_edit));
 
   VersionEdit version_edit2;
@@ -422,16 +437,18 @@ TEST_F(VersionBuilderTest, ApplyDeleteAndSaveTo) {
       2, 808, 0, 100U, GetInternalKey("901"), GetInternalKey("950"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit2.DeleteFile(2, 616);
   version_edit2.DeleteFile(2, 636);
   version_edit.AddFile(
       2, 806, 0, 100U, GetInternalKey("801"), GetInternalKey("850"), 200, 200,
       false, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
 
   ASSERT_OK(version_builder.Apply(&version_edit2));
   ASSERT_OK(version_builder.SaveTo(&new_vstorage));
@@ -536,14 +553,15 @@ TEST_F(VersionBuilderTest, ApplyFileDeletionAndAddition) {
 
   constexpr bool marked_for_compaction = false;
 
-  addition.AddFile(
-      level, file_number, path_id, file_size,
-      GetInternalKey(smallest, smallest_seq),
-      GetInternalKey(largest, largest_seq), smallest_seqno, largest_seqno,
-      marked_for_compaction, Temperature::kUnknown, kInvalidBlobFileNumber,
-      kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+  addition.AddFile(level, file_number, path_id, file_size,
+                   GetInternalKey(smallest, smallest_seq),
+                   GetInternalKey(largest, largest_seq), smallest_seqno,
+                   largest_seqno, marked_for_compaction, Temperature::kUnknown,
+                   kInvalidBlobFileNumber, kUnknownOldestAncesterTime,
+                   kUnknownFileCreationTime, kUnknownEpochNumber,
+                   kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+                   rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+                   /* user_defined_timestamps_persisted */ true);
 
   ASSERT_OK(builder.Apply(&addition));
 
@@ -592,8 +610,9 @@ TEST_F(VersionBuilderTest, ApplyFileAdditionAlreadyInBase) {
       GetInternalKey(largest), smallest_seqno, largest_seqno,
       marked_for_compaction, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
 
   const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
@@ -624,13 +643,14 @@ TEST_F(VersionBuilderTest, ApplyFileAdditionAlreadyApplied) {
   constexpr SequenceNumber largest_seqno = 1000;
   constexpr bool marked_for_compaction = false;
 
-  edit.AddFile(
-      level, file_number, path_id, file_size, GetInternalKey(smallest),
-      GetInternalKey(largest), smallest_seqno, largest_seqno,
-      marked_for_compaction, Temperature::kUnknown, kInvalidBlobFileNumber,
-      kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+  edit.AddFile(level, file_number, path_id, file_size, GetInternalKey(smallest),
+               GetInternalKey(largest), smallest_seqno, largest_seqno,
+               marked_for_compaction, Temperature::kUnknown,
+               kInvalidBlobFileNumber, kUnknownOldestAncesterTime,
+               kUnknownFileCreationTime, kUnknownEpochNumber,
+               kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+               /* user_defined_timestamps_persisted */ true);
 
   ASSERT_OK(builder.Apply(&edit));
 
@@ -643,8 +663,9 @@ TEST_F(VersionBuilderTest, ApplyFileAdditionAlreadyApplied) {
       GetInternalKey(largest), smallest_seqno, largest_seqno,
       marked_for_compaction, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
 
   const rocksdb_rs::status::Status s = builder.Apply(&other_edit);
   ASSERT_TRUE(s.IsCorruption());
@@ -680,8 +701,9 @@ TEST_F(VersionBuilderTest, ApplyFileAdditionAndDeletion) {
       GetInternalKey(largest), smallest_seqno, largest_seqno,
       marked_for_compaction, Temperature::kUnknown, kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime, kUnknownEpochNumber,
-      kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0,
-      0, /* user_defined_timestamps_persisted */ true);
+      kUnknownFileChecksum, kUnknownFileChecksumFuncName,
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
 
   ASSERT_OK(builder.Apply(&addition));
 
@@ -796,7 +818,8 @@ TEST_F(VersionBuilderTest, ApplyBlobFileAdditionAlreadyInBase) {
 
   const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Blob file #1234 already added"));
+  ASSERT_TRUE(
+      std::strstr(s.getState()->c_str(), "Blob file #1234 already added"));
 }
 
 TEST_F(VersionBuilderTest, ApplyBlobFileAdditionAlreadyApplied) {
@@ -828,7 +851,8 @@ TEST_F(VersionBuilderTest, ApplyBlobFileAdditionAlreadyApplied) {
 
   const rocksdb_rs::status::Status s = builder.Apply(&edit);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Blob file #1234 already added"));
+  ASSERT_TRUE(
+      std::strstr(s.getState()->c_str(), "Blob file #1234 already added"));
 }
 
 TEST_F(VersionBuilderTest, ApplyBlobFileGarbageFileInBase) {
@@ -1047,8 +1071,8 @@ TEST_F(VersionBuilderTest, BlobFileGarbageOverflow) {
 
     const rocksdb_rs::status::Status s = builder.Apply(&garbage);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(
-        std::strstr(s.getState()->c_str(), "Garbage overflow for blob file #1234"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(),
+                            "Garbage overflow for blob file #1234"));
   }
 
   {
@@ -1063,8 +1087,8 @@ TEST_F(VersionBuilderTest, BlobFileGarbageOverflow) {
 
     const rocksdb_rs::status::Status s = builder.Apply(&garbage);
     ASSERT_TRUE(s.IsCorruption());
-    ASSERT_TRUE(
-        std::strstr(s.getState()->c_str(), "Garbage overflow for blob file #1234"));
+    ASSERT_TRUE(std::strstr(s.getState()->c_str(),
+                            "Garbage overflow for blob file #1234"));
   }
 }
 
@@ -1249,13 +1273,14 @@ TEST_F(VersionBuilderTest, SaveBlobFilesToConcurrentJobs) {
   constexpr uint64_t total_blob_count = 234;
   constexpr uint64_t total_blob_bytes = 1 << 22;
 
-  edit.AddFile(
-      level, table_file_number, path_id, file_size, GetInternalKey(smallest),
-      GetInternalKey(largest), smallest_seqno, largest_seqno,
-      marked_for_compaction, Temperature::kUnknown, blob_file_number,
-      kUnknownOldestAncesterTime, kUnknownFileCreationTime, 2 /*epoch_number*/,
-      checksum_value, checksum_method, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
-      /* user_defined_timestamps_persisted */ true);
+  edit.AddFile(level, table_file_number, path_id, file_size,
+               GetInternalKey(smallest), GetInternalKey(largest),
+               smallest_seqno, largest_seqno, marked_for_compaction,
+               Temperature::kUnknown, blob_file_number,
+               kUnknownOldestAncesterTime, kUnknownFileCreationTime,
+               2 /*epoch_number*/, checksum_value, checksum_method,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+               /* user_defined_timestamps_persisted */ true);
   edit.AddBlobFile(blob_file_number, total_blob_count, total_blob_bytes,
                    checksum_method, checksum_value);
 
@@ -1451,8 +1476,8 @@ TEST_F(VersionBuilderTest, CheckConsistencyForBlobFilesAllGarbage) {
 
   const rocksdb_rs::status::Status s = builder.SaveTo(&new_vstorage);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(
-      std::strstr(s.getState()->c_str(), "Blob file #16 consists entirely of garbage"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(),
+                          "Blob file #16 consists entirely of garbage"));
 
   UnrefFilesInVersion(&new_vstorage);
 }
@@ -1500,8 +1525,8 @@ TEST_F(VersionBuilderTest, CheckConsistencyForBlobFilesAllGarbageLinkedSsts) {
 
   const rocksdb_rs::status::Status s = builder.SaveTo(&new_vstorage);
   ASSERT_TRUE(s.IsCorruption());
-  ASSERT_TRUE(
-      std::strstr(s.getState()->c_str(), "Blob file #16 consists entirely of garbage"));
+  ASSERT_TRUE(std::strstr(s.getState()->c_str(),
+                          "Blob file #16 consists entirely of garbage"));
 
   UnrefFilesInVersion(&new_vstorage);
 }
@@ -1576,7 +1601,8 @@ TEST_F(VersionBuilderTest, MaintainLinkedSstsForBlobFiles) {
       Temperature::kUnknown,
       /* oldest_blob_file_number */ 1, kUnknownOldestAncesterTime,
       kUnknownFileCreationTime, kUnknownEpochNumber, kUnknownFileChecksum,
-      kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
+      0, 0,
       /* user_defined_timestamps_persisted */ true);
 
   // Add an SST that does not reference any blob files.
@@ -1587,7 +1613,8 @@ TEST_F(VersionBuilderTest, MaintainLinkedSstsForBlobFiles) {
       /* largest_seqno */ 2200, /* marked_for_compaction */ false,
       Temperature::kUnknown, kInvalidBlobFileNumber, kUnknownOldestAncesterTime,
       kUnknownFileCreationTime, kUnknownEpochNumber, kUnknownFileChecksum,
-      kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
+      0, 0,
       /* user_defined_timestamps_persisted */ true);
 
   // Delete a file that references a blob file.
@@ -1624,7 +1651,8 @@ TEST_F(VersionBuilderTest, MaintainLinkedSstsForBlobFiles) {
                Temperature::kUnknown, kInvalidBlobFileNumber,
                kUnknownOldestAncesterTime, kUnknownFileCreationTime,
                kUnknownEpochNumber, kUnknownFileChecksum,
-               kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+               kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
                /* user_defined_timestamps_persisted */ true);
 
   // Add one more SST file that references a blob file, then promptly
@@ -1741,7 +1769,8 @@ TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
       /* oldest_blob_file_number */ kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime,
       1 /* epoch_number */, kUnknownFileChecksum, kUnknownFileChecksumFuncName,
-      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, /* user_defined_timestamps_persisted */ true);
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit_1.AddFile(
       /* level */ 0, /* file_number */ 2U, /* path_id */ 0,
       /* file_size */ 100, /* smallest */ GetInternalKey("b", 2),
@@ -1751,7 +1780,8 @@ TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
       /* oldest_blob_file_number */ kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime,
       1 /* epoch_number */, kUnknownFileChecksum, kUnknownFileChecksumFuncName,
-      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, /* user_defined_timestamps_persisted */ true);
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
 
   VersionBuilder version_builder_1(EnvOptions(), &ioptions_,
                                    nullptr /* table_cache */, &vstorage_,
@@ -1763,8 +1793,9 @@ TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
   ASSERT_OK(version_builder_1.Apply(&version_edit_1));
   s = version_builder_1.SaveTo(&new_vstorage_1);
   EXPECT_TRUE(s.IsCorruption());
-  EXPECT_TRUE(std::strstr(
-      s.getState()->c_str(), "L0 files of same epoch number but overlapping range"));
+  EXPECT_TRUE(
+      std::strstr(s.getState()->c_str(),
+                  "L0 files of same epoch number but overlapping range"));
   UnrefFilesInVersion(&new_vstorage_1);
 
   // To verify L0 files not sorted by epoch_number are caught as corrupted
@@ -1778,7 +1809,8 @@ TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
       /* oldest_blob_file_number */ kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime,
       1 /* epoch_number */, kUnknownFileChecksum, kUnknownFileChecksumFuncName,
-      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, /* user_defined_timestamps_persisted */ true);
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
   version_edit_2.AddFile(
       /* level */ 0, /* file_number */ 2U, /* path_id */ 0,
       /* file_size */ 100, /* smallest */ GetInternalKey("b", 2),
@@ -1788,7 +1820,8 @@ TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
       /* oldest_blob_file_number */ kInvalidBlobFileNumber,
       kUnknownOldestAncesterTime, kUnknownFileCreationTime,
       2 /* epoch_number */, kUnknownFileChecksum, kUnknownFileChecksumFuncName,
-      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, /* user_defined_timestamps_persisted */ true);
+      rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+      /* user_defined_timestamps_persisted */ true);
 
   VersionBuilder version_builder_2(EnvOptions(), &ioptions_,
                                    nullptr /* table_cache */, &vstorage_,
@@ -1815,7 +1848,8 @@ TEST_F(VersionBuilderTest, CheckConsistencyForL0FilesSortedByEpochNumber) {
   ASSERT_OK(dummy_version_builder.Apply(&dummy_version_edit));
   s = dummy_version_builder.SaveTo(&new_vstorage_2);
   EXPECT_TRUE(s.IsCorruption());
-  EXPECT_TRUE(std::strstr(s.getState()->c_str(), "L0 files are not sorted properly"));
+  EXPECT_TRUE(
+      std::strstr(s.getState()->c_str(), "L0 files are not sorted properly"));
 
   UnrefFilesInVersion(&new_vstorage_2);
 }

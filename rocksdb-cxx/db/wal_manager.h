@@ -21,14 +21,12 @@
 #include "file/file_util.h"
 #include "options/db_options.h"
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/transaction_log.h"
 #include "rocksdb/types.h"
 
-#include "rocksdb-rs/src/status.rs.h"
-
 namespace rocksdb {
-
 
 // WAL manager provides the abstraction for reading the WAL files as a single
 // unit. Internally, it opens and reads the files using Reader or Writer
@@ -62,28 +60,33 @@ class WalManager {
 
   void ArchiveWALFile(const std::string& fname, uint64_t number);
 
-  rocksdb_rs::status::Status DeleteFile(const std::string& fname, uint64_t number);
+  rocksdb_rs::status::Status DeleteFile(const std::string& fname,
+                                        uint64_t number);
 
-  rocksdb_rs::status::Status GetLiveWalFile(uint64_t number, std::unique_ptr<LogFile>* log_file);
+  rocksdb_rs::status::Status GetLiveWalFile(uint64_t number,
+                                            std::unique_ptr<LogFile>* log_file);
 
-  rocksdb_rs::status::Status TEST_ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
-                              SequenceNumber* sequence) {
+  rocksdb_rs::status::Status TEST_ReadFirstRecord(
+      const rocksdb_rs::transaction_log::WalFileType type,
+      const uint64_t number, SequenceNumber* sequence) {
     return ReadFirstRecord(type, number, sequence);
   }
 
-  rocksdb_rs::status::Status TEST_ReadFirstLine(const std::string& fname, const uint64_t number,
-                            SequenceNumber* sequence) {
+  rocksdb_rs::status::Status TEST_ReadFirstLine(const std::string& fname,
+                                                const uint64_t number,
+                                                SequenceNumber* sequence) {
     return ReadFirstLine(fname, number, sequence);
   }
 
  private:
-  rocksdb_rs::status::Status GetSortedWalsOfType(const std::string& path, VectorLogPtr& log_files,
-                             rocksdb_rs::transaction_log::WalFileType type);
+  rocksdb_rs::status::Status GetSortedWalsOfType(
+      const std::string& path, VectorLogPtr& log_files,
+      rocksdb_rs::transaction_log::WalFileType type);
   // Requires: all_logs should be sorted with earliest log file first
   // Retains all log files in all_logs which contain updates with seq no.
   // Greater Than or Equal to the requested SequenceNumber.
-  rocksdb_rs::status::Status RetainProbableWalFiles(VectorLogPtr& all_logs,
-                                const SequenceNumber target);
+  rocksdb_rs::status::Status RetainProbableWalFiles(
+      VectorLogPtr& all_logs, const SequenceNumber target);
 
   // ReadFirstRecord checks the read_first_record_cache_ to see if the entry
   // exists or not. If not, it will read the WAL file.
@@ -93,8 +96,9 @@ class WalManager {
   // order to include that WAL and is inserted in read_first_record_cache_.
   // Therefore, sequence_number is used as boolean if WAL should be included or
   // not and that sequence_number shouldn't be use for any other purpose.
-  rocksdb_rs::status::Status ReadFirstRecord(const rocksdb_rs::transaction_log::WalFileType type, const uint64_t number,
-                         SequenceNumber* sequence);
+  rocksdb_rs::status::Status ReadFirstRecord(
+      const rocksdb_rs::transaction_log::WalFileType type,
+      const uint64_t number, SequenceNumber* sequence);
 
   // In case of no wal_compression, ReadFirstLine returns status.ok() and
   // sequence == 0 if the file exists, but is empty.
@@ -104,8 +108,9 @@ class WalManager {
   // result for an empty file, GetSortedWalsOfType() will skip these WALs
   // causing the operations to fail. To avoid that, it sets sequence_number to
   // 1 inorder to include that WAL.
-  rocksdb_rs::status::Status ReadFirstLine(const std::string& fname, const uint64_t number,
-                       SequenceNumber* sequence);
+  rocksdb_rs::status::Status ReadFirstLine(const std::string& fname,
+                                           const uint64_t number,
+                                           SequenceNumber* sequence);
 
   // ------- state from DBImpl ------
   const ImmutableDBOptions& db_options_;

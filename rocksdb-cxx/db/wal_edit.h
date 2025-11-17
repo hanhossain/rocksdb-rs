@@ -19,7 +19,7 @@
 #include "port/port.h"
 
 namespace rocksdb::status {
- struct Status;
+struct Status;
 }
 
 namespace rocksdb {

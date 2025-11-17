@@ -17,7 +17,6 @@
 
 namespace rocksdb {
 
-
 class TieredCompactionTest : public DBTestBase,
                              public testing::WithParamInterface<bool> {
  public:
@@ -2138,7 +2137,6 @@ TEST_F(PrecludeLastLevelTest, RangeDelsCauseFileEndpointsToOverlap) {
 
   Close();
 }
-
 
 }  // namespace rocksdb
 

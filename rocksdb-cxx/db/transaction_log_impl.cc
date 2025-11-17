@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "db/transaction_log_impl.h"
 
 #include <cinttypes>
@@ -51,17 +50,25 @@ rocksdb_rs::status::Status TransactionLogIteratorImpl::OpenLogFile(
   std::string fname;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   EnvOptions optimized_env_options = fs->OptimizeForLogRead(soptions_);
-  if (log_file->Type() == rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
-    fname = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(dir_, log_file->LogNumber()));
-    s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr).status();
+  if (log_file->Type() ==
+      rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
+    fname = static_cast<std::string>(
+        rocksdb_rs::filename::ArchivedLogFileName(dir_, log_file->LogNumber()));
+    s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr)
+            .status();
   } else {
-    fname = static_cast<std::string>(rocksdb_rs::filename::LogFileName(dir_, log_file->LogNumber()));
-    s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr).status();
+    fname = static_cast<std::string>(
+        rocksdb_rs::filename::LogFileName(dir_, log_file->LogNumber()));
+    s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr)
+            .status();
     if (!s.ok()) {
       //  If cannot open file in DB directory.
       //  Try the archive dir, as it could have moved in the meanwhile.
-      fname = static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(dir_, log_file->LogNumber()));
-      s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr).status();
+      fname =
+          static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName(
+              dir_, log_file->LogNumber()));
+      s = fs->NewSequentialFile(fname, optimized_env_options, &file, nullptr)
+              .status();
     }
   }
   if (s.ok()) {
@@ -80,7 +87,9 @@ BatchResult TransactionLogIteratorImpl::GetBatch() {
   return result;
 }
 
-rocksdb_rs::status::Status TransactionLogIteratorImpl::status() { return current_status_.Clone(); }
+rocksdb_rs::status::Status TransactionLogIteratorImpl::status() {
+  return current_status_.Clone();
+}
 
 bool TransactionLogIteratorImpl::Valid() { return started_ && is_valid_; }
 
@@ -122,8 +131,8 @@ void TransactionLogIteratorImpl::SeekToStartSequence(uint64_t start_file_index,
   }
   while (RestrictedRead(&record)) {
     if (record.size() < WriteBatchInternal::kHeader) {
-      reporter_.Corruption(record.size(),
-                           rocksdb_rs::status::Status_Corruption("very small log record"));
+      reporter_.Corruption(record.size(), rocksdb_rs::status::Status_Corruption(
+                                              "very small log record"));
       continue;
     }
     UpdateCurrentWriteBatch(record);
@@ -188,8 +197,9 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
     }
     while (RestrictedRead(&record)) {
       if (record.size() < WriteBatchInternal::kHeader) {
-        reporter_.Corruption(record.size(),
-                             rocksdb_rs::status::Status_Corruption("very small log record"));
+        reporter_.Corruption(
+            record.size(),
+            rocksdb_rs::status::Status_Corruption("very small log record"));
         continue;
       } else {
         // started_ should be true if called by application
@@ -207,7 +217,8 @@ void TransactionLogIteratorImpl::NextImpl(bool internal) {
     // Open the next file
     if (current_file_index_ < files_->size() - 1) {
       ++current_file_index_;
-      rocksdb_rs::status::Status s = OpenLogReader(files_->at(current_file_index_).get());
+      rocksdb_rs::status::Status s =
+          OpenLogReader(files_->at(current_file_index_).get());
       if (!s.ok()) {
         is_valid_ = false;
         current_status_.copy_from(s);
@@ -245,7 +256,8 @@ bool TransactionLogIteratorImpl::IsBatchExpected(
 
 void TransactionLogIteratorImpl::UpdateCurrentWriteBatch(const Slice& record) {
   std::unique_ptr<WriteBatch> batch(new WriteBatch());
-  rocksdb_rs::status::Status s = WriteBatchInternal::SetContents(batch.get(), record);
+  rocksdb_rs::status::Status s =
+      WriteBatchInternal::SetContents(batch.get(), record);
 
   SequenceNumber expected_seq = current_last_seq_ + 1;
   // If the iterator has started, then confirm that we get continuous batches
@@ -262,7 +274,8 @@ void TransactionLogIteratorImpl::UpdateCurrentWriteBatch(const Slice& record) {
     // currentStatus_ will be set to Ok if reseek succeeds
     // Note: this is still ok in seq_pre_batch_ && two_write_queuesp_ mode
     // that allows gaps in the WAL since it will still skip over the gap.
-    current_status_ = rocksdb_rs::status::Status_NotFound("Gap in sequence numbers");
+    current_status_ =
+        rocksdb_rs::status::Status_NotFound("Gap in sequence numbers");
     // In seq_per_batch_ mode, gaps in the seq are possible so the strict mode
     // should be disabled
     return SeekToStartSequence(current_file_index_, !seq_per_batch_);
@@ -280,7 +293,8 @@ void TransactionLogIteratorImpl::UpdateCurrentWriteBatch(const Slice& record) {
   current_status_ = rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status TransactionLogIteratorImpl::OpenLogReader(const LogFile* log_file) {
+rocksdb_rs::status::Status TransactionLogIteratorImpl::OpenLogReader(
+    const LogFile* log_file) {
   std::unique_ptr<SequentialFileReader> file;
   rocksdb_rs::status::Status s = OpenLogFile(log_file, &file);
   if (!s.ok()) {

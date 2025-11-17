@@ -43,9 +43,9 @@ WriteMode operator+(WriteMode lhs, const int rhs) {
   return static_cast<WriteMode>(static_cast<T>(lhs) + rhs);
 }
 
-std::pair<WriteBatch, rocksdb_rs::status::Status> GetWriteBatch(ColumnFamilyHandle* cf_handle,
-                                            size_t protection_bytes_per_key,
-                                            WriteBatchOpType op_type) {
+std::pair<WriteBatch, rocksdb_rs::status::Status> GetWriteBatch(
+    ColumnFamilyHandle* cf_handle, size_t protection_bytes_per_key,
+    WriteBatchOpType op_type) {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   WriteBatch wb(0 /* reserved_bytes */, 0 /* max_bytes */,
                 protection_bytes_per_key, 0 /* default_cf_ts_sz */);
@@ -134,8 +134,8 @@ class DbKvChecksumTest
       case WriteMode::kNum:
         assert(false);
     }
-    return rocksdb_rs::status::Status_NotSupported("WriteMode " +
-                                std::to_string(static_cast<int>(write_mode_)));
+    return rocksdb_rs::status::Status_NotSupported(
+        "WriteMode " + std::to_string(static_cast<int>(write_mode_)));
   }
 
   void CorruptNextByteCallBack(void* arg) {

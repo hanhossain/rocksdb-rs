@@ -151,10 +151,10 @@ MemTable::~MemTable() {
 }
 
 size_t MemTable::ApproximateMemoryUsage() {
-  autovector<size_t> usages = {
-      arena_.ApproximateMemoryUsage(), table_->ApproximateMemoryUsage(),
-      range_del_table_->ApproximateMemoryUsage(),
-      rocksdb::ApproximateMemoryUsage(insert_hints_)};
+  autovector<size_t> usages = {arena_.ApproximateMemoryUsage(),
+                               table_->ApproximateMemoryUsage(),
+                               range_del_table_->ApproximateMemoryUsage(),
+                               rocksdb::ApproximateMemoryUsage(insert_hints_)};
   size_t total_usage = 0;
   for (size_t usage : usages) {
     // If usage + total_usage >= kMaxSizet, return kMaxSizet.
@@ -255,23 +255,27 @@ void MemTable::UpdateOldestKeyTime() {
   }
 }
 
-rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
-                                     uint32_t protection_bytes_per_key,
-                                     bool allow_data_in_errors) {
+rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(
+    const char* entry, uint32_t protection_bytes_per_key,
+    bool allow_data_in_errors) {
   if (protection_bytes_per_key == 0) {
     return rocksdb_rs::status::Status_OK();
   }
   uint32_t key_length;
-  const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
+  const char* key_ptr =
+      rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
   if (key_ptr == nullptr) {
-    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key length");
+    return rocksdb_rs::status::Status_Corruption(
+        "Unable to parse internal key length");
   }
   if (key_length < 8) {
-    return rocksdb_rs::status::Status_Corruption("Memtable entry internal key length too short.");
+    return rocksdb_rs::status::Status_Corruption(
+        "Memtable entry internal key length too short.");
   }
   Slice user_key = Slice(key_ptr, key_length - 8);
 
-  const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
+  const uint64_t tag =
+      rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
   ValueType type;
   SequenceNumber seq;
   UnPackSequenceAndType(tag, &seq, &type);
@@ -280,7 +284,8 @@ rocksdb_rs::status::Status MemTable::VerifyEntryChecksum(const char* entry,
   const char* value_ptr = rocksdb_rs::coding::GetVarint32Ptr(
       key_ptr + key_length, key_ptr + key_length + 5, &value_length);
   if (value_ptr == nullptr) {
-    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key value");
+    return rocksdb_rs::status::Status_Corruption(
+        "Unable to parse internal key value");
   }
   Slice value = Slice(value_ptr, value_length);
 
@@ -517,7 +522,8 @@ class MemTableIterator : public InternalIterator {
       status_ = MemTable::VerifyEntryChecksum(iter_->key(),
                                               protection_bytes_per_key_);
       if (!status_.ok()) {
-        ROCKS_LOG_ERROR(logger_, "In MemtableIterator: %s", status_.getState()->c_str());
+        ROCKS_LOG_ERROR(logger_, "In MemtableIterator: %s",
+                        status_.getState()->c_str());
       }
     }
   }
@@ -618,18 +624,21 @@ MemTable::MemTableStats MemTable::ApproximateStats(const Slice& start_ikey,
   return {entry_count * (data_size / n), entry_count};
 }
 
-rocksdb_rs::status::Status MemTable::VerifyEncodedEntry(Slice encoded,
-                                    const ProtectionInfoKVOS64& kv_prot_info) {
+rocksdb_rs::status::Status MemTable::VerifyEncodedEntry(
+    Slice encoded, const ProtectionInfoKVOS64& kv_prot_info) {
   uint32_t ikey_len = 0;
   if (!GetVarint32(&encoded, &ikey_len)) {
-    return rocksdb_rs::status::Status_Corruption("Unable to parse internal key length");
+    return rocksdb_rs::status::Status_Corruption(
+        "Unable to parse internal key length");
   }
   size_t ts_sz = GetInternalKeyComparator().user_comparator()->timestamp_size();
   if (ikey_len < 8 + ts_sz) {
-    return rocksdb_rs::status::Status_Corruption("Internal key length too short");
+    return rocksdb_rs::status::Status_Corruption(
+        "Internal key length too short");
   }
   if (ikey_len > encoded.size()) {
-    return rocksdb_rs::status::Status_Corruption("Internal key length too long");
+    return rocksdb_rs::status::Status_Corruption(
+        "Internal key length too long");
   }
   uint32_t value_len = 0;
   const size_t user_key_len = ikey_len - 8;
@@ -643,7 +652,8 @@ rocksdb_rs::status::Status MemTable::VerifyEncodedEntry(Slice encoded,
   encoded.remove_prefix(8);
 
   if (!GetVarint32(&encoded, &value_len)) {
-    return rocksdb_rs::status::Status_Corruption("Unable to parse value length");
+    return rocksdb_rs::status::Status_Corruption(
+        "Unable to parse value length");
   }
   if (value_len < encoded.size()) {
     return rocksdb_rs::status::Status_Corruption("Value length too short");
@@ -678,12 +688,11 @@ void MemTable::UpdateEntryChecksum(const ProtectionInfoKVOS64* kv_prot_info,
   }
 }
 
-rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
-                     const Slice& key, /* user key */
-                     const Slice& value,
-                     const ProtectionInfoKVOS64* kv_prot_info,
-                     bool allow_concurrent,
-                     MemTablePostProcessInfo* post_process_info, void** hint) {
+rocksdb_rs::status::Status MemTable::Add(
+    SequenceNumber s, ValueType type, const Slice& key, /* user key */
+    const Slice& value, const ProtectionInfoKVOS64* kv_prot_info,
+    bool allow_concurrent, MemTablePostProcessInfo* post_process_info,
+    void** hint) {
   // Format of an entry is concatenation of:
   //  key_size     : varint32 of internal_key.size()
   //  key bytes    : char[internal_key.size()]
@@ -693,9 +702,10 @@ rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
   uint32_t key_size = static_cast<uint32_t>(key.size());
   uint32_t val_size = static_cast<uint32_t>(value.size());
   uint32_t internal_key_size = key_size + 8;
-  const uint32_t encoded_len = rocksdb_rs::coding::VarintLength(internal_key_size) +
-                               internal_key_size + rocksdb_rs::coding::VarintLength(val_size) +
-                               val_size + moptions_.protection_bytes_per_key;
+  const uint32_t encoded_len =
+      rocksdb_rs::coding::VarintLength(internal_key_size) + internal_key_size +
+      rocksdb_rs::coding::VarintLength(val_size) + val_size +
+      moptions_.protection_bytes_per_key;
   char* buf = nullptr;
   std::unique_ptr<MemTableRep>& table =
       type == kTypeRangeDeletion ? range_del_table_ : table_;
@@ -718,7 +728,8 @@ rocksdb_rs::status::Status MemTable::Add(SequenceNumber s, ValueType type,
   Slice encoded(buf, encoded_len - moptions_.protection_bytes_per_key);
   if (kv_prot_info != nullptr) {
     TEST_SYNC_POINT_CALLBACK("MemTable::Add:Encoded", &encoded);
-    rocksdb_rs::status::Status status = VerifyEncodedEntry(encoded, *kv_prot_info);
+    rocksdb_rs::status::Status status =
+        VerifyEncodedEntry(encoded, *kv_prot_info);
     if (!status.ok()) {
       return status;
     }
@@ -891,7 +902,8 @@ static bool SaveValue(void* arg, const char* entry) {
     *(s->status) = MemTable::VerifyEntryChecksum(
         entry, s->protection_bytes_per_key, s->allow_data_in_errors);
     if (!s->status->ok()) {
-      ROCKS_LOG_ERROR(s->logger, "In SaveValue: %s", s->status->getState()->c_str());
+      ROCKS_LOG_ERROR(s->logger, "In SaveValue: %s",
+                      s->status->getState()->c_str());
       // Memtable entry corrupted
       return false;
     }
@@ -906,7 +918,8 @@ static bool SaveValue(void* arg, const char* entry) {
   // Refer to comments under MemTable::Add() for entry format.
   // Check that it belongs to same user key.
   uint32_t key_length = 0;
-  const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
+  const char* key_ptr =
+      rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
   assert(key_length >= 8);
   Slice user_key_slice = Slice(key_ptr, key_length - 8);
   const Comparator* user_comparator =
@@ -919,7 +932,8 @@ static bool SaveValue(void* arg, const char* entry) {
   if (user_comparator->EqualWithoutTimestamp(user_key_slice,
                                              s->key->user_key())) {
     // Correct user key
-    const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
+    const uint64_t tag =
+        rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
     ValueType type;
     SequenceNumber seq;
     UnPackSequenceAndType(tag, &seq, &type);
@@ -1326,14 +1340,12 @@ bool MemTable::Get(const LookupKey& key, std::string* value,
   return found_final_value;
 }
 
-void MemTable::GetFromTable(const LookupKey& key,
-                            SequenceNumber max_covering_tombstone_seq,
-                            bool do_merge, ReadCallback* callback,
-                            bool* is_blob_index, std::string* value,
-                            PinnableWideColumns* columns,
-                            std::string* timestamp, rocksdb_rs::status::Status* s,
-                            MergeContext* merge_context, SequenceNumber* seq,
-                            bool* found_final_value, bool* merge_in_progress) {
+void MemTable::GetFromTable(
+    const LookupKey& key, SequenceNumber max_covering_tombstone_seq,
+    bool do_merge, ReadCallback* callback, bool* is_blob_index,
+    std::string* value, PinnableWideColumns* columns, std::string* timestamp,
+    rocksdb_rs::status::Status* s, MergeContext* merge_context,
+    SequenceNumber* seq, bool* found_final_value, bool* merge_in_progress) {
   Saver saver;
   saver.status = s;
   saver.found_final_value = found_final_value;
@@ -1458,9 +1470,9 @@ void MemTable::MultiGet(const ReadOptions& read_options, MultiGetRange* range,
   PERF_COUNTER_ADD(get_from_memtable_count, 1);
 }
 
-rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_type,
-                        const Slice& key, const Slice& value,
-                        const ProtectionInfoKVOS64* kv_prot_info) {
+rocksdb_rs::status::Status MemTable::Update(
+    SequenceNumber seq, ValueType value_type, const Slice& key,
+    const Slice& value, const ProtectionInfoKVOS64* kv_prot_info) {
   LookupKey lkey(key, seq);
   Slice mem_key = lkey.memtable_key();
 
@@ -1475,11 +1487,13 @@ rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_
     // all entries with overly large sequence numbers.
     const char* entry = iter->key();
     uint32_t key_length = 0;
-    const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
+    const char* key_ptr =
+        rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
     if (comparator_.comparator.user_comparator()->Equal(
             Slice(key_ptr, key_length - 8), lkey.user_key())) {
       // Correct user key
-      const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
+      const uint64_t tag =
+          rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
       ValueType type;
       SequenceNumber existing_seq;
       UnPackSequenceAndType(tag, &existing_seq, &type);
@@ -1491,13 +1505,15 @@ rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_
 
         // Update value, if new value size  <= previous value size
         if (new_size <= prev_size) {
-          char* p =
-              rocksdb_rs::coding::EncodeVarint32(const_cast<char*>(key_ptr) + key_length, new_size);
+          char* p = rocksdb_rs::coding::EncodeVarint32(
+              const_cast<char*>(key_ptr) + key_length, new_size);
           WriteLock wl(GetLock(lkey.user_key()));
           memcpy(p, value.data(), value.size());
           assert((unsigned)((p + value.size()) - entry) ==
-                 (unsigned)(rocksdb_rs::coding::VarintLength(key_length) + key_length +
-                            rocksdb_rs::coding::VarintLength(value.size()) + value.size()));
+                 (unsigned)(rocksdb_rs::coding::VarintLength(key_length) +
+                            key_length +
+                            rocksdb_rs::coding::VarintLength(value.size()) +
+                            value.size()));
           RecordTick(moptions_.statistics, NUMBER_KEYS_UPDATED);
           if (kv_prot_info != nullptr) {
             ProtectionInfoKVOS64 updated_kv_prot_info(*kv_prot_info);
@@ -1521,9 +1537,9 @@ rocksdb_rs::status::Status MemTable::Update(SequenceNumber seq, ValueType value_
   return Add(seq, value_type, key, value, kv_prot_info);
 }
 
-rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Slice& key,
-                                const Slice& delta,
-                                const ProtectionInfoKVOS64* kv_prot_info) {
+rocksdb_rs::status::Status MemTable::UpdateCallback(
+    SequenceNumber seq, const Slice& key, const Slice& delta,
+    const ProtectionInfoKVOS64* kv_prot_info) {
   LookupKey lkey(key, seq);
   Slice memkey = lkey.memtable_key();
 
@@ -1538,11 +1554,13 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
     // all entries with overly large sequence numbers.
     const char* entry = iter->key();
     uint32_t key_length = 0;
-    const char* key_ptr = rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
+    const char* key_ptr =
+        rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
     if (comparator_.comparator.user_comparator()->Equal(
             Slice(key_ptr, key_length - 8), lkey.user_key())) {
       // Correct user key
-      const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
+      const uint64_t tag =
+          rocksdb_rs::coding_lean::DecodeFixed64(key_ptr + key_length - 8);
       ValueType type;
       uint64_t existing_seq;
       UnPackSequenceAndType(tag, &existing_seq, &type);
@@ -1562,9 +1580,10 @@ rocksdb_rs::status::Status MemTable::UpdateCallback(SequenceNumber seq, const Sl
           assert(new_prev_size <= prev_size);
           if (new_prev_size < prev_size) {
             // overwrite the new prev_size
-            char* p = rocksdb_rs::coding::EncodeVarint32(const_cast<char*>(key_ptr) + key_length,
-                                     new_prev_size);
-            if (rocksdb_rs::coding::VarintLength(new_prev_size) < rocksdb_rs::coding::VarintLength(prev_size)) {
+            char* p = rocksdb_rs::coding::EncodeVarint32(
+                const_cast<char*>(key_ptr) + key_length, new_prev_size);
+            if (rocksdb_rs::coding::VarintLength(new_prev_size) <
+                rocksdb_rs::coding::VarintLength(prev_size)) {
               // shift the value buffer as well.
               memcpy(p, prev_buffer, new_prev_size);
               prev_buffer = p;
@@ -1629,13 +1648,15 @@ size_t MemTable::CountSuccessiveMergeEntries(const LookupKey& key) {
   for (; iter->Valid(); iter->Next()) {
     const char* entry = iter->key();
     uint32_t key_length = 0;
-    const char* iter_key_ptr = rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
+    const char* iter_key_ptr =
+        rocksdb_rs::coding::GetVarint32Ptr(entry, entry + 5, &key_length);
     if (!comparator_.comparator.user_comparator()->Equal(
             Slice(iter_key_ptr, key_length - 8), key.user_key())) {
       break;
     }
 
-    const uint64_t tag = rocksdb_rs::coding_lean::DecodeFixed64(iter_key_ptr + key_length - 8);
+    const uint64_t tag =
+        rocksdb_rs::coding_lean::DecodeFixed64(iter_key_ptr + key_length - 8);
     ValueType type;
     uint64_t unused;
     UnPackSequenceAndType(tag, &unused, &type);

@@ -33,7 +33,6 @@
 
 namespace rocksdb {
 
-
 const std::map<LevelStatType, LevelStat> InternalStats::compaction_level_stats =
     {
         {LevelStatType::NUM_FILES, LevelStat{"NumFiles", "Files"}},
@@ -643,8 +642,9 @@ InternalStats::InternalStats(int num_levels, SystemClock* clock,
   Cache* block_cache = GetBlockCacheForStats();
   if (block_cache) {
     // Extract or create stats collector. Could fail in rare cases.
-    rocksdb_rs::status::Status s = CacheEntryStatsCollector<CacheEntryRoleStats>::GetShared(
-        block_cache, clock_, &cache_entry_stats_collector_);
+    rocksdb_rs::status::Status s =
+        CacheEntryStatsCollector<CacheEntryRoleStats>::GetShared(
+            block_cache, clock_, &cache_entry_stats_collector_);
     if (s.ok()) {
       assert(cache_entry_stats_collector_);
     } else {
@@ -686,8 +686,8 @@ std::function<void(const Slice& key, Cache::ObjectPtr value, size_t charge,
 InternalStats::CacheEntryRoleStats::GetEntryCallback() {
   return [&](const Slice& /*key*/, Cache::ObjectPtr /*value*/, size_t charge,
              const Cache::CacheItemHelper* helper) -> void {
-    size_t role_idx =
-        static_cast<size_t>(helper ? helper->role : rocksdb_rs::cache::CacheEntryRole::kMisc);
+    size_t role_idx = static_cast<size_t>(
+        helper ? helper->role : rocksdb_rs::cache::CacheEntryRole::kMisc);
     entry_counts[role_idx]++;
     total_charges[role_idx] += charge;
   };
@@ -741,8 +741,11 @@ std::string InternalStats::CacheEntryRoleStats::ToString(
   str << "Block cache entry stats(count,size,portion):";
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
     if (entry_counts[i] > 0) {
-      str << " " << CacheEntryRole_ToCamelString(static_cast<rocksdb_rs::cache::CacheEntryRole>(i)) << "(" << entry_counts[i]
-          << "," << BytesToHumanString(total_charges[i]) << ","
+      str << " "
+          << CacheEntryRole_ToCamelString(
+                 static_cast<rocksdb_rs::cache::CacheEntryRole>(i))
+          << "(" << entry_counts[i] << ","
+          << BytesToHumanString(total_charges[i]) << ","
           << (100.0 * total_charges[i] / cache_capacity) << "%)";
     }
   }
@@ -754,20 +757,29 @@ void InternalStats::CacheEntryRoleStats::ToMap(
     std::map<std::string, std::string>* values, SystemClock* clock) const {
   values->clear();
   auto& v = *values;
-  v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheId())] = cache_id;
-  v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheCapacityBytes())] =
+  v[static_cast<std::string>(
+      rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheId())] = cache_id;
+  v[static_cast<std::string>(
+      rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheCapacityBytes())] =
       std::to_string(cache_capacity);
-  v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())] =
+  v[static_cast<std::string>(
+      rocksdb_rs::cache::
+          BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())] =
       std::to_string(GetLastDurationMicros() / 1000000.0);
-  v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())] =
+  v[static_cast<std::string>(
+      rocksdb_rs::cache::
+          BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())] =
       std::to_string((clock->NowMicros() - last_end_time_micros_) / 1000000U);
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
     auto role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
-    v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))] =
+    v[static_cast<std::string>(
+        rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))] =
         std::to_string(entry_counts[i]);
-    v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedBytes(role))] =
+    v[static_cast<std::string>(
+        rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedBytes(role))] =
         std::to_string(total_charges[i]);
-    v[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedPercent(role))] =
+    v[static_cast<std::string>(
+        rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedPercent(role))] =
         std::to_string(100.0 * total_charges[i] / cache_capacity);
   }
 }
@@ -1664,16 +1676,20 @@ void InternalStats::DumpDBStats(std::string* value) {
 
 void InternalStats::DumpDBMapStatsWriteStall(
     std::map<std::string, std::string>* value) {
-  constexpr uint32_t max_db_scope_write_stall_cause =
-      static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kDBScopeWriteStallCauseEnumMax);
+  constexpr uint32_t max_db_scope_write_stall_cause = static_cast<uint32_t>(
+      rocksdb_rs::types::WriteStallCause::kDBScopeWriteStallCauseEnumMax);
 
   for (uint32_t i =
            max_db_scope_write_stall_cause - kNumDBScopeWriteStallCauses;
        i < max_db_scope_write_stall_cause; ++i) {
     for (uint32_t j = 0;
-         j < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal); ++j) {
-      rocksdb_rs::types::WriteStallCause cause = static_cast<rocksdb_rs::types::WriteStallCause>(i);
-      rocksdb_rs::types::WriteStallCondition condition = static_cast<rocksdb_rs::types::WriteStallCondition>(j);
+         j <
+         static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal);
+         ++j) {
+      rocksdb_rs::types::WriteStallCause cause =
+          static_cast<rocksdb_rs::types::WriteStallCause>(i);
+      rocksdb_rs::types::WriteStallCondition condition =
+          static_cast<rocksdb_rs::types::WriteStallCondition>(j);
       InternalStats::InternalDBStatsType internal_db_stat =
           InternalDBStat(cause, condition);
 
@@ -1836,16 +1852,20 @@ void InternalStats::DumpCFMapStatsWriteStall(
     std::map<std::string, std::string>* value) {
   uint64_t total_delays = 0;
   uint64_t total_stops = 0;
-  constexpr uint32_t max_cf_scope_write_stall_cause =
-      static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kCFScopeWriteStallCauseEnumMax);
+  constexpr uint32_t max_cf_scope_write_stall_cause = static_cast<uint32_t>(
+      rocksdb_rs::types::WriteStallCause::kCFScopeWriteStallCauseEnumMax);
 
   for (uint32_t i =
            max_cf_scope_write_stall_cause - kNumCFScopeWriteStallCauses;
        i < max_cf_scope_write_stall_cause; ++i) {
     for (uint32_t j = 0;
-         j < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal); ++j) {
-      rocksdb_rs::types::WriteStallCause cause = static_cast<rocksdb_rs::types::WriteStallCause>(i);
-      rocksdb_rs::types::WriteStallCondition condition = static_cast<rocksdb_rs::types::WriteStallCondition>(j);
+         j <
+         static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal);
+         ++j) {
+      rocksdb_rs::types::WriteStallCause cause =
+          static_cast<rocksdb_rs::types::WriteStallCause>(i);
+      rocksdb_rs::types::WriteStallCondition condition =
+          static_cast<rocksdb_rs::types::WriteStallCondition>(j);
       InternalStats::InternalCFStatsType internal_cf_stat =
           InternalCFStat(cause, condition);
 
@@ -1861,7 +1881,8 @@ void InternalStats::DumpCFMapStatsWriteStall(
 
       if (condition == rocksdb_rs::types::WriteStallCondition::kDelayed) {
         total_delays += stat;
-      } else if (condition == rocksdb_rs::types::WriteStallCondition::kStopped) {
+      } else if (condition ==
+                 rocksdb_rs::types::WriteStallCondition::kStopped) {
         total_stops += stat;
       }
     }
@@ -2128,6 +2149,5 @@ void InternalStats::DumpCFFileHistogram(std::string* value) {
 
   value->append(oss.str());
 }
-
 
 }  // namespace rocksdb

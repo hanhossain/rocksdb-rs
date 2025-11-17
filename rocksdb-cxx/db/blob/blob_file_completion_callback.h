@@ -11,7 +11,6 @@
 #include "db/error_handler.h"
 #include "db/event_helpers.h"
 #include "file/sst_file_manager_impl.h"
-
 #include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
@@ -29,24 +28,22 @@ class BlobFileCompletionCallback {
     error_handler_ = error_handler;
   }
 
-  void OnBlobFileCreationStarted(const std::string& file_name,
-                                 const std::string& column_family_name,
-                                 int job_id,
-                                 rocksdb_rs::types::BlobFileCreationReason creation_reason) {
+  void OnBlobFileCreationStarted(
+      const std::string& file_name, const std::string& column_family_name,
+      int job_id, rocksdb_rs::types::BlobFileCreationReason creation_reason) {
     // Notify the listeners.
     EventHelpers::NotifyBlobFileCreationStarted(listeners_, dbname_,
                                                 column_family_name, file_name,
                                                 job_id, creation_reason);
   }
 
-  rocksdb_rs::status::Status OnBlobFileCompleted(const std::string& file_name,
-                             const std::string& column_family_name, int job_id,
-                             uint64_t file_number,
-                             rocksdb_rs::types::BlobFileCreationReason creation_reason,
-                             const rocksdb_rs::status::Status& report_status,
-                             const std::string& checksum_value,
-                             const std::string& checksum_method,
-                             uint64_t blob_count, uint64_t blob_bytes) {
+  rocksdb_rs::status::Status OnBlobFileCompleted(
+      const std::string& file_name, const std::string& column_family_name,
+      int job_id, uint64_t file_number,
+      rocksdb_rs::types::BlobFileCreationReason creation_reason,
+      const rocksdb_rs::status::Status& report_status,
+      const std::string& checksum_value, const std::string& checksum_method,
+      uint64_t blob_count, uint64_t blob_bytes) {
     rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
 
     auto sfm = static_cast<SstFileManagerImpl*>(sst_file_manager_);
@@ -54,7 +51,8 @@ class BlobFileCompletionCallback {
       // Report new blob files to SstFileManagerImpl
       s = sfm->OnAddFile(file_name);
       if (sfm->IsMaxAllowedSpaceReached()) {
-        s = rocksdb_rs::status::Status_SpaceLimit("Max allowed space was reached");
+        s = rocksdb_rs::status::Status_SpaceLimit(
+            "Max allowed space was reached");
         TEST_SYNC_POINT(
             "BlobFileCompletionCallback::CallBack::MaxAllowedSpaceReached");
         InstrumentedMutexLock l(mutex_);

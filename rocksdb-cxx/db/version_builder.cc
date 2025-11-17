@@ -301,8 +301,9 @@ class VersionBuilder::Rep {
       }
 
       if (file_metadata_cache_res_mgr_) {
-        rocksdb_rs::status::Status s = file_metadata_cache_res_mgr_->UpdateCacheReservation(
-            f->ApproximateMemoryUsage(), false /* increase */);
+        rocksdb_rs::status::Status s =
+            file_metadata_cache_res_mgr_->UpdateCacheReservation(
+                f->ApproximateMemoryUsage(), false /* increase */);
       }
       delete f;
     }
@@ -376,7 +377,8 @@ class VersionBuilder::Rep {
 
   // Make sure table files are sorted correctly and that the links between
   // table files and blob files are consistent.
-  rocksdb_rs::status::Status CheckConsistencyDetails(const VersionStorageInfo* vstorage) const {
+  rocksdb_rs::status::Status CheckConsistencyDetails(
+      const VersionStorageInfo* vstorage) const {
     assert(vstorage);
 
     ExpectedLinkedSsts expected_linked_ssts;
@@ -404,7 +406,8 @@ class VersionBuilder::Rep {
                   << ", #" << rhs->fd.GetNumber()
                   << " with seqnos (largest, smallest) "
                   << rhs->fd.largest_seqno << " , " << rhs->fd.smallest_seqno;
-              return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
+              return rocksdb_rs::status::Status_Corruption("VersionBuilder",
+                                                           oss.str());
             }
           } else if (epoch_number_requirement ==
                      EpochNumberRequirement::kMustPresent) {
@@ -424,7 +427,8 @@ class VersionBuilder::Rep {
                     << " , smallest key: " << rhs->smallest.DebugString(true)
                     << " , largest key: " << rhs->largest.DebugString(true)
                     << " , epoch number: " << rhs->epoch_number;
-                return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
+                return rocksdb_rs::status::Status_Corruption("VersionBuilder",
+                                                             oss.str());
               }
             }
 
@@ -434,7 +438,8 @@ class VersionBuilder::Rep {
                   << lhs->fd.GetNumber() << " with epoch number "
                   << lhs->epoch_number << ", #" << rhs->fd.GetNumber()
                   << " with epoch number " << rhs->epoch_number;
-              return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
+              return rocksdb_rs::status::Status_Corruption("VersionBuilder",
+                                                           oss.str());
             }
           }
 
@@ -462,7 +467,8 @@ class VersionBuilder::Rep {
             oss << 'L' << level << " files are not sorted properly: files #"
                 << lhs->fd.GetNumber() << ", #" << rhs->fd.GetNumber();
 
-            return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
+            return rocksdb_rs::status::Status_Corruption("VersionBuilder",
+                                                         oss.str());
           }
 
           // Make sure there is no overlap in level
@@ -474,7 +480,8 @@ class VersionBuilder::Rep {
                 << " vs. file #" << rhs->fd.GetNumber()
                 << " smallest key: " << rhs->smallest.DebugString(true);
 
-            return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
+            return rocksdb_rs::status::Status_Corruption("VersionBuilder",
+                                                         oss.str());
           }
 
           return rocksdb_rs::status::Status_OK();
@@ -503,7 +510,8 @@ class VersionBuilder::Rep {
         oss << "Blob file #" << blob_file_number
             << " consists entirely of garbage";
 
-        return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
+        return rocksdb_rs::status::Status_Corruption("VersionBuilder",
+                                                     oss.str());
       }
 
       if (blob_file_meta->GetLinkedSsts() !=
@@ -512,7 +520,8 @@ class VersionBuilder::Rep {
         oss << "Links are inconsistent between table files and blob file #"
             << blob_file_number;
 
-        return rocksdb_rs::status::Status_Corruption("VersionBuilder", oss.str());
+        return rocksdb_rs::status::Status_Corruption("VersionBuilder",
+                                                     oss.str());
       }
     }
 
@@ -522,7 +531,8 @@ class VersionBuilder::Rep {
     return ret_s;
   }
 
-  rocksdb_rs::status::Status CheckConsistency(const VersionStorageInfo* vstorage) const {
+  rocksdb_rs::status::Status CheckConsistency(
+      const VersionStorageInfo* vstorage) const {
     assert(vstorage);
 
     // Always run consistency checks in debug build
@@ -596,7 +606,8 @@ class VersionBuilder::Rep {
     return nullptr;
   }
 
-  rocksdb_rs::status::Status ApplyBlobFileAddition(const BlobFileAddition& blob_file_addition) {
+  rocksdb_rs::status::Status ApplyBlobFileAddition(
+      const BlobFileAddition& blob_file_addition) {
     const uint64_t blob_file_number = blob_file_addition.GetBlobFileNumber();
 
     if (IsBlobFileInVersion(blob_file_number)) {
@@ -636,7 +647,8 @@ class VersionBuilder::Rep {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status ApplyBlobFileGarbage(const BlobFileGarbage& blob_file_garbage) {
+  rocksdb_rs::status::Status ApplyBlobFileGarbage(
+      const BlobFileGarbage& blob_file_garbage) {
     const uint64_t blob_file_number = blob_file_garbage.GetBlobFileNumber();
 
     MutableBlobFileMetaData* const mutable_meta =
@@ -691,7 +703,8 @@ class VersionBuilder::Rep {
     return meta->oldest_blob_file_number;
   }
 
-  rocksdb_rs::status::Status ApplyFileDeletion(int level, uint64_t file_number) {
+  rocksdb_rs::status::Status ApplyFileDeletion(int level,
+                                               uint64_t file_number) {
     assert(level != VersionStorageInfo::FileLocation::Invalid().GetLevel());
 
     const int current_level = GetCurrentLevelForTableFile(file_number);
@@ -754,7 +767,8 @@ class VersionBuilder::Rep {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status ApplyFileAddition(int level, const FileMetaData& meta) {
+  rocksdb_rs::status::Status ApplyFileAddition(int level,
+                                               const FileMetaData& meta) {
     assert(level != VersionStorageInfo::FileLocation::Invalid().GetLevel());
 
     const uint64_t file_number = meta.fd.GetNumber();
@@ -792,8 +806,9 @@ class VersionBuilder::Rep {
     f->refs = 1;
 
     if (file_metadata_cache_res_mgr_) {
-      rocksdb_rs::status::Status s = file_metadata_cache_res_mgr_->UpdateCacheReservation(
-          f->ApproximateMemoryUsage(), true /* increase */);
+      rocksdb_rs::status::Status s =
+          file_metadata_cache_res_mgr_->UpdateCacheReservation(
+              f->ApproximateMemoryUsage(), true /* increase */);
       if (!s.ok()) {
         delete f;
         s = rocksdb_rs::status::Status_MemoryLimit(
@@ -826,8 +841,8 @@ class VersionBuilder::Rep {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status ApplyCompactCursors(int level,
-                             const InternalKey& smallest_uncompacted_key) {
+  rocksdb_rs::status::Status ApplyCompactCursors(
+      int level, const InternalKey& smallest_uncompacted_key) {
     if (level < 0) {
       std::ostringstream oss;
       oss << "Cannot add compact cursor (" << level << ","
@@ -857,7 +872,8 @@ class VersionBuilder::Rep {
 
     // Add new blob files
     for (const auto& blob_file_addition : edit->GetBlobFileAdditions()) {
-      const rocksdb_rs::status::Status s = ApplyBlobFileAddition(blob_file_addition);
+      const rocksdb_rs::status::Status s =
+          ApplyBlobFileAddition(blob_file_addition);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -865,7 +881,8 @@ class VersionBuilder::Rep {
 
     // Increase the amount of garbage for blob files affected by GC
     for (const auto& blob_file_garbage : edit->GetBlobFileGarbages()) {
-      const rocksdb_rs::status::Status s = ApplyBlobFileGarbage(blob_file_garbage);
+      const rocksdb_rs::status::Status s =
+          ApplyBlobFileGarbage(blob_file_garbage);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -876,7 +893,8 @@ class VersionBuilder::Rep {
       const int level = deleted_file.first;
       const uint64_t file_number = deleted_file.second;
 
-      const rocksdb_rs::status::Status s = ApplyFileDeletion(level, file_number);
+      const rocksdb_rs::status::Status s =
+          ApplyFileDeletion(level, file_number);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -898,7 +916,8 @@ class VersionBuilder::Rep {
     for (const auto& cursor : edit->GetCompactCursors()) {
       const int level = cursor.first;
       const InternalKey smallest_uncompacted_key = cursor.second;
-      const rocksdb_rs::status::Status s = ApplyCompactCursors(level, smallest_uncompacted_key);
+      const rocksdb_rs::status::Status s =
+          ApplyCompactCursors(level, smallest_uncompacted_key);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -1376,7 +1395,8 @@ rocksdb_rs::status::Status VersionBuilder::Apply(const VersionEdit* edit) {
   return rep_->Apply(edit);
 }
 
-rocksdb_rs::status::Status VersionBuilder::SaveTo(VersionStorageInfo* vstorage) const {
+rocksdb_rs::status::Status VersionBuilder::SaveTo(
+    VersionStorageInfo* vstorage) const {
   return rep_->SaveTo(vstorage);
 }
 

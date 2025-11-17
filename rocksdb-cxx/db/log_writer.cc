@@ -12,8 +12,8 @@
 #include <stdint.h>
 
 #include "file/writable_file_writer.h"
-#include "rocksdb/env.h"
 #include "rocksdb-rs/src/io_status.rs.h"
+#include "rocksdb/env.h"
 #include "util/coding.h"
 #include "util/crc32c.h"
 #include "util/udt_util.h"
@@ -48,7 +48,8 @@ Writer::~Writer() {
 
 rocksdb_rs::io_status::IOStatus Writer::WriteBuffer() {
   if (dest_->seen_error()) {
-    return rocksdb_rs::io_status::IOStatus_IOError("Seen error. Skip writing buffer.");
+    return rocksdb_rs::io_status::IOStatus_IOError(
+        "Seen error. Skip writing buffer.");
   }
   return dest_->Flush();
 }
@@ -62,8 +63,8 @@ rocksdb_rs::io_status::IOStatus Writer::Close() {
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus Writer::AddRecord(const Slice& slice,
-                           Env::IOPriority rate_limiter_priority) {
+rocksdb_rs::io_status::IOStatus Writer::AddRecord(
+    const Slice& slice, Env::IOPriority rate_limiter_priority) {
   const char* ptr = slice.data();
   size_t left = slice.size();
 
@@ -117,7 +118,8 @@ rocksdb_rs::io_status::IOStatus Writer::AddRecord(const Slice& slice,
 
       if (compress_remaining < 0) {
         // Set failure status
-        s = rocksdb_rs::io_status::IOStatus_IOError("Unexpected WAL compression error");
+        s = rocksdb_rs::io_status::IOStatus_IOError(
+            "Unexpected WAL compression error");
         s.SetDataLoss(true);
         break;
       } else if (left == 0) {
@@ -163,7 +165,8 @@ rocksdb_rs::io_status::IOStatus Writer::AddCompressionTypeRecord() {
   // Should be the first record
   assert(block_offset_ == 0);
 
-  if (compression_type_ == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+  if (compression_type_ ==
+      rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     // No need to add a record
     return rocksdb_rs::io_status::IOStatus_OK();
   }
@@ -191,7 +194,8 @@ rocksdb_rs::io_status::IOStatus Writer::AddCompressionTypeRecord() {
     assert(compressed_buffer_);
   } else {
     // Disable compression if the record could not be added.
-    compression_type_ = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    compression_type_ =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   return s;
 }
@@ -225,8 +229,9 @@ rocksdb_rs::io_status::IOStatus Writer::MaybeAddUserDefinedTimestampSizeRecord(
 
 bool Writer::BufferIsEmpty() { return dest_->BufferIsEmpty(); }
 
-rocksdb_rs::io_status::IOStatus Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n,
-                                    Env::IOPriority rate_limiter_priority) {
+rocksdb_rs::io_status::IOStatus Writer::EmitPhysicalRecord(
+    RecordType t, const char* ptr, size_t n,
+    Env::IOPriority rate_limiter_priority) {
   assert(n <= 0xffff);  // Must fit in two bytes
 
   size_t header_size;
@@ -253,7 +258,8 @@ rocksdb_rs::io_status::IOStatus Writer::EmitPhysicalRecord(RecordType t, const c
     // ~4 billion logs ago, but that is effectively impossible, and
     // even if it were we'dbe far more likely to see a false positive
     // on the 32-bit CRC.
-    rocksdb_rs::coding_lean::EncodeFixed32(buf + 7, static_cast<uint32_t>(log_number_));
+    rocksdb_rs::coding_lean::EncodeFixed32(buf + 7,
+                                           static_cast<uint32_t>(log_number_));
     crc = crc32c::Extend(crc, buf + 7, 4);
   }
 
@@ -266,8 +272,8 @@ rocksdb_rs::io_status::IOStatus Writer::EmitPhysicalRecord(RecordType t, const c
   rocksdb_rs::coding_lean::EncodeFixed32(buf, crc);
 
   // Write the header and the payload
-  rocksdb_rs::io_status::IOStatus s = dest_->Append(Slice(buf, header_size), 0 /* crc32c_checksum */,
-                             rate_limiter_priority);
+  rocksdb_rs::io_status::IOStatus s = dest_->Append(
+      Slice(buf, header_size), 0 /* crc32c_checksum */, rate_limiter_priority);
   if (s.ok()) {
     s = dest_->Append(Slice(ptr, n), payload_crc, rate_limiter_priority);
   }

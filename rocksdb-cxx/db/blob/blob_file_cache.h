@@ -12,7 +12,7 @@
 #include "util/mutexlock.h"
 
 namespace rocksdb::status {
-    struct Status;
+struct Status;
 }
 
 namespace rocksdb {
@@ -34,13 +34,14 @@ class BlobFileCache {
   BlobFileCache(const BlobFileCache&) = delete;
   BlobFileCache& operator=(const BlobFileCache&) = delete;
 
-  rocksdb_rs::status::Status GetBlobFileReader(const ReadOptions& read_options,
-                           uint64_t blob_file_number,
-                           CacheHandleGuard<BlobFileReader>* blob_file_reader);
+  rocksdb_rs::status::Status GetBlobFileReader(
+      const ReadOptions& read_options, uint64_t blob_file_number,
+      CacheHandleGuard<BlobFileReader>* blob_file_reader);
 
  private:
   using CacheInterface =
-      BasicTypedCacheInterface<BlobFileReader, rocksdb_rs::cache::CacheEntryRole::kMisc>;
+      BasicTypedCacheInterface<BlobFileReader,
+                               rocksdb_rs::cache::CacheEntryRole::kMisc>;
   using TypedHandle = CacheInterface::TypedHandle;
   CacheInterface cache_;
   // Note: mutex_ below is used to guard against multiple threads racing to open

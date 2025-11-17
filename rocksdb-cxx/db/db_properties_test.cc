@@ -320,7 +320,8 @@ TEST_F(DBPropertiesTest, AggregatedTableProperties) {
 
     Options options = CurrentOptions();
     options.level0_file_num_compaction_trigger = 8;
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.create_if_missing = true;
     options.merge_operator.reset(new TestPutOperator());
 
@@ -381,7 +382,8 @@ TEST_F(DBPropertiesTest, ReadLatencyHistogramByLevel) {
   options.write_buffer_size = 110 << 10;
   options.level0_file_num_compaction_trigger = 6;
   options.num_levels = 4;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_base = 4500 << 10;
   options.target_file_size_base = 98 << 10;
   options.max_write_buffer_number = 2;
@@ -513,7 +515,8 @@ TEST_F(DBPropertiesTest, AggregatedTablePropertiesAtLevel) {
   Random rnd(301);
   Options options = CurrentOptions();
   options.level0_file_num_compaction_trigger = 8;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = 2;
   options.target_file_size_base = 8192;
@@ -889,7 +892,8 @@ TEST_F(DBPropertiesTest, ApproximateMemoryUsage) {
   Options options;
   options.write_buffer_size = 1000;  // small write buffer
   options.min_write_buffer_number_to_merge = 4;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options = CurrentOptions(options);
   DestroyAndReopen(options);
@@ -1048,8 +1052,10 @@ TEST_F(DBPropertiesTest, EstimateCompressionRatio) {
       {{"compression_per_level", "kNoCompression:kSnappyCompression"}}));
   auto opts = db_->GetOptions();
   ASSERT_EQ(opts.compression_per_level.size(), 2);
-  ASSERT_EQ(opts.compression_per_level[0], rocksdb_rs::compression_type::CompressionType::kNoCompression);
-  ASSERT_EQ(opts.compression_per_level[1], rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+  ASSERT_EQ(opts.compression_per_level[0],
+            rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  ASSERT_EQ(opts.compression_per_level[1],
+            rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
 
   // compression ratio is -1.0 when no open files at level
   ASSERT_EQ(CompressionRatioAtLevel(0), -1.0);
@@ -1078,12 +1084,12 @@ TEST_F(DBPropertiesTest, EstimateCompressionRatio) {
   ASSERT_GT(CompressionRatioAtLevel(1), 10.0);
 }
 
-
 class CountingUserTblPropCollector : public TablePropertiesCollector {
  public:
   const char* Name() const override { return "CountingUserTblPropCollector"; }
 
-  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* properties) override {
     std::string encoded;
     PutVarint32(&encoded, count_);
     *properties = UserCollectedProperties{
@@ -1093,9 +1099,11 @@ class CountingUserTblPropCollector : public TablePropertiesCollector {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
-                    rocksdb_rs::types::EntryType /*type*/, SequenceNumber /*seq*/,
-                    uint64_t /*file_size*/) override {
+  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/,
+                                        const Slice& /*value*/,
+                                        rocksdb_rs::types::EntryType /*type*/,
+                                        SequenceNumber /*seq*/,
+                                        uint64_t /*file_size*/) override {
     ++count_;
     return rocksdb_rs::status::Status_OK();
   }
@@ -1136,9 +1144,11 @@ class CountingDeleteTabPropCollector : public TablePropertiesCollector {
  public:
   const char* Name() const override { return "CountingDeleteTabPropCollector"; }
 
-  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
-                    rocksdb_rs::types::EntryType type, SequenceNumber /*seq*/,
-                    uint64_t /*file_size*/) override {
+  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/,
+                                        const Slice& /*value*/,
+                                        rocksdb_rs::types::EntryType type,
+                                        SequenceNumber /*seq*/,
+                                        uint64_t /*file_size*/) override {
     if (type == rocksdb_rs::types::EntryType::kEntryDelete) {
       num_deletes_++;
     }
@@ -1151,7 +1161,8 @@ class CountingDeleteTabPropCollector : public TablePropertiesCollector {
     return UserCollectedProperties{};
   }
 
-  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* properties) override {
     *properties =
         UserCollectedProperties{{"num_delete", std::to_string(num_deletes_)}};
     return rocksdb_rs::status::Status_OK();
@@ -1181,15 +1192,18 @@ class BlockCountingTablePropertiesCollector : public TablePropertiesCollector {
     return "BlockCountingTablePropertiesCollector";
   }
 
-  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* properties) override {
     (*properties)[kNumSampledBlocksPropertyName] =
         std::to_string(num_sampled_blocks_);
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
-                    rocksdb_rs::types::EntryType /*type*/, SequenceNumber /*seq*/,
-                    uint64_t /*file_size*/) override {
+  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/,
+                                        const Slice& /*value*/,
+                                        rocksdb_rs::types::EntryType /*type*/,
+                                        SequenceNumber /*seq*/,
+                                        uint64_t /*file_size*/) override {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -1536,18 +1550,22 @@ TEST_P(CompressionSamplingDBPropertiesTest,
   if (fast_) {
     // One of the following light compression libraries must be present.
     if (LZ4_Supported()) {
-      options.compression = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+      options.compression =
+          rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
     } else if (Snappy_Supported()) {
-      options.compression = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+      options.compression =
+          rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
     } else {
       return;
     }
   } else {
     // One of the following heavy compression libraries must be present.
     if (ZSTD_Supported()) {
-      options.compression = rocksdb_rs::compression_type::CompressionType::kZSTD;
+      options.compression =
+          rocksdb_rs::compression_type::CompressionType::kZSTD;
     } else if (Zlib_Supported()) {
-      options.compression = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
+      options.compression =
+          rocksdb_rs::compression_type::CompressionType::kZlibCompression;
     } else {
       return;
     }
@@ -1750,7 +1768,8 @@ TEST_F(DBPropertiesTest, MinObsoleteSstNumberToKeep) {
   class TestListener : public EventListener {
    public:
     void OnTableFileCreated(const TableFileCreationInfo& info) override {
-      if (info.reason == rocksdb_rs::types::TableFileCreationReason::kCompaction) {
+      if (info.reason ==
+          rocksdb_rs::types::TableFileCreationReason::kCompaction) {
         // Verify the property indicates that SSTs created by a running
         // compaction cannot be deleted.
         uint64_t created_file_num;
@@ -2069,25 +2088,35 @@ TEST_F(DBPropertiesTest, GetMapPropertyBlockCacheEntryStats) {
   ASSERT_TRUE(
       db_->GetMapProperty(DB::Properties::kBlockCacheEntryStats, &values));
 
-  ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheId())) !=
+  ASSERT_TRUE(values.find(static_cast<std::string>(
+                  rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheId())) !=
               values.end());
-  ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_CacheCapacityBytes())) !=
+  ASSERT_TRUE(values.find(static_cast<std::string>(
+                  rocksdb_rs::cache::
+                      BlockCacheEntryStatsMapKeys_CacheCapacityBytes())) !=
               values.end());
   ASSERT_TRUE(
-      values.find(
-          static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())) !=
+      values.find(static_cast<std::string>(
+          rocksdb_rs::cache::
+              BlockCacheEntryStatsMapKeys_LastCollectionDurationSeconds())) !=
       values.end());
   ASSERT_TRUE(
-      values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())) !=
+      values.find(static_cast<std::string>(
+          rocksdb_rs::cache::
+              BlockCacheEntryStatsMapKeys_LastCollectionAgeSeconds())) !=
       values.end());
   for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
-    rocksdb_rs::cache::CacheEntryRole role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
-    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))) !=
-                values.end());
-    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedBytes(role))) !=
-                values.end());
-    ASSERT_TRUE(values.find(static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedPercent(role))) !=
-                values.end());
+    rocksdb_rs::cache::CacheEntryRole role =
+        static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
+    ASSERT_TRUE(values.find(static_cast<std::string>(
+                    rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(
+                        role))) != values.end());
+    ASSERT_TRUE(values.find(static_cast<std::string>(
+                    rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedBytes(
+                        role))) != values.end());
+    ASSERT_TRUE(values.find(static_cast<std::string>(
+                    rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_UsedPercent(
+                        role))) != values.end());
   }
 
   // There should be no extra values in the map.
@@ -2095,34 +2124,47 @@ TEST_F(DBPropertiesTest, GetMapPropertyBlockCacheEntryStats) {
 }
 
 TEST_F(DBPropertiesTest, WriteStallStatsSanityCheck) {
-  for (uint32_t i = 0; i < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kNone); ++i) {
-    rocksdb_rs::types::WriteStallCause cause = static_cast<rocksdb_rs::types::WriteStallCause>(i);
+  for (uint32_t i = 0;
+       i < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kNone);
+       ++i) {
+    rocksdb_rs::types::WriteStallCause cause =
+        static_cast<rocksdb_rs::types::WriteStallCause>(i);
     const std::string& str = WriteStallCauseToHyphenString(cause);
     ASSERT_TRUE(!str.empty())
         << "Please ensure mapping from `WriteStallCause` to "
            "`WriteStallCauseToHyphenString` is complete";
-    if (cause == rocksdb_rs::types::WriteStallCause::kCFScopeWriteStallCauseEnumMax ||
-        cause == rocksdb_rs::types::WriteStallCause::kDBScopeWriteStallCauseEnumMax) {
+    if (cause == rocksdb_rs::types::WriteStallCause::
+                     kCFScopeWriteStallCauseEnumMax ||
+        cause == rocksdb_rs::types::WriteStallCause::
+                     kDBScopeWriteStallCauseEnumMax) {
       ASSERT_EQ(str, InvalidWriteStallHyphenString())
           << "Please ensure order in `WriteStallCauseToHyphenString` is "
              "consistent with `WriteStallCause`";
     }
   }
 
-  for (uint32_t i = 0; i < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal);
+  for (uint32_t i = 0; i < static_cast<uint32_t>(
+                               rocksdb_rs::types::WriteStallCondition::kNormal);
        ++i) {
-    rocksdb_rs::types::WriteStallCondition condition = static_cast<rocksdb_rs::types::WriteStallCondition>(i);
+    rocksdb_rs::types::WriteStallCondition condition =
+        static_cast<rocksdb_rs::types::WriteStallCondition>(i);
     const std::string& str = WriteStallConditionToHyphenString(condition);
     ASSERT_TRUE(!str.empty())
         << "Please ensure mapping from `WriteStallCondition` to "
            "`WriteStallConditionToHyphenString` is complete";
   }
 
-  for (uint32_t i = 0; i < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kNone); ++i) {
+  for (uint32_t i = 0;
+       i < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kNone);
+       ++i) {
     for (uint32_t j = 0;
-         j < static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal); ++j) {
-      rocksdb_rs::types::WriteStallCause cause = static_cast<rocksdb_rs::types::WriteStallCause>(i);
-      rocksdb_rs::types::WriteStallCondition condition = static_cast<rocksdb_rs::types::WriteStallCondition>(j);
+         j <
+         static_cast<uint32_t>(rocksdb_rs::types::WriteStallCondition::kNormal);
+         ++j) {
+      rocksdb_rs::types::WriteStallCause cause =
+          static_cast<rocksdb_rs::types::WriteStallCause>(i);
+      rocksdb_rs::types::WriteStallCondition condition =
+          static_cast<rocksdb_rs::types::WriteStallCondition>(j);
 
       if (isCFScopeWriteStallCause(cause)) {
         ASSERT_TRUE(InternalCFStat(cause, condition) !=
@@ -2137,8 +2179,10 @@ TEST_F(DBPropertiesTest, WriteStallStatsSanityCheck) {
         InternalStats::InternalDBStatsType internal_db_stat =
             InternalDBStat(cause, condition);
         if (internal_db_stat == InternalStats::kIntStatsNumMax) {
-          ASSERT_TRUE(cause == rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit &&
-                      condition == rocksdb_rs::types::WriteStallCondition::kDelayed)
+          ASSERT_TRUE(cause == rocksdb_rs::types::WriteStallCause::
+                                   kWriteBufferManagerLimit &&
+                      condition ==
+                          rocksdb_rs::types::WriteStallCondition::kDelayed)
               << "Please ensure the combination of WriteStallCause(" +
                      std::to_string(static_cast<uint32_t>(cause)) +
                      ") + WriteStallCondition(" +
@@ -2146,8 +2190,10 @@ TEST_F(DBPropertiesTest, WriteStallStatsSanityCheck) {
                      ") is correctly mapped to a valid `InternalStats` or "
                      "bypass its check in this test";
         }
-      } else if (cause != rocksdb_rs::types::WriteStallCause::kCFScopeWriteStallCauseEnumMax &&
-                 cause != rocksdb_rs::types::WriteStallCause::kDBScopeWriteStallCauseEnumMax) {
+      } else if (cause != rocksdb_rs::types::WriteStallCause::
+                              kCFScopeWriteStallCauseEnumMax &&
+                 cause != rocksdb_rs::types::WriteStallCause::
+                              kDBScopeWriteStallCauseEnumMax) {
         ASSERT_TRUE(false) << "Please ensure the WriteStallCause(" +
                                   std::to_string(static_cast<uint32_t>(cause)) +
                                   ") is either CF-scope or DB-scope write "
@@ -2160,12 +2206,15 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
   Options options = CurrentOptions();
   CreateAndReopenWithCF({"heavy_write_cf"}, options);
 
-  for (auto test_cause : {rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit,
-                          rocksdb_rs::types::WriteStallCause::kMemtableLimit}) {
-    if (test_cause == rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit) {
+  for (auto test_cause :
+       {rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit,
+        rocksdb_rs::types::WriteStallCause::kMemtableLimit}) {
+    if (test_cause ==
+        rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit) {
       options.write_buffer_manager.reset(
           new WriteBufferManager(100000, nullptr, true));
-    } else if (test_cause == rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
+    } else if (test_cause ==
+               rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
       options.max_write_buffer_number = 2;
       options.disable_auto_compactions = true;
     }
@@ -2197,7 +2246,8 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
     sleeping_task->WaitUntilSleeping();
 
     // Coerce write stall
-    if (test_cause == rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit) {
+    if (test_cause ==
+        rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit) {
       ASSERT_OK(dbfull()->Put(
           WriteOptions(), handles_[1], Key(1),
           DummyString(options.write_buffer_manager->buffer_size())));
@@ -2209,7 +2259,8 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
           DummyString(options.write_buffer_manager->buffer_size()));
       ASSERT_TRUE(s.IsIncomplete());
       ASSERT_TRUE(s.ToString()->find("Write stall") != std::string::npos);
-    } else if (test_cause == rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
+    } else if (test_cause ==
+               rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
       FlushOptions fo;
       fo.allow_write_stall = true;
       fo.wait = false;
@@ -2223,14 +2274,16 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
       ASSERT_OK(dbfull()->Flush(fo, handles_[1]));
     }
 
-    if (test_cause == rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit) {
+    if (test_cause ==
+        rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit) {
       db_values.clear();
       EXPECT_TRUE(dbfull()->GetMapProperty(DB::Properties::kDBWriteStallStats,
                                            &db_values));
-      EXPECT_EQ(std::stoi(db_values[WriteStallStatsMapKeys::CauseConditionCount(
-                    rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit,
-                    rocksdb_rs::types::WriteStallCondition::kStopped)]),
-                1);
+      EXPECT_EQ(
+          std::stoi(db_values[WriteStallStatsMapKeys::CauseConditionCount(
+              rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit,
+              rocksdb_rs::types::WriteStallCondition::kStopped)]),
+          1);
       // `WriteStallCause::kWriteBufferManagerLimit` should not result in any
       // CF-scope write stall stats changes
       for (int cf = 0; cf <= 1; ++cf) {
@@ -2242,7 +2295,8 @@ TEST_F(DBPropertiesTest, GetMapPropertyWriteStallStats) {
         EXPECT_EQ(std::stoi(cf_values[WriteStallStatsMapKeys::TotalDelays()]),
                   0);
       }
-    } else if (test_cause == rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
+    } else if (test_cause ==
+               rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
       for (int cf = 0; cf <= 1; ++cf) {
         std::map<std::string, std::string> cf_values;
         EXPECT_TRUE(dbfull()->GetMapProperty(
@@ -2353,7 +2407,6 @@ TEST_F(DBPropertiesTest, TableMetaIndexKeys) {
     EXPECT_EQ("NOT_FOUND", PopMetaIndexKey(meta_iter.get()));
   } while (ChangeOptions());
 }
-
 
 }  // namespace rocksdb
 

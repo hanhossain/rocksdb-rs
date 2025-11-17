@@ -29,7 +29,8 @@ void UpdateOptionsFiles(DB* db,
   rocksdb_rs::types::FileType type;
   *options_files_count = 0;
   for (auto filename : filenames) {
-    if (ParseFileName(filename, &number, &type) && type == rocksdb_rs::types::FileType::kOptionsFile) {
+    if (ParseFileName(filename, &number, &type) &&
+        type == rocksdb_rs::types::FileType::kOptionsFile) {
       filename_history->insert(filename);
       (*options_files_count)++;
     }
@@ -45,7 +46,8 @@ void VerifyOptionsFileName(
   uint64_t number;
   rocksdb_rs::types::FileType type;
   for (auto filename : filenames) {
-    if (ParseFileName(filename, &number, &type) && type == rocksdb_rs::types::FileType::kOptionsFile) {
+    if (ParseFileName(filename, &number, &type) &&
+        type == rocksdb_rs::types::FileType::kOptionsFile) {
       current_filenames.insert(filename);
     }
   }
@@ -84,13 +86,15 @@ TEST_F(OptionsFileTest, OptionsFileName) {
   uint64_t number;
   rocksdb_rs::types::FileType type;
 
-  auto options_file_name = static_cast<std::string>(OptionsFileName("", kOptionsFileNum));
+  auto options_file_name =
+      static_cast<std::string>(OptionsFileName("", kOptionsFileNum));
   ASSERT_TRUE(ParseFileName(options_file_name, &number, &type, nullptr));
   ASSERT_EQ(type, rocksdb_rs::types::FileType::kOptionsFile);
   ASSERT_EQ(number, kOptionsFileNum);
 
   const uint64_t kTempOptionsFileNum = 54352;
-  auto temp_options_file_name = static_cast<std::string>(TempOptionsFileName("", kTempOptionsFileNum));
+  auto temp_options_file_name =
+      static_cast<std::string>(TempOptionsFileName("", kTempOptionsFileNum));
   ASSERT_TRUE(ParseFileName(temp_options_file_name, &number, &type, nullptr));
   ASSERT_NE(temp_options_file_name.find(kTempFileNameSuffix),
             std::string::npos);

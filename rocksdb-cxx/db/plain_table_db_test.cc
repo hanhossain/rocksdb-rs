@@ -7,7 +7,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-
 #include <algorithm>
 #include <set>
 
@@ -197,7 +196,9 @@ class PlainTableDBTest : public testing::Test,
     return db_->Put(WriteOptions(), k, v);
   }
 
-  rocksdb_rs::status::Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
+  rocksdb_rs::status::Status Delete(const std::string& k) {
+    return db_->Delete(WriteOptions(), k);
+  }
 
   std::string Get(const std::string& k, const Snapshot* snapshot = nullptr) {
     ReadOptions options;
@@ -356,8 +357,9 @@ class TestPlainTableFactory : public PlainTableFactory {
     auto encoding_type_prop =
         user_props.find(PlainTablePropertyNames::kEncodingType);
     assert(encoding_type_prop != user_props.end());
-    EncodingType encoding_type = static_cast<EncodingType>(
-        rocksdb_rs::coding_lean::DecodeFixed32(encoding_type_prop->second.c_str()));
+    EncodingType encoding_type =
+        static_cast<EncodingType>(rocksdb_rs::coding_lean::DecodeFixed32(
+            encoding_type_prop->second.c_str()));
 
     std::unique_ptr<PlainTableReader> new_reader(new TestPlainTableReader(
         table_reader_options.env_options,

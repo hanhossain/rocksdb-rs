@@ -59,11 +59,12 @@ rocksdb_rs::status::Status BlobLogWriter::WriteHeader(BlobLogHeader& header) {
   return s;
 }
 
-rocksdb_rs::status::Status BlobLogWriter::AppendFooter(BlobLogFooter& footer,
-                                   std::string* checksum_method,
-                                   std::string* checksum_value) {
+rocksdb_rs::status::Status BlobLogWriter::AppendFooter(
+    BlobLogFooter& footer, std::string* checksum_method,
+    std::string* checksum_value) {
   assert(block_offset_ != 0);
-  assert(last_elem_type_ == ElemType::kEtFileHdr || last_elem_type_ == ElemType::kEtRecord);
+  assert(last_elem_type_ == ElemType::kEtFileHdr ||
+         last_elem_type_ == ElemType::kEtRecord);
 
   std::string str;
   footer.EncodeTo(&str);
@@ -113,28 +114,36 @@ rocksdb_rs::status::Status BlobLogWriter::AppendFooter(BlobLogFooter& footer,
   return s;
 }
 
-rocksdb_rs::status::Status BlobLogWriter::AddRecord(const Slice& key, const Slice& val,
-                                uint64_t expiration, uint64_t* key_offset,
-                                uint64_t* blob_offset) {
+rocksdb_rs::status::Status BlobLogWriter::AddRecord(const Slice& key,
+                                                    const Slice& val,
+                                                    uint64_t expiration,
+                                                    uint64_t* key_offset,
+                                                    uint64_t* blob_offset) {
   assert(block_offset_ != 0);
-  assert(last_elem_type_ == ElemType::kEtFileHdr || last_elem_type_ == ElemType::kEtRecord);
+  assert(last_elem_type_ == ElemType::kEtFileHdr ||
+         last_elem_type_ == ElemType::kEtRecord);
 
   std::string buf;
   ConstructBlobHeader(&buf, key, val, expiration);
 
-  rocksdb_rs::status::Status s = EmitPhysicalRecord(buf, key, val, key_offset, blob_offset);
+  rocksdb_rs::status::Status s =
+      EmitPhysicalRecord(buf, key, val, key_offset, blob_offset);
   return s;
 }
 
-rocksdb_rs::status::Status BlobLogWriter::AddRecord(const Slice& key, const Slice& val,
-                                uint64_t* key_offset, uint64_t* blob_offset) {
+rocksdb_rs::status::Status BlobLogWriter::AddRecord(const Slice& key,
+                                                    const Slice& val,
+                                                    uint64_t* key_offset,
+                                                    uint64_t* blob_offset) {
   assert(block_offset_ != 0);
-  assert(last_elem_type_ == ElemType::kEtFileHdr || last_elem_type_ == ElemType::kEtRecord);
+  assert(last_elem_type_ == ElemType::kEtFileHdr ||
+         last_elem_type_ == ElemType::kEtRecord);
 
   std::string buf;
   ConstructBlobHeader(&buf, key, val, 0);
 
-  rocksdb_rs::status::Status s = EmitPhysicalRecord(buf, key, val, key_offset, blob_offset);
+  rocksdb_rs::status::Status s =
+      EmitPhysicalRecord(buf, key, val, key_offset, blob_offset);
   return s;
 }
 
@@ -147,10 +156,9 @@ void BlobLogWriter::ConstructBlobHeader(std::string* buf, const Slice& key,
   record.EncodeHeaderTo(buf);
 }
 
-rocksdb_rs::status::Status BlobLogWriter::EmitPhysicalRecord(const std::string& headerbuf,
-                                         const Slice& key, const Slice& val,
-                                         uint64_t* key_offset,
-                                         uint64_t* blob_offset) {
+rocksdb_rs::status::Status BlobLogWriter::EmitPhysicalRecord(
+    const std::string& headerbuf, const Slice& key, const Slice& val,
+    uint64_t* key_offset, uint64_t* blob_offset) {
   StopWatch write_sw(clock_, statistics_, BLOB_DB_BLOB_FILE_WRITE_MICROS);
   rocksdb_rs::status::Status s = dest_->Append(Slice(headerbuf)).status();
   if (s.ok()) {

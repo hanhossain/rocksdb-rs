@@ -15,14 +15,13 @@
 #include "db/job_context.h"
 #include "db/version_set.h"
 #include "logging/logging.h"
-#include "util/cast_util.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "util/cast_util.h"
 
 namespace rocksdb {
 
-rocksdb_rs::status::Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* column_family,
-                                   const Slice* begin, const Slice* end) {
+rocksdb_rs::status::Status DBImpl::SuggestCompactRange(
+    ColumnFamilyHandle* column_family, const Slice* begin, const Slice* end) {
   auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
   auto cfd = cfh->cfd();
   InternalKey start_key, end_key;
@@ -54,7 +53,8 @@ rocksdb_rs::status::Status DBImpl::SuggestCompactRange(ColumnFamilyHandle* colum
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, int target_level) {
+rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family,
+                                             int target_level) {
   assert(column_family);
 
   if (target_level < 1) {
@@ -77,7 +77,8 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
                      "PromoteL0 FAILED. Target level %d does not exist\n",
                      target_level);
       job_context.Clean();
-      status = rocksdb_rs::status::Status_InvalidArgument("Target level does not exist");
+      status = rocksdb_rs::status::Status_InvalidArgument(
+          "Target level does not exist");
       return status;
     }
 
@@ -98,8 +99,8 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
                        "PromoteL0 FAILED. File %" PRIu64 " being compacted\n",
                        f->fd.GetNumber());
         job_context.Clean();
-        status =
-            rocksdb_rs::status::Status_InvalidArgument("PromoteL0 called during L0 compaction");
+        status = rocksdb_rs::status::Status_InvalidArgument(
+            "PromoteL0 called during L0 compaction");
         return status;
       }
 
@@ -111,7 +112,8 @@ rocksdb_rs::status::Status DBImpl::PromoteL0(ColumnFamilyHandle* column_family, 
                        " have overlapping ranges\n",
                        prev_f->fd.GetNumber(), f->fd.GetNumber());
         job_context.Clean();
-        status = rocksdb_rs::status::Status_InvalidArgument("L0 has overlapping files");
+        status = rocksdb_rs::status::Status_InvalidArgument(
+            "L0 has overlapping files");
         return status;
       }
     }

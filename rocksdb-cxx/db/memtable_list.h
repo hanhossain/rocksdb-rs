@@ -58,15 +58,15 @@ class MemTableListVersion {
   // will be stored in *seq on success (regardless of whether true/false is
   // returned).  Otherwise, *seq will be set to kMaxSequenceNumber.
   bool Get(const LookupKey& key, std::string* value,
-           PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* s,
-           MergeContext* merge_context,
+           PinnableWideColumns* columns, std::string* timestamp,
+           rocksdb_rs::status::Status* s, MergeContext* merge_context,
            SequenceNumber* max_covering_tombstone_seq, SequenceNumber* seq,
            const ReadOptions& read_opts, ReadCallback* callback = nullptr,
            bool* is_blob_index = nullptr);
 
   bool Get(const LookupKey& key, std::string* value,
-           PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* s,
-           MergeContext* merge_context,
+           PinnableWideColumns* columns, std::string* timestamp,
+           rocksdb_rs::status::Status* s, MergeContext* merge_context,
            SequenceNumber* max_covering_tombstone_seq,
            const ReadOptions& read_opts, ReadCallback* callback = nullptr,
            bool* is_blob_index = nullptr) {
@@ -92,13 +92,15 @@ class MemTableListVersion {
   // writes that are also present in the SST files.
   bool GetFromHistory(const LookupKey& key, std::string* value,
                       PinnableWideColumns* columns, std::string* timestamp,
-                      rocksdb_rs::status::Status* s, MergeContext* merge_context,
+                      rocksdb_rs::status::Status* s,
+                      MergeContext* merge_context,
                       SequenceNumber* max_covering_tombstone_seq,
                       SequenceNumber* seq, const ReadOptions& read_opts,
                       bool* is_blob_index = nullptr);
   bool GetFromHistory(const LookupKey& key, std::string* value,
                       PinnableWideColumns* columns, std::string* timestamp,
-                      rocksdb_rs::status::Status* s, MergeContext* merge_context,
+                      rocksdb_rs::status::Status* s,
+                      MergeContext* merge_context,
                       SequenceNumber* max_covering_tombstone_seq,
                       const ReadOptions& read_opts,
                       bool* is_blob_index = nullptr) {
@@ -108,8 +110,9 @@ class MemTableListVersion {
                           is_blob_index);
   }
 
-  rocksdb_rs::status::Status AddRangeTombstoneIterators(const ReadOptions& read_opts, Arena* arena,
-                                    RangeDelAggregator* range_del_agg);
+  rocksdb_rs::status::Status AddRangeTombstoneIterators(
+      const ReadOptions& read_opts, Arena* arena,
+      RangeDelAggregator* range_del_agg);
 
   void AddIterators(const ReadOptions& options,
                     std::vector<InternalIterator*>* iterator_list,
@@ -422,8 +425,9 @@ class MemTableList {
 
   // DB mutex held
   // Called after writing to MANIFEST
-  void RemoveMemTablesOrRestoreFlags(const rocksdb_rs::status::Status& s, ColumnFamilyData* cfd,
-                                     size_t batch_count, LogBuffer* log_buffer,
+  void RemoveMemTablesOrRestoreFlags(const rocksdb_rs::status::Status& s,
+                                     ColumnFamilyData* cfd, size_t batch_count,
+                                     LogBuffer* log_buffer,
                                      autovector<MemTable*>* to_delete,
                                      InstrumentedMutex* mu);
 

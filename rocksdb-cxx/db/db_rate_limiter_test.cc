@@ -148,7 +148,8 @@ TEST_P(DBRateLimiterOnReadTest, NewMultiGet) {
       key_bufs.emplace_back(Key(i));
       keys.emplace_back(key_bufs[i]);
     }
-    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(kNumKeys);
+    rust::Vec<rocksdb_rs::status::Status> statuses =
+        rocksdb_rs::status::Status_new().create_vec(kNumKeys);
     std::vector<PinnableSlice> values(kNumKeys);
     const int64_t prev_total_rl_req = options_.rate_limiter->GetTotalRequests();
     db_->MultiGet(GetReadOptions(), dbfull()->DefaultColumnFamily(), kNumKeys,
@@ -225,7 +226,6 @@ TEST_P(DBRateLimiterOnReadTest, Iterator) {
   ASSERT_EQ(expected, options_.rate_limiter->GetTotalRequests(Env::IO_USER));
 }
 
-
 TEST_P(DBRateLimiterOnReadTest, VerifyChecksum) {
   if (use_direct_io_ && !IsDirectIOSupported()) {
     return;
@@ -254,7 +254,6 @@ TEST_P(DBRateLimiterOnReadTest, VerifyFileChecksums) {
   int expected = kNumFiles;
   ASSERT_EQ(expected, options_.rate_limiter->GetTotalRequests(Env::IO_USER));
 }
-
 
 class DBRateLimiterOnWriteTest : public DBTestBase {
  public:

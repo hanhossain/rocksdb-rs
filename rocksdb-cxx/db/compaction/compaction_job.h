@@ -186,10 +186,13 @@ class CompactionJob {
 
   // REQUIRED: mutex held
   // Add compaction input/output to the current version
-  rocksdb_rs::status::Status Install(const MutableCFOptions& mutable_cf_options);
+  rocksdb_rs::status::Status Install(
+      const MutableCFOptions& mutable_cf_options);
 
   // Return the IO status
-  rocksdb_rs::io_status::IOStatus io_status() const { return io_status_.Clone(); }
+  rocksdb_rs::io_status::IOStatus io_status() const {
+    return io_status_.Clone();
+  }
 
  protected:
   void UpdateCompactionStats();
@@ -213,7 +216,8 @@ class CompactionJob {
 
   Env::WriteLifeTimeHint write_hint_;
 
-  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus io_status_ =
+      rocksdb_rs::io_status::IOStatus_new();
 
   CompactionJobStats* compaction_job_stats_;
 
@@ -253,15 +257,15 @@ class CompactionJob {
   // update the thread status for starting a compaction.
   void ReportStartedCompaction(Compaction* compaction);
 
-  rocksdb_rs::status::Status FinishCompactionOutputFile(const rocksdb_rs::status::Status& input_status,
-                                    SubcompactionState* sub_compact,
-                                    CompactionOutputs& outputs,
-                                    const Slice& next_table_min_key,
-                                    const Slice* comp_start_user_key,
-                                    const Slice* comp_end_user_key);
-  rocksdb_rs::status::Status InstallCompactionResults(const MutableCFOptions& mutable_cf_options);
-  rocksdb_rs::status::Status OpenCompactionOutputFile(SubcompactionState* sub_compact,
-                                  CompactionOutputs& outputs);
+  rocksdb_rs::status::Status FinishCompactionOutputFile(
+      const rocksdb_rs::status::Status& input_status,
+      SubcompactionState* sub_compact, CompactionOutputs& outputs,
+      const Slice& next_table_min_key, const Slice* comp_start_user_key,
+      const Slice* comp_end_user_key);
+  rocksdb_rs::status::Status InstallCompactionResults(
+      const MutableCFOptions& mutable_cf_options);
+  rocksdb_rs::status::Status OpenCompactionOutputFile(
+      SubcompactionState* sub_compact, CompactionOutputs& outputs);
   void UpdateCompactionJobStats(
       const InternalStats::CompactionStats& stats) const;
   void RecordDroppedKeys(const CompactionIterationStats& c_iter_stats,
@@ -383,7 +387,8 @@ struct CompactionServiceInput {
   std::string end;
 
   // serialization interface to read and write the object
-  static rocksdb_rs::status::Status Read(const std::string& data_str, CompactionServiceInput* obj);
+  static rocksdb_rs::status::Status Read(const std::string& data_str,
+                                         CompactionServiceInput* obj);
   rocksdb_rs::status::Status Write(std::string* output);
 
   // Initialize a dummy ColumnFamilyDescriptor
@@ -410,12 +415,15 @@ struct CompactionServiceOutputFile {
   rocksdb_rs::unique_id::UniqueId64x2 unique_id;
 
   CompactionServiceOutputFile() = default;
-  CompactionServiceOutputFile(
-      const std::string& name, SequenceNumber smallest, SequenceNumber largest,
-      std::string _smallest_internal_key, std::string _largest_internal_key,
-      uint64_t _oldest_ancester_time, uint64_t _file_creation_time,
-      uint64_t _epoch_number, uint64_t _paranoid_hash,
-      bool _marked_for_compaction, rocksdb_rs::unique_id::UniqueId64x2 _unique_id)
+  CompactionServiceOutputFile(const std::string& name, SequenceNumber smallest,
+                              SequenceNumber largest,
+                              std::string _smallest_internal_key,
+                              std::string _largest_internal_key,
+                              uint64_t _oldest_ancester_time,
+                              uint64_t _file_creation_time,
+                              uint64_t _epoch_number, uint64_t _paranoid_hash,
+                              bool _marked_for_compaction,
+                              rocksdb_rs::unique_id::UniqueId64x2 _unique_id)
       : file_name(name),
         smallest_seqno(smallest),
         largest_seqno(largest),
@@ -450,7 +458,8 @@ struct CompactionServiceResult {
   CompactionServiceResult() : status(rocksdb_rs::status::Status_new()) {}
 
   // serialization interface to read and write the object
-  static rocksdb_rs::status::Status Read(const std::string& data_str, CompactionServiceResult* obj);
+  static rocksdb_rs::status::Status Read(const std::string& data_str,
+                                         CompactionServiceResult* obj);
   rocksdb_rs::status::Status Write(std::string* output);
 
 #ifndef NDEBUG
@@ -485,7 +494,9 @@ class CompactionServiceCompactionJob : private CompactionJob {
 
   void CleanupCompaction();
 
-  rocksdb_rs::io_status::IOStatus io_status() const { return CompactionJob::io_status(); }
+  rocksdb_rs::io_status::IOStatus io_status() const {
+    return CompactionJob::io_status();
+  }
 
  protected:
   void RecordCompactionIOStats() override;

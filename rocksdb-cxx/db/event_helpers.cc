@@ -10,9 +10,9 @@
 #include "rocksdb/utilities/customizable_util.h"
 
 namespace rocksdb {
-rocksdb_rs::status::Status EventListener::CreateFromString(const ConfigOptions& config_options,
-                                       const std::string& id,
-                                       std::shared_ptr<EventListener>* result) {
+rocksdb_rs::status::Status EventListener::CreateFromString(
+    const ConfigOptions& config_options, const std::string& id,
+    std::shared_ptr<EventListener>* result) {
   return LoadSharedObject<EventListener>(config_options, id, result);
 }
 
@@ -33,7 +33,8 @@ void EventHelpers::AppendCurrentTime(JSONWriter* jwriter) {
 void EventHelpers::NotifyTableFileCreationStarted(
     const std::vector<std::shared_ptr<EventListener>>& listeners,
     const std::string& db_name, const std::string& cf_name,
-    const std::string& file_path, int job_id, rocksdb_rs::types::TableFileCreationReason reason) {
+    const std::string& file_path, int job_id,
+    rocksdb_rs::types::TableFileCreationReason reason) {
   if (listeners.empty()) {
     return;
   }
@@ -50,8 +51,8 @@ void EventHelpers::NotifyTableFileCreationStarted(
 
 void EventHelpers::NotifyOnBackgroundError(
     const std::vector<std::shared_ptr<EventListener>>& listeners,
-    BackgroundErrorReason reason, rocksdb_rs::status::Status* bg_error, InstrumentedMutex* db_mutex,
-    bool* auto_recovery) {
+    BackgroundErrorReason reason, rocksdb_rs::status::Status* bg_error,
+    InstrumentedMutex* db_mutex, bool* auto_recovery) {
   if (listeners.empty()) {
     return;
   }
@@ -73,8 +74,8 @@ void EventHelpers::LogAndNotifyTableFileCreationFinished(
     const std::string& db_name, const std::string& cf_name,
     const std::string& file_path, int job_id, const FileDescriptor& fd,
     uint64_t oldest_blob_file_number, const TableProperties& table_properties,
-    rocksdb_rs::types::TableFileCreationReason reason, const rocksdb_rs::status::Status& s,
-    const std::string& file_checksum,
+    rocksdb_rs::types::TableFileCreationReason reason,
+    const rocksdb_rs::status::Status& s, const std::string& file_checksum,
     const std::string& file_checksum_func_name) {
   if (s.ok() && event_logger) {
     JSONWriter jwriter;
@@ -142,7 +143,8 @@ void EventHelpers::LogAndNotifyTableFileCreationFinished(
         jwriter << "N/A";
       } else {
         SeqnoToTimeMapping tmp;
-        rocksdb_rs::status::Status status = tmp.Add(table_properties.seqno_to_time_mapping);
+        rocksdb_rs::status::Status status =
+            tmp.Add(table_properties.seqno_to_time_mapping);
         if (status.ok()) {
           jwriter << tmp.ToHumanString();
         } else {
@@ -219,7 +221,8 @@ void EventHelpers::LogAndNotifyTableFileDeletion(
 
 void EventHelpers::NotifyOnErrorRecoveryEnd(
     const std::vector<std::shared_ptr<EventListener>>& listeners,
-    const rocksdb_rs::status::Status& old_bg_error, const rocksdb_rs::status::Status& new_bg_error,
+    const rocksdb_rs::status::Status& old_bg_error,
+    const rocksdb_rs::status::Status& new_bg_error,
     InstrumentedMutex* db_mutex) {
   if (!listeners.empty()) {
     db_mutex->AssertHeld();
@@ -256,8 +259,8 @@ void EventHelpers::LogAndNotifyBlobFileCreationFinished(
     const std::vector<std::shared_ptr<EventListener>>& listeners,
     const std::string& db_name, const std::string& cf_name,
     const std::string& file_path, int job_id, uint64_t file_number,
-    rocksdb_rs::types::BlobFileCreationReason creation_reason, const rocksdb_rs::status::Status& s,
-    const std::string& file_checksum,
+    rocksdb_rs::types::BlobFileCreationReason creation_reason,
+    const rocksdb_rs::status::Status& s, const std::string& file_checksum,
     const std::string& file_checksum_func_name, uint64_t total_blob_count,
     uint64_t total_blob_bytes) {
   if (s.ok() && event_logger) {
@@ -288,8 +291,8 @@ void EventHelpers::LogAndNotifyBlobFileCreationFinished(
 void EventHelpers::LogAndNotifyBlobFileDeletion(
     EventLogger* event_logger,
     const std::vector<std::shared_ptr<EventListener>>& listeners, int job_id,
-    uint64_t file_number, const std::string& file_path, const rocksdb_rs::status::Status& status,
-    const std::string& dbname) {
+    uint64_t file_number, const std::string& file_path,
+    const rocksdb_rs::status::Status& status, const std::string& dbname) {
   if (event_logger) {
     JSONWriter jwriter;
     AppendCurrentTime(&jwriter);

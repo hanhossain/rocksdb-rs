@@ -10,14 +10,13 @@
 #include <string>
 #include <vector>
 
+#include "rocksdb-rs/src/compression_type.rs.h"
 #include "rocksdb/advanced_options.h"
 #include "rocksdb/env.h"
 #include "rocksdb/types.h"
 
-#include "rocksdb-rs/src/compression_type.rs.h"
-
 namespace rocksdb::status {
-    struct Status;
+struct Status;
 }
 
 namespace rocksdb {
@@ -71,21 +70,25 @@ class BlobFileBuilder {
 
   ~BlobFileBuilder();
 
-  rocksdb_rs::status::Status Add(const Slice& key, const Slice& value, std::string* blob_index);
+  rocksdb_rs::status::Status Add(const Slice& key, const Slice& value,
+                                 std::string* blob_index);
   rocksdb_rs::status::Status Finish();
   void Abandon(const rocksdb_rs::status::Status& s);
 
  private:
   bool IsBlobFileOpen() const;
   rocksdb_rs::status::Status OpenBlobFileIfNeeded();
-  rocksdb_rs::status::Status CompressBlobIfNeeded(Slice* blob, std::string* compressed_blob) const;
-  rocksdb_rs::status::Status WriteBlobToFile(const Slice& key, const Slice& blob,
-                         uint64_t* blob_file_number, uint64_t* blob_offset);
+  rocksdb_rs::status::Status CompressBlobIfNeeded(
+      Slice* blob, std::string* compressed_blob) const;
+  rocksdb_rs::status::Status WriteBlobToFile(const Slice& key,
+                                             const Slice& blob,
+                                             uint64_t* blob_file_number,
+                                             uint64_t* blob_offset);
   rocksdb_rs::status::Status CloseBlobFile();
   rocksdb_rs::status::Status CloseBlobFileIfNeeded();
 
-  rocksdb_rs::status::Status PutBlobIntoCacheIfNeeded(const Slice& blob, uint64_t blob_file_number,
-                                  uint64_t blob_offset) const;
+  rocksdb_rs::status::Status PutBlobIntoCacheIfNeeded(
+      const Slice& blob, uint64_t blob_file_number, uint64_t blob_offset) const;
 
   std::function<uint64_t()> file_number_generator_;
   FileSystem* fs_;

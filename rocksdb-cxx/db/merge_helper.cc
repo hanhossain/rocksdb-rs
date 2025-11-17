@@ -113,7 +113,8 @@ rocksdb_rs::status::Status MergeHelper::TimedFullMerge(
 
   if (!success) {
     RecordTick(statistics, NUMBER_MERGE_FAILURES);
-    return rocksdb_rs::status::Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
+    return rocksdb_rs::status::Status_Corruption(
+        rocksdb_rs::status::SubCode::kMergeOperatorFailed);
   }
 
   return rocksdb_rs::status::Status_OK();
@@ -145,10 +146,10 @@ rocksdb_rs::status::Status MergeHelper::TimedFullMergeWithEntity(
   std::string merge_result;
 
   {
-    const rocksdb_rs::status::Status s = TimedFullMerge(merge_operator, key, &value_of_default,
-                                    operands, &merge_result, logger, statistics,
-                                    clock, nullptr /* result_operand */,
-                                    update_num_ops_stats, op_failure_scope);
+    const rocksdb_rs::status::Status s = TimedFullMerge(
+        merge_operator, key, &value_of_default, operands, &merge_result, logger,
+        statistics, clock, nullptr /* result_operand */, update_num_ops_stats,
+        op_failure_scope);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -157,7 +158,8 @@ rocksdb_rs::status::Status MergeHelper::TimedFullMergeWithEntity(
   if (has_default_column) {
     base_columns[0].value() = merge_result;
 
-    const rocksdb_rs::status::Status s = WideColumnSerialization::Serialize(base_columns, *result);
+    const rocksdb_rs::status::Status s =
+        WideColumnSerialization::Serialize(base_columns, *result);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -181,15 +183,13 @@ rocksdb_rs::status::Status MergeHelper::TimedFullMergeWithEntity(
 //
 // TODO: Avoid the snapshot stripe map lookup in CompactionRangeDelAggregator
 // and just pass the StripeRep corresponding to the stripe being merged.
-rocksdb_rs::status::Status MergeHelper::MergeUntil(InternalIterator* iter,
-                               CompactionRangeDelAggregator* range_del_agg,
-                               const SequenceNumber stop_before,
-                               const bool at_bottom,
-                               const bool allow_data_in_errors,
-                               const BlobFetcher* blob_fetcher,
-                               const std::string* const full_history_ts_low,
-                               PrefetchBufferCollection* prefetch_buffers,
-                               CompactionIterationStats* c_iter_stats) {
+rocksdb_rs::status::Status MergeHelper::MergeUntil(
+    InternalIterator* iter, CompactionRangeDelAggregator* range_del_agg,
+    const SequenceNumber stop_before, const bool at_bottom,
+    const bool allow_data_in_errors, const BlobFetcher* blob_fetcher,
+    const std::string* const full_history_ts_low,
+    PrefetchBufferCollection* prefetch_buffers,
+    CompactionIterationStats* c_iter_stats) {
   // Get a copy of the internal key, before it's invalidated by iter->Next()
   // Also maintain the list of merge operands seen.
   assert(HasOperator());
@@ -218,7 +218,8 @@ rocksdb_rs::status::Status MergeHelper::MergeUntil(InternalIterator* iter,
   // orig_ikey is backed by keys_.back() if !keys_.empty()
   ParsedInternalKey orig_ikey;
 
-  rocksdb_rs::status::Status s = ParseInternalKey(original_key, &orig_ikey, allow_data_in_errors);
+  rocksdb_rs::status::Status s =
+      ParseInternalKey(original_key, &orig_ikey, allow_data_in_errors);
   assert(s.ok());
   if (!s.ok()) return s;
 
@@ -347,7 +348,8 @@ rocksdb_rs::status::Status MergeHelper::MergeUntil(InternalIterator* iter,
           c_iter_stats->total_blob_bytes_read += bytes_read;
         }
 
-        s = TimedFullMerge(user_merge_operator_, ikey.user_key, &static_cast<const Slice&>(blob_value),
+        s = TimedFullMerge(user_merge_operator_, ikey.user_key,
+                           &static_cast<const Slice&>(blob_value),
                            merge_context_.GetOperands(), &merge_result, logger_,
                            stats_, clock_,
                            /* result_operand */ nullptr,

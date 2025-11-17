@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 #include "db/blob/blob_constants.h"
-
 #include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
@@ -85,8 +84,10 @@ class BlobGarbageMeter {
     BlobStats out_flow_;
   };
 
-  rocksdb_rs::status::Status ProcessInFlow(const Slice& key, const Slice& value);
-  rocksdb_rs::status::Status ProcessOutFlow(const Slice& key, const Slice& value);
+  rocksdb_rs::status::Status ProcessInFlow(const Slice& key,
+                                           const Slice& value);
+  rocksdb_rs::status::Status ProcessOutFlow(const Slice& key,
+                                            const Slice& value);
 
   const std::unordered_map<uint64_t, BlobInOutFlow>& flows() const {
     return flows_;
@@ -94,7 +95,8 @@ class BlobGarbageMeter {
 
  private:
   static rocksdb_rs::status::Status Parse(const Slice& key, const Slice& value,
-                      uint64_t* blob_file_number, uint64_t* bytes);
+                                          uint64_t* blob_file_number,
+                                          uint64_t* bytes);
 
   std::unordered_map<uint64_t, BlobInOutFlow> flows_;
 };

@@ -44,6 +44,7 @@
 #include "options/configurable_helper.h"
 #include "options/options_helper.h"
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
 #include "rocksdb/options.h"
@@ -55,8 +56,6 @@
 #include "table/unique_id_impl.h"
 #include "test_util/sync_point.h"
 #include "util/stop_watch.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -503,10 +502,11 @@ void CompactionJob::GenSubcompactionBoundaries() {
       for (size_t i = 0; i < num_files; i++) {
         FileMetaData* f = flevel->files[i].file_metadata;
         std::vector<TableReader::Anchor> my_anchors;
-        rocksdb_rs::status::Status s = cfd->table_cache()->ApproximateKeyAnchors(
-            read_options, icomp, *f,
-            c->mutable_cf_options()->block_protection_bytes_per_key,
-            my_anchors);
+        rocksdb_rs::status::Status s =
+            cfd->table_cache()->ApproximateKeyAnchors(
+                read_options, icomp, *f,
+                c->mutable_cf_options()->block_protection_bytes_per_key,
+                my_anchors);
         if (!s.ok() || my_anchors.empty()) {
           my_anchors.emplace_back(f->largest.user_key(), f->fd.GetFileSize());
         }
@@ -757,7 +757,8 @@ rocksdb_rs::status::Status CompactionJob::Run() {
           }
           if (s.ok() &&
               !validator.CompareValidator(files_output[file_idx]->validator)) {
-            s = rocksdb_rs::status::Status_Corruption("Paranoid checksums do not match");
+            s = rocksdb_rs::status::Status_Corruption(
+                "Paranoid checksums do not match");
           }
         }
 
@@ -793,9 +794,9 @@ rocksdb_rs::status::Status CompactionJob::Run() {
   TablePropertiesCollection tp;
   for (const auto& state : compact_->sub_compact_states) {
     for (const auto& output : state.GetOutputs()) {
-      auto fn =
-          static_cast<std::string>(rocksdb_rs::filename::TableFileName(state.compaction->immutable_options()->cf_paths,
-                        output.meta.fd.GetNumber(), output.meta.fd.GetPathId()));
+      auto fn = static_cast<std::string>(rocksdb_rs::filename::TableFileName(
+          state.compaction->immutable_options()->cf_paths,
+          output.meta.fd.GetNumber(), output.meta.fd.GetPathId()));
       tp[fn] = output.table_properties;
     }
   }
@@ -813,7 +814,8 @@ rocksdb_rs::status::Status CompactionJob::Run() {
   return status;
 }
 
-rocksdb_rs::status::Status CompactionJob::Install(const MutableCFOptions& mutable_cf_options) {
+rocksdb_rs::status::Status CompactionJob::Install(
+    const MutableCFOptions& mutable_cf_options) {
   assert(compact_);
 
   AutoThreadOperationStageUpdater stage_updater(
@@ -1008,7 +1010,6 @@ void CompactionJob::NotifyOnSubcompactionBegin(
 
 void CompactionJob::NotifyOnSubcompactionCompleted(
     SubcompactionState* sub_compact) {
-
   if (db_options_.listeners.empty()) {
     return;
   }
@@ -1227,7 +1228,8 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
                 mutable_cf_options, &file_options_, db_id_, db_session_id_,
                 job_id_, cfd->GetID(), cfd->GetName(), Env::IOPriority::IO_LOW,
                 write_hint_, io_tracer_, blob_callback_,
-                rocksdb_rs::types::BlobFileCreationReason::kCompaction, &blob_file_paths,
+                rocksdb_rs::types::BlobFileCreationReason::kCompaction,
+                &blob_file_paths,
                 sub_compact->Current().GetBlobFileAdditionsPtr())
           : nullptr);
 
@@ -1349,8 +1351,8 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
   RecordCompactionIOStats();
 
   if (status.ok() && cfd->IsDropped()) {
-    status =
-        rocksdb_rs::status::Status_ColumnFamilyDropped("Column family dropped during compaction");
+    status = rocksdb_rs::status::Status_ColumnFamilyDropped(
+        "Column family dropped during compaction");
   }
   if ((status.ok() || status.IsColumnFamilyDropped()) &&
       shutting_down_->load(std::memory_order_relaxed)) {
@@ -1358,7 +1360,8 @@ void CompactionJob::ProcessKeyValueCompaction(SubcompactionState* sub_compact) {
   }
   if ((status.ok() || status.IsColumnFamilyDropped()) &&
       (manual_compaction_canceled_.load(std::memory_order_relaxed))) {
-    status = rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
+    status = rocksdb_rs::status::Status_Incomplete(
+        rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
   if (status.ok()) {
     status = input->status();
@@ -1454,9 +1457,10 @@ void CompactionJob::RecordDroppedKeys(
 }
 
 rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
-    const rocksdb_rs::status::Status& input_status, SubcompactionState* sub_compact,
-    CompactionOutputs& outputs, const Slice& next_table_min_key,
-    const Slice* comp_start_user_key, const Slice* comp_end_user_key) {
+    const rocksdb_rs::status::Status& input_status,
+    SubcompactionState* sub_compact, CompactionOutputs& outputs,
+    const Slice& next_table_min_key, const Slice* comp_start_user_key,
+    const Slice* comp_end_user_key) {
   AutoThreadOperationStageUpdater stage_updater(
       ThreadStatus::STAGE_COMPACTION_SYNC_FILE);
   assert(sub_compact != nullptr);
@@ -1521,8 +1525,8 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
   }
 
   // Finish and check for file errors
-  rocksdb_rs::io_status::IOStatus io_s = outputs.WriterSyncClose(s, db_options_.clock, stats_,
-                                          db_options_.use_fsync);
+  rocksdb_rs::io_status::IOStatus io_s = outputs.WriterSyncClose(
+      s, db_options_.clock, stats_, db_options_.use_fsync);
 
   if (s.ok() && io_s.ok()) {
     file_checksum = meta->file_checksum;
@@ -1546,8 +1550,9 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
     // This happens when the output level is bottom level, at the same time
     // the sub_compact output nothing.
     std::string fname =
-        static_cast<std::string>(rocksdb_rs::filename::TableFileName(sub_compact->compaction->immutable_options()->cf_paths,
-                      meta->fd.GetNumber(), meta->fd.GetPathId()));
+        static_cast<std::string>(rocksdb_rs::filename::TableFileName(
+            sub_compact->compaction->immutable_options()->cf_paths,
+            meta->fd.GetNumber(), meta->fd.GetPathId()));
 
     // TODO(AR) it is not clear if there are any larger implications if
     // DeleteFile fails here
@@ -1589,14 +1594,15 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
   } else {
     fname = "(nil)";
     if (s.ok()) {
-      status_for_listener = rocksdb_rs::status::Status_Aborted("Empty SST file not kept");
+      status_for_listener =
+          rocksdb_rs::status::Status_Aborted("Empty SST file not kept");
     }
   }
   EventHelpers::LogAndNotifyTableFileCreationFinished(
       event_logger_, cfd->ioptions()->listeners, dbname_, cfd->GetName(), fname,
       job_id_, output_fd, oldest_blob_file_number, tp,
-      rocksdb_rs::types::TableFileCreationReason::kCompaction, status_for_listener, file_checksum,
-      file_checksum_func_name);
+      rocksdb_rs::types::TableFileCreationReason::kCompaction,
+      status_for_listener, file_checksum, file_checksum_func_name);
 
   // Report new file to SstFileManagerImpl
   auto sfm =
@@ -1609,7 +1615,8 @@ rocksdb_rs::status::Status CompactionJob::FinishCompactionOutputFile(
     if (sfm->IsMaxAllowedSpaceReached()) {
       // TODO(ajkr): should we return OK() if max space was reached by the final
       // compaction output file (similarly to how flush works when full)?
-      s = rocksdb_rs::status::Status_SpaceLimit("Max allowed space was reached");
+      s = rocksdb_rs::status::Status_SpaceLimit(
+          "Max allowed space was reached");
       TEST_SYNC_POINT(
           "CompactionJob::FinishCompactionOutputFile:MaxAllowedSpaceReached");
       InstrumentedMutexLock l(db_mutex_);
@@ -1732,8 +1739,8 @@ void CompactionJob::RecordCompactionIOStats() {
   IOSTATS_RESET(bytes_written);
 }
 
-rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(SubcompactionState* sub_compact,
-                                               CompactionOutputs& outputs) {
+rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(
+    SubcompactionState* sub_compact, CompactionOutputs& outputs) {
   assert(sub_compact != nullptr);
 
   // no need to lock because VersionSet::next_file_number_ is atomic
@@ -1766,7 +1773,8 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
   fo_copy.temperature = temperature;
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
-  rocksdb_rs::io_status::IOStatus io_s = NewWritableFile(fs_.get(), fname, &writable_file, fo_copy);
+  rocksdb_rs::io_status::IOStatus io_s =
+      NewWritableFile(fs_.get(), fname, &writable_file, fo_copy);
   s = io_s.status();
   if (sub_compact->io_status.ok()) {
     sub_compact->io_status = io_s.Clone();
@@ -1782,7 +1790,8 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
     EventHelpers::LogAndNotifyTableFileCreationFinished(
         event_logger_, cfd->ioptions()->listeners, dbname_, cfd->GetName(),
         fname, job_id_, FileDescriptor(), kInvalidBlobFileNumber,
-        TableProperties(), rocksdb_rs::types::TableFileCreationReason::kCompaction, s,
+        TableProperties(),
+        rocksdb_rs::types::TableFileCreationReason::kCompaction, s,
         kUnknownFileChecksum, kUnknownFileChecksumFuncName);
     return s;
   }
@@ -1824,7 +1833,8 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
     meta.temperature = temperature;
     assert(!db_id_.empty());
     assert(!db_session_id_.empty());
-    s = meta.unique_id.get_sst_internal_unique_id(db_id_, db_session_id_, meta.fd.GetNumber(), false);
+    s = meta.unique_id.get_sst_internal_unique_id(db_id_, db_session_id_,
+                                                  meta.fd.GetNumber(), false);
     if (!s.ok()) {
       ROCKS_LOG_ERROR(db_options_.info_log,
                       "[%s] [JOB %d] file #%" PRIu64
@@ -1858,7 +1868,8 @@ rocksdb_rs::status::Status CompactionJob::OpenCompactionOutputFile(Subcompaction
       sub_compact->compaction->output_compression(),
       sub_compact->compaction->output_compression_opts(), cfd->GetID(),
       cfd->GetName(), sub_compact->compaction->output_level(),
-      bottommost_level_, rocksdb_rs::types::TableFileCreationReason::kCompaction,
+      bottommost_level_,
+      rocksdb_rs::types::TableFileCreationReason::kCompaction,
       0 /* oldest_key_time */, current_time, db_id_, db_session_id_,
       sub_compact->compaction->max_output_file_size(), file_number);
 
@@ -1883,7 +1894,6 @@ void CopyPrefix(const Slice& src, size_t prefix_length, std::string* dst) {
   dst->assign(src.data(), length);
 }
 }  // namespace
-
 
 void CompactionJob::UpdateCompactionStats() {
   assert(compact_);
@@ -2014,8 +2024,9 @@ void CompactionJob::LogCompaction() {
 }
 
 std::string CompactionJob::GetTableFileName(uint64_t file_number) {
-  return static_cast<std::string>(rocksdb_rs::filename::TableFileName(compact_->compaction->immutable_options()->cf_paths,
-                       file_number, compact_->compaction->output_path_id()));
+  return static_cast<std::string>(rocksdb_rs::filename::TableFileName(
+      compact_->compaction->immutable_options()->cf_paths, file_number,
+      compact_->compaction->output_path_id()));
 }
 
 Env::IOPriority CompactionJob::GetRateLimiterPriority() {

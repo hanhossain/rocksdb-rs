@@ -46,13 +46,13 @@ class BlobFileBuilderTest : public testing::Test {
     clock_ = mock_env_->GetSystemClock().get();
   }
 
-  void VerifyBlobFile(uint64_t blob_file_number,
-                      const std::string& blob_file_path,
-                      uint32_t column_family_id,
-                      rocksdb_rs::compression_type::CompressionType blob_compression_type,
-                      const std::vector<std::pair<std::string, std::string>>&
-                          expected_key_value_pairs,
-                      const std::vector<std::string>& blob_indexes) {
+  void VerifyBlobFile(
+      uint64_t blob_file_number, const std::string& blob_file_path,
+      uint32_t column_family_id,
+      rocksdb_rs::compression_type::CompressionType blob_compression_type,
+      const std::vector<std::pair<std::string, std::string>>&
+          expected_key_value_pairs,
+      const std::vector<std::string>& blob_indexes) {
     assert(expected_key_value_pairs.size() == blob_indexes.size());
 
     std::unique_ptr<FSRandomAccessFile> file;
@@ -80,7 +80,8 @@ class BlobFileBuilderTest : public testing::Test {
       uint64_t blob_offset = 0;
 
       ASSERT_OK(blob_log_reader.ReadRecord(
-          &record, BlobLogSequentialReader::ReadLevel::kReadHeaderKeyBlob, &blob_offset));
+          &record, BlobLogSequentialReader::ReadLevel::kReadHeaderKeyBlob,
+          &blob_offset));
 
       // Check the contents of the blob file
       const auto& expected_key_value = expected_key_value_pairs[i];
@@ -148,7 +149,8 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckOneFile) {
       &file_options_, "" /*db_id*/, "" /*db_session_id*/, job_id,
       column_family_id, column_family_name, io_priority, write_hint,
       nullptr /*IOTracer*/, nullptr /*BlobFileCompletionCallback*/,
-      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths, &blob_file_additions);
+      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths,
+      &blob_file_additions);
 
   std::vector<std::pair<std::string, std::string>> expected_key_value_pairs(
       number_of_blobs);
@@ -180,9 +182,9 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckOneFile) {
 
   const std::string& blob_file_path = blob_file_paths[0];
 
-  ASSERT_EQ(
-      blob_file_path,
-      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number)));
+  ASSERT_EQ(blob_file_path,
+            static_cast<std::string>(BlobFileName(
+                immutable_options.cf_paths.front().path, blob_file_number)));
 
   ASSERT_EQ(blob_file_additions.size(), 1);
 
@@ -196,7 +198,8 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckOneFile) {
 
   // Verify the contents of the new blob file as well as the blob references
   VerifyBlobFile(blob_file_number, blob_file_path, column_family_id,
-                 rocksdb_rs::compression_type::CompressionType::kNoCompression, expected_key_value_pairs, blob_indexes);
+                 rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                 expected_key_value_pairs, blob_indexes);
 }
 
 TEST_F(BlobFileBuilderTest, BuildAndCheckMultipleFiles) {
@@ -233,7 +236,8 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckMultipleFiles) {
       &file_options_, "" /*db_id*/, "" /*db_session_id*/, job_id,
       column_family_id, column_family_name, io_priority, write_hint,
       nullptr /*IOTracer*/, nullptr /*BlobFileCompletionCallback*/,
-      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths, &blob_file_additions);
+      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths,
+      &blob_file_additions);
 
   std::vector<std::pair<std::string, std::string>> expected_key_value_pairs(
       number_of_blobs);
@@ -266,8 +270,8 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckMultipleFiles) {
     const uint64_t blob_file_number = i + 2;
 
     ASSERT_EQ(blob_file_paths[i],
-              static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path,
-                           blob_file_number)));
+              static_cast<std::string>(BlobFileName(
+                  immutable_options.cf_paths.front().path, blob_file_number)));
 
     const auto& blob_file_addition = blob_file_additions[i];
 
@@ -283,8 +287,10 @@ TEST_F(BlobFileBuilderTest, BuildAndCheckMultipleFiles) {
         expected_key_value_pairs[i]};
     std::vector<std::string> blob_index{blob_indexes[i]};
 
-    VerifyBlobFile(i + 2, blob_file_paths[i], column_family_id, rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                   expected_key_value_pair, blob_index);
+    VerifyBlobFile(
+        i + 2, blob_file_paths[i], column_family_id,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression,
+        expected_key_value_pair, blob_index);
   }
 }
 
@@ -321,7 +327,8 @@ TEST_F(BlobFileBuilderTest, InlinedValues) {
       &file_options_, "" /*db_id*/, "" /*db_session_id*/, job_id,
       column_family_id, column_family_name, io_priority, write_hint,
       nullptr /*IOTracer*/, nullptr /*BlobFileCompletionCallback*/,
-      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths, &blob_file_additions);
+      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths,
+      &blob_file_additions);
 
   for (size_t i = 0; i < number_of_blobs; ++i) {
     const std::string key = std::to_string(i);
@@ -356,7 +363,8 @@ TEST_F(BlobFileBuilderTest, Compression) {
       test::PerThreadDBPath(mock_env_.get(), "BlobFileBuilderTest_Compression"),
       0);
   options.enable_blob_files = true;
-  options.blob_compression_type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+  options.blob_compression_type =
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.env = mock_env_.get();
 
   ImmutableOptions immutable_options(options);
@@ -376,7 +384,8 @@ TEST_F(BlobFileBuilderTest, Compression) {
       &file_options_, "" /*db_id*/, "" /*db_session_id*/, job_id,
       column_family_id, column_family_name, io_priority, write_hint,
       nullptr /*IOTracer*/, nullptr /*BlobFileCompletionCallback*/,
-      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths, &blob_file_additions);
+      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths,
+      &blob_file_additions);
 
   const std::string key("1");
   const std::string uncompressed_value(value_size, 'x');
@@ -395,9 +404,9 @@ TEST_F(BlobFileBuilderTest, Compression) {
 
   const std::string& blob_file_path = blob_file_paths[0];
 
-  ASSERT_EQ(
-      blob_file_path,
-      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number)));
+  ASSERT_EQ(blob_file_path,
+            static_cast<std::string>(BlobFileName(
+                immutable_options.cf_paths.front().path, blob_file_number)));
 
   ASSERT_EQ(blob_file_additions.size(), 1);
 
@@ -407,11 +416,14 @@ TEST_F(BlobFileBuilderTest, Compression) {
   ASSERT_EQ(blob_file_addition.GetTotalBlobCount(), 1);
 
   CompressionOptions opts;
-  CompressionContext context(rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
+  CompressionContext context(
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression);
   constexpr uint64_t sample_for_compression = 0;
 
-  CompressionInfo info(opts, context, CompressionDict::GetEmptyDict(),
-                       rocksdb_rs::compression_type::CompressionType::kSnappyCompression, sample_for_compression);
+  CompressionInfo info(
+      opts, context, CompressionDict::GetEmptyDict(),
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+      sample_for_compression);
 
   std::string compressed_value;
   ASSERT_TRUE(Snappy_Compress(info, uncompressed_value.data(),
@@ -425,8 +437,10 @@ TEST_F(BlobFileBuilderTest, Compression) {
       {key, compressed_value}};
   std::vector<std::string> blob_indexes{blob_index};
 
-  VerifyBlobFile(blob_file_number, blob_file_path, column_family_id,
-                 rocksdb_rs::compression_type::CompressionType::kSnappyCompression, expected_key_value_pairs, blob_indexes);
+  VerifyBlobFile(
+      blob_file_number, blob_file_path, column_family_id,
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+      expected_key_value_pairs, blob_indexes);
 }
 
 TEST_F(BlobFileBuilderTest, CompressionError) {
@@ -441,7 +455,8 @@ TEST_F(BlobFileBuilderTest, CompressionError) {
                             "BlobFileBuilderTest_CompressionError"),
       0);
   options.enable_blob_files = true;
-  options.blob_compression_type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+  options.blob_compression_type =
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   options.env = mock_env_.get();
   ImmutableOptions immutable_options(options);
   MutableCFOptions mutable_cf_options(options);
@@ -460,7 +475,8 @@ TEST_F(BlobFileBuilderTest, CompressionError) {
       &file_options_, "" /*db_id*/, "" /*db_session_id*/, job_id,
       column_family_id, column_family_name, io_priority, write_hint,
       nullptr /*IOTracer*/, nullptr /*BlobFileCompletionCallback*/,
-      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths, &blob_file_additions);
+      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths,
+      &blob_file_additions);
 
   SyncPoint::GetInstance()->SetCallBack("CompressData:TamperWithReturnValue",
                                         [](void* arg) {
@@ -482,9 +498,9 @@ TEST_F(BlobFileBuilderTest, CompressionError) {
   constexpr uint64_t blob_file_number = 2;
 
   ASSERT_EQ(blob_file_paths.size(), 1);
-  ASSERT_EQ(
-      blob_file_paths[0],
-      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number)));
+  ASSERT_EQ(blob_file_paths[0],
+            static_cast<std::string>(BlobFileName(
+                immutable_options.cf_paths.front().path, blob_file_number)));
 
   ASSERT_TRUE(blob_file_additions.empty());
 }
@@ -540,7 +556,8 @@ TEST_F(BlobFileBuilderTest, Checksum) {
       &file_options_, "" /*db_id*/, "" /*db_session_id*/, job_id,
       column_family_id, column_family_name, io_priority, write_hint,
       nullptr /*IOTracer*/, nullptr /*BlobFileCompletionCallback*/,
-      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths, &blob_file_additions);
+      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths,
+      &blob_file_additions);
 
   const std::string key("1");
   const std::string value("deadbeef");
@@ -559,9 +576,9 @@ TEST_F(BlobFileBuilderTest, Checksum) {
 
   const std::string& blob_file_path = blob_file_paths[0];
 
-  ASSERT_EQ(
-      blob_file_path,
-      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number)));
+  ASSERT_EQ(blob_file_path,
+            static_cast<std::string>(BlobFileName(
+                immutable_options.cf_paths.front().path, blob_file_number)));
 
   ASSERT_EQ(blob_file_additions.size(), 1);
 
@@ -580,7 +597,8 @@ TEST_F(BlobFileBuilderTest, Checksum) {
   std::vector<std::string> blob_indexes{blob_index};
 
   VerifyBlobFile(blob_file_number, blob_file_path, column_family_id,
-                 rocksdb_rs::compression_type::CompressionType::kNoCompression, expected_key_value_pairs, blob_indexes);
+                 rocksdb_rs::compression_type::CompressionType::kNoCompression,
+                 expected_key_value_pairs, blob_indexes);
 }
 
 class BlobFileBuilderIOErrorTest
@@ -638,10 +656,12 @@ TEST_P(BlobFileBuilderIOErrorTest, IOError) {
       &file_options_, "" /*db_id*/, "" /*db_session_id*/, job_id,
       column_family_id, column_family_name, io_priority, write_hint,
       nullptr /*IOTracer*/, nullptr /*BlobFileCompletionCallback*/,
-      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths, &blob_file_additions);
+      rocksdb_rs::types::BlobFileCreationReason::kFlush, &blob_file_paths,
+      &blob_file_additions);
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* arg) {
-    rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
+    rocksdb_rs::status::Status* const s =
+        static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
     (*s) = rocksdb_rs::status::Status_IOError(sync_point_);
@@ -665,8 +685,8 @@ TEST_P(BlobFileBuilderIOErrorTest, IOError) {
 
     ASSERT_EQ(blob_file_paths.size(), 1);
     ASSERT_EQ(blob_file_paths[0],
-              static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path,
-                           blob_file_number)));
+              static_cast<std::string>(BlobFileName(
+                  immutable_options.cf_paths.front().path, blob_file_number)));
   }
 
   ASSERT_TRUE(blob_file_additions.empty());

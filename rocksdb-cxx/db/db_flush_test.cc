@@ -325,7 +325,8 @@ TEST_F(DBFlushTest, StatisticsGarbageBasic) {
 
   // Useful for now as we are trying to compare uncompressed data savings on
   // flush().
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Prevent memtable in place updates. Should already be disabled
   // (from Wiki:
@@ -359,8 +360,8 @@ TEST_F(DBFlushTest, StatisticsGarbageBasic) {
   //                                                      number
   // +
   //                                                      insertion type"
-  //             + rocksdb_rs::coding::VarintLength(val_size)           --> = min # of bytes to
-  //             store val_size
+  //             + rocksdb_rs::coding::VarintLength(val_size)           --> =
+  //             min # of bytes to store val_size
   //             + val_size                         --> = actual value
   //             string
   // For example, in our situation, "key1" : size 4, "value1" : size 6
@@ -466,7 +467,8 @@ TEST_F(DBFlushTest, StatisticsGarbageInsertAndDeletes) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
   options.write_buffer_size = 67108864;
@@ -557,7 +559,8 @@ TEST_F(DBFlushTest, StatisticsGarbageRangeDeletes) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
   options.write_buffer_size = 67108864;
@@ -898,7 +901,8 @@ TEST_F(DBFlushTest, MemPurgeBasic) {
 
   // Useful for now as we are trying to compare uncompressed data savings on
   // flush().
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Prevent memtable in place updates. Should already be disabled
   // (from Wiki:
@@ -1071,7 +1075,8 @@ TEST_F(DBFlushTest, MemPurgeBasicToggle) {
 
   // Useful for now as we are trying to compare uncompressed data savings on
   // flush().
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Prevent memtable in place updates. Should already be disabled
   // (from Wiki:
@@ -1194,7 +1199,8 @@ TEST_F(DBFlushTest, MemPurgeWithAtomicFlush) {
 
   // Useful for now as we are trying to compare uncompressed data savings on
   // flush().
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
 
   // Prevent memtable in place updates. Should already be disabled
   // (from Wiki:
@@ -1285,7 +1291,8 @@ TEST_F(DBFlushTest, MemPurgeDeleteAndDeleteRange) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
   TestFlushListener* listener = new TestFlushListener(options.env, this);
@@ -1484,7 +1491,8 @@ TEST_F(DBFlushTest, MemPurgeAndCompactionFilter) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
   TestFlushListener* listener = new TestFlushListener(options.env, this);
@@ -1567,7 +1575,8 @@ TEST_F(DBFlushTest, DISABLED_MemPurgeWALSupport) {
   options.statistics = CreateDBStatistics();
   options.statistics->set_stats_level(StatsLevel::kAll);
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
 
@@ -1747,7 +1756,8 @@ TEST_F(DBFlushTest, MemPurgeCorrectLogNumberAndSSTFileCreation) {
   Options options = CurrentOptions();
 
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.inplace_update_support = false;
   options.allow_concurrent_memtable_write = true;
 
@@ -2168,7 +2178,8 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
   options.min_write_buffer_number_to_merge = 3;
   options.disable_auto_compactions = true;
   options.env = fault_fs_env.get();
-  options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kTableFile);
+  options.checksum_handoff_file_types.Add(
+      rocksdb_rs::types::FileType::kTableFile);
   Reopen(options);
 
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
@@ -2187,8 +2198,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
   ASSERT_OK(Put("key4", "value4"));
   SyncPoint::GetInstance()->EnableProcessing();
   rocksdb_rs::status::Status s = Flush();
-  ASSERT_EQ(s.severity(),
-            rocksdb_rs::status::Severity::kUnrecoverableError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
   Destroy(options);
   Reopen(options);
@@ -2211,8 +2221,7 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoff1) {
   ASSERT_OK(Put("key8", "value8"));
   SyncPoint::GetInstance()->EnableProcessing();
   s = Flush();
-  ASSERT_EQ(s.severity(),
-            rocksdb_rs::status::Severity::kUnrecoverableError);
+  ASSERT_EQ(s.severity(), rocksdb_rs::status::Severity::kUnrecoverableError);
   SyncPoint::GetInstance()->DisableProcessing();
 
   Destroy(options);
@@ -2286,7 +2295,8 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoffManifest1) {
   options.min_write_buffer_number_to_merge = 3;
   options.disable_auto_compactions = true;
   options.env = fault_fs_env.get();
-  options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kDescriptorFile);
+  options.checksum_handoff_file_types.Add(
+      rocksdb_rs::types::FileType::kDescriptorFile);
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
   Reopen(options);
 
@@ -2326,7 +2336,8 @@ TEST_F(DBFlushTest, FlushWithChecksumHandoffManifest2) {
   options.min_write_buffer_number_to_merge = 3;
   options.disable_auto_compactions = true;
   options.env = fault_fs_env.get();
-  options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kDescriptorFile);
+  options.checksum_handoff_file_types.Add(
+      rocksdb_rs::types::FileType::kDescriptorFile);
   fault_fs->SetChecksumHandoffFuncType(ChecksumType::kNoChecksum);
   Reopen(options);
   // The file system does not support checksum handoff. The check
@@ -2420,7 +2431,8 @@ TEST_P(DBFlushTestBlobError, FlushError) {
   ASSERT_OK(Put("key", "blob"));
 
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* arg) {
-    rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
+    rocksdb_rs::status::Status* const s =
+        static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
     (*s) = rocksdb_rs::status::Status_IOError(sync_point_);
@@ -3094,7 +3106,9 @@ TEST_P(DBAtomicFlushTest, BgThreadNoWaitAfterManifestError) {
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::AtomicFlushMemTablesToOutputFiles:WaitToCommit", [&](void* arg) {
         if (std::this_thread::get_id() == bg_flush_thr2) {
-          const auto* ptr = reinterpret_cast<std::pair<rocksdb_rs::status::Status, bool>*>(arg);
+          const auto* ptr =
+              reinterpret_cast<std::pair<rocksdb_rs::status::Status, bool>*>(
+                  arg);
           assert(ptr);
           if (0 == called) {
             // When bg flush thread 2 reaches here for the first time.

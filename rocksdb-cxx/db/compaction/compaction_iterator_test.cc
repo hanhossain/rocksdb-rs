@@ -1290,7 +1290,8 @@ TEST_P(CompactionIteratorTsGcTest, AllKeysOlderThanThreshold) {
       test::KeyStr(/*ts=*/104, user_key[1], /*seq=*/5, kTypeValue)};
   const std::vector<std::string> input_values = {"", "a2", "a1", "b5"};
   std::string full_history_ts_low;
-  rocksdb_rs::coding::PutFixed64(full_history_ts_low, std::numeric_limits<uint64_t>::max());
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low,
+                                 std::numeric_limits<uint64_t>::max());
   {
     // With a snapshot at seq 3, both the deletion marker and the key at 3 must
     // be preserved.
@@ -1576,7 +1577,8 @@ TEST_P(CompactionIteratorTsGcTest, SingleDeleteAllKeysOlderThanThreshold) {
       test::KeyStr(/*ts=*/104, user_key[1], /*seq=*/5, kTypeValue)};
   const std::vector<std::string> input_values = {"", "a2", "b5"};
   std::string full_history_ts_low;
-  rocksdb_rs::coding::PutFixed64(full_history_ts_low, std::numeric_limits<uint64_t>::max());
+  rocksdb_rs::coding::PutFixed64(full_history_ts_low,
+                                 std::numeric_limits<uint64_t>::max());
   {
     // With a snapshot at seq 3, both the deletion marker and the key at 3 must
     // be preserved.

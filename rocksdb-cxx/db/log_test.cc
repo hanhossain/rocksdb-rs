@@ -49,8 +49,8 @@ static std::string RandomSkewedString(int i, Random* rnd) {
 // get<0>(tuple): non-zero if recycling log, zero if regular log
 // get<1>(tuple): true if allow retry after read EOF, false otherwise
 // get<2>(tuple): type of compression used
-class LogTest
-    : public ::testing::TestWithParam<std::tuple<int, bool, rocksdb_rs::compression_type::CompressionType>> {
+class LogTest : public ::testing::TestWithParam<std::tuple<
+                    int, bool, rocksdb_rs::compression_type::CompressionType>> {
  private:
   class StringSource : public FSSequentialFile {
    public:
@@ -70,8 +70,9 @@ class LogTest
           returned_partial_(false),
           fail_after_read_partial_(fail_after_read_partial) {}
 
-    rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& /*opts*/, Slice* result,
-                  char* scratch, IODebugContext* /*dbg*/) override {
+    rocksdb_rs::io_status::IOStatus Read(size_t n, const IOOptions& /*opts*/,
+                                         Slice* result, char* scratch,
+                                         IODebugContext* /*dbg*/) override {
       if (fail_after_read_partial_) {
         EXPECT_TRUE(!returned_partial_) << "must not Read() after eof/error";
       }
@@ -115,7 +116,8 @@ class LogTest
     rocksdb_rs::io_status::IOStatus Skip(uint64_t n) override {
       if (n > contents_.size()) {
         contents_.clear();
-        return rocksdb_rs::io_status::IOStatus_NotFound("in-memory file skipepd past end");
+        return rocksdb_rs::io_status::IOStatus_NotFound(
+            "in-memory file skipepd past end");
       }
 
       contents_.remove_prefix(n);
@@ -130,7 +132,8 @@ class LogTest
     std::string message_;
 
     ReportCollector() : dropped_bytes_(0) {}
-    void Corruption(size_t bytes, const rocksdb_rs::status::Status& status) override {
+    void Corruption(size_t bytes,
+                    const rocksdb_rs::status::Status& status) override {
       dropped_bytes_ += bytes;
       message_.append(*status.ToString());
     }
@@ -234,7 +237,8 @@ class LogTest
     uint32_t crc = crc32c::Value(&dest_contents()[header_offset + 6],
                                  header_size - 6 + len);
     crc = crc32c::Mask(crc);
-    rocksdb_rs::coding_lean::EncodeFixed32(&dest_contents()[header_offset], crc);
+    rocksdb_rs::coding_lean::EncodeFixed32(&dest_contents()[header_offset],
+                                           crc);
   }
 
   void ForceError(size_t position = 0) {
@@ -776,8 +780,10 @@ TEST_P(LogTest, RecycleWithTimestampSize) {
 // Do NOT enable compression for this instantiation.
 INSTANTIATE_TEST_CASE_P(
     Log, LogTest,
-    ::testing::Combine(::testing::Values(0, 1), ::testing::Bool(),
-                       ::testing::Values(rocksdb_rs::compression_type::CompressionType::kNoCompression)));
+    ::testing::Combine(
+        ::testing::Values(0, 1), ::testing::Bool(),
+        ::testing::Values(
+            rocksdb_rs::compression_type::CompressionType::kNoCompression)));
 
 class RetriableLogTest : public ::testing::TestWithParam<int> {
  private:
@@ -787,7 +793,8 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     std::string message_;
 
     ReportCollector() : dropped_bytes_(0) {}
-    void Corruption(size_t bytes, const rocksdb_rs::status::Status& status) override {
+    void Corruption(size_t bytes,
+                    const rocksdb_rs::status::Status& status) override {
       dropped_bytes_ += bytes;
       message_.append(*status.ToString());
     }
@@ -828,7 +835,8 @@ class RetriableLogTest : public ::testing::TestWithParam<int> {
     s = fs->CreateDirIfMissing(test_dir_, IOOptions(), nullptr).status();
     std::unique_ptr<FSWritableFile> writable_file;
     if (s.ok()) {
-      s = fs->NewWritableFile(log_file_, fopts, &writable_file, nullptr).status();
+      s = fs->NewWritableFile(log_file_, fopts, &writable_file, nullptr)
+              .status();
     }
     if (s.ok()) {
       writer_.reset(
@@ -991,18 +999,24 @@ INSTANTIATE_TEST_CASE_P(bool, RetriableLogTest, ::testing::Values(0, 2));
 
 class CompressionLogTest : public LogTest {
  public:
-  rocksdb_rs::status::Status SetupTestEnv() { return writer_->AddCompressionTypeRecord().status(); }
+  rocksdb_rs::status::Status SetupTestEnv() {
+    return writer_->AddCompressionTypeRecord().status();
+  }
 };
 
 TEST_P(CompressionLogTest, Empty) {
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<2>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<2>(GetParam());
   if (!StreamingCompressionTypeSupported(compression_type)) {
     ROCKSDB_GTEST_SKIP("Test requires support for compression type");
     return;
   }
   ASSERT_OK(SetupTestEnv());
   const bool compression_enabled =
-      std::get<2>(GetParam()) == rocksdb_rs::compression_type::CompressionType::kNoCompression ? false : true;
+      std::get<2>(GetParam()) ==
+              rocksdb_rs::compression_type::CompressionType::kNoCompression
+          ? false
+          : true;
   // If WAL compression is enabled, a record is added for the compression type
   const int compression_record_size = compression_enabled ? kHeaderSize + 4 : 0;
   ASSERT_EQ(compression_record_size, WrittenBytes());
@@ -1010,7 +1024,8 @@ TEST_P(CompressionLogTest, Empty) {
 }
 
 TEST_P(CompressionLogTest, ReadWrite) {
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<2>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<2>(GetParam());
   if (!StreamingCompressionTypeSupported(compression_type)) {
     ROCKSDB_GTEST_SKIP("Test requires support for compression type");
     return;
@@ -1029,7 +1044,8 @@ TEST_P(CompressionLogTest, ReadWrite) {
 }
 
 TEST_P(CompressionLogTest, ReadWriteWithTimestampSize) {
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<2>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<2>(GetParam());
   if (!StreamingCompressionTypeSupported(compression_type)) {
     ROCKSDB_GTEST_SKIP("Test requires support for compression type");
     return;
@@ -1058,7 +1074,8 @@ TEST_P(CompressionLogTest, ReadWriteWithTimestampSize) {
 }
 
 TEST_P(CompressionLogTest, ManyBlocks) {
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<2>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<2>(GetParam());
   if (!StreamingCompressionTypeSupported(compression_type)) {
     ROCKSDB_GTEST_SKIP("Test requires support for compression type");
     return;
@@ -1074,7 +1091,8 @@ TEST_P(CompressionLogTest, ManyBlocks) {
 }
 
 TEST_P(CompressionLogTest, Fragmentation) {
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<2>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<2>(GetParam());
   if (!StreamingCompressionTypeSupported(compression_type)) {
     ROCKSDB_GTEST_SKIP("Test requires support for compression type");
     return;
@@ -1097,7 +1115,8 @@ TEST_P(CompressionLogTest, Fragmentation) {
 }
 
 TEST_P(CompressionLogTest, AlignedFragmentation) {
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<2>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<2>(GetParam());
   if (!StreamingCompressionTypeSupported(compression_type)) {
     ROCKSDB_GTEST_SKIP("Test requires support for compression type");
     return;
@@ -1130,16 +1149,20 @@ TEST_P(CompressionLogTest, AlignedFragmentation) {
 
 INSTANTIATE_TEST_CASE_P(
     Compression, CompressionLogTest,
-    ::testing::Combine(::testing::Values(0, 1), ::testing::Bool(),
-                       ::testing::Values(rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                                         rocksdb_rs::compression_type::CompressionType::kZSTD)));
+    ::testing::Combine(
+        ::testing::Values(0, 1), ::testing::Bool(),
+        ::testing::Values(
+            rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            rocksdb_rs::compression_type::CompressionType::kZSTD)));
 
 class StreamingCompressionTest
-    : public ::testing::TestWithParam<std::tuple<int, rocksdb_rs::compression_type::CompressionType>> {};
+    : public ::testing::TestWithParam<
+          std::tuple<int, rocksdb_rs::compression_type::CompressionType>> {};
 
 TEST_P(StreamingCompressionTest, Basic) {
   size_t input_size = std::get<0>(GetParam());
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<1>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<1>(GetParam());
   if (!StreamingCompressionTypeSupported(compression_type)) {
     ROCKSDB_GTEST_SKIP("Test requires support for compression type");
     return;
@@ -1198,9 +1221,10 @@ TEST_P(StreamingCompressionTest, Basic) {
 
 INSTANTIATE_TEST_CASE_P(
     StreamingCompression, StreamingCompressionTest,
-    ::testing::Combine(::testing::Values(10, 100, 1000, kBlockSize,
-                                         kBlockSize * 2),
-                       ::testing::Values(rocksdb_rs::compression_type::CompressionType::kZSTD)));
+    ::testing::Combine(
+        ::testing::Values(10, 100, 1000, kBlockSize, kBlockSize * 2),
+        ::testing::Values(
+            rocksdb_rs::compression_type::CompressionType::kZSTD)));
 
 }  // namespace log
 }  // namespace rocksdb

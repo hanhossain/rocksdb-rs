@@ -60,7 +60,8 @@ class SubcompactionState {
   rocksdb_rs::status::Status status;
 
   // The return IO Status of this sub-compaction
-  rocksdb_rs::io_status::IOStatus io_status = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus io_status =
+      rocksdb_rs::io_status::IOStatus_new();
 
   // Notify on sub-compaction completion only if listener was notified on
   // sub-compaction begin.
@@ -189,15 +190,17 @@ class SubcompactionState {
   }
 
   // Add compaction_iterator key/value to the `Current` output group.
-  rocksdb_rs::status::Status AddToOutput(const CompactionIterator& iter,
-                     const CompactionFileOpenFunc& open_file_func,
-                     const CompactionFileCloseFunc& close_file_func);
+  rocksdb_rs::status::Status AddToOutput(
+      const CompactionIterator& iter,
+      const CompactionFileOpenFunc& open_file_func,
+      const CompactionFileCloseFunc& close_file_func);
 
   // Close all compaction output files, both output_to_penultimate_level outputs
   // and normal outputs.
-  rocksdb_rs::status::Status CloseCompactionFiles(const rocksdb_rs::status::Status& curr_status,
-                              const CompactionFileOpenFunc& open_file_func,
-                              const CompactionFileCloseFunc& close_file_func) {
+  rocksdb_rs::status::Status CloseCompactionFiles(
+      const rocksdb_rs::status::Status& curr_status,
+      const CompactionFileOpenFunc& open_file_func,
+      const CompactionFileCloseFunc& close_file_func) {
     // Call FinishCompactionOutputFile() even if status is not ok: it needs to
     // close the output file.
     // CloseOutput() may open new compaction output files.

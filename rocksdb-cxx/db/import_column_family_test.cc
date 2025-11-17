@@ -4,7 +4,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include <functional>
 
 #include "db/db_test_util.h"
@@ -643,10 +642,11 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
     // Create column family with existing cf name.
     ExportImportFilesMetaData metadata;
     metadata.db_comparator_name = options.comparator->Name();
-    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "koko",
-                                                 ImportColumnFamilyOptions(),
-                                                 metadata, &import_cfh_);
-    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Column family already exists"));
+    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(
+        ColumnFamilyOptions(), "koko", ImportColumnFamilyOptions(), metadata,
+        &import_cfh_);
+    ASSERT_TRUE(
+        std::strstr(s.getState()->c_str(), "Column family already exists"));
     ASSERT_EQ(import_cfh_, nullptr);
   }
 
@@ -654,10 +654,11 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
     // Import with no files specified.
     ExportImportFilesMetaData metadata;
     metadata.db_comparator_name = options.comparator->Name();
-    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "yoyo",
-                                                 ImportColumnFamilyOptions(),
-                                                 metadata, &import_cfh_);
-    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "The list of files is empty"));
+    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(
+        ColumnFamilyOptions(), "yoyo", ImportColumnFamilyOptions(), metadata,
+        &import_cfh_);
+    ASSERT_TRUE(
+        std::strstr(s.getState()->c_str(), "The list of files is empty"));
     ASSERT_EQ(import_cfh_, nullptr);
   }
 
@@ -707,9 +708,9 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
         LiveFileMetaDataInit(file1_sst_name, sst_files_dir_, 1, 10, 19));
     metadata.db_comparator_name = mismatch_options.comparator->Name();
 
-    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "coco",
-                                                 ImportColumnFamilyOptions(),
-                                                 metadata, &import_cfh_);
+    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(
+        ColumnFamilyOptions(), "coco", ImportColumnFamilyOptions(), metadata,
+        &import_cfh_);
     ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Comparator name mismatch"));
     ASSERT_EQ(import_cfh_, nullptr);
   }
@@ -732,10 +733,11 @@ TEST_F(ImportColumnFamilyTest, ImportColumnFamilyNegativeTest) {
         LiveFileMetaDataInit(file3_sst_name, sst_files_dir_, 1, 10, 19));
     metadata.db_comparator_name = options.comparator->Name();
 
-    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(ColumnFamilyOptions(), "yoyo",
-                                                 ImportColumnFamilyOptions(),
-                                                 metadata, &import_cfh_);
-    ASSERT_TRUE(std::strstr(s.getState()->c_str(), "No such file or directory"));
+    rocksdb_rs::status::Status s = db_->CreateColumnFamilyWithImport(
+        ColumnFamilyOptions(), "yoyo", ImportColumnFamilyOptions(), metadata,
+        &import_cfh_);
+    ASSERT_TRUE(
+        std::strstr(s.getState()->c_str(), "No such file or directory"));
     ASSERT_EQ(import_cfh_, nullptr);
 
     // Test successful import after a failure with the same CF name. Ensures
@@ -872,8 +874,10 @@ TEST_F(ImportColumnFamilyTest, ImportMultiColumnFamilyWithOverlap) {
   std::vector<const ExportImportFilesMetaData*> metadatas = {metadata_ptr_,
                                                              metadata_ptr2_};
 
-  ASSERT_TRUE(db_->CreateColumnFamilyWithImport(options, "toto", import_options, metadatas, &import_cfh_)
-            .eq(rocksdb_rs::status::Status_InvalidArgument("CFs have overlapping ranges")));
+  ASSERT_TRUE(db_->CreateColumnFamilyWithImport(options, "toto", import_options,
+                                                metadatas, &import_cfh_)
+                  .eq(rocksdb_rs::status::Status_InvalidArgument(
+                      "CFs have overlapping ranges")));
 
   ASSERT_OK(db_copy->DropColumnFamily(copy_cfh));
   ASSERT_OK(db_copy->DestroyColumnFamilyHandle(copy_cfh));
@@ -887,4 +891,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

@@ -531,7 +531,8 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsSingleDB) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions write_op;
     write_op.no_slowdown = false;
-    rocksdb_rs::status::Status tmp = Put(cf, Slice(key), DummyString(1), write_op);
+    rocksdb_rs::status::Status tmp =
+        Put(cf, Slice(key), DummyString(1), write_op);
     InstrumentedMutexLock lock(&mutex);
     s1 = s1 && tmp.ok();
   };
@@ -541,7 +542,8 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsSingleDB) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions write_op;
     write_op.no_slowdown = true;
-    rocksdb_rs::status::Status tmp = Put(cf, Slice(key), DummyString(1), write_op);
+    rocksdb_rs::status::Status tmp =
+        Put(cf, Slice(key), DummyString(1), write_op);
     {
       InstrumentedMutexLock lock(&mutex);
       s2 = s2 && !tmp.ok();
@@ -694,7 +696,8 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsMultipleDB) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions write_op;
     write_op.no_slowdown = false;
-    rocksdb_rs::status::Status tmp = db->Put(write_op, Slice(key), DummyString(1));
+    rocksdb_rs::status::Status tmp =
+        db->Put(write_op, Slice(key), DummyString(1));
     InstrumentedMutexLock lock(&mutex);
     s1 = s1 && tmp.ok();
   };
@@ -704,7 +707,8 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsMultipleDB) {
     std::string key = "foo" + std::to_string(a);
     WriteOptions write_op;
     write_op.no_slowdown = true;
-    rocksdb_rs::status::Status tmp = db->Put(write_op, Slice(key), DummyString(1));
+    rocksdb_rs::status::Status tmp =
+        db->Put(write_op, Slice(key), DummyString(1));
     {
       InstrumentedMutexLock lock(&mutex);
       s2 = s2 && !tmp.ok();
@@ -779,7 +783,6 @@ TEST_P(DBWriteBufferManagerTest, MixedSlowDownOptionsMultipleDB) {
   rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
 }
-
 
 // Tests a `WriteBufferManager` constructed with `allow_stall == false` does not
 // thrash memtable switching when full and a CF receives multiple writes.
@@ -870,7 +873,8 @@ TEST_F(DBWriteBufferManagerTest, RuntimeChangeableAllowStall) {
   // Assert existence of a write stall
   WriteOptions wo_no_slowdown;
   wo_no_slowdown.no_slowdown = true;
-  rocksdb_rs::status::Status s = Put(Key(0), DummyString(kBigValue), wo_no_slowdown);
+  rocksdb_rs::status::Status s =
+      Put(Key(0), DummyString(kBigValue), wo_no_slowdown);
   ASSERT_TRUE(s.IsIncomplete());
   ASSERT_TRUE(s.ToString()->find("Write stall") != std::string::npos);
 

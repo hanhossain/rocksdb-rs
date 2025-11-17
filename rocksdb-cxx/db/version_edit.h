@@ -192,7 +192,7 @@ struct FileMetaData {
   uint64_t compensated_file_size = 0;
   // These values can mutate, but they can only be read or written from
   // single-threaded LogAndApply thread
-  uint64_t num_entries = 0;     // the number of entries.
+  uint64_t num_entries = 0;  // the number of entries.
   // The number of deletion entries, including range deletions.
   uint64_t num_deletions = 0;
   uint64_t raw_key_size = 0;    // total uncompressed key size.
@@ -283,8 +283,10 @@ struct FileMetaData {
 
   // REQUIRED: Keys must be given to the function in sorted order (it expects
   // the last key to be the largest).
-  rocksdb_rs::status::Status UpdateBoundaries(const Slice& key, const Slice& value,
-                          SequenceNumber seqno, ValueType value_type);
+  rocksdb_rs::status::Status UpdateBoundaries(const Slice& key,
+                                              const Slice& value,
+                                              SequenceNumber seqno,
+                                              ValueType value_type);
 
   // Unlike UpdateBoundaries, ranges do not need to be presented in any
   // particular order.

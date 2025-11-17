@@ -90,10 +90,9 @@ uint64_t DBImpl::TEST_Current_Next_FileNo() {
   return versions_->current_next_file_number();
 }
 
-rocksdb_rs::status::Status DBImpl::TEST_CompactRange(int level, const Slice* begin,
-                                 const Slice* end,
-                                 ColumnFamilyHandle* column_family,
-                                 bool disallow_trivial_move) {
+rocksdb_rs::status::Status DBImpl::TEST_CompactRange(
+    int level, const Slice* begin, const Slice* end,
+    ColumnFamilyHandle* column_family, bool disallow_trivial_move) {
   ColumnFamilyData* cfd;
   if (column_family == nullptr) {
     cfd = default_cf_handle_->cfd();
@@ -134,8 +133,9 @@ rocksdb_rs::status::Status DBImpl::TEST_SwitchMemtable(ColumnFamilyData* cfd) {
   return s;
 }
 
-rocksdb_rs::status::Status DBImpl::TEST_FlushMemTable(bool wait, bool allow_write_stall,
-                                  ColumnFamilyHandle* cfh) {
+rocksdb_rs::status::Status DBImpl::TEST_FlushMemTable(bool wait,
+                                                      bool allow_write_stall,
+                                                      ColumnFamilyHandle* cfh) {
   FlushOptions fo;
   fo.wait = wait;
   fo.allow_write_stall = allow_write_stall;
@@ -149,8 +149,8 @@ rocksdb_rs::status::Status DBImpl::TEST_FlushMemTable(bool wait, bool allow_writ
   return FlushMemTable(cfd, fo, FlushReason::kTest);
 }
 
-rocksdb_rs::status::Status DBImpl::TEST_FlushMemTable(ColumnFamilyData* cfd,
-                                  const FlushOptions& flush_opts) {
+rocksdb_rs::status::Status DBImpl::TEST_FlushMemTable(
+    ColumnFamilyData* cfd, const FlushOptions& flush_opts) {
   return FlushMemTable(cfd, flush_opts, FlushReason::kTest);
 }
 
@@ -167,7 +167,8 @@ rocksdb_rs::status::Status DBImpl::TEST_WaitForBackgroundWork() {
   return error_handler_.GetBGError();
 }
 
-rocksdb_rs::status::Status DBImpl::TEST_WaitForFlushMemTable(ColumnFamilyHandle* column_family) {
+rocksdb_rs::status::Status DBImpl::TEST_WaitForFlushMemTable(
+    ColumnFamilyHandle* column_family) {
   ColumnFamilyData* cfd;
   if (column_family == nullptr) {
     cfd = default_cf_handle_->cfd();
@@ -308,7 +309,6 @@ SeqnoToTimeMapping DBImpl::TEST_GetSeqnoToTimeMapping() const {
   InstrumentedMutexLock l(&mutex_);
   return seqno_time_mapping_;
 }
-
 
 size_t DBImpl::TEST_EstimateInMemoryStatsHistorySize() const {
   return EstimateInMemoryStatsHistorySize();

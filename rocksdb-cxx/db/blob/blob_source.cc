@@ -32,9 +32,9 @@ BlobSource::BlobSource(const ImmutableOptions* immutable_options,
       lowest_used_cache_tier_(immutable_options->lowest_used_cache_tier) {
   auto bbto =
       immutable_options->table_factory->GetOptions<BlockBasedTableOptions>();
-  if (bbto &&
-      bbto->cache_usage_options.options_overrides.at(rocksdb_rs::cache::CacheEntryRole::kBlobCache)
-              .charged == CacheEntryRoleOptions::Decision::kEnabled) {
+  if (bbto && bbto->cache_usage_options.options_overrides
+                      .at(rocksdb_rs::cache::CacheEntryRole::kBlobCache)
+                      .charged == CacheEntryRoleOptions::Decision::kEnabled) {
     blob_cache_ = SharedCacheInterface{std::make_shared<ChargedCache>(
         immutable_options->blob_cache, bbto->block_cache)};
   }
@@ -81,8 +81,8 @@ rocksdb_rs::status::Status BlobSource::PutBlobIntoCache(
   assert(cached_blob->IsEmpty());
 
   TypedHandle* cache_handle = nullptr;
-  const rocksdb_rs::status::Status s = InsertEntryIntoCache(cache_key, blob->get(),
-                                        &cache_handle, Cache::Priority::BOTTOM);
+  const rocksdb_rs::status::Status s = InsertEntryIntoCache(
+      cache_key, blob->get(), &cache_handle, Cache::Priority::BOTTOM);
   if (s.ok()) {
     blob->release();
 
@@ -146,21 +146,21 @@ void BlobSource::PinOwnedBlob(std::unique_ptr<BlobContents>* owned_blob,
       blob, nullptr);
 }
 
-rocksdb_rs::status::Status BlobSource::InsertEntryIntoCache(const Slice& key, BlobContents* value,
-                                        TypedHandle** cache_handle,
-                                        Cache::Priority priority) const {
+rocksdb_rs::status::Status BlobSource::InsertEntryIntoCache(
+    const Slice& key, BlobContents* value, TypedHandle** cache_handle,
+    Cache::Priority priority) const {
   return blob_cache_.InsertFull(key, value, value->ApproximateMemoryUsage(),
                                 cache_handle, priority,
                                 lowest_used_cache_tier_);
 }
 
-rocksdb_rs::status::Status BlobSource::GetBlob(const ReadOptions& read_options,
-                           const Slice& user_key, uint64_t file_number,
-                           uint64_t offset, uint64_t file_size,
-                           uint64_t value_size,
-                           rocksdb_rs::compression_type::CompressionType compression_type,
-                           FilePrefetchBuffer* prefetch_buffer,
-                           PinnableSlice* value, uint64_t* bytes_read) {
+rocksdb_rs::status::Status BlobSource::GetBlob(
+    const ReadOptions& read_options, const Slice& user_key,
+    uint64_t file_number, uint64_t offset, uint64_t file_size,
+    uint64_t value_size,
+    rocksdb_rs::compression_type::CompressionType compression_type,
+    FilePrefetchBuffer* prefetch_buffer, PinnableSlice* value,
+    uint64_t* bytes_read) {
   assert(value);
 
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
@@ -199,7 +199,8 @@ rocksdb_rs::status::Status BlobSource::GetBlob(const ReadOptions& read_options,
 
   const bool no_io = read_options.read_tier == kBlockCacheTier;
   if (no_io) {
-    s = rocksdb_rs::status::Status_Incomplete("Cannot read blob(s): no disk I/O allowed");
+    s = rocksdb_rs::status::Status_Incomplete(
+        "Cannot read blob(s): no disk I/O allowed");
     return s;
   }
 
@@ -218,7 +219,8 @@ rocksdb_rs::status::Status BlobSource::GetBlob(const ReadOptions& read_options,
     assert(blob_file_reader.GetValue());
 
     if (compression_type != blob_file_reader.GetValue()->GetCompressionType()) {
-      return rocksdb_rs::status::Status_Corruption("Compression type mismatch when reading blob");
+      return rocksdb_rs::status::Status_Corruption(
+          "Compression type mismatch when reading blob");
     }
 
     MemoryAllocator* const allocator =
@@ -353,8 +355,8 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
         BlobReadRequest& req = blob_reqs[i];
         assert(req.status);
 
-        *req.status =
-            rocksdb_rs::status::Status_Incomplete("Cannot read blob(s): no disk I/O allowed");
+        *req.status = rocksdb_rs::status::Status_Incomplete(
+            "Cannot read blob(s): no disk I/O allowed");
       }
     }
     return;
@@ -373,8 +375,8 @@ void BlobSource::MultiGetBlobFromOneFile(const ReadOptions& read_options,
     }
 
     CacheHandleGuard<BlobFileReader> blob_file_reader;
-    rocksdb_rs::status::Status s = blob_file_cache_->GetBlobFileReader(read_options, file_number,
-                                                   &blob_file_reader);
+    rocksdb_rs::status::Status s = blob_file_cache_->GetBlobFileReader(
+        read_options, file_number, &blob_file_reader);
     if (!s.ok()) {
       for (size_t i = 0; i < _blob_reqs.size(); ++i) {
         BlobReadRequest* const req = _blob_reqs[i].first;

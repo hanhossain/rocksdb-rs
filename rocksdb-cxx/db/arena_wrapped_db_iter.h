@@ -73,11 +73,14 @@ class ArenaWrappedDBIter : public Iterator {
   Slice key() const override { return db_iter_->key(); }
   Slice value() const override { return db_iter_->value(); }
   const WideColumns& columns() const override { return db_iter_->columns(); }
-  rocksdb_rs::status::Status status() const override { return db_iter_->status(); }
+  rocksdb_rs::status::Status status() const override {
+    return db_iter_->status();
+  }
   Slice timestamp() const override { return db_iter_->timestamp(); }
   bool IsBlob() const { return db_iter_->IsBlob(); }
 
-  rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop) override;
+  rocksdb_rs::status::Status GetProperty(std::string prop_name,
+                                         std::string* prop) override;
 
   rocksdb_rs::status::Status Refresh() override;
 

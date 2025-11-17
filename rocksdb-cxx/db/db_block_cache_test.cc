@@ -140,8 +140,8 @@ class DBBlockCacheTest : public DBTestBase {
                                     &values));
     for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
       auto role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
-      cache_entry_role_counts[i] =
-          ParseSizeT(values[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))]);
+      cache_entry_role_counts[i] = ParseSizeT(values[static_cast<std::string>(
+          rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))]);
     }
     return cache_entry_role_counts;
   }
@@ -245,7 +245,7 @@ class PersistentCacheFromCache : public PersistentCache {
       : cache_(cache), read_only_(read_only) {}
 
   rocksdb_rs::status::Status Insert(const Slice& key, const char* data,
-                const size_t size) override {
+                                    const size_t size) override {
     if (read_only_) {
       return rocksdb_rs::status::Status_NotSupported();
     }
@@ -258,8 +258,9 @@ class PersistentCacheFromCache : public PersistentCache {
     return s;
   }
 
-  rocksdb_rs::status::Status Lookup(const Slice& key, std::unique_ptr<char[]>* data,
-                size_t* size) override {
+  rocksdb_rs::status::Status Lookup(const Slice& key,
+                                    std::unique_ptr<char[]>* data,
+                                    size_t* size) override {
     auto handle = cache_.Lookup(key);
     if (handle) {
       char* ptr = cache_.Value(handle);
@@ -282,7 +283,9 @@ class PersistentCacheFromCache : public PersistentCache {
   uint64_t NewId() override { return cache_.get()->NewId(); }
 
  private:
-  BasicTypedSharedCacheInterface<char[], rocksdb_rs::cache::CacheEntryRole::kMisc> cache_;
+  BasicTypedSharedCacheInterface<char[],
+                                 rocksdb_rs::cache::CacheEntryRole::kMisc>
+      cache_;
   bool read_only_;
 };
 
@@ -292,16 +295,17 @@ class ReadOnlyCacheWrapper : public CacheWrapper {
 
   const char* Name() const override { return "ReadOnlyCacheWrapper"; }
 
-  rocksdb_rs::status::Status Insert(const Slice& /*key*/, Cache::ObjectPtr /*value*/,
-                const CacheItemHelper* /*helper*/, size_t /*charge*/,
-                Handle** /*handle*/, Priority /*priority*/) override {
+  rocksdb_rs::status::Status Insert(const Slice& /*key*/,
+                                    Cache::ObjectPtr /*value*/,
+                                    const CacheItemHelper* /*helper*/,
+                                    size_t /*charge*/, Handle** /*handle*/,
+                                    Priority /*priority*/) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
 };
 
 }  // anonymous namespace
 #endif  // SNAPPY
-
 
 // Make sure that when options.block_cache is set, after a new table is
 // created its index/filter blocks are added to block cache.
@@ -627,8 +631,9 @@ class MockCache : public LRUCache {
   using ShardedCache::Insert;
 
   rocksdb_rs::status::Status Insert(const Slice& key, Cache::ObjectPtr value,
-                const Cache::CacheItemHelper* helper, size_t charge,
-                Handle** handle, Priority priority) override {
+                                    const Cache::CacheItemHelper* helper,
+                                    size_t charge, Handle** handle,
+                                    Priority priority) override {
     if (priority == Priority::LOW) {
       low_pri_insert_count++;
     } else {
@@ -894,16 +899,21 @@ TEST_F(DBBlockCacheTest, CacheCompressionDict) {
   // Try all the available libraries that support dictionary compression
   std::vector<rocksdb_rs::compression_type::CompressionType> compression_types;
   if (Zlib_Supported()) {
-    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kZlibCompression);
+    compression_types.push_back(
+        rocksdb_rs::compression_type::CompressionType::kZlibCompression);
   }
   if (LZ4_Supported()) {
-    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
-    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
+    compression_types.push_back(
+        rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+    compression_types.push_back(
+        rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression);
   }
   if (ZSTD_Supported()) {
-    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kZSTD);
+    compression_types.push_back(
+        rocksdb_rs::compression_type::CompressionType::kZSTD);
   } else if (ZSTDNotFinal_Supported()) {
-    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::kZSTDNotFinalCompression);
+    compression_types.push_back(rocksdb_rs::compression_type::CompressionType::
+                                    kZSTDNotFinalCompression);
   }
   Random rnd(301);
   for (auto compression_type : compression_types) {
@@ -1031,16 +1041,19 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
 
       std::array<size_t, kNumCacheEntryRoles> expected{};
       // For CacheEntryStatsCollector
-      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kMisc)] = 1;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kMisc)] =
+          1;
       EXPECT_EQ(expected, GetCacheEntryRoleCountsBg());
 
       std::array<size_t, kNumCacheEntryRoles> prev_expected = expected;
 
       // First access only filters
       ASSERT_EQ("NOT_FOUND", Get("different from any key added"));
-      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kFilterBlock)] += 2;
+      expected[static_cast<size_t>(
+          rocksdb_rs::cache::CacheEntryRole::kFilterBlock)] += 2;
       if (partition) {
-        expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kFilterMetaBlock)] += 2;
+        expected[static_cast<size_t>(
+            rocksdb_rs::cache::CacheEntryRole::kFilterMetaBlock)] += 2;
       }
       // Within some time window, we will get cached entry stats
       EXPECT_EQ(prev_expected, GetCacheEntryRoleCountsBg());
@@ -1053,12 +1066,15 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
 
       // Now access index and data block
       ASSERT_EQ("value", Get("foo"));
-      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
+      expected[static_cast<size_t>(
+          rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
       if (partition) {
         // top-level
-        expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
+        expected[static_cast<size_t>(
+            rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
       }
-      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kDataBlock)]++;
+      expected[static_cast<size_t>(
+          rocksdb_rs::cache::CacheEntryRole::kDataBlock)]++;
       // Enough to force a miss
       env_->MockSleepForSeconds(601);
       // But inject a simulated long scan so that we need a longer
@@ -1078,12 +1094,15 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
 
       // The same for other file
       ASSERT_EQ("value", Get("zfoo"));
-      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
+      expected[static_cast<size_t>(
+          rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
       if (partition) {
         // top-level
-        expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
+        expected[static_cast<size_t>(
+            rocksdb_rs::cache::CacheEntryRole::kIndexBlock)]++;
       }
-      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kDataBlock)]++;
+      expected[static_cast<size_t>(
+          rocksdb_rs::cache::CacheEntryRole::kDataBlock)]++;
       // Because of the simulated long scan, this is not enough to force
       // a miss
       env_->MockSleepForSeconds(601);
@@ -1101,32 +1120,36 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
       for (size_t i = 0; i < kNumCacheEntryRoles; ++i) {
         auto role = static_cast<rocksdb_rs::cache::CacheEntryRole>(i);
         EXPECT_EQ(std::to_string(expected[i]),
-                  values[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(role))]);
+                  values[static_cast<std::string>(
+                      rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(
+                          role))]);
       }
 
       // Add one for kWriteBuffer
       {
         WriteBufferManager wbm(size_t{1} << 20, cache);
         wbm.ReserveMem(1024);
-        expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kWriteBuffer)]++;
+        expected[static_cast<size_t>(
+            rocksdb_rs::cache::CacheEntryRole::kWriteBuffer)]++;
         // Now we check that the GetProperty interface is more agressive about
         // re-scanning stats, but not totally aggressive.
         // Within some time window, we will get cached entry stats
         env_->MockSleepForSeconds(1);
         EXPECT_EQ(std::to_string(prev_expected[static_cast<size_t>(
                       rocksdb_rs::cache::CacheEntryRole::kWriteBuffer)]),
-                  values[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(
-                      rocksdb_rs::cache::CacheEntryRole::kWriteBuffer))]);
+                  values[static_cast<std::string>(
+                      rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(
+                          rocksdb_rs::cache::CacheEntryRole::kWriteBuffer))]);
         // Not enough for a "background" miss but enough for a "foreground" miss
         env_->MockSleepForSeconds(45);
 
         ASSERT_TRUE(db_->GetMapProperty(DB::Properties::kBlockCacheEntryStats,
                                         &values));
-        EXPECT_EQ(
-            std::to_string(
-                expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kWriteBuffer)]),
-            values[static_cast<std::string>(rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(
-                rocksdb_rs::cache::CacheEntryRole::kWriteBuffer))]);
+        EXPECT_EQ(std::to_string(expected[static_cast<size_t>(
+                      rocksdb_rs::cache::CacheEntryRole::kWriteBuffer)]),
+                  values[static_cast<std::string>(
+                      rocksdb_rs::cache::BlockCacheEntryStatsMapKeys_EntryCount(
+                          rocksdb_rs::cache::CacheEntryRole::kWriteBuffer))]);
       }
       prev_expected = expected;
 
@@ -1146,7 +1169,8 @@ TEST_F(DBBlockCacheTest, CacheEntryRoleStats) {
       ASSERT_GT(cache->GetUsage(), cache->GetCapacity());
       expected = {};
       // For CacheEntryStatsCollector
-      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kMisc)] = 1;
+      expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kMisc)] =
+          1;
       // For Fill-it-up
       expected[static_cast<size_t>(rocksdb_rs::cache::CacheEntryRole::kMisc)]++;
       // Still able to hit on saved stats
@@ -1231,8 +1255,9 @@ void DummyFillCache(Cache& cache, size_t entry_size,
   for (size_t my_usage = 0; my_usage < capacity;) {
     size_t charge = std::min(entry_size, capacity - my_usage);
     Cache::Handle* handle;
-    rocksdb_rs::status::Status st = cache.Insert(ck.WithOffset(my_usage).AsSlice(), fake_value,
-                             &kNoopCacheItemHelper, charge, &handle);
+    rocksdb_rs::status::Status st =
+        cache.Insert(ck.WithOffset(my_usage).AsSlice(), fake_value,
+                     &kNoopCacheItemHelper, charge, &handle);
     ASSERT_OK(st);
     handles.emplace_back(&cache, handle);
     my_usage += charge;
@@ -1337,7 +1362,6 @@ TEST_F(DBBlockCacheTest, HyperClockCacheReportProblems) {
   EXPECT_EQ(logger->PopCounts(), (std::array<int, 3>{{0, 1, 0}}));
 }
 
-
 class DBBlockCacheKeyTest
     : public DBTestBase,
       public testing::WithParamInterface<std::tuple<bool, bool>> {
@@ -1365,8 +1389,9 @@ class StableCacheKeyTestFS : public FaultInjectionTestFS {
 
   virtual ~StableCacheKeyTestFS() override {}
 
-  rocksdb_rs::io_status::IOStatus LinkFile(const std::string&, const std::string&, const IOOptions&,
-                    IODebugContext*) override {
+  rocksdb_rs::io_status::IOStatus LinkFile(const std::string&,
+                                           const std::string&, const IOOptions&,
+                                           IODebugContext*) override {
     return rocksdb_rs::io_status::IOStatus_NotSupported("Disabled");
   }
 };
@@ -1552,8 +1577,8 @@ class CacheKeyTest : public testing::Test {
                                            uint64_t file_number) {
     // Like SemiStructuredUniqueIdGen::GenerateNext
     // TODO: make db_session_id be a rust::String
-    tp_.db_session_id = std::string(rocksdb_rs::unique_id::EncodeSessionId(base_session_upper_,
-                                        base_session_lower_ ^ session_counter));
+    tp_.db_session_id = std::string(rocksdb_rs::unique_id::EncodeSessionId(
+        base_session_upper_, base_session_lower_ ^ session_counter));
     tp_.db_id = std::to_string(db_id_);
     tp_.orig_file_number = file_number;
     bool is_stable;
@@ -1570,8 +1595,8 @@ class CacheKeyTest : public testing::Test {
     rocksdb_rs::unique_id::UniqueId64x2 sst_unique_id = {};
     EXPECT_OK(sst_unique_id.decode_bytes(external_unique_id_str));
     ExternalUniqueIdToInternal(sst_unique_id.as_unique_id_ptr());
-    OffsetableCacheKey ock =
-        OffsetableCacheKey::FromInternalUniqueId(sst_unique_id.as_unique_id_ptr());
+    OffsetableCacheKey ock = OffsetableCacheKey::FromInternalUniqueId(
+        sst_unique_id.as_unique_id_ptr());
     EXPECT_EQ(rv.WithOffset(0).AsSlice(), ock.WithOffset(0).AsSlice());
     EXPECT_EQ(ock.ToInternalUniqueId(), sst_unique_id);
     // END some assertions in relation to SST unique IDs
@@ -1592,8 +1617,10 @@ TEST_F(CacheKeyTest, DBImplSessionIdStructure) {
   std::string session_id1 = DBImpl::GenerateDbSessionId(/*env*/ nullptr);
   std::string session_id2 = DBImpl::GenerateDbSessionId(/*env*/ nullptr);
   uint64_t upper1, upper2, lower1, lower2;
-  ASSERT_OK(rocksdb_rs::unique_id::DecodeSessionId(session_id1, upper1, lower1));
-  ASSERT_OK(rocksdb_rs::unique_id::DecodeSessionId(session_id2, upper2, lower2));
+  ASSERT_OK(
+      rocksdb_rs::unique_id::DecodeSessionId(session_id1, upper1, lower1));
+  ASSERT_OK(
+      rocksdb_rs::unique_id::DecodeSessionId(session_id2, upper2, lower2));
   // Because generated in same process
   ASSERT_EQ(upper1, upper2);
   // Unless we generate > 4 billion session IDs in this process...
@@ -1836,10 +1863,12 @@ TEST_P(DBBlockCachePinningTest, TwoLevelDB) {
   const int kNumKeysPerFile = kBlockSize * kNumBlocksPerFile / kKeySize;
 
   Options options = CurrentOptions();
-  // `rocksdb_rs::compression_type::CompressionType::kNoCompression` makes the unit test more portable. But it relies on the
-  // current behavior of persisting/accessing dictionary even when there's no
-  // (de)compression happening, which seems fairly likely to change over time.
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  // `rocksdb_rs::compression_type::CompressionType::kNoCompression` makes the
+  // unit test more portable. But it relies on the current behavior of
+  // persisting/accessing dictionary even when there's no (de)compression
+  // happening, which seems fairly likely to change over time.
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.compression_opts.max_dict_bytes = 4 << 10;
   options.statistics = rocksdb::CreateDBStatistics();
   BlockBasedTableOptions table_options;

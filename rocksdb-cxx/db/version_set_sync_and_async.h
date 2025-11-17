@@ -109,7 +109,8 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
             TEST_SYNC_POINT_CALLBACK("Version::MultiGet::TamperWithBlobIndex",
                                      &(*iter));
 
-            tmp_s = blob_index.DecodeFrom(static_cast<const Slice&>(*(iter->value)));
+            tmp_s = blob_index.DecodeFrom(
+                static_cast<const Slice&>(*(iter->value)));
 
           } else {
             assert(iter->columns);
@@ -147,8 +148,8 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kCorrupt:
-        *status =
-            rocksdb_rs::status::Status_Corruption("corrupted key for ", iter->lkey->user_key());
+        *status = rocksdb_rs::status::Status_Corruption("corrupted key for ",
+                                                        iter->lkey->user_key());
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kUnexpectedBlobIndex:
@@ -159,7 +160,8 @@ DEFINE_SYNC_AND_ASYNC(rocksdb_rs::status::Status, Version::MultiGetFromSST)
         file_range.MarkKeyDone(iter);
         continue;
       case GetContext::kMergeOperatorFailed:
-        *status = rocksdb_rs::status::Status_Corruption(rocksdb_rs::status::SubCode::kMergeOperatorFailed);
+        *status = rocksdb_rs::status::Status_Corruption(
+            rocksdb_rs::status::SubCode::kMergeOperatorFailed);
         file_range.MarkKeyDone(iter);
         continue;
     }

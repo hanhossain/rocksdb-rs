@@ -96,8 +96,8 @@ TEST_F(RepairTest, SortRepairedDBL0ByEpochNumber) {
   ASSERT_EQ(level1_files.size(), 1);
   ASSERT_EQ(level1_files[0]->epoch_number, 1);
 
-  std::string manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
   Close();
   ASSERT_OK(env_->FileExists(manifest_path));
   ASSERT_OK(env_->DeleteFile(manifest_path));
@@ -125,8 +125,8 @@ TEST_F(RepairTest, LostManifest) {
   ASSERT_OK(Flush());
   // Need to get path before Close() deletes db_, but delete it after Close() to
   // ensure Close() didn't change the manifest.
-  std::string manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
 
   Close();
   ASSERT_OK(env_->FileExists(manifest_path));
@@ -152,8 +152,8 @@ TEST_F(RepairTest, LostManifestMoreDbFeatures) {
   ASSERT_OK(Flush());
   // Need to get path before Close() deletes db_, but delete it after Close() to
   // ensure Close() didn't change the manifest.
-  std::string manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
 
   Close();
   ASSERT_OK(env_->FileExists(manifest_path));
@@ -177,8 +177,8 @@ TEST_F(RepairTest, CorruptManifest) {
   ASSERT_OK(Flush());
   // Need to get path before Close() deletes db_, but overwrite it after Close()
   // to ensure Close() didn't change the manifest.
-  std::string manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
 
   Close();
   ASSERT_OK(env_->FileExists(manifest_path));
@@ -198,15 +198,15 @@ TEST_F(RepairTest, IncompleteManifest) {
   // files. Expect a full recovery.
   ASSERT_OK(Put("key", "val"));
   ASSERT_OK(Flush());
-  std::string orig_manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string orig_manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
   CopyFile(orig_manifest_path, orig_manifest_path + ".tmp");
   ASSERT_OK(Put("key2", "val2"));
   ASSERT_OK(Flush());
   // Need to get path before Close() deletes db_, but overwrite it after Close()
   // to ensure Close() didn't change the manifest.
-  std::string new_manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string new_manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
 
   Close();
   ASSERT_OK(env_->FileExists(new_manifest_path));
@@ -290,13 +290,14 @@ TEST_F(RepairTest, UnflushedSst) {
   {
     uint64_t total_ssts_size;
     std::unordered_map<std::string, uint64_t> sst_files;
-    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &sst_files, &total_ssts_size));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile,
+                              &sst_files, &total_ssts_size));
     ASSERT_EQ(total_ssts_size, 0);
   }
   // Need to get path before Close() deletes db_, but delete it after Close() to
   // ensure Close() didn't change the manifest.
-  std::string manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
 
   Close();
   ASSERT_OK(env_->FileExists(manifest_path));
@@ -309,7 +310,8 @@ TEST_F(RepairTest, UnflushedSst) {
   {
     uint64_t total_ssts_size;
     std::unordered_map<std::string, uint64_t> sst_files;
-    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &sst_files, &total_ssts_size));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile,
+                              &sst_files, &total_ssts_size));
     ASSERT_GT(total_ssts_size, 0);
   }
   ASSERT_EQ(Get("key"), "val");
@@ -326,7 +328,8 @@ class RepairTestWithTimestamp
   RepairTestWithTimestamp()
       : DBBasicTestWithTimestampBase("repair_test_with_timestamp") {}
 
-  rocksdb_rs::status::Status Put(const Slice& key, const Slice& ts, const Slice& value) {
+  rocksdb_rs::status::Status Put(const Slice& key, const Slice& ts,
+                                 const Slice& value) {
     WriteOptions write_opts;
     return db_->Put(write_opts, handles_[0], key, ts, value);
   }
@@ -390,13 +393,14 @@ TEST_P(RepairTestWithTimestamp, UnflushedSst) {
   {
     uint64_t total_ssts_size;
     std::unordered_map<std::string, uint64_t> sst_files;
-    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &sst_files, &total_ssts_size));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile,
+                              &sst_files, &total_ssts_size));
     ASSERT_EQ(total_ssts_size, 0);
   }
   // Need to get path before Close() deletes db_, but delete it after Close() to
   // ensure Close() didn't change the manifest.
-  std::string manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
 
   Close();
   ASSERT_OK(env_->FileExists(manifest_path));
@@ -409,7 +413,8 @@ TEST_P(RepairTestWithTimestamp, UnflushedSst) {
   {
     uint64_t total_ssts_size;
     std::unordered_map<std::string, uint64_t> sst_files;
-    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &sst_files, &total_ssts_size));
+    ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile,
+                              &sst_files, &total_ssts_size));
     ASSERT_GT(total_ssts_size, 0);
   }
 
@@ -465,11 +470,12 @@ TEST_F(RepairTest, SeparateWalDir) {
     {
       uint64_t total_ssts_size;
       std::unordered_map<std::string, uint64_t> sst_files;
-      ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &sst_files, &total_ssts_size));
+      ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile,
+                                &sst_files, &total_ssts_size));
       ASSERT_EQ(total_ssts_size, 0);
     }
-    std::string manifest_path =
-        static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+    std::string manifest_path = static_cast<std::string>(
+        DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
 
     Close();
     ASSERT_OK(env_->FileExists(manifest_path));
@@ -485,7 +491,8 @@ TEST_F(RepairTest, SeparateWalDir) {
     {
       uint64_t total_ssts_size;
       std::unordered_map<std::string, uint64_t> sst_files;
-      ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile, &sst_files, &total_ssts_size));
+      ASSERT_OK(GetAllDataFiles(rocksdb_rs::types::FileType::kTableFile,
+                                &sst_files, &total_ssts_size));
       ASSERT_GT(total_ssts_size, 0);
     }
     ASSERT_EQ(Get("key"), "val");
@@ -515,8 +522,8 @@ TEST_F(RepairTest, RepairMultipleColumnFamilies) {
 
   // Need to get path before Close() deletes db_, but delete it after Close() to
   // ensure Close() doesn't re-create the manifest.
-  std::string manifest_path =
-      static_cast<std::string>(DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
+  std::string manifest_path = static_cast<std::string>(
+      DescriptorFileName(dbname_, dbfull()->TEST_Current_Manifest_FileNo()));
   Close();
   ASSERT_OK(env_->FileExists(manifest_path));
   ASSERT_OK(env_->DeleteFile(manifest_path));
@@ -619,4 +626,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

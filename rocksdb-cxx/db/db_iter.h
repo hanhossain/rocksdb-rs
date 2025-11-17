@@ -141,9 +141,7 @@ class DBIter final : public Iterator {
     iter_.iter()->SetPinnedItersMgr(&pinned_iters_mgr_);
   }
 
-  bool Valid() const override {
-    return valid_;
-  }
+  bool Valid() const override { return valid_; }
   Slice key() const override {
     assert(valid_);
     if (timestamp_lb_) {
@@ -188,7 +186,8 @@ class DBIter final : public Iterator {
     return is_blob_;
   }
 
-  rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop) override;
+  rocksdb_rs::status::Status GetProperty(std::string prop_name,
+                                         std::string* prop) override;
 
   void Next() final override;
   void Prev() final override;

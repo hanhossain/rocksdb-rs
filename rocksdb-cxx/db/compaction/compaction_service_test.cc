@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "db/db_test_util.h"
 #include "port/stack_trace.h"
 #include "table/unique_id_impl.h"
@@ -286,7 +285,8 @@ TEST_F(CompactionServiceTest, BasicCompactions) {
       "DBImplSecondary::CompactWithoutInstallation::End", [&](void* status) {
         // override job status
         auto s = static_cast<rocksdb_rs::status::Status*>(status);
-        *s = rocksdb_rs::status::Status_Aborted("MyTestCompactionService failed to compact!");
+        *s = rocksdb_rs::status::Status_Aborted(
+            "MyTestCompactionService failed to compact!");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -423,7 +423,8 @@ TEST_F(CompactionServiceTest, FailedToStart) {
   std::string end_str = Key(45);
   Slice start(start_str);
   Slice end(end_str);
-  rocksdb_rs::status::Status s = db_->CompactRange(CompactRangeOptions(), &start, &end);
+  rocksdb_rs::status::Status s =
+      db_->CompactRange(CompactRangeOptions(), &start, &end);
   ASSERT_TRUE(s.IsIncomplete());
 }
 
@@ -441,7 +442,8 @@ TEST_F(CompactionServiceTest, InvalidResult) {
   std::string end_str = Key(45);
   Slice start(start_str);
   Slice end(end_str);
-  rocksdb_rs::status::Status s = db_->CompactRange(CompactRangeOptions(), &start, &end);
+  rocksdb_rs::status::Status s =
+      db_->CompactRange(CompactRangeOptions(), &start, &end);
   ASSERT_FALSE(s.ok());
 }
 
@@ -859,7 +861,8 @@ TEST_F(CompactionServiceTest, TablePropertiesCollector) {
 
   class TablePropertiesCollectorTest : public TablePropertiesCollector {
    public:
-    rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+    rocksdb_rs::status::Status Finish(
+        UserCollectedProperties* properties) override {
       *properties = UserCollectedProperties{
           {kUserPropertyName, std::to_string(count_)},
       };
@@ -872,9 +875,11 @@ TEST_F(CompactionServiceTest, TablePropertiesCollector) {
 
     const char* Name() const override { return "TablePropertiesCollectorTest"; }
 
-    rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
-                      rocksdb_rs::types::EntryType /*type*/, SequenceNumber /*seq*/,
-                      uint64_t /*file_size*/) override {
+    rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/,
+                                          const Slice& /*value*/,
+                                          rocksdb_rs::types::EntryType /*type*/,
+                                          SequenceNumber /*seq*/,
+                                          uint64_t /*file_size*/) override {
       count_++;
       return rocksdb_rs::status::Status_OK();
     }

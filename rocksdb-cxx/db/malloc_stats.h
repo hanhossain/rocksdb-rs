@@ -9,13 +9,10 @@
 
 #pragma once
 
-
 #include <string>
-
 
 namespace rocksdb {
 
 void DumpMallocStats(std::string*);
 
 }
-

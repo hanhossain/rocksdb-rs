@@ -33,7 +33,6 @@
 #include "util/string_util.h"
 #include "utilities/merge_operators.h"
 
-
 namespace rocksdb {
 
 class EventListenerTest : public DBTestBase {
@@ -43,22 +42,21 @@ class EventListenerTest : public DBTestBase {
   static std::string BlobStr(uint64_t blob_file_number, uint64_t offset,
                              uint64_t size) {
     std::string blob_index;
-    BlobIndex::EncodeBlob(&blob_index, blob_file_number, offset, size,
-                          rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    BlobIndex::EncodeBlob(
+        &blob_index, blob_file_number, offset, size,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression);
     return blob_index;
   }
 
   const size_t k110KB = 110 << 10;
 };
 
-struct TestPropertiesCollector
-    : public rocksdb::TablePropertiesCollector {
-  rocksdb_rs::status::Status AddUserKey(
-      const rocksdb::Slice& /*key*/,
-      const rocksdb::Slice& /*value*/,
-      rocksdb_rs::types::EntryType /*type*/,
-      rocksdb::SequenceNumber /*seq*/,
-      uint64_t /*file_size*/) override {
+struct TestPropertiesCollector : public rocksdb::TablePropertiesCollector {
+  rocksdb_rs::status::Status AddUserKey(const rocksdb::Slice& /*key*/,
+                                        const rocksdb::Slice& /*value*/,
+                                        rocksdb_rs::types::EntryType /*type*/,
+                                        rocksdb::SequenceNumber /*seq*/,
+                                        uint64_t /*file_size*/) override {
     return rocksdb_rs::status::Status_OK();
   }
   rocksdb_rs::status::Status Finish(
@@ -69,8 +67,7 @@ struct TestPropertiesCollector
 
   const char* Name() const override { return "TestTablePropertiesCollector"; }
 
-  rocksdb::UserCollectedProperties GetReadableProperties()
-      const override {
+  rocksdb::UserCollectedProperties GetReadableProperties() const override {
     rocksdb::UserCollectedProperties ret;
     ret["2"] = "3";
     return ret;
@@ -163,7 +160,8 @@ TEST_F(EventListenerTest, OnSingleDBCompactionTest) {
   options.target_file_size_base = options.write_buffer_size;
   options.max_bytes_for_level_base = options.target_file_size_base * 2;
   options.max_bytes_for_level_multiplier = 2;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
 #ifdef ROCKSDB_USING_THREAD_STATUS
   options.enable_thread_tracking = true;
 #endif  // ROCKSDB_USING_THREAD_STATUS
@@ -510,7 +508,8 @@ TEST_F(EventListenerTest, DisableBGCompaction) {
   // BG compaction is disabled.  Number of L0 files will simply keeps
   // increasing in this test.
   options.compaction_style = kCompactionStyleNone;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.write_buffer_size = 100000;  // Small write buffer
   options.table_properties_collector_factories.push_back(
       std::make_shared<TestPropertiesCollectorFactory>());
@@ -715,9 +714,9 @@ class TableFileCreationListener : public EventListener {
 
     void SetStatus(rocksdb_rs::io_status::IOStatus s) { status_ = s.Clone(); }
 
-    rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname, const FileOptions& opts,
-                             std::unique_ptr<FSWritableFile>* result,
-                             IODebugContext* dbg) override {
+    rocksdb_rs::io_status::IOStatus NewWritableFile(
+        const std::string& fname, const FileOptions& opts,
+        std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) override {
       if (fname.size() > 4 && fname.substr(fname.size() - 4) == ".sst") {
         if (!status_.ok()) {
           return status_.Clone();
@@ -727,10 +726,12 @@ class TableFileCreationListener : public EventListener {
     }
 
    private:
-    rocksdb_rs::io_status::IOStatus status_ = rocksdb_rs::io_status::IOStatus_new();
+    rocksdb_rs::io_status::IOStatus status_ =
+        rocksdb_rs::io_status::IOStatus_new();
   };
 
-  TableFileCreationListener() : last_failure_(rocksdb_rs::status::Status_new()) {
+  TableFileCreationListener()
+      : last_failure_(rocksdb_rs::status::Status_new()) {
     for (int i = 0; i < 2; i++) {
       started_[i] = finished_[i] = failure_[i] = 0;
     }
@@ -829,7 +830,8 @@ TEST_F(EventListenerTest, TableFileCreationListenersTest) {
   listener->CheckAndResetCounters(1, 1, 0, 0, 0, 0);
   ASSERT_OK(Put("foo", "aaa1"));
   ASSERT_OK(Put("bar", "bbb1"));
-  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_NotSupported("not supported"));
+  test_fs->SetStatus(
+      rocksdb_rs::io_status::IOStatus_NotSupported("not supported"));
   ASSERT_NOK(Flush());
   listener->CheckAndResetCounters(1, 1, 1, 0, 0, 0);
   ASSERT_TRUE(listener->last_failure_.IsNotSupported());
@@ -852,7 +854,8 @@ TEST_F(EventListenerTest, TableFileCreationListenersTest) {
   ASSERT_OK(Put("foo", "aaa3"));
   ASSERT_OK(Put("bar", "bbb3"));
   ASSERT_OK(Flush());
-  test_fs->SetStatus(rocksdb_rs::io_status::IOStatus_NotSupported("not supported"));
+  test_fs->SetStatus(
+      rocksdb_rs::io_status::IOStatus_NotSupported("not supported"));
   ASSERT_NOK(
       dbfull()->CompactRange(CompactRangeOptions(), &kRangeStart, &kRangeEnd));
   ASSERT_NOK(dbfull()->TEST_WaitForCompact());
@@ -1330,7 +1333,8 @@ class BlobDBJobLevelEventListenerTest : public EventListener {
       flushed_files_.push_back(info.file_path);
     }
 
-    EXPECT_EQ(info.blob_compression_type, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    EXPECT_EQ(info.blob_compression_type,
+              rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     CheckBlobFileAdditions(info.blob_file_addition_infos);
   }
@@ -1339,7 +1343,8 @@ class BlobDBJobLevelEventListenerTest : public EventListener {
                              const CompactionJobInfo& info) override {
     call_count_++;
 
-    EXPECT_EQ(info.blob_compression_type, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    EXPECT_EQ(info.blob_compression_type,
+              rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     CheckBlobFileAdditions(info.blob_file_addition_infos);
 
@@ -1587,7 +1592,6 @@ TEST_F(EventListenerTest, BlobDBFileTest) {
 }
 
 }  // namespace rocksdb
-
 
 int main(int argc, char** argv) {
   rocksdb::port::InstallStackTraceHandler();

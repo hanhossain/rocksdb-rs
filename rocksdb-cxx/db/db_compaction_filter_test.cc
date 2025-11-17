@@ -201,13 +201,15 @@ class KeepFilterFactory : public CompactionFilterFactory {
 // files, such as "CompactionFilterFlush" and "CompactionFilterRecovery".
 class DeleteFilterFactory : public CompactionFilterFactory {
  public:
-  explicit DeleteFilterFactory(rocksdb_rs::types::TableFileCreationReason reason)
+  explicit DeleteFilterFactory(
+      rocksdb_rs::types::TableFileCreationReason reason)
       : reason_(reason) {}
 
   std::unique_ptr<CompactionFilter> CreateCompactionFilter(
       const CompactionFilter::Context& context) override {
     EXPECT_EQ(reason_, context.reason);
-    if (context.reason == rocksdb_rs::types::TableFileCreationReason::kCompaction &&
+    if (context.reason ==
+            rocksdb_rs::types::TableFileCreationReason::kCompaction &&
         !context.is_manual_compaction) {
       // Table files created by automatic compaction do not undergo filtering.
       // Presumably some tests rely on this.
@@ -473,8 +475,8 @@ TEST_F(DBTestCompactionFilter, CompactionFilterFlush) {
   // Tests a `CompactionFilterFactory` that filters when table file is created
   // by flush.
   Options options = CurrentOptions();
-  options.compaction_filter_factory =
-      std::make_shared<DeleteFilterFactory>(rocksdb_rs::types::TableFileCreationReason::kFlush);
+  options.compaction_filter_factory = std::make_shared<DeleteFilterFactory>(
+      rocksdb_rs::types::TableFileCreationReason::kFlush);
   options.merge_operator = MergeOperators::CreateStringAppendOperator();
   Reopen(options);
 
@@ -502,8 +504,8 @@ TEST_F(DBTestCompactionFilter, CompactionFilterRecovery) {
   // Tests a `CompactionFilterFactory` that filters when table file is created
   // by recovery.
   Options options = CurrentOptions();
-  options.compaction_filter_factory =
-      std::make_shared<DeleteFilterFactory>(rocksdb_rs::types::TableFileCreationReason::kRecovery);
+  options.compaction_filter_factory = std::make_shared<DeleteFilterFactory>(
+      rocksdb_rs::types::TableFileCreationReason::kRecovery);
   options.merge_operator = MergeOperators::CreateStringAppendOperator();
   Reopen(options);
 
@@ -659,7 +661,8 @@ TEST_F(DBTestCompactionFilter, CompactionFilterContextManual) {
   Options options = CurrentOptions();
   options.compaction_style = kCompactionStyleUniversal;
   options.compaction_filter_factory.reset(filter);
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 8;
   Reopen(options);
   int num_keys_per_file = 400;
@@ -719,7 +722,8 @@ TEST_F(DBTestCompactionFilter, CompactionFilterContextCfId) {
 
   Options options = CurrentOptions();
   options.compaction_filter_factory.reset(filter);
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 2;
   CreateAndReopenWithCF({"pikachu"}, options);
 
@@ -915,7 +919,8 @@ TEST_F(DBTestCompactionFilter, IgnoreSnapshotsFalse) {
 
 class TestNotSupportedFilterFactory : public CompactionFilterFactory {
  public:
-  explicit TestNotSupportedFilterFactory(rocksdb_rs::types::TableFileCreationReason reason)
+  explicit TestNotSupportedFilterFactory(
+      rocksdb_rs::types::TableFileCreationReason reason)
       : reason_(reason) {}
 
   bool ShouldFilterTableFileCreation(

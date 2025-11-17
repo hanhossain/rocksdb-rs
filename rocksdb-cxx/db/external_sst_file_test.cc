@@ -29,8 +29,10 @@ class ExternalSSTTestFS : public FileSystemWrapper {
   static const char* kClassName() { return "ExternalSSTTestFS"; }
   const char* Name() const override { return kClassName(); }
 
-  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& s, const std::string& t,
-                    const IOOptions& options, IODebugContext* dbg) override {
+  rocksdb_rs::io_status::IOStatus LinkFile(const std::string& s,
+                                           const std::string& t,
+                                           const IOOptions& options,
+                                           IODebugContext* dbg) override {
     if (fail_link_) {
       return rocksdb_rs::io_status::IOStatus_NotSupported("Link failed");
     }
@@ -56,9 +58,7 @@ class ExternalSSTFileTestBase : public DBTestBase {
     ASSERT_OK(env_->CreateDir(sst_files_dir_));
   }
 
-  ~ExternalSSTFileTestBase() override {
-    DestroyDir(env_, sst_files_dir_);
-  }
+  ~ExternalSSTFileTestBase() override { DestroyDir(env_, sst_files_dir_); }
 
  protected:
   std::string sst_files_dir_;
@@ -278,10 +278,9 @@ class ExternalSSTFileTest
                                       ingest_behind, sort_data, true_data, cfh);
   }
 
-  rocksdb_rs::status::Status DeprecatedAddFile(const std::vector<std::string>& files,
-                           bool move_files = false,
-                           bool skip_snapshot_check = false,
-                           bool skip_write_global_seqno = false) {
+  rocksdb_rs::status::Status DeprecatedAddFile(
+      const std::vector<std::string>& files, bool move_files = false,
+      bool skip_snapshot_check = false, bool skip_write_global_seqno = false) {
     IngestExternalFileOptions opts;
     opts.move_files = move_files;
     opts.snapshot_consistency = !skip_snapshot_check;
@@ -546,7 +545,8 @@ class SstFileWriterCollector : public TablePropertiesCollector {
 
   const char* Name() const override { return name_.c_str(); }
 
-  rocksdb_rs::status::Status Finish(UserCollectedProperties* properties) override {
+  rocksdb_rs::status::Status Finish(
+      UserCollectedProperties* properties) override {
     std::string count = std::to_string(count_);
     *properties = UserCollectedProperties{
         {prefix_ + "_SstFileWriterCollector", "YES"},
@@ -555,9 +555,11 @@ class SstFileWriterCollector : public TablePropertiesCollector {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/, const Slice& /*value*/,
-                    rocksdb_rs::types::EntryType /*type*/, SequenceNumber /*seq*/,
-                    uint64_t /*file_size*/) override {
+  rocksdb_rs::status::Status AddUserKey(const Slice& /*user_key*/,
+                                        const Slice& /*value*/,
+                                        rocksdb_rs::types::EntryType /*type*/,
+                                        SequenceNumber /*seq*/,
+                                        uint64_t /*file_size*/) override {
     ++count_;
     return rocksdb_rs::status::Status_OK();
   }
@@ -1275,8 +1277,8 @@ TEST_F(ExternalSSTFileTest, IngestNonExistingFile) {
   Options options = CurrentOptions();
   DestroyAndReopen(options);
 
-  rocksdb_rs::status::Status s = db_->IngestExternalFile({"non_existing_file"},
-                                     IngestExternalFileOptions());
+  rocksdb_rs::status::Status s = db_->IngestExternalFile(
+      {"non_existing_file"}, IngestExternalFileOptions());
   ASSERT_NOK(s);
 
   // Verify file deletion is not impacted (verify a bug fix)
@@ -1298,7 +1300,8 @@ TEST_F(ExternalSSTFileTest, IngestNonExistingFile) {
   for (auto& f : files) {
     uint64_t number;
     rocksdb_rs::types::FileType type;
-    if (ParseFileName(f, &number, &type) && type == rocksdb_rs::types::FileType::kTableFile) {
+    if (ParseFileName(f, &number, &type) &&
+        type == rocksdb_rs::types::FileType::kTableFile) {
       num_sst_files++;
     }
   }
@@ -2021,7 +2024,8 @@ TEST_P(ExternSSTFileLinkFailFallbackTest, LinkFailFallBackExternalSst) {
       [&](void* /* arg */) { copyfile = true; });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
-  const rocksdb_rs::status::Status s = db_->IngestExternalFile({file_path}, ifo);
+  const rocksdb_rs::status::Status s =
+      db_->IngestExternalFile({file_path}, ifo);
 
   ColumnFamilyHandleImpl* cfh =
       static_cast<ColumnFamilyHandleImpl*>(dbfull()->DefaultColumnFamily());

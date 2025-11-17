@@ -156,7 +156,8 @@ TEST_F(BlobFileGarbageTest, ForwardIncompatibleCustomField) {
 
   BlobFileGarbage decoded_blob_file_addition;
   Slice input(encoded);
-  const rocksdb_rs::status::Status s = decoded_blob_file_addition.DecodeFrom(&input);
+  const rocksdb_rs::status::Status s =
+      decoded_blob_file_addition.DecodeFrom(&input);
 
   ASSERT_TRUE(s.IsCorruption());
   ASSERT_TRUE(std::strstr(s.getState()->c_str(), "Forward incompatible"));

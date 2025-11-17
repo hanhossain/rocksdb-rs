@@ -11,11 +11,13 @@
 
 namespace rocksdb {
 
-rocksdb_rs::status::Status BlobGarbageMeter::ProcessInFlow(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status BlobGarbageMeter::ProcessInFlow(const Slice& key,
+                                                           const Slice& value) {
   uint64_t blob_file_number = kInvalidBlobFileNumber;
   uint64_t bytes = 0;
 
-  const rocksdb_rs::status::Status s = Parse(key, value, &blob_file_number, &bytes);
+  const rocksdb_rs::status::Status s =
+      Parse(key, value, &blob_file_number, &bytes);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -29,11 +31,13 @@ rocksdb_rs::status::Status BlobGarbageMeter::ProcessInFlow(const Slice& key, con
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status BlobGarbageMeter::ProcessOutFlow(
+    const Slice& key, const Slice& value) {
   uint64_t blob_file_number = kInvalidBlobFileNumber;
   uint64_t bytes = 0;
 
-  const rocksdb_rs::status::Status s = Parse(key, value, &blob_file_number, &bytes);
+  const rocksdb_rs::status::Status s =
+      Parse(key, value, &blob_file_number, &bytes);
   if (!s.ok()) {
     return s.Clone();
   }
@@ -55,8 +59,10 @@ rocksdb_rs::status::Status BlobGarbageMeter::ProcessOutFlow(const Slice& key, co
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice& value,
-                               uint64_t* blob_file_number, uint64_t* bytes) {
+rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key,
+                                                   const Slice& value,
+                                                   uint64_t* blob_file_number,
+                                                   uint64_t* bytes) {
   assert(blob_file_number);
   assert(*blob_file_number == kInvalidBlobFileNumber);
   assert(bytes);
@@ -66,7 +72,8 @@ rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice
 
   {
     constexpr bool log_err_key = false;
-    const rocksdb_rs::status::Status s = ParseInternalKey(key, &ikey, log_err_key);
+    const rocksdb_rs::status::Status s =
+        ParseInternalKey(key, &ikey, log_err_key);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -86,7 +93,8 @@ rocksdb_rs::status::Status BlobGarbageMeter::Parse(const Slice& key, const Slice
   }
 
   if (blob_index.IsInlined() || blob_index.HasTTL()) {
-    return rocksdb_rs::status::Status_Corruption("Unexpected TTL/inlined blob index");
+    return rocksdb_rs::status::Status_Corruption(
+        "Unexpected TTL/inlined blob index");
   }
 
   *blob_file_number = blob_index.file_number();

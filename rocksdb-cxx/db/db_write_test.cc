@@ -592,7 +592,8 @@ TEST_P(DBWriteTest, IOErrorOnSwitchMemtable) {
   options.wal_bytes_per_sync = 256 * 1024;
   options.manual_wal_flush = true;
   Reopen(options);
-  mock_env->SetFilesystemActive(false, rocksdb_rs::status::Status_IOError("Not active"));
+  mock_env->SetFilesystemActive(
+      false, rocksdb_rs::status::Status_IOError("Not active"));
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   for (int i = 0; i < 4 * 512; ++i) {
     s = Put(Key(i), rnd.RandomString(1024));
@@ -773,8 +774,8 @@ TEST_P(DBWriteTest, ConcurrentlyDisabledWAL) {
   for (auto& t : threads) {
     t.join();
   }
-  uint64_t bytes_num = options.statistics->getTickerCount(
-      rocksdb::Tickers::WAL_FILE_BYTES);
+  uint64_t bytes_num =
+      options.statistics->getTickerCount(rocksdb::Tickers::WAL_FILE_BYTES);
   // written WAL size should less than 100KB (even included HEADER & FOOTER
   // overhead)
   ASSERT_LE(bytes_num, 1024 * 100);

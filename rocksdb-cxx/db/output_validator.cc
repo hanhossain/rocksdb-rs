@@ -9,7 +9,8 @@
 #include "util/hash.h"
 
 namespace rocksdb {
-rocksdb_rs::status::Status OutputValidator::Add(const Slice& key, const Slice& value) {
+rocksdb_rs::status::Status OutputValidator::Add(const Slice& key,
+                                                const Slice& value) {
   if (enable_hash_) {
     // Generate a rolling 64-bit hash of the key and values
     paranoid_hash_ = NPHash64(key.data(), key.size(), paranoid_hash_);
@@ -24,7 +25,8 @@ rocksdb_rs::status::Status OutputValidator::Add(const Slice& key, const Slice& v
     }
     // prev_key_ starts with empty.
     if (!prev_key_.empty() && icmp_.Compare(key, prev_key_) < 0) {
-      return rocksdb_rs::status::Status_Corruption("Compaction sees out-of-order keys.");
+      return rocksdb_rs::status::Status_Corruption(
+          "Compaction sees out-of-order keys.");
     }
     prev_key_.assign(key.data(), key.size());
   }

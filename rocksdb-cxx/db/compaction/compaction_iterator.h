@@ -36,7 +36,9 @@ class SequenceIterWrapper : public InternalIterator {
         inner_iter_(iter),
         need_count_entries_(need_count_entries) {}
   bool Valid() const override { return inner_iter_->Valid(); }
-  rocksdb_rs::status::Status status() const override { return inner_iter_->status(); }
+  rocksdb_rs::status::Status status() const override {
+    return inner_iter_->status();
+  }
   void Next() override {
     num_itered_++;
     inner_iter_->Next();

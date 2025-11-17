@@ -40,7 +40,8 @@ TEST_F(DBBasicTestWithTimestamp, SanityChecks) {
   assert(options1.comparator &&
          options1.comparator->timestamp_size() == sizeof(uint64_t));
   ColumnFamilyHandle* handle = nullptr;
-  rocksdb_rs::status::Status s = db_->CreateColumnFamily(options1, "data", &handle);
+  rocksdb_rs::status::Status s =
+      db_->CreateColumnFamily(options1, "data", &handle);
   ASSERT_OK(s);
 
   std::string dummy_ts(sizeof(uint64_t), '\0');
@@ -120,7 +121,8 @@ TEST_F(DBBasicTestWithTimestamp, MixedCfs) {
   TestComparator test_cmp(kTimestampSize);
   options1.comparator = &test_cmp;
   ColumnFamilyHandle* handle = nullptr;
-  rocksdb_rs::status::Status s = db_->CreateColumnFamily(options1, "data", &handle);
+  rocksdb_rs::status::Status s =
+      db_->CreateColumnFamily(options1, "data", &handle);
   ASSERT_OK(s);
 
   WriteBatch wb;
@@ -397,7 +399,8 @@ TEST_F(DBBasicTestWithTimestamp, UpdateFullHistoryTsLowWithPublicAPI) {
 TEST_F(DBBasicTestWithTimestamp, GetApproximateSizes) {
   Options options = CurrentOptions();
   options.write_buffer_size = 100000000;  // Large write buffer
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   const size_t kTimestampSize = Timestamp(0, 0).size();
   TestComparator test_cmp(kTimestampSize);
@@ -490,8 +493,9 @@ TEST_F(DBBasicTestWithTimestamp, SimpleIterate) {
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = start_keys[i]; key <= kMaxKey; ++key) {
-      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
-                          "value" + std::to_string(i));
+      rocksdb_rs::status::Status s =
+          db_->Put(write_opts, Key1(key), write_timestamps[i],
+                   "value" + std::to_string(i));
       ASSERT_OK(s);
     }
   }
@@ -560,8 +564,8 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   options.comparator = &test_cmp;
   DestroyAndReopen(options);
   auto check_value_by_ts = [](DB* db, Slice key, std::string readTs,
-                              rocksdb_rs::status::Status status, std::string checkValue,
-                              std::string expected_ts) {
+                              rocksdb_rs::status::Status status,
+                              std::string checkValue, std::string expected_ts) {
     ReadOptions ropts;
     Slice ts = readTs;
     ropts.timestamp = &ts;
@@ -581,8 +585,8 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   ASSERT_OK(db_->Put(WriteOptions(), "k1", Timestamp(4, 0), "v2"));
   ASSERT_OK(db_->Delete(WriteOptions(), "k1", Timestamp(5, 0)));
   ASSERT_OK(db_->Put(WriteOptions(), "k1", Timestamp(6, 0), "v3"));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), rocksdb_rs::status::Status_OK(), "v3",
-                    Timestamp(6, 0));
+  check_value_by_ts(db_, "k1", Timestamp(7, 0), rocksdb_rs::status::Status_OK(),
+                    "v3", Timestamp(6, 0));
   ASSERT_OK(Flush());
   Close();
 
@@ -595,28 +599,28 @@ TEST_F(DBBasicTestWithTimestamp, TrimHistoryTest) {
   // Trim data whose version > Timestamp(5, 0), read(k1, ts(7)) <- NOT_FOUND.
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(5, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), rocksdb_rs::status::Status_NotFound(), "",
-                    Timestamp(5, 0));
+  check_value_by_ts(db_, "k1", Timestamp(7, 0),
+                    rocksdb_rs::status::Status_NotFound(), "", Timestamp(5, 0));
   Close();
 
   // Trim data whose timestamp > Timestamp(4, 0), read(k1, ts(7)) <- v2
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(4, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(7, 0), rocksdb_rs::status::Status_OK(), "v2",
-                    Timestamp(4, 0));
+  check_value_by_ts(db_, "k1", Timestamp(7, 0), rocksdb_rs::status::Status_OK(),
+                    "v2", Timestamp(4, 0));
   Close();
 
   Reopen(options);
   ASSERT_OK(db_->DeleteRange(WriteOptions(), db_->DefaultColumnFamily(), "k1",
                              "k3", Timestamp(7, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(8, 0), rocksdb_rs::status::Status_NotFound(), "",
-                    Timestamp(7, 0));
+  check_value_by_ts(db_, "k1", Timestamp(8, 0),
+                    rocksdb_rs::status::Status_NotFound(), "", Timestamp(7, 0));
   Close();
   // Trim data whose timestamp > Timestamp(6, 0), read(k1, ts(8)) <- v2
   ASSERT_OK(DB::OpenAndTrimHistory(db_options, dbname_, column_families,
                                    &handles_, &db_, Timestamp(6, 0)));
-  check_value_by_ts(db_, "k1", Timestamp(8, 0), rocksdb_rs::status::Status_OK(), "v2",
-                    Timestamp(4, 0));
+  check_value_by_ts(db_, "k1", Timestamp(8, 0), rocksdb_rs::status::Status_OK(),
+                    "v2", Timestamp(4, 0));
   Close();
 }
 
@@ -694,7 +698,8 @@ TEST_P(DBBasicTestWithTimestampTableOptions, GetAndMultiGet) {
   Options options = GetDefaultOptions();
   options.create_if_missing = true;
   options.prefix_extractor.reset(NewFixedPrefixTransform(3));
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions bbto;
   bbto.index_type = GetParam();
   bbto.block_size = 100;
@@ -1034,8 +1039,9 @@ TEST_F(DBBasicTestWithTimestamp, SimpleForwardIterateLowerTsBound) {
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = 0; key <= kMaxKey; ++key) {
-      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
-                          "value" + std::to_string(i));
+      rocksdb_rs::status::Status s =
+          db_->Put(write_opts, Key1(key), write_timestamps[i],
+                   "value" + std::to_string(i));
       ASSERT_OK(s);
     }
   }
@@ -1066,7 +1072,8 @@ TEST_F(DBBasicTestWithTimestamp, SimpleForwardIterateLowerTsBound) {
     std::string write_timestamp = Timestamp(5, 0);
     WriteOptions write_opts;
     for (uint64_t key = 0; key < kMaxKey + 1; ++key) {
-      rocksdb_rs::status::Status s = db_->Delete(write_opts, Key1(key), write_timestamp);
+      rocksdb_rs::status::Status s =
+          db_->Delete(write_opts, Key1(key), write_timestamp);
       ASSERT_OK(s);
     }
 
@@ -1112,8 +1119,9 @@ TEST_F(DBBasicTestWithTimestamp, BackwardIterateLowerTsBound) {
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = 0; key <= kMaxKey; ++key) {
-      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
-                          "value" + std::to_string(i));
+      rocksdb_rs::status::Status s =
+          db_->Put(write_opts, Key1(key), write_timestamps[i],
+                   "value" + std::to_string(i));
       ASSERT_OK(s);
     }
   }
@@ -1144,7 +1152,8 @@ TEST_F(DBBasicTestWithTimestamp, BackwardIterateLowerTsBound) {
     std::string write_timestamp = Timestamp(5, 0);
     WriteOptions write_opts;
     for (uint64_t key = 0; key < kMaxKey + 1; ++key) {
-      rocksdb_rs::status::Status s = db_->Delete(write_opts, Key1(key), write_timestamp);
+      rocksdb_rs::status::Status s =
+          db_->Delete(write_opts, Key1(key), write_timestamp);
       ASSERT_OK(s);
     }
 
@@ -1341,8 +1350,12 @@ TEST_F(DBBasicTestWithTimestamp, ReseekToNextUserKey) {
   {
     std::string ts_str = Timestamp(static_cast<uint64_t>(kNumKeys + 1), 0);
     WriteBatch batch(0, 0, 0, kTimestampSize);
-    { ASSERT_OK(batch.Put("a", "new_value")); }
-    { ASSERT_OK(batch.Put("b", "new_value")); }
+    {
+      ASSERT_OK(batch.Put("a", "new_value"));
+    }
+    {
+      ASSERT_OK(batch.Put("b", "new_value"));
+    }
     s = batch.UpdateTimestamps(
         ts_str, [kTimestampSize](uint32_t) { return kTimestampSize; });
     ASSERT_OK(s);
@@ -1378,7 +1391,8 @@ TEST_F(DBBasicTestWithTimestamp, ReseekToUserKeyBeforeSavedKey) {
   for (size_t i = 0; i < kNumKeys; ++i) {
     std::string ts = Timestamp(static_cast<uint64_t>(i + 1), 0);
     WriteOptions write_opts;
-    rocksdb_rs::status::Status s = db_->Put(write_opts, "b", ts, "value" + std::to_string(i));
+    rocksdb_rs::status::Status s =
+        db_->Put(write_opts, "b", ts, "value" + std::to_string(i));
     ASSERT_OK(s);
   }
   {
@@ -1430,7 +1444,8 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetWithFastLocalBloom) {
   size_t batch_size = 1;
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(batch_size);
   std::vector<std::string> timestamps(batch_size);
   keys[0] = "foo";
   ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
@@ -1486,7 +1501,8 @@ TEST_P(DBBasicTestWithTimestampTableOptions, MultiGetWithPrefix) {
   size_t batch_size = 1;
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(batch_size);
   std::vector<std::string> timestamps(batch_size);
   keys[0] = "foo";
   ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
@@ -1546,7 +1562,8 @@ TEST_P(DBBasicTestWithTimestampTableOptions, MultiGetWithMemBloomFilter) {
   size_t batch_size = 1;
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(batch_size);
   keys[0] = "foo";
   ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
   db_->MultiGet(read_opts, cfh, batch_size, keys.data(), values.data(),
@@ -1600,7 +1617,8 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetRangeFiltering) {
   size_t batch_size = 1;
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(batch_size);
   keys[0] = "foo";
   ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
   db_->MultiGet(read_opts, cfh, batch_size, keys.data(), values.data(),
@@ -1844,7 +1862,8 @@ TEST_P(DBBasicTestWithTimestampFilterPrefixSettings, GetAndMultiGet) {
     size_t batch_size = 4;
     std::vector<std::string> keys_str(batch_size);
     std::vector<PinnableSlice> values(batch_size);
-    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+    rust::Vec<rocksdb_rs::status::Status> statuses =
+        rocksdb_rs::status::Status_new().create_vec(batch_size);
     ColumnFamilyHandle* cfh = db_->DefaultColumnFamily();
 
     keys_str[0] = Key1(idx);
@@ -1999,26 +2018,30 @@ class DataVisibilityTest : public DBBasicTestWithTimestampBase {
     AssertVisibility(ts, seq, s4);
 
     std::vector<PinnableSlice> values_ps5(kTestDataSize);
-    rust::Vec<rocksdb_rs::status::Status> s5 = rocksdb_rs::status::Status_new().create_vec(kTestDataSize);
+    rust::Vec<rocksdb_rs::status::Status> s5 =
+        rocksdb_rs::status::Status_new().create_vec(kTestDataSize);
     db_->MultiGet(read_opts, cfh, kTestDataSize, keys.data(), values_ps5.data(),
                   s5.data());
     AssertVisibility(ts, seq, s5);
 
     std::vector<PinnableSlice> values_ps6(kTestDataSize);
-    rust::Vec<rocksdb_rs::status::Status> s6 = rocksdb_rs::status::Status_new().create_vec(kTestDataSize);
+    rust::Vec<rocksdb_rs::status::Status> s6 =
+        rocksdb_rs::status::Status_new().create_vec(kTestDataSize);
     std::vector<std::string> timestamps_array(kTestDataSize);
     db_->MultiGet(read_opts, cfh, kTestDataSize, keys.data(), values_ps6.data(),
                   timestamps_array.data(), s6.data());
     AssertVisibility(ts, seq, s6);
 
     std::vector<PinnableSlice> values_ps7(kTestDataSize);
-    rust::Vec<rocksdb_rs::status::Status> s7 = rocksdb_rs::status::Status_new().create_vec(kTestDataSize);
+    rust::Vec<rocksdb_rs::status::Status> s7 =
+        rocksdb_rs::status::Status_new().create_vec(kTestDataSize);
     db_->MultiGet(read_opts, kTestDataSize, cfs.data(), keys.data(),
                   values_ps7.data(), s7.data());
     AssertVisibility(ts, seq, s7);
 
     std::vector<PinnableSlice> values_ps8(kTestDataSize);
-    rust::Vec<rocksdb_rs::status::Status> s8 = rocksdb_rs::status::Status_new().create_vec(kTestDataSize);
+    rust::Vec<rocksdb_rs::status::Status> s8 =
+        rocksdb_rs::status::Status_new().create_vec(kTestDataSize);
     db_->MultiGet(read_opts, kTestDataSize, cfs.data(), keys.data(),
                   values_ps8.data(), timestamps_array.data(), s8.data());
     AssertVisibility(ts, seq, s8);
@@ -2061,7 +2084,8 @@ TEST_F(DataVisibilityTest, PointLookupWithoutSnapshot1) {
     WriteOptions write_opts;
     TEST_SYNC_POINT(
         "DataVisibilityTest::PointLookupWithoutSnapshot1:BeforePut");
-    rocksdb_rs::status::Status s = db_->Put(write_opts, "foo", write_ts, "value");
+    rocksdb_rs::status::Status s =
+        db_->Put(write_opts, "foo", write_ts, "value");
     ASSERT_OK(s);
     TEST_SYNC_POINT("DataVisibilityTest::PointLookupWithoutSnapshot1:AfterPut");
   });
@@ -2107,7 +2131,8 @@ TEST_F(DataVisibilityTest, PointLookupWithoutSnapshot2) {
     WriteOptions write_opts;
     TEST_SYNC_POINT(
         "DataVisibilityTest::PointLookupWithoutSnapshot2:BeforePut");
-    rocksdb_rs::status::Status s = db_->Put(write_opts, "foo", write_ts, "value");
+    rocksdb_rs::status::Status s =
+        db_->Put(write_opts, "foo", write_ts, "value");
     ASSERT_OK(s);
     ASSERT_OK(Flush());
 
@@ -2156,7 +2181,8 @@ TEST_F(DataVisibilityTest, PointLookupWithSnapshot1) {
     std::string write_ts = Timestamp(1, 0);
     WriteOptions write_opts;
     TEST_SYNC_POINT("DataVisibilityTest::PointLookupWithSnapshot1:BeforePut");
-    rocksdb_rs::status::Status s = db_->Put(write_opts, "foo", write_ts, "value");
+    rocksdb_rs::status::Status s =
+        db_->Put(write_opts, "foo", write_ts, "value");
     TEST_SYNC_POINT("DataVisibilityTest::PointLookupWithSnapshot1:AfterPut");
     ASSERT_OK(s);
   });
@@ -2206,7 +2232,8 @@ TEST_F(DataVisibilityTest, PointLookupWithSnapshot2) {
     std::string write_ts = Timestamp(1, 0);
     WriteOptions write_opts;
     TEST_SYNC_POINT("DataVisibilityTest::PointLookupWithSnapshot2:BeforePut");
-    rocksdb_rs::status::Status s = db_->Put(write_opts, "foo", write_ts, "value1");
+    rocksdb_rs::status::Status s =
+        db_->Put(write_opts, "foo", write_ts, "value1");
     ASSERT_OK(s);
     ASSERT_OK(Flush());
 
@@ -2257,8 +2284,9 @@ TEST_F(DataVisibilityTest, RangeScanWithoutSnapshot) {
     TEST_SYNC_POINT("DataVisibilityTest::RangeScanWithoutSnapshot:BeforePut");
     for (int i = 0; i < 3; ++i) {
       std::string write_ts = Timestamp(i + 1, 0);
-      rocksdb_rs::status::Status s = db_->Put(write_opts, "key" + std::to_string(i), write_ts,
-                          "value" + std::to_string(i));
+      rocksdb_rs::status::Status s =
+          db_->Put(write_opts, "key" + std::to_string(i), write_ts,
+                   "value" + std::to_string(i));
       ASSERT_OK(s);
     }
   });
@@ -2302,8 +2330,9 @@ TEST_F(DataVisibilityTest, RangeScanWithSnapshot) {
     TEST_SYNC_POINT("DataVisibilityTest::RangeScanWithSnapshot:BeforePut");
     for (int i = 0; i < 3; ++i) {
       std::string write_ts = Timestamp(i + 1, 0);
-      rocksdb_rs::status::Status s = db_->Put(write_opts, "key" + std::to_string(i), write_ts,
-                          "value" + std::to_string(i));
+      rocksdb_rs::status::Status s =
+          db_->Put(write_opts, "key" + std::to_string(i), write_ts,
+                   "value" + std::to_string(i));
       ASSERT_OK(s);
     }
   });
@@ -2479,9 +2508,9 @@ TEST_F(DataVisibilityTest, MultiGetCrossCF) {
 #if !defined(ROCKSDB_VALGRIND_RUN) || defined(ROCKSDB_FULL_VALGRIND_RUN)
 class DBBasicTestWithTimestampCompressionSettings
     : public DBBasicTestWithTimestampBase,
-      public testing::WithParamInterface<
-          std::tuple<std::shared_ptr<const FilterPolicy>, rocksdb_rs::compression_type::CompressionType,
-                     uint32_t, uint32_t>> {
+      public testing::WithParamInterface<std::tuple<
+          std::shared_ptr<const FilterPolicy>,
+          rocksdb_rs::compression_type::CompressionType, uint32_t, uint32_t>> {
  public:
   DBBasicTestWithTimestampCompressionSettings()
       : DBBasicTestWithTimestampBase(
@@ -2504,16 +2533,23 @@ TEST_P(DBBasicTestWithTimestampCompressionSettings, PutAndGet) {
   bbto.whole_key_filtering = true;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
-  const rocksdb_rs::compression_type::CompressionType comp_type = std::get<1>(GetParam());
+  const rocksdb_rs::compression_type::CompressionType comp_type =
+      std::get<1>(GetParam());
 #if LZ4_VERSION_NUMBER < 10400  // r124+
-  if (comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4Compression || comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
+  if (comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kLZ4Compression ||
+      comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
     return;
   }
 #endif  // LZ4_VERSION_NUMBER >= 10400
-  if (!ZSTD_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
+  if (!ZSTD_Supported() &&
+      comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     return;
   }
-  if (!Zlib_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
+  if (!Zlib_Supported() &&
+      comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
     return;
   }
 
@@ -2579,16 +2615,23 @@ TEST_P(DBBasicTestWithTimestampCompressionSettings, PutDeleteGet) {
   bbto.whole_key_filtering = true;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
-  const rocksdb_rs::compression_type::CompressionType comp_type = std::get<1>(GetParam());
+  const rocksdb_rs::compression_type::CompressionType comp_type =
+      std::get<1>(GetParam());
 #if LZ4_VERSION_NUMBER < 10400  // r124+
-  if (comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4Compression || comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
+  if (comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kLZ4Compression ||
+      comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
     return;
   }
 #endif  // LZ4_VERSION_NUMBER >= 10400
-  if (!ZSTD_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
+  if (!ZSTD_Supported() &&
+      comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     return;
   }
-  if (!Zlib_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
+  if (!Zlib_Supported() &&
+      comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
     return;
   }
 
@@ -2725,16 +2768,23 @@ TEST_P(DBBasicTestWithTimestampCompressionSettings, PutAndGetWithCompaction) {
   bbto.whole_key_filtering = true;
   options.table_factory.reset(NewBlockBasedTableFactory(bbto));
 
-  const rocksdb_rs::compression_type::CompressionType comp_type = std::get<1>(GetParam());
+  const rocksdb_rs::compression_type::CompressionType comp_type =
+      std::get<1>(GetParam());
 #if LZ4_VERSION_NUMBER < 10400  // r124+
-  if (comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4Compression || comp_type == rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
+  if (comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kLZ4Compression ||
+      comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression) {
     return;
   }
 #endif  // LZ4_VERSION_NUMBER >= 10400
-  if (!ZSTD_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
+  if (!ZSTD_Supported() &&
+      comp_type == rocksdb_rs::compression_type::CompressionType::kZSTD) {
     return;
   }
-  if (!Zlib_Supported() && comp_type == rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
+  if (!Zlib_Supported() &&
+      comp_type ==
+          rocksdb_rs::compression_type::CompressionType::kZlibCompression) {
     return;
   }
 
@@ -2796,7 +2846,8 @@ TEST_P(DBBasicTestWithTimestampCompressionSettings, PutAndGetWithCompaction) {
           // keys with the same timestamp is at one level, with newer versions
           // at higher levels.
           CompactionOptions compact_opt;
-          compact_opt.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+          compact_opt.compression =
+              rocksdb_rs::compression_type::CompressionType::kNoCompression;
           ASSERT_OK(db_->CompactFiles(compact_opt, handles_[cf],
                                       collector->GetFlushedFiles(),
                                       static_cast<int>(kNumTimestamps - i)));
@@ -2940,7 +2991,8 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetNoReturnTs) {
     ColumnFamilyHandle* column_families[] = {cfh, cfh};
     Slice keys[] = {"foo", "bar"};
     PinnableSlice values[] = {PinnableSlice(), PinnableSlice()};
-    rocksdb_rs::status::Status statuses[] = {rocksdb_rs::status::Status_OK(), rocksdb_rs::status::Status_OK()};
+    rocksdb_rs::status::Status statuses[] = {rocksdb_rs::status::Status_OK(),
+                                             rocksdb_rs::status::Status_OK()};
     dbfull()->MultiGet(read_opts, /*num_keys=*/2, &column_families[0], &keys[0],
                        &values[0], &statuses[0], /*sorted_input=*/false);
     for (const auto& s : statuses) {
@@ -2954,8 +3006,9 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetNoReturnTs) {
     Slice keys[] = {"fooxxxxxxxxxxxxxxxx", "barxxxxxxxxxxxxxxxx", "foo", "bar"};
     PinnableSlice values[] = {PinnableSlice(), PinnableSlice(), PinnableSlice(),
                               PinnableSlice()};
-    rocksdb_rs::status::Status statuses[] = {rocksdb_rs::status::Status_OK(), rocksdb_rs::status::Status_OK(), rocksdb_rs::status::Status_OK(),
-                         rocksdb_rs::status::Status_OK()};
+    rocksdb_rs::status::Status statuses[] = {
+        rocksdb_rs::status::Status_OK(), rocksdb_rs::status::Status_OK(),
+        rocksdb_rs::status::Status_OK(), rocksdb_rs::status::Status_OK()};
     dbfull()->MultiGet(read_opts, /*num_keys=*/4, &column_families[0], &keys[0],
                        &values[0], &statuses[0], /*sorted_input=*/false);
     for (const auto& s : statuses) {
@@ -2965,15 +3018,18 @@ TEST_F(DBBasicTestWithTimestamp, MultiGetNoReturnTs) {
   Close();
 }
 
-
 INSTANTIATE_TEST_CASE_P(
     Timestamp, DBBasicTestWithTimestampCompressionSettings,
     ::testing::Combine(
         ::testing::Values(std::shared_ptr<const FilterPolicy>(nullptr),
                           std::shared_ptr<const FilterPolicy>(
                               NewBloomFilterPolicy(10, false))),
-        ::testing::Values(rocksdb_rs::compression_type::CompressionType::kNoCompression, rocksdb_rs::compression_type::CompressionType::kZlibCompression, rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
-                          rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression, rocksdb_rs::compression_type::CompressionType::kZSTD),
+        ::testing::Values(
+            rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            rocksdb_rs::compression_type::CompressionType::kZlibCompression,
+            rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+            rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression,
+            rocksdb_rs::compression_type::CompressionType::kZSTD),
         ::testing::Values(0, 1 << 14), ::testing::Values(1, 4)));
 
 class DBBasicTestWithTimestampPrefixSeek
@@ -3013,8 +3069,9 @@ TEST_P(DBBasicTestWithTimestampPrefixSeek, IterateWithPrefix) {
   {
     for (size_t i = 0; i != write_ts_list.size(); ++i) {
       for (uint64_t key = kMaxKey; key >= kMinKey; --key) {
-        rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_ts_list[i],
-                            "value" + std::to_string(i));
+        rocksdb_rs::status::Status s =
+            db_->Put(write_opts, Key1(key), write_ts_list[i],
+                     "value" + std::to_string(i));
         ASSERT_OK(s);
       }
     }
@@ -3167,8 +3224,8 @@ TEST_P(DBBasicTestWithTsIterTombstones, IterWithDelete) {
   WriteOptions write_opts;
   Slice ts = write_ts_strs[0];
   do {
-    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_ts_strs[0],
-                        "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(
+        write_opts, Key1(key), write_ts_strs[0], "value" + std::to_string(key));
     ASSERT_OK(s);
     if (kMaxKey == key) {
       break;
@@ -3386,7 +3443,8 @@ TEST_F(DBBasicTestWithTimestamp,
     std::vector<std::string> key_strs = {"k1", "k2", "k3"};
     std::vector<Slice> keys{key_strs.begin(), key_strs.end()};
     std::vector<PinnableSlice> values(batch_size);
-    rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+    rust::Vec<rocksdb_rs::status::Status> statuses =
+        rocksdb_rs::status::Status_new().create_vec(batch_size);
     db_->MultiGet(ropts, db_->DefaultColumnFamily(), batch_size, keys.data(),
                   values.data(), statuses.data(), true /* sorted_input */);
     ASSERT_TRUE(statuses[0].IsNotFound());
@@ -3437,7 +3495,8 @@ TEST_F(DBBasicTestWithTimestamp,
   std::vector<std::string> key_strs = {"k1", "k2", "k3"};
   std::vector<Slice> keys = {key_strs.begin(), key_strs.end()};
   std::vector<PinnableSlice> values(batch_size);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(batch_size);
   std::vector<std::string> timestamps(batch_size);
   db_->MultiGet(ropts, db_->DefaultColumnFamily(), batch_size, keys.data(),
                 values.data(), timestamps.data(), statuses.data(),
@@ -3494,7 +3553,8 @@ TEST_P(DBBasicTestWithTimestampTableOptions, DeleteRangeBaiscReadAndIterate) {
   const int kNum = 200, kRangeBegin = 50, kRangeEnd = 150, kNumPerFile = 25;
   Options options = CurrentOptions();
   options.prefix_extractor.reset(NewFixedPrefixTransform(3));
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions bbto;
   bbto.index_type = GetParam();
   bbto.block_size = 100;
@@ -3590,7 +3650,8 @@ TEST_P(DBBasicTestWithTimestampTableOptions, DeleteRangeBaiscReadAndIterate) {
   std::vector<std::string> key_strs(batch_size);
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(batch_size);
   std::vector<std::string> timestamps(batch_size);
   for (int i = 0; i < kNum; ++i) {
     key_strs[i] = Key1(i);
@@ -3662,7 +3723,8 @@ TEST_F(DBBasicTestWithTimestamp, DeleteRangeGetIteratorWithSnapshot) {
   std::vector<std::string> key_strs(batch_size);
   std::vector<Slice> keys(batch_size);
   std::vector<PinnableSlice> values(batch_size);
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(batch_size);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(batch_size);
   std::vector<std::string> timestamps(batch_size);
   for (int i = 0; i < kNum; ++i) {
     key_strs[i] = Key1(i);
@@ -3803,7 +3865,8 @@ TEST_F(DBBasicTestWithTimestamp, MergeBasic) {
         read_opts.timestamp = &read_ts;
         std::string value;
         std::string ts;
-        const rocksdb_rs::status::Status s = db_->Get(read_opts, Key1(i), &value, &ts);
+        const rocksdb_rs::status::Status s =
+            db_->Get(read_opts, Key1(i), &value, &ts);
         ASSERT_OK(s);
         ASSERT_EQ(expected_values[j], value);
         ASSERT_EQ(expected_ts[j], ts);

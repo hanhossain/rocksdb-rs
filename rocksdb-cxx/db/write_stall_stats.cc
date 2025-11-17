@@ -11,7 +11,8 @@ const std::string& InvalidWriteStallHyphenString() {
   return kInvalidWriteStallHyphenString;
 }
 
-const std::string& WriteStallCauseToHyphenString(rocksdb_rs::types::WriteStallCause cause) {
+const std::string& WriteStallCauseToHyphenString(
+    rocksdb_rs::types::WriteStallCause cause) {
   static const std::string kMemtableLimit = "memtable-limit";
   static const std::string kL0FileCountLimit = "l0-file-count-limit";
   static const std::string kPendingCompactionBytes = "pending-compaction-bytes";
@@ -48,7 +49,8 @@ const std::string& WriteStallConditionToHyphenString(
 }
 
 InternalStats::InternalCFStatsType InternalCFStat(
-    rocksdb_rs::types::WriteStallCause cause, rocksdb_rs::types::WriteStallCondition condition) {
+    rocksdb_rs::types::WriteStallCause cause,
+    rocksdb_rs::types::WriteStallCondition condition) {
   switch (cause) {
     case rocksdb_rs::types::WriteStallCause::kMemtableLimit: {
       switch (condition) {
@@ -90,7 +92,8 @@ InternalStats::InternalCFStatsType InternalCFStat(
 }
 
 InternalStats::InternalDBStatsType InternalDBStat(
-    rocksdb_rs::types::WriteStallCause cause, rocksdb_rs::types::WriteStallCondition condition) {
+    rocksdb_rs::types::WriteStallCause cause,
+    rocksdb_rs::types::WriteStallCondition condition) {
   switch (cause) {
     case rocksdb_rs::types::WriteStallCause::kWriteBufferManagerLimit: {
       switch (condition) {
@@ -110,10 +113,12 @@ InternalStats::InternalDBStatsType InternalDBStat(
 bool isCFScopeWriteStallCause(rocksdb_rs::types::WriteStallCause cause) {
   uint32_t int_cause = static_cast<uint32_t>(cause);
   uint32_t lower_bound =
-      static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kCFScopeWriteStallCauseEnumMax) -
+      static_cast<uint32_t>(
+          rocksdb_rs::types::WriteStallCause::kCFScopeWriteStallCauseEnumMax) -
       kNumCFScopeWriteStallCauses;
   uint32_t upper_bound =
-      static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kCFScopeWriteStallCauseEnumMax) -
+      static_cast<uint32_t>(
+          rocksdb_rs::types::WriteStallCause::kCFScopeWriteStallCauseEnumMax) -
       1;
   return lower_bound <= int_cause && int_cause <= upper_bound;
 }
@@ -121,10 +126,12 @@ bool isCFScopeWriteStallCause(rocksdb_rs::types::WriteStallCause cause) {
 bool isDBScopeWriteStallCause(rocksdb_rs::types::WriteStallCause cause) {
   uint32_t int_cause = static_cast<uint32_t>(cause);
   uint32_t lower_bound =
-      static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kDBScopeWriteStallCauseEnumMax) -
+      static_cast<uint32_t>(
+          rocksdb_rs::types::WriteStallCause::kDBScopeWriteStallCauseEnumMax) -
       kNumDBScopeWriteStallCauses;
   uint32_t upper_bound =
-      static_cast<uint32_t>(rocksdb_rs::types::WriteStallCause::kDBScopeWriteStallCauseEnumMax) -
+      static_cast<uint32_t>(
+          rocksdb_rs::types::WriteStallCause::kDBScopeWriteStallCauseEnumMax) -
       1;
   return lower_bound <= int_cause && int_cause <= upper_bound;
 }
@@ -154,7 +161,8 @@ WriteStallStatsMapKeys::CFL0FileCountLimitStopsWithOngoingCompaction() {
 }
 
 std::string WriteStallStatsMapKeys::CauseConditionCount(
-    rocksdb_rs::types::WriteStallCause cause, rocksdb_rs::types::WriteStallCondition condition) {
+    rocksdb_rs::types::WriteStallCause cause,
+    rocksdb_rs::types::WriteStallCondition condition) {
   std::string cause_condition_count_name;
 
   std::string cause_name;

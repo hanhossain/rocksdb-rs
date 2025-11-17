@@ -55,7 +55,8 @@ rocksdb_rs::types::EntryType GetEntryType(ValueType value_type) {
 
 void AppendInternalKey(std::string* result, const ParsedInternalKey& key) {
   result->append(key.user_key.data(), key.user_key.size());
-  rocksdb_rs::coding::PutFixed64(*result, PackSequenceAndType(key.sequence, key.type));
+  rocksdb_rs::coding::PutFixed64(*result,
+                                 PackSequenceAndType(key.sequence, key.type));
 }
 
 void AppendInternalKeyWithDifferentTimestamp(std::string* result,
@@ -64,7 +65,8 @@ void AppendInternalKeyWithDifferentTimestamp(std::string* result,
   assert(key.user_key.size() >= ts.size());
   result->append(key.user_key.data(), key.user_key.size() - ts.size());
   result->append(ts.data(), ts.size());
-  rocksdb_rs::coding::PutFixed64(*result, PackSequenceAndType(key.sequence, key.type));
+  rocksdb_rs::coding::PutFixed64(*result,
+                                 PackSequenceAndType(key.sequence, key.type));
 }
 
 void AppendInternalKeyFooter(std::string* result, SequenceNumber s,
@@ -187,8 +189,8 @@ int InternalKeyComparator::Compare(const Slice& a,
   //    decreasing type (though sequence# should be enough to disambiguate)
   int r = user_comparator_.Compare(ExtractUserKey(a), b.user_key);
   if (r == 0) {
-    const uint64_t anum =
-        rocksdb_rs::coding_lean::DecodeFixed64(a.data() + a.size() - kNumInternalBytes);
+    const uint64_t anum = rocksdb_rs::coding_lean::DecodeFixed64(
+        a.data() + a.size() - kNumInternalBytes);
     const uint64_t bnum = (b.sequence << 8) | b.type;
     if (anum > bnum) {
       r = -1;
@@ -217,7 +219,8 @@ LookupKey::LookupKey(const Slice& _user_key, SequenceNumber s,
   }
   start_ = dst;
   // NOTE: We don't support users keys of more than 2GB :)
-  dst = rocksdb_rs::coding::EncodeVarint32(dst, static_cast<uint32_t>(usize + ts_sz + 8));
+  dst = rocksdb_rs::coding::EncodeVarint32(
+      dst, static_cast<uint32_t>(usize + ts_sz + 8));
   kstart_ = dst;
   memcpy(dst, _user_key.data(), usize);
   dst += usize;
@@ -225,7 +228,8 @@ LookupKey::LookupKey(const Slice& _user_key, SequenceNumber s,
     memcpy(dst, ts->data(), ts_sz);
     dst += ts_sz;
   }
-  rocksdb_rs::coding_lean::EncodeFixed64(dst, PackSequenceAndType(s, kValueTypeForSeek));
+  rocksdb_rs::coding_lean::EncodeFixed64(
+      dst, PackSequenceAndType(s, kValueTypeForSeek));
   dst += 8;
   end_ = dst;
 }

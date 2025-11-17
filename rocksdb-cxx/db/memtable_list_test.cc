@@ -12,13 +12,12 @@
 #include "db/merge_context.h"
 #include "db/version_set.h"
 #include "db/write_controller.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/db.h"
 #include "rocksdb/write_buffer_manager.h"
 #include "test_util/testharness.h"
 #include "test_util/testutil.h"
 #include "util/string_util.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -45,7 +44,8 @@ class MemTableListTest : public testing::Test {
       ColumnFamilyOptions cf_options;
       std::vector<ColumnFamilyDescriptor> cf_descs;
       cf_descs.emplace_back(kDefaultColumnFamilyName, cf_options);
-      rocksdb_rs::status::Status s = DB::Open(options, dbname, cf_descs, &handles, &db);
+      rocksdb_rs::status::Status s =
+          DB::Open(options, dbname, cf_descs, &handles, &db);
       EXPECT_OK(s);
 
       ColumnFamilyOptions cf_opt1, cf_opt2;
@@ -119,7 +119,8 @@ class MemTableListTest : public testing::Test {
     auto cfd = column_family_set->GetDefault();
     EXPECT_TRUE(nullptr != cfd);
     uint64_t file_num = file_number.fetch_add(1);
-    rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
+    rocksdb_rs::io_status::IOStatus io_s =
+        rocksdb_rs::io_status::IOStatus_new();
     // Create dummy mutex.
     InstrumentedMutex mutex;
     InstrumentedMutexLock l(&mutex);
@@ -875,8 +876,8 @@ TEST_F(MemTableListTest, EmptyAtomicFlusTest) {
   autovector<const MutableCFOptions*> options_list;
   autovector<const autovector<MemTable*>*> to_flush;
   autovector<MemTable*> to_delete;
-  rocksdb_rs::status::Status s = Mock_InstallMemtableAtomicFlushResults(lists, cf_ids, options_list,
-                                                    to_flush, &to_delete);
+  rocksdb_rs::status::Status s = Mock_InstallMemtableAtomicFlushResults(
+      lists, cf_ids, options_list, to_flush, &to_delete);
   ASSERT_OK(s);
   ASSERT_TRUE(to_delete.empty());
 }

@@ -37,15 +37,19 @@ size_t CompactedDBImpl::FindFile(const Slice& key) {
       files_.files);
 }
 
-rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
-                            const Slice& key, PinnableSlice* value) {
+rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options,
+                                                ColumnFamilyHandle*,
+                                                const Slice& key,
+                                                PinnableSlice* value) {
   return Get(options, /*column_family*/ nullptr, key, value,
              /*timestamp*/ nullptr);
 }
 
-rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, ColumnFamilyHandle*,
-                            const Slice& key, PinnableSlice* value,
-                            std::string* timestamp) {
+rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options,
+                                                ColumnFamilyHandle*,
+                                                const Slice& key,
+                                                PinnableSlice* value,
+                                                std::string* timestamp) {
   if (options.io_activity != Env::IOActivity::kUnknown) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
@@ -88,8 +92,8 @@ rocksdb_rs::status::Status CompactedDBImpl::Get(const ReadOptions& options, Colu
           /*b_has_ts=*/false) < 0) {
     return rocksdb_rs::status::Status_NotFound();
   }
-  rocksdb_rs::status::Status s = f.fd.table_reader->Get(options, lkey.internal_key(), &get_context,
-                                    nullptr);
+  rocksdb_rs::status::Status s = f.fd.table_reader->Get(
+      options, lkey.internal_key(), &get_context, nullptr);
   if (!s.ok() && !s.IsNotFound()) {
     return s;
   }
@@ -113,8 +117,9 @@ rust::Vec<rocksdb_rs::status::Status> CompactedDBImpl::MultiGet(
   size_t num_keys = keys.size();
 
   if (options.timestamp) {
-    rocksdb_rs::status::Status s = FailIfTsMismatchCf(DefaultColumnFamily(), *(options.timestamp),
-                                  /*ts_for_read=*/true);
+    rocksdb_rs::status::Status s =
+        FailIfTsMismatchCf(DefaultColumnFamily(), *(options.timestamp),
+                           /*ts_for_read=*/true);
     if (!s.ok()) {
       return s.create_vec(num_keys);
     }
@@ -149,7 +154,8 @@ rust::Vec<rocksdb_rs::status::Status> CompactedDBImpl::MultiGet(
       reader_list.push_back(f.fd.table_reader);
     }
   }
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_NotFound().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_NotFound().create_vec(num_keys);
   values->resize(num_keys);
   if (timestamps) {
     timestamps->resize(num_keys);
@@ -166,7 +172,8 @@ rust::Vec<rocksdb_rs::status::Status> CompactedDBImpl::MultiGet(
           lkey.user_key(), &pinnable_val, /*columns=*/nullptr,
           user_comparator_->timestamp_size() > 0 ? timestamp : nullptr, nullptr,
           nullptr, true, nullptr, nullptr, nullptr, nullptr, &read_cb);
-      rocksdb_rs::status::Status s = r->Get(options, lkey.internal_key(), &get_context, nullptr);
+      rocksdb_rs::status::Status s =
+          r->Get(options, lkey.internal_key(), &get_context, nullptr);
       assert(static_cast<size_t>(idx) < statuses.size());
       if (!s.ok() && !s.IsNotFound()) {
         statuses[idx].copy_from(s);
@@ -187,7 +194,8 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
   mutex_.Lock();
   ColumnFamilyDescriptor cf(kDefaultColumnFamilyName,
                             ColumnFamilyOptions(options));
-  rocksdb_rs::status::Status s = Recover({cf}, true /* read only */, false, true);
+  rocksdb_rs::status::Status s =
+      Recover({cf}, true /* read only */, false, true);
   if (s.ok()) {
     cfd_ = static_cast_with_check<ColumnFamilyHandleImpl>(DefaultColumnFamily())
                ->cfd();
@@ -208,11 +216,13 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
   const LevelFilesBrief& l0 = vstorage->LevelFilesBrief(0);
   // L0 should not have files
   if (l0.num_files > 1) {
-    return rocksdb_rs::status::Status_NotSupported("L0 contain more than 1 file");
+    return rocksdb_rs::status::Status_NotSupported(
+        "L0 contain more than 1 file");
   }
   if (l0.num_files == 1) {
     if (vstorage->num_non_empty_levels() > 1) {
-      return rocksdb_rs::status::Status_NotSupported("Both L0 and other level contain files");
+      return rocksdb_rs::status::Status_NotSupported(
+          "Both L0 and other level contain files");
     }
     files_ = l0;
     return rocksdb_rs::status::Status_OK();
@@ -220,7 +230,8 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
 
   for (int i = 1; i < vstorage->num_non_empty_levels() - 1; ++i) {
     if (vstorage->LevelFilesBrief(i).num_files > 0) {
-      return rocksdb_rs::status::Status_NotSupported("Other levels also contain files");
+      return rocksdb_rs::status::Status_NotSupported(
+          "Other levels also contain files");
     }
   }
 
@@ -232,15 +243,18 @@ rocksdb_rs::status::Status CompactedDBImpl::Init(const Options& options) {
   return rocksdb_rs::status::Status_NotSupported("no file exists");
 }
 
-rocksdb_rs::status::Status CompactedDBImpl::Open(const Options& options, const std::string& dbname,
-                             DB** dbptr) {
+rocksdb_rs::status::Status CompactedDBImpl::Open(const Options& options,
+                                                 const std::string& dbname,
+                                                 DB** dbptr) {
   *dbptr = nullptr;
 
   if (options.max_open_files != -1) {
-    return rocksdb_rs::status::Status_InvalidArgument("require max_open_files = -1");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "require max_open_files = -1");
   }
   if (options.merge_operator.get() != nullptr) {
-    return rocksdb_rs::status::Status_InvalidArgument("merge operator is not supported");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "merge operator is not supported");
   }
   DBOptions db_options(options);
   std::unique_ptr<CompactedDBImpl> db(new CompactedDBImpl(db_options, dbname));

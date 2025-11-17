@@ -333,7 +333,8 @@ TEST_F(DBOptionsTest, SetBytesPerSync) {
   options.use_direct_reads = false;
   options.write_buffer_size = 400 * kValueSize;
   options.disable_auto_compactions = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.env = env_;
   Reopen(options);
   int counter = 0;
@@ -382,7 +383,8 @@ TEST_F(DBOptionsTest, SetWalBytesPerSync) {
   options.wal_bytes_per_sync = 512;
   options.write_buffer_size = 100 * kValueSize;
   options.disable_auto_compactions = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.env = env_;
   Reopen(options);
   ASSERT_EQ(512, dbfull()->GetDBOptions().wal_bytes_per_sync);
@@ -484,7 +486,8 @@ TEST_F(DBOptionsTest, EnableAutoCompactionAndTriggerStall) {
       options.create_if_missing = true;
       options.disable_auto_compactions = true;
       options.write_buffer_size = 1024 * 1024 * 10;
-      options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      options.compression =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
       options.level0_file_num_compaction_trigger = 1;
       options.level0_stop_writes_trigger = std::numeric_limits<int>::max();
       options.level0_slowdown_writes_trigger = std::numeric_limits<int>::max();
@@ -910,7 +913,8 @@ TEST_F(DBOptionsTest, SetFIFOCompactionOptions) {
   options.compaction_style = kCompactionStyleFIFO;
   options.write_buffer_size = 10 << 10;  // 10KB
   options.arena_block_size = 4096;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.compaction_options_fifo.allow_compaction = false;
   options.num_levels = 1;
@@ -1125,15 +1129,18 @@ TEST_F(DBOptionsTest, ChangeCompression) {
   options.write_buffer_size = 10 << 10;  // 10KB
   options.level0_file_num_compaction_trigger = 2;
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
-  options.bottommost_compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+  options.bottommost_compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.bottommost_compression_opts.level = 2;
   options.bottommost_compression_opts.parallel_threads = 1;
   options.env = CurrentOptions().env;
 
   ASSERT_OK(TryReopen(options));
 
-  rocksdb_rs::compression_type::CompressionType compression_used = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+  rocksdb_rs::compression_type::CompressionType compression_used =
+      rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   CompressionOptions compression_opt_used;
   bool compacted = false;
   SyncPoint::GetInstance()->SetCallBack(
@@ -1153,12 +1160,14 @@ TEST_F(DBOptionsTest, ChangeCompression) {
   ASSERT_OK(Flush());
   ASSERT_OK(dbfull()->TEST_WaitForCompact());
   ASSERT_TRUE(compacted);
-  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kNoCompression, compression_used);
+  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            compression_used);
   ASSERT_EQ(options.compression_opts.level, compression_opt_used.level);
   ASSERT_EQ(options.compression_opts.parallel_threads,
             compression_opt_used.parallel_threads);
 
-  compression_used = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+  compression_used =
+      rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   compacted = false;
   ASSERT_OK(dbfull()->SetOptions(
       {{"bottommost_compression", "kSnappyCompression"},
@@ -1171,13 +1180,13 @@ TEST_F(DBOptionsTest, ChangeCompression) {
   ASSERT_OK(Flush());
   ASSERT_OK(dbfull()->TEST_WaitForCompact());
   ASSERT_TRUE(compacted);
-  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kSnappyCompression, compression_used);
+  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kSnappyCompression,
+            compression_used);
   ASSERT_EQ(6, compression_opt_used.level);
   // Right now parallel_level is not yet allowed to be changed.
 
   SyncPoint::GetInstance()->DisableProcessing();
 }
-
 
 TEST_F(DBOptionsTest, BottommostCompressionOptsWithFallbackType) {
   // Verify the bottommost compression options still take effect even when the
@@ -1193,13 +1202,15 @@ TEST_F(DBOptionsTest, BottommostCompressionOptsWithFallbackType) {
 
   Options options = CurrentOptions();
   options.level0_file_num_compaction_trigger = kNumL0Files;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
   options.compression_opts.level = kUpperCompressionLevel;
   options.bottommost_compression_opts.level = kBottommostCompressionLevel;
   options.bottommost_compression_opts.enabled = true;
   Reopen(options);
 
-  rocksdb_rs::compression_type::CompressionType compression_used = rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
+  rocksdb_rs::compression_type::CompressionType compression_used =
+      rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
   CompressionOptions compression_opt_used;
   bool compacted = false;
   SyncPoint::GetInstance()->SetCallBack(
@@ -1220,12 +1231,14 @@ TEST_F(DBOptionsTest, BottommostCompressionOptsWithFallbackType) {
   ASSERT_OK(dbfull()->TEST_WaitForCompact());
 
   ASSERT_TRUE(compacted);
-  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kLZ4Compression, compression_used);
+  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+            compression_used);
   ASSERT_EQ(kBottommostCompressionLevel, compression_opt_used.level);
 
   // Second, verify for manual compaction.
   compacted = false;
-  compression_used = rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
+  compression_used =
+      rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
   compression_opt_used = CompressionOptions();
   CompactRangeOptions cro;
   cro.bottommost_level_compaction = BottommostLevelCompaction::kForceOptimized;
@@ -1235,7 +1248,8 @@ TEST_F(DBOptionsTest, BottommostCompressionOptsWithFallbackType) {
   rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
 
   ASSERT_TRUE(compacted);
-  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kLZ4Compression, compression_used);
+  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+            compression_used);
   ASSERT_EQ(kBottommostCompressionLevel, compression_opt_used.level);
 }
 
@@ -1316,7 +1330,8 @@ TEST_F(DBOptionsTest, TempOptionsFailTest) {
   rocksdb_rs::types::FileType type;
   bool found_temp_file = false;
   for (size_t i = 0; i < filenames.size(); i++) {
-    if (ParseFileName(filenames[i], &number, &type) && type == rocksdb_rs::types::FileType::kTempFile) {
+    if (ParseFileName(filenames[i], &number, &type) &&
+        type == rocksdb_rs::types::FileType::kTempFile) {
       found_temp_file = true;
     }
   }

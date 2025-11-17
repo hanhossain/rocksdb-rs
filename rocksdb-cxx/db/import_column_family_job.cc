@@ -4,8 +4,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-#include "db/version_builder.h"
-
 #include "db/import_column_family_job.h"
 
 #include <algorithm>
@@ -13,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "db/version_builder.h"
 #include "db/version_edit.h"
 #include "file/file_util.h"
 #include "file/random_access_file_reader.h"
@@ -26,8 +25,8 @@
 
 namespace rocksdb {
 
-rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_number,
-                                      SuperVersion* sv) {
+rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(
+    uint64_t next_file_number, SuperVersion* sv) {
   rocksdb_rs::status::Status status = rocksdb_rs::status::Status_new();
   std::vector<ColumnFamilyIngestFileInfo> cf_ingest_infos;
   for (const auto& metadata_per_cf : metadatas_) {
@@ -47,13 +46,15 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
       }
 
       if (file_to_import.num_entries == 0) {
-        status = rocksdb_rs::status::Status_InvalidArgument("File contain no entries");
+        status = rocksdb_rs::status::Status_InvalidArgument(
+            "File contain no entries");
         return status;
       }
 
       if (!file_to_import.smallest_internal_key.Valid() ||
           !file_to_import.largest_internal_key.Valid()) {
-        status = rocksdb_rs::status::Status_Corruption("File has corrupted keys");
+        status =
+            rocksdb_rs::status::Status_Corruption("File has corrupted keys");
         return status;
       }
 
@@ -77,7 +78,8 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
     }
 
     if (num_files == 0) {
-      status = rocksdb_rs::status::Status_InvalidArgument("The list of files is empty");
+      status = rocksdb_rs::status::Status_InvalidArgument(
+          "The list of files is empty");
       return status;
     }
     files_to_import_.push_back(files_to_import_per_cf);
@@ -98,7 +100,8 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
     if (cfd_->user_comparator()->Compare(
             cf_ingest_infos[i].largest_internal_key.user_key(),
             cf_ingest_infos[i + 1].smallest_internal_key.user_key()) >= 0) {
-      status = rocksdb_rs::status::Status_InvalidArgument("CFs have overlapping ranges");
+      status = rocksdb_rs::status::Status_InvalidArgument(
+          "CFs have overlapping ranges");
       return status;
     }
   }
@@ -113,8 +116,10 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
           cfd_->ioptions()->cf_paths, f.fd.GetNumber(), f.fd.GetPathId());
 
       if (hardlink_files) {
-        status = fs_->LinkFile(path_outside_db, static_cast<std::string>(path_inside_db), IOOptions(),
-                               nullptr).status();
+        status = fs_->LinkFile(path_outside_db,
+                               static_cast<std::string>(path_inside_db),
+                               IOOptions(), nullptr)
+                     .status();
         if (status.IsNotSupported()) {
           // Original file is on a different FS, use copy instead of hard
           // linking
@@ -127,8 +132,10 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::Prepare(uint64_t next_file_num
       }
       if (!hardlink_files) {
         status =
-            CopyFile(fs_.get(), path_outside_db, static_cast<std::string>(path_inside_db), 0,
-                     db_options_.use_fsync, io_tracer_, Temperature::kUnknown).status();
+            CopyFile(fs_.get(), path_outside_db,
+                     static_cast<std::string>(path_inside_db), 0,
+                     db_options_.use_fsync, io_tracer_, Temperature::kUnknown)
+                .status();
       }
       if (!status.ok()) {
         break;
@@ -298,7 +305,8 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
   } else {
     // Get external file size
     status = fs_->GetFileSize(external_file, IOOptions(),
-                              &file_to_import->file_size, nullptr).status();
+                              &file_to_import->file_size, nullptr)
+                 .status();
     if (!status.ok()) {
       return status;
     }
@@ -313,7 +321,8 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
   std::unique_ptr<RandomAccessFileReader> sst_file_reader;
 
   status =
-      fs_->NewRandomAccessFile(external_file, env_options_, &sst_file, nullptr).status();
+      fs_->NewRandomAccessFile(external_file, env_options_, &sst_file, nullptr)
+          .status();
   if (!status.ok()) {
     return status;
   }
@@ -375,11 +384,11 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
       range_del_iter->SeekToFirst();
       if (range_del_iter->Valid()) {
         ParsedInternalKey key;
-        rocksdb_rs::status::Status pik_status = ParseInternalKey(range_del_iter->key(), &key,
-                                             db_options_.allow_data_in_errors);
+        rocksdb_rs::status::Status pik_status = ParseInternalKey(
+            range_del_iter->key(), &key, db_options_.allow_data_in_errors);
         if (!pik_status.ok()) {
-          return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
-                                    pik_status.getState());
+          return rocksdb_rs::status::Status_Corruption(
+              "Corrupted key in external file. ", pik_status.getState());
         }
         RangeTombstone first_tombstone(key, range_del_iter->value());
         InternalKey start_key = first_tombstone.SerializeKey();
@@ -394,8 +403,8 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
         pik_status = ParseInternalKey(range_del_iter->key(), &key,
                                       db_options_.allow_data_in_errors);
         if (!pik_status.ok()) {
-          return rocksdb_rs::status::Status_Corruption("Corrupted key in external file. ",
-                                    pik_status.getState());
+          return rocksdb_rs::status::Status_Corruption(
+              "Corrupted key in external file. ", pik_status.getState());
         }
         RangeTombstone last_tombstone(key, range_del_iter->value());
         InternalKey end_key = last_tombstone.SerializeEndKey();
@@ -417,8 +426,8 @@ rocksdb_rs::status::Status ImportColumnFamilyJob::GetIngestedFileInfo(
 
   file_to_import->table_properties = *props;
 
-  auto s = file_to_import->unique_id.get_sst_internal_unique_id(props->db_id, props->db_session_id,
-                                  props->orig_file_number, false);
+  auto s = file_to_import->unique_id.get_sst_internal_unique_id(
+      props->db_id, props->db_session_id, props->orig_file_number, false);
   if (!s.ok()) {
     ROCKS_LOG_WARN(db_options_.info_log,
                    "Failed to get SST unique id for file %s",

@@ -21,8 +21,8 @@ namespace rocksdb {
 
 class LogFileImpl : public LogFile {
  public:
-  LogFileImpl(uint64_t logNum, rocksdb_rs::transaction_log::WalFileType logType, SequenceNumber startSeq,
-              uint64_t sizeBytes)
+  LogFileImpl(uint64_t logNum, rocksdb_rs::transaction_log::WalFileType logType,
+              SequenceNumber startSeq, uint64_t sizeBytes)
       : logNumber_(logNum),
         type_(logType),
         startSequence_(startSeq),
@@ -30,14 +30,18 @@ class LogFileImpl : public LogFile {
 
   std::string PathName() const override {
     if (type_ == rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile) {
-      return static_cast<std::string>(rocksdb_rs::filename::ArchivedLogFileName("", logNumber_));
+      return static_cast<std::string>(
+          rocksdb_rs::filename::ArchivedLogFileName("", logNumber_));
     }
-    return static_cast<std::string>(rocksdb_rs::filename::LogFileName("", logNumber_));
+    return static_cast<std::string>(
+        rocksdb_rs::filename::LogFileName("", logNumber_));
   }
 
   uint64_t LogNumber() const override { return logNumber_; }
 
-  rocksdb_rs::transaction_log::WalFileType Type() const override { return type_; }
+  rocksdb_rs::transaction_log::WalFileType Type() const override {
+    return type_;
+  }
 
   SequenceNumber StartSequence() const override { return startSequence_; }
 
@@ -92,13 +96,14 @@ class TransactionLogIteratorImpl : public TransactionLogIterator {
   std::unique_ptr<WriteBatch> current_batch_;
   std::unique_ptr<log::Reader> current_log_reader_;
   std::string scratch_;
-  rocksdb_rs::status::Status OpenLogFile(const LogFile* log_file,
-                     std::unique_ptr<SequentialFileReader>* file);
+  rocksdb_rs::status::Status OpenLogFile(
+      const LogFile* log_file, std::unique_ptr<SequentialFileReader>* file);
 
   struct LogReporter : public log::Reader::Reporter {
     Env* env;
     Logger* info_log;
-    virtual void Corruption(size_t bytes, const rocksdb_rs::status::Status& s) override {
+    virtual void Corruption(size_t bytes,
+                            const rocksdb_rs::status::Status& s) override {
       ROCKS_LOG_ERROR(info_log, "dropping %" ROCKSDB_PRIszt " bytes; %s", bytes,
                       s.ToString()->c_str());
     }

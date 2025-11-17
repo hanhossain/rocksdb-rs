@@ -38,7 +38,8 @@ class DBWALTestBase : public DBTestBase {
     int alloc_status = fallocate(fd, 0, 0, 1);
     int err_number = errno;
     close(fd);
-    assert(env_->DeleteFile(fname_test_fallocate).eq(rocksdb_rs::status::Status_OK()));
+    assert(env_->DeleteFile(fname_test_fallocate)
+               .eq(rocksdb_rs::status::Status_OK()));
     if (err_number == ENOSYS || err_number == EOPNOTSUPP) {
       fprintf(stderr, "Skipped preallocated space check: %s\n",
               errnoStr(err_number).c_str());
@@ -67,9 +68,9 @@ class DBWALTest : public DBWALTestBase {
 class EnrichedSpecialEnv : public SpecialEnv {
  public:
   explicit EnrichedSpecialEnv(Env* base) : SpecialEnv(base) {}
-  rocksdb_rs::status::Status NewSequentialFile(const std::string& f,
-                           std::unique_ptr<SequentialFile>* r,
-                           const EnvOptions& soptions) override {
+  rocksdb_rs::status::Status NewSequentialFile(
+      const std::string& f, std::unique_ptr<SequentialFile>* r,
+      const EnvOptions& soptions) override {
     InstrumentedMutexLock l(&env_mutex_);
     if (f == skipped_wal) {
       deleted_wal_reopened = true;
@@ -274,8 +275,7 @@ TEST_F(DBWALTest, SyncWALNotWaitWrite) {
   });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
-  rocksdb::port::Thread thread(
-      [&]() { ASSERT_OK(Put("foo2", "bar2")); });
+  rocksdb::port::Thread thread([&]() { ASSERT_OK(Put("foo2", "bar2")); });
   // Moving this to SyncWAL before the actual fsync
   // TEST_SYNC_POINT("DBWALTest::SyncWALNotWaitWrite:1");
   ASSERT_OK(db_->SyncWAL());
@@ -323,17 +323,17 @@ class DBWALTestWithTimestamp
     DBBasicTestWithTimestampBase::SetUp();
   }
 
-  rocksdb_rs::status::Status CreateAndReopenWithCFWithTs(const std::vector<std::string>& cfs,
-                                     const Options& options,
-                                     bool avoid_flush_during_recovery = false) {
+  rocksdb_rs::status::Status CreateAndReopenWithCFWithTs(
+      const std::vector<std::string>& cfs, const Options& options,
+      bool avoid_flush_during_recovery = false) {
     CreateColumnFamilies(cfs, options);
     return ReopenColumnFamiliesWithTs(cfs, options,
                                       avoid_flush_during_recovery);
   }
 
-  rocksdb_rs::status::Status ReopenColumnFamiliesWithTs(const std::vector<std::string>& cfs,
-                                    Options ts_options,
-                                    bool avoid_flush_during_recovery = false) {
+  rocksdb_rs::status::Status ReopenColumnFamiliesWithTs(
+      const std::vector<std::string>& cfs, Options ts_options,
+      bool avoid_flush_during_recovery = false) {
     Options default_options = CurrentOptions();
     default_options.create_if_missing = false;
     default_options.avoid_flush_during_recovery = avoid_flush_during_recovery;
@@ -348,7 +348,7 @@ class DBWALTestWithTimestamp
   }
 
   rocksdb_rs::status::Status Put(uint32_t cf, const Slice& key, const Slice& ts,
-             const Slice& value) {
+                                 const Slice& value) {
     WriteOptions write_opts;
     return db_->Put(write_opts, handles_[cf], key, ts, value);
   }
@@ -746,7 +746,8 @@ TEST_F(DBWALTest, WALWithChecksumHandoff) {
   do {
     Options options = CurrentOptions();
 
-    options.checksum_handoff_file_types.Add(rocksdb_rs::types::FileType::kWalFile);
+    options.checksum_handoff_file_types.Add(
+        rocksdb_rs::types::FileType::kWalFile);
     options.env = fault_fs_env.get();
     fault_fs->SetChecksumHandoffFuncType(ChecksumType::kCRC32c);
 
@@ -870,7 +871,8 @@ TEST_P(DBRecoveryTestBlobError, RecoverWithBlobError) {
   // Reopen with blob files enabled but make blob file writing fail during
   // recovery.
   SyncPoint::GetInstance()->SetCallBack(sync_point_, [this](void* arg) {
-    rocksdb_rs::status::Status* const s = static_cast<rocksdb_rs::status::Status*>(arg);
+    rocksdb_rs::status::Status* const s =
+        static_cast<rocksdb_rs::status::Status*>(arg);
     assert(s);
 
     (*s) = rocksdb_rs::status::Status_IOError(sync_point_);
@@ -1193,7 +1195,8 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
     // nothing has been written to the log yet
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_EQ(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
+    ASSERT_EQ(log_file->Type(),
+              rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
     // add some data and verify that the file size actually moves foward
@@ -1205,7 +1208,8 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
 
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_GT(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
+    ASSERT_EQ(log_file->Type(),
+              rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
     // force log files to cycle and add some more data, then check if
@@ -1224,7 +1228,8 @@ TEST_F(DBWALTest, GetCurrentWalFile) {
 
     ASSERT_EQ(log_file->StartSequence(), 0);
     ASSERT_GT(log_file->SizeFileBytes(), 0);
-    ASSERT_EQ(log_file->Type(), rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
+    ASSERT_EQ(log_file->Type(),
+              rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
     ASSERT_GT(log_file->LogNumber(), 0);
 
   } while (ChangeWalOptions());
@@ -1512,7 +1517,8 @@ class RecoveryTestHelper {
 
     for (size_t j = kWALFileOffset; j < wal_count + kWALFileOffset; j++) {
       uint64_t current_log_number = j;
-      std::string fname = static_cast<std::string>(LogFileName(test->dbname_, current_log_number));
+      std::string fname = static_cast<std::string>(
+          LogFileName(test->dbname_, current_log_number));
       std::unique_ptr<WritableFileWriter> file_writer;
       ASSERT_OK(WritableFileWriter::Create(db_options.env->GetFileSystem(),
                                            fname, file_options, &file_writer,
@@ -1569,7 +1575,8 @@ class RecoveryTestHelper {
                          const double off, const double len,
                          const int wal_file_id, const bool trunc = false) {
     Env* env = options.env;
-    std::string fname = static_cast<std::string>(LogFileName(test->dbname_, wal_file_id));
+    std::string fname =
+        static_cast<std::string>(LogFileName(test->dbname_, wal_file_id));
     uint64_t size;
     ASSERT_OK(env->GetFileSize(fname, &size));
     ASSERT_GT(size, 0);
@@ -1591,27 +1598,31 @@ class RecoveryTestHelper {
   }
 };
 
-class DBWALTestWithParams : public DBWALTestBase,
-                            public ::testing::WithParamInterface<
-                                std::tuple<bool, int, int, rocksdb_rs::compression_type::CompressionType>> {
+class DBWALTestWithParams
+    : public DBWALTestBase,
+      public ::testing::WithParamInterface<std::tuple<
+          bool, int, int, rocksdb_rs::compression_type::CompressionType>> {
  public:
   DBWALTestWithParams() : DBWALTestBase("/db_wal_test_with_params") {}
 };
 
 INSTANTIATE_TEST_CASE_P(
     Wal, DBWALTestWithParams,
-    ::testing::Combine(::testing::Bool(), ::testing::Range(0, 4, 1),
-                       ::testing::Range(RecoveryTestHelper::kWALFileOffset,
-                                        RecoveryTestHelper::kWALFileOffset +
-                                            RecoveryTestHelper::kWALFilesCount,
-                                        1),
-                       ::testing::Values(rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                                         rocksdb_rs::compression_type::CompressionType::kZSTD)));
+    ::testing::Combine(
+        ::testing::Bool(), ::testing::Range(0, 4, 1),
+        ::testing::Range(RecoveryTestHelper::kWALFileOffset,
+                         RecoveryTestHelper::kWALFileOffset +
+                             RecoveryTestHelper::kWALFilesCount,
+                         1),
+        ::testing::Values(
+            rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            rocksdb_rs::compression_type::CompressionType::kZSTD)));
 
 class DBWALTestWithParamsVaryingRecoveryMode
     : public DBWALTestBase,
       public ::testing::WithParamInterface<
-          std::tuple<bool, int, int, WALRecoveryMode, rocksdb_rs::compression_type::CompressionType>> {
+          std::tuple<bool, int, int, WALRecoveryMode,
+                     rocksdb_rs::compression_type::CompressionType>> {
  public:
   DBWALTestWithParamsVaryingRecoveryMode()
       : DBWALTestBase("/db_wal_test_with_params_mode") {}
@@ -1629,8 +1640,9 @@ INSTANTIATE_TEST_CASE_P(
                           WALRecoveryMode::kAbsoluteConsistency,
                           WALRecoveryMode::kPointInTimeRecovery,
                           WALRecoveryMode::kSkipAnyCorruptedRecords),
-        ::testing::Values(rocksdb_rs::compression_type::CompressionType::kNoCompression,
-                          rocksdb_rs::compression_type::CompressionType::kZSTD)));
+        ::testing::Values(
+            rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            rocksdb_rs::compression_type::CompressionType::kZSTD)));
 
 // Test scope:
 // - We expect to open the data store when there is incomplete trailing writes
@@ -1677,7 +1689,8 @@ TEST_P(DBWALTestWithParams, kAbsoluteConsistency) {
   int corrupt_offset = std::get<1>(GetParam());
   int wal_file_id = std::get<2>(GetParam());  // WAL file
   // WAL compression type
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<3>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<3>(GetParam());
   options.wal_compression = compression_type;
 
   if (trunc && corrupt_offset == 0) {
@@ -1710,7 +1723,8 @@ TEST_F(DBWALTest, kPointInTimeRecoveryCFConsistency) {
   // Record the offset at this point
   Env* env = options.env;
   uint64_t wal_file_id = dbfull()->TEST_LogfileNumber();
-  std::string fname = static_cast<std::string>(LogFileName(dbname_, wal_file_id));
+  std::string fname =
+      static_cast<std::string>(LogFileName(dbname_, wal_file_id));
   uint64_t offset_to_corrupt;
   ASSERT_OK(env->GetFileSize(fname, &offset_to_corrupt));
   ASSERT_GT(offset_to_corrupt, 0);
@@ -1877,7 +1891,6 @@ TEST_F(DBWALTest, FixSyncWalOnObseletedWalWithNewManifestCausingMissingWAL) {
         wal_synced = true;
       });
 
-
   SyncPoint::GetInstance()->EnableProcessing();
 
   ASSERT_OK(Flush());
@@ -1914,7 +1927,8 @@ TEST_P(DBWALTestWithParams, kPointInTimeRecovery) {
   int corrupt_offset = std::get<1>(GetParam());
   int wal_file_id = std::get<2>(GetParam());  // WAL file
   // WAL compression type
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<3>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<3>(GetParam());
 
   // Fill data for testing
   Options options = CurrentOptions();
@@ -1971,7 +1985,8 @@ TEST_P(DBWALTestWithParams, kSkipAnyCorruptedRecords) {
   int corrupt_offset = std::get<1>(GetParam());
   int wal_file_id = std::get<2>(GetParam());  // WAL file
   // WAL compression type
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<3>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<3>(GetParam());
 
   // Fill data for testing
   Options options = CurrentOptions();
@@ -2200,7 +2215,8 @@ TEST_P(DBWALTestWithParamsVaryingRecoveryMode,
   int wal_file_id = std::get<2>(GetParam());  // WAL file
   WALRecoveryMode recovery_mode = std::get<3>(GetParam());
   // WAL compression type
-  rocksdb_rs::compression_type::CompressionType compression_type = std::get<4>(GetParam());
+  rocksdb_rs::compression_type::CompressionType compression_type =
+      std::get<4>(GetParam());
 
   options.wal_recovery_mode = recovery_mode;
   options.wal_compression = compression_type;
@@ -2397,7 +2413,8 @@ TEST_F(DBWALTest, DISABLED_TruncateLastLogAfterRecoverWALEmpty) {
     uint64_t number;
     rocksdb_rs::types::FileType type;
     if (ParseFileName(fname, &number, &type, nullptr)) {
-      if (type == rocksdb_rs::types::FileType::kWalFile && number > last_log_num) {
+      if (type == rocksdb_rs::types::FileType::kWalFile &&
+          number > last_log_num) {
         last_log = fname;
       }
     }
@@ -2505,10 +2522,12 @@ TEST_F(DBWALTest, WalInManifestButNotInSortedWals) {
                  bool* _wals_go_missing_flag)
         : FileSystemWrapper(t), wals_go_missing_flag(_wals_go_missing_flag) {}
     bool* wals_go_missing_flag;
-    rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir, const IOOptions& io_opts,
-                         std::vector<std::string>* r,
-                         IODebugContext* dbg) override {
-      rocksdb_rs::io_status::IOStatus s = target_->GetChildren(dir, io_opts, r, dbg);
+    rocksdb_rs::io_status::IOStatus GetChildren(const std::string& dir,
+                                                const IOOptions& io_opts,
+                                                std::vector<std::string>* r,
+                                                IODebugContext* dbg) override {
+      rocksdb_rs::io_status::IOStatus s =
+          target_->GetChildren(dir, io_opts, r, dbg);
       if (s.ok() && *wals_go_missing_flag) {
         for (size_t i = 0; i < r->size();) {
           if (EndsWith(r->at(i), ".log")) {
@@ -2546,7 +2565,6 @@ TEST_F(DBWALTest, WalInManifestButNotInSortedWals) {
   Close();
 }
 
-
 TEST_F(DBWALTest, WalTermTest) {
   Options options = CurrentOptions();
   options.env = env_;
@@ -2572,7 +2590,8 @@ TEST_F(DBWALTest, WalTermTest) {
 }
 
 TEST_F(DBWALTest, GetCompressedWalsAfterSync) {
-  if (db_->GetOptions().wal_compression == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+  if (db_->GetOptions().wal_compression ==
+      rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     ROCKSDB_GTEST_BYPASS("stream compression not present");
     return;
   }
@@ -2585,7 +2604,8 @@ TEST_F(DBWALTest, GetCompressedWalsAfterSync) {
   // Enable WAL compression so that the newly-created WAL will be non-empty
   // after DB open, even if point-in-time WAL recovery encounters no
   // corruption.
-  options.wal_compression = rocksdb_rs::compression_type::CompressionType::kZSTD;
+  options.wal_compression =
+      rocksdb_rs::compression_type::CompressionType::kZSTD;
   DestroyAndReopen(options);
 
   // Write something to memtable and WAL so that log_empty_ will be false after
@@ -2621,7 +2641,8 @@ TEST_F(DBWALTest, EmptyWalReopenTest) {
     for (const auto& file : files) {
       uint64_t number = 0;
       rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kWalFile;
-      if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
+      if (ParseFileName(file, &number, &type) &&
+          type == rocksdb_rs::types::FileType::kWalFile) {
         num_wal_files++;
       }
     }

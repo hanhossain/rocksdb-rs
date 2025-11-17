@@ -51,7 +51,8 @@ class GenerateLevelFilesBriefTest : public testing::Test {
         largest_seq, /* marked_for_compact */ false, Temperature::kUnknown,
         kInvalidBlobFileNumber, kUnknownOldestAncesterTime,
         kUnknownFileCreationTime, kUnknownEpochNumber, kUnknownFileChecksum,
-        kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+        kUnknownFileChecksumFuncName,
+        rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
         /* user_defined_timestamps_persisted */ true);
     files_.push_back(f);
   }
@@ -164,7 +165,8 @@ class VersionStorageInfoTestBase : public testing::Test {
         Temperature::kUnknown, oldest_blob_file_number,
         kUnknownOldestAncesterTime, kUnknownFileCreationTime,
         kUnknownEpochNumber, kUnknownFileChecksum, kUnknownFileChecksumFuncName,
-        rocksdb_rs::unique_id::UniqueId64x2_null(), compensated_range_deletion_size, 0,
+        rocksdb_rs::unique_id::UniqueId64x2_null(),
+        compensated_range_deletion_size, 0,
         /* user_defined_timestamps_persisted */ true);
     vstorage_.AddFile(level, f);
   }
@@ -1247,11 +1249,14 @@ class VersionSetTestBase {
     *last_seqno = last_seq;
     num_initial_edits_ = static_cast<int>(new_cfs.size() + 1);
     std::unique_ptr<WritableFileWriter> file_writer;
-    const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
+    const std::string manifest =
+        static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
-    rocksdb_rs::status::Status s = WritableFileWriter::Create(
-        fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
-        nullptr).status();
+    rocksdb_rs::status::Status s =
+        WritableFileWriter::Create(fs, manifest,
+                                   fs->OptimizeForManifestWrite(env_options_),
+                                   &file_writer, nullptr)
+            .status();
     ASSERT_OK(s);
     {
       log_writer->reset(new log::Writer(std::move(file_writer), 0, false));
@@ -1281,7 +1286,8 @@ class VersionSetTestBase {
     PrepareManifest(&column_families_, &last_seqno, &log_writer);
     log_writer.reset();
     // Make "CURRENT" file point to the new manifest file.
-    rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
+    rocksdb_rs::status::Status s =
+        SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
     ASSERT_OK(s);
 
     EXPECT_OK(versions_->Recover(column_families_, false));
@@ -1427,8 +1433,8 @@ TEST_F(VersionSetTest, SameColumnFamilyGroupCommit) {
       });
   SyncPoint::GetInstance()->EnableProcessing();
   mutex_.Lock();
-  rocksdb_rs::status::Status s = versions_->LogAndApply(cfds, all_mutable_cf_options, read_options,
-                                    edit_lists, &mutex_, nullptr);
+  rocksdb_rs::status::Status s = versions_->LogAndApply(
+      cfds, all_mutable_cf_options, read_options, edit_lists, &mutex_, nullptr);
   mutex_.Unlock();
   EXPECT_OK(s);
   EXPECT_EQ(kGroupSize - 1, count);
@@ -2695,7 +2701,8 @@ TEST_P(VersionSetTestDropOneCF, HandleDroppedColumnFamilyInAtomicGroup) {
   SequenceNumber last_seqno;
   std::unique_ptr<log::Writer> log_writer;
   PrepareManifest(&column_families, &last_seqno, &log_writer);
-  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
+  rocksdb_rs::status::Status s =
+      SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
   ASSERT_OK(s);
 
   EXPECT_OK(versions_->Recover(column_families, false /* read_only */));
@@ -2794,12 +2801,15 @@ class EmptyDefaultCfNewManifest : public VersionSetTestBase,
     assert(log_writer != nullptr);
     VersionEdit new_db;
     new_db.SetLogNumber(0);
-    const std::string manifest_path = static_cast<std::string>(DescriptorFileName(dbname_, 1));
+    const std::string manifest_path =
+        static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
-    rocksdb_rs::status::Status s = WritableFileWriter::Create(
-        fs, manifest_path, fs->OptimizeForManifestWrite(env_options_),
-        &file_writer, nullptr).status();
+    rocksdb_rs::status::Status s =
+        WritableFileWriter::Create(fs, manifest_path,
+                                   fs->OptimizeForManifestWrite(env_options_),
+                                   &file_writer, nullptr)
+            .status();
     ASSERT_OK(s);
     log_writer->reset(new log::Writer(std::move(file_writer), 0, true));
     std::string record;
@@ -2829,7 +2839,8 @@ TEST_F(EmptyDefaultCfNewManifest, Recover) {
   PrepareManifest(nullptr, nullptr, &log_writer_);
   log_writer_.reset();
   rocksdb_rs::status::Status s =
-      SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
+      SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr)
+          .status();
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -2867,12 +2878,15 @@ class VersionSetTestEmptyDb
       impl->GetDbIdentityFromIdentityFile(&db_id);
       new_db.SetDBId(db_id);
     }
-    const std::string manifest_path = static_cast<std::string>(DescriptorFileName(dbname_, 1));
+    const std::string manifest_path =
+        static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
-    rocksdb_rs::status::Status s = WritableFileWriter::Create(
-        fs, manifest_path, fs->OptimizeForManifestWrite(env_options_),
-        &file_writer, nullptr).status();
+    rocksdb_rs::status::Status s =
+        WritableFileWriter::Create(fs, manifest_path,
+                                   fs->OptimizeForManifestWrite(env_options_),
+                                   &file_writer, nullptr)
+            .status();
     ASSERT_OK(s);
     {
       log_writer->reset(new log::Writer(std::move(file_writer), 0, false));
@@ -2893,7 +2907,8 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest0) {
   PrepareManifest(nullptr, nullptr, &log_writer_);
   log_writer_.reset();
   rocksdb_rs::status::Status s =
-      SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
+      SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr)
+          .status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -2937,7 +2952,8 @@ TEST_P(VersionSetTestEmptyDb, OpenFromIncompleteManifest1) {
     ASSERT_OK(s);
   }
   log_writer_.reset();
-  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
+  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr)
+          .status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -2984,7 +3000,8 @@ TEST_P(VersionSetTestEmptyDb, OpenFromInCompleteManifest2) {
     ASSERT_OK(s);
   }
   log_writer_.reset();
-  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
+  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr)
+          .status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -3042,7 +3059,8 @@ TEST_P(VersionSetTestEmptyDb, OpenManifestWithUnknownCF) {
     ASSERT_OK(s);
   }
   log_writer_.reset();
-  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
+  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr)
+          .status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -3099,7 +3117,8 @@ TEST_P(VersionSetTestEmptyDb, OpenCompleteManifest) {
     ASSERT_OK(s);
   }
   log_writer_.reset();
-  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr).status();
+  s = SetCurrentFile(fs_.get(), dbname_, 1, /*directory_to_fsync=*/nullptr)
+          .status();
   ASSERT_OK(s);
 
   std::string manifest_path;
@@ -3180,12 +3199,15 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     assert(column_families != nullptr);
     assert(last_seqno != nullptr);
     assert(log_writer != nullptr);
-    const std::string manifest = static_cast<std::string>(DescriptorFileName(dbname_, 1));
+    const std::string manifest =
+        static_cast<std::string>(DescriptorFileName(dbname_, 1));
     const auto& fs = env_->GetFileSystem();
     std::unique_ptr<WritableFileWriter> file_writer;
-    rocksdb_rs::status::Status s = WritableFileWriter::Create(
-        fs, manifest, fs->OptimizeForManifestWrite(env_options_), &file_writer,
-        nullptr).status();
+    rocksdb_rs::status::Status s =
+        WritableFileWriter::Create(fs, manifest,
+                                   fs->OptimizeForManifestWrite(env_options_),
+                                   &file_writer, nullptr)
+            .status();
     ASSERT_OK(s);
     log_writer->reset(new log::Writer(std::move(file_writer), 0, false));
     VersionEdit new_db;
@@ -3270,9 +3292,11 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
     assert(file_metas != nullptr);
     for (const auto& info : file_infos) {
       uint64_t file_num = info.file_number;
-      std::string fname = static_cast<std::string>(MakeTableFileName(dbname_, file_num));
+      std::string fname =
+          static_cast<std::string>(MakeTableFileName(dbname_, file_num));
       std::unique_ptr<FSWritableFile> file;
-      rocksdb_rs::status::Status s = fs_->NewWritableFile(fname, FileOptions(), &file, nullptr).status();
+      rocksdb_rs::status::Status s =
+          fs_->NewWritableFile(fname, FileOptions(), &file, nullptr).status();
       ASSERT_OK(s);
       std::unique_ptr<WritableFileWriter> fwriter(new WritableFileWriter(
           std::move(file), fname, FileOptions(), env_->GetSystemClock().get()));
@@ -3281,7 +3305,8 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       std::unique_ptr<TableBuilder> builder(table_factory_->NewTableBuilder(
           TableBuilderOptions(
               immutable_options_, mutable_cf_options_, *internal_comparator_,
-              &int_tbl_prop_collector_factories, rocksdb_rs::compression_type::CompressionType::kNoCompression,
+              &int_tbl_prop_collector_factories,
+              rocksdb_rs::compression_type::CompressionType::kNoCompression,
               CompressionOptions(),
               TablePropertiesCollectorFactory::Context::kUnknownColumnFamily,
               info.column_family, info.level),
@@ -3294,11 +3319,12 @@ class VersionSetTestMissingFiles : public VersionSetTestBase,
       s = fs_->GetFileSize(fname, IOOptions(), &file_size, nullptr).status();
       ASSERT_OK(s);
       ASSERT_NE(0, file_size);
-      file_metas->emplace_back(
-          file_num, /*file_path_id=*/0, file_size, ikey, ikey, 0, 0, false,
-          Temperature::kUnknown, 0, 0, 0, info.epoch_number,
-          kUnknownFileChecksum, kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
-          0, 0, /* user_defined_timestamps_persisted */ true);
+      file_metas->emplace_back(file_num, /*file_path_id=*/0, file_size, ikey,
+                               ikey, 0, 0, false, Temperature::kUnknown, 0, 0,
+                               0, info.epoch_number, kUnknownFileChecksum,
+                               kUnknownFileChecksumFuncName,
+                               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+                               /* user_defined_timestamps_persisted */ true);
     }
   }
 
@@ -3355,7 +3381,8 @@ TEST_F(VersionSetTestMissingFiles, ManifestFarBehindSst) {
         file_num, /*file_path_id=*/0, /*file_size=*/12, smallest_ikey,
         largest_ikey, 0, 0, false, Temperature::kUnknown, 0, 0, 0,
         file_num /* epoch_number */, kUnknownFileChecksum,
-        kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+        kUnknownFileChecksumFuncName,
+        rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
         /* user_defined_timestamps_persisted */ true);
     added_files.emplace_back(0, meta);
   }
@@ -3366,7 +3393,8 @@ TEST_F(VersionSetTestMissingFiles, ManifestFarBehindSst) {
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, std::vector<std::pair<int, FileMetaData>>(), deleted_files);
   log_writer_.reset();
-  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
+  rocksdb_rs::status::Status s =
+      SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -3417,14 +3445,16 @@ TEST_F(VersionSetTestMissingFiles, ManifestAheadofSst) {
         file_num, /*file_path_id=*/0, /*file_size=*/12, smallest_ikey,
         largest_ikey, 0, 0, false, Temperature::kUnknown, 0, 0, 0,
         file_num /* epoch_number */, kUnknownFileChecksum,
-        kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
+        kUnknownFileChecksumFuncName,
+        rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0,
         /* user_defined_timestamps_persisted */ true);
     added_files.emplace_back(0, meta);
   }
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, added_files, std::vector<std::pair<int, uint64_t>>());
   log_writer_.reset();
-  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
+  rocksdb_rs::status::Status s =
+      SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -3478,7 +3508,8 @@ TEST_F(VersionSetTestMissingFiles, NoFileMissing) {
   WriteFileAdditionAndDeletionToManifest(
       /*cf=*/0, std::vector<std::pair<int, FileMetaData>>(), deleted_files);
   log_writer_.reset();
-  rocksdb_rs::status::Status s = SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
+  rocksdb_rs::status::Status s =
+      SetCurrentFile(fs_.get(), dbname_, 1, nullptr).status();
   ASSERT_OK(s);
   std::string manifest_path;
   VerifyManifest(&manifest_path);
@@ -3555,14 +3586,18 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   BlockBasedTableOptions table_options;
   CacheEntryRoleOptions::Decision charge_file_metadata = GetParam();
   table_options.cache_usage_options.options_overrides.insert(
-      {rocksdb_rs::cache::CacheEntryRole::kFileMetadata, {/*.charged = */ charge_file_metadata}});
-  std::shared_ptr<TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>
-      file_metadata_charge_only_cache = std::make_shared<
-          TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>(
-          NewLRUCache(
-              4 * CacheReservationManagerImpl<
-                      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::GetDummyEntrySize(),
-              0 /* num_shard_bits */, true /* strict_capacity_limit */));
+      {rocksdb_rs::cache::CacheEntryRole::kFileMetadata,
+       {/*.charged = */ charge_file_metadata}});
+  std::shared_ptr<TargetCacheChargeTrackingCache<
+      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>
+      file_metadata_charge_only_cache =
+          std::make_shared<TargetCacheChargeTrackingCache<
+              rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>(
+              NewLRUCache(
+                  4 * CacheReservationManagerImpl<
+                          rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::
+                          GetDummyEntrySize(),
+                  0 /* num_shard_bits */, true /* strict_capacity_limit */));
   table_options.block_cache = file_metadata_charge_only_cache;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   options.create_if_missing = true;
@@ -3581,7 +3616,8 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   if (charge_file_metadata == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_EQ(file_metadata_charge_only_cache->GetCacheCharge(),
               1 * CacheReservationManagerImpl<
-                      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::GetDummyEntrySize());
+                      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::
+                      GetDummyEntrySize());
 
   } else {
     EXPECT_EQ(file_metadata_charge_only_cache->GetCacheCharge(), 0);
@@ -3598,7 +3634,8 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   if (charge_file_metadata == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_EQ(file_metadata_charge_only_cache->GetCacheCharge(),
               2 * CacheReservationManagerImpl<
-                      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::GetDummyEntrySize());
+                      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::
+                      GetDummyEntrySize());
   } else {
     EXPECT_EQ(file_metadata_charge_only_cache->GetCacheCharge(), 0);
   }
@@ -3618,7 +3655,8 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   if (charge_file_metadata == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_EQ(file_metadata_charge_only_cache->GetCacheCharge(),
               1 * CacheReservationManagerImpl<
-                      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::GetDummyEntrySize());
+                      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::
+                      GetDummyEntrySize());
   } else {
     EXPECT_EQ(file_metadata_charge_only_cache->GetCacheCharge(), 0);
   }
@@ -3627,17 +3665,21 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   // Destroying the db will delete the remaining 1 new file metadata
   // This results in no cache reservation for file metadata.
   Destroy(options);
-  EXPECT_EQ(file_metadata_charge_only_cache->GetCacheCharge(),
-            0 * CacheReservationManagerImpl<
-                    rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::GetDummyEntrySize());
+  EXPECT_EQ(
+      file_metadata_charge_only_cache->GetCacheCharge(),
+      0 * CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::
+                                          kFileMetadata>::GetDummyEntrySize());
 
   // Reopen the db with a smaller cache in order to test failure in allocating
   // file metadata due to memory limit based on cache capacity
-  file_metadata_charge_only_cache = std::make_shared<
-      TargetCacheChargeTrackingCache<rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>(
-      NewLRUCache(1 * CacheReservationManagerImpl<
-                          rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::GetDummyEntrySize(),
-                  0 /* num_shard_bits */, true /* strict_capacity_limit */));
+  file_metadata_charge_only_cache =
+      std::make_shared<TargetCacheChargeTrackingCache<
+          rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>(
+          NewLRUCache(
+              1 * CacheReservationManagerImpl<
+                      rocksdb_rs::cache::CacheEntryRole::kFileMetadata>::
+                      GetDummyEntrySize(),
+              0 /* num_shard_bits */, true /* strict_capacity_limit */));
   table_options.block_cache = file_metadata_charge_only_cache;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   Reopen(options);
@@ -3647,7 +3689,9 @@ TEST_P(ChargeFileMetadataTestWithParam, Basic) {
   if (charge_file_metadata == CacheEntryRoleOptions::Decision::kEnabled) {
     EXPECT_TRUE(s.IsMemoryLimit());
     EXPECT_TRUE(s.ToString()->find(
-      static_cast<std::string>(CacheEntryRole_ToCamelString(rocksdb_rs::cache::CacheEntryRole::kFileMetadata))) != std::string::npos);
+                    static_cast<std::string>(CacheEntryRole_ToCamelString(
+                        rocksdb_rs::cache::CacheEntryRole::kFileMetadata))) !=
+                std::string::npos);
     EXPECT_TRUE(s.ToString()->find("memory limit based on cache capacity") !=
                 std::string::npos);
   } else {

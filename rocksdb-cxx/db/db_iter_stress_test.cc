@@ -83,7 +83,10 @@ struct StressTestIterator : public InternalIterator {
   rocksdb_rs::status::Status status_;
 
   StressTestIterator(Data* _data, Random64* _rnd, const Comparator* _cmp)
-      : data(_data), rnd(_rnd), cmp(_cmp), status_(rocksdb_rs::status::Status_new()) {}
+      : data(_data),
+        rnd(_rnd),
+        cmp(_cmp),
+        status_(rocksdb_rs::status::Status_new()) {}
 
   bool Valid() const override {
     if (iter >= 0 && iter < (int)data->entries.size()) {

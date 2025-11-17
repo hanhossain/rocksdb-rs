@@ -13,9 +13,8 @@
 #include <iterator>
 #include <string>
 
-#include "rocksdb/types.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/types.h"
 
 namespace rocksdb {
 

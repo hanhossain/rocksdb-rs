@@ -52,16 +52,18 @@ TEST(BlobCountingIteratorTest, CountBlobs) {
   constexpr uint64_t first_size = 2000;
 
   std::string first_blob_index;
-  BlobIndex::EncodeBlob(&first_blob_index, first_blob_file_number, first_offset,
-                        first_size, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  BlobIndex::EncodeBlob(
+      &first_blob_index, first_blob_file_number, first_offset, first_size,
+      rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
   constexpr uint64_t second_blob_file_number = 6;
   constexpr uint64_t second_offset = 2000;
   constexpr uint64_t second_size = 4000;
 
   std::string second_blob_index;
-  BlobIndex::EncodeBlob(&second_blob_index, second_blob_file_number,
-                        second_offset, second_size, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+  BlobIndex::EncodeBlob(
+      &second_blob_index, second_blob_file_number, second_offset, second_size,
+      rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
   const std::vector<std::string> values{first_blob_index, second_blob_index,
                                         "raw_value"};

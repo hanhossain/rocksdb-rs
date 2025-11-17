@@ -9,11 +9,10 @@
 #include <string>
 
 #include "db/blob/blob_log_format.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/slice.h"
 #include "rocksdb/statistics.h"
 #include "rocksdb/types.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -44,18 +43,24 @@ class BlobLogWriter {
   static void ConstructBlobHeader(std::string* buf, const Slice& key,
                                   const Slice& val, uint64_t expiration);
 
-  rocksdb_rs::status::Status AddRecord(const Slice& key, const Slice& val, uint64_t* key_offset,
-                   uint64_t* blob_offset);
+  rocksdb_rs::status::Status AddRecord(const Slice& key, const Slice& val,
+                                       uint64_t* key_offset,
+                                       uint64_t* blob_offset);
 
-  rocksdb_rs::status::Status AddRecord(const Slice& key, const Slice& val, uint64_t expiration,
-                   uint64_t* key_offset, uint64_t* blob_offset);
+  rocksdb_rs::status::Status AddRecord(const Slice& key, const Slice& val,
+                                       uint64_t expiration,
+                                       uint64_t* key_offset,
+                                       uint64_t* blob_offset);
 
-  rocksdb_rs::status::Status EmitPhysicalRecord(const std::string& headerbuf, const Slice& key,
-                            const Slice& val, uint64_t* key_offset,
-                            uint64_t* blob_offset);
+  rocksdb_rs::status::Status EmitPhysicalRecord(const std::string& headerbuf,
+                                                const Slice& key,
+                                                const Slice& val,
+                                                uint64_t* key_offset,
+                                                uint64_t* blob_offset);
 
-  rocksdb_rs::status::Status AppendFooter(BlobLogFooter& footer, std::string* checksum_method,
-                      std::string* checksum_value);
+  rocksdb_rs::status::Status AppendFooter(BlobLogFooter& footer,
+                                          std::string* checksum_method,
+                                          std::string* checksum_value);
 
   rocksdb_rs::status::Status WriteHeader(BlobLogHeader& header);
 

@@ -77,7 +77,8 @@ void DBSecondaryTestBase::OpenSecondary(const Options& options) {
   ASSERT_OK(TryOpenSecondary(options));
 }
 
-rocksdb_rs::status::Status DBSecondaryTestBase::TryOpenSecondary(const Options& options) {
+rocksdb_rs::status::Status DBSecondaryTestBase::TryOpenSecondary(
+    const Options& options) {
   rocksdb_rs::status::Status s =
       DB::OpenAsSecondary(options, dbname_, secondary_path_, &db_secondary_);
   return s;
@@ -90,8 +91,9 @@ void DBSecondaryTestBase::OpenSecondaryWithColumnFamilies(
   for (const auto& cf_name : column_families) {
     cf_descs.emplace_back(cf_name, options);
   }
-  rocksdb_rs::status::Status s = DB::OpenAsSecondary(options, dbname_, secondary_path_, cf_descs,
-                                 &handles_secondary_, &db_secondary_);
+  rocksdb_rs::status::Status s =
+      DB::OpenAsSecondary(options, dbname_, secondary_path_, cf_descs,
+                          &handles_secondary_, &db_secondary_);
   ASSERT_OK(s);
 }
 
@@ -306,8 +308,9 @@ TEST_F(DBSecondaryTest, InternalCompactionMultiLevels) {
   }
   OpenSecondary(options);
   cfh = db_secondary_->DefaultColumnFamily();
-  rocksdb_rs::status::Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
-      OpenAndCompactOptions(), cfh, input2, &result);
+  rocksdb_rs::status::Status s =
+      db_secondary_full()->TEST_CompactWithoutInstallation(
+          OpenAndCompactOptions(), cfh, input2, &result);
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_OK(result.status);
 
@@ -353,8 +356,9 @@ TEST_F(DBSecondaryTest, InternalCompactionCompactedFiles) {
   auto cfh = db_secondary_->DefaultColumnFamily();
 
   CompactionServiceResult result;
-  rocksdb_rs::status::Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
-      OpenAndCompactOptions(), cfh, input, &result);
+  rocksdb_rs::status::Status s =
+      db_secondary_full()->TEST_CompactWithoutInstallation(
+          OpenAndCompactOptions(), cfh, input, &result);
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_OK(result.status);
 }
@@ -391,8 +395,9 @@ TEST_F(DBSecondaryTest, InternalCompactionMissingFiles) {
   auto cfh = db_secondary_->DefaultColumnFamily();
 
   CompactionServiceResult result;
-  rocksdb_rs::status::Status s = db_secondary_full()->TEST_CompactWithoutInstallation(
-      OpenAndCompactOptions(), cfh, input, &result);
+  rocksdb_rs::status::Status s =
+      db_secondary_full()->TEST_CompactWithoutInstallation(
+          OpenAndCompactOptions(), cfh, input, &result);
   ASSERT_TRUE(s.IsInvalidArgument());
   ASSERT_OK(result.status);
 
@@ -464,9 +469,9 @@ class TraceFileEnv : public EnvWrapper {
   static const char* kClassName() { return "TraceFileEnv"; }
   const char* Name() const override { return kClassName(); }
 
-  rocksdb_rs::status::Status NewRandomAccessFile(const std::string& f,
-                             std::unique_ptr<RandomAccessFile>* r,
-                             const EnvOptions& env_options) override {
+  rocksdb_rs::status::Status NewRandomAccessFile(
+      const std::string& f, std::unique_ptr<RandomAccessFile>* r,
+      const EnvOptions& env_options) override {
     class TracedRandomAccessFile : public RandomAccessFile {
      public:
       TracedRandomAccessFile(std::unique_ptr<RandomAccessFile>&& target,
@@ -476,7 +481,7 @@ class TraceFileEnv : public EnvWrapper {
         files_closed_.fetch_add(1, std::memory_order_relaxed);
       }
       rocksdb_rs::status::Status Read(uint64_t offset, size_t n, Slice* result,
-                  char* scratch) const override {
+                                      char* scratch) const override {
         return target_->Read(offset, n, result, scratch);
       }
 
@@ -484,7 +489,8 @@ class TraceFileEnv : public EnvWrapper {
       std::unique_ptr<RandomAccessFile> target_;
       std::atomic<int>& files_closed_;
     };
-    rocksdb_rs::status::Status s = target()->NewRandomAccessFile(f, r, env_options);
+    rocksdb_rs::status::Status s =
+        target()->NewRandomAccessFile(f, r, env_options);
     if (s.ok()) {
       r->reset(new TracedRandomAccessFile(std::move(*r), files_closed_));
     }
@@ -539,7 +545,8 @@ TEST_F(DBSecondaryTest, SecondaryCloseFiles) {
   ASSERT_OK(db_secondary_->TryCatchUpWithPrimary());
   ASSERT_EQ(2, static_cast<TraceFileEnv*>(traced_env.get())->files_closed());
 
-  rocksdb_rs::status::Status s = db_secondary_->SetDBOptions({{"max_open_files", "-1"}});
+  rocksdb_rs::status::Status s =
+      db_secondary_->SetDBOptions({{"max_open_files", "-1"}});
   ASSERT_TRUE(s.IsNotSupported());
   CloseSecondary();
 }
@@ -689,8 +696,9 @@ TEST_F(DBSecondaryTest, OpenWithNonExistColumnFamily) {
   cf_descs.emplace_back(kDefaultColumnFamilyName, options1);
   cf_descs.emplace_back("pikachu", options1);
   cf_descs.emplace_back("eevee", options1);
-  rocksdb_rs::status::Status s = DB::OpenAsSecondary(options1, dbname_, secondary_path_, cf_descs,
-                                 &handles_secondary_, &db_secondary_);
+  rocksdb_rs::status::Status s =
+      DB::OpenAsSecondary(options1, dbname_, secondary_path_, cf_descs,
+                          &handles_secondary_, &db_secondary_);
   ASSERT_NOK(s);
 }
 
@@ -1304,8 +1312,8 @@ TEST_F(DBSecondaryTestWithTimestamp, IteratorAndGetReadTimestampSizeMismatch) {
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
-                        "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(
+        write_opts, Key1(key), write_timestamp, "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -1347,7 +1355,8 @@ TEST_F(DBSecondaryTestWithTimestamp,
   DestroyAndReopen(options);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
+    rocksdb_rs::status::Status s =
+        db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -1392,8 +1401,8 @@ TEST_F(DBSecondaryTestWithTimestamp,
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
-                        "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(
+        write_opts, Key1(key), write_timestamp, "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -1438,8 +1447,9 @@ TEST_F(DBSecondaryTestWithTimestamp, IteratorAndGet) {
   for (size_t i = 0; i < write_timestamps.size(); ++i) {
     WriteOptions write_opts;
     for (uint64_t key = start_keys[i]; key <= kMaxKey; ++key) {
-      rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamps[i],
-                          "value" + std::to_string(i));
+      rocksdb_rs::status::Status s =
+          db_->Put(write_opts, Key1(key), write_timestamps[i],
+                   "value" + std::to_string(i));
       ASSERT_OK(s);
     }
   }
@@ -1536,8 +1546,8 @@ TEST_F(DBSecondaryTestWithTimestamp, IteratorsReadTimestampSizeMismatch) {
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
-                        "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(
+        write_opts, Key1(key), write_timestamp, "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -1573,7 +1583,8 @@ TEST_F(DBSecondaryTestWithTimestamp,
   DestroyAndReopen(options);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
+    rocksdb_rs::status::Status s =
+        db_->Put(write_opts, Key1(key), "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -1612,8 +1623,8 @@ TEST_F(DBSecondaryTestWithTimestamp,
   const std::string write_timestamp = Timestamp(1, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
-                        "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(
+        write_opts, Key1(key), write_timestamp, "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 
@@ -1649,8 +1660,8 @@ TEST_F(DBSecondaryTestWithTimestamp, Iterators) {
   const std::string read_timestamp = Timestamp(2, 0);
   WriteOptions write_opts;
   for (uint64_t key = 0; key <= kMaxKey; ++key) {
-    rocksdb_rs::status::Status s = db_->Put(write_opts, Key1(key), write_timestamp,
-                        "value" + std::to_string(key));
+    rocksdb_rs::status::Status s = db_->Put(
+        write_opts, Key1(key), write_timestamp, "value" + std::to_string(key));
     ASSERT_OK(s);
   }
 

@@ -106,7 +106,8 @@ int MemTableList::NumFlushed() const {
 // Operands stores the list of merge operations to apply, so far.
 bool MemTableListVersion::Get(const LookupKey& key, std::string* value,
                               PinnableWideColumns* columns,
-                              std::string* timestamp, rocksdb_rs::status::Status* s,
+                              std::string* timestamp,
+                              rocksdb_rs::status::Status* s,
                               MergeContext* merge_context,
                               SequenceNumber* max_covering_tombstone_seq,
                               SequenceNumber* seq, const ReadOptions& read_opts,
@@ -129,8 +130,9 @@ void MemTableListVersion::MultiGet(const ReadOptions& read_options,
 }
 
 bool MemTableListVersion::GetMergeOperands(
-    const LookupKey& key, rocksdb_rs::status::Status* s, MergeContext* merge_context,
-    SequenceNumber* max_covering_tombstone_seq, const ReadOptions& read_opts) {
+    const LookupKey& key, rocksdb_rs::status::Status* s,
+    MergeContext* merge_context, SequenceNumber* max_covering_tombstone_seq,
+    const ReadOptions& read_opts) {
   for (MemTable* memtable : memlist_) {
     bool done = memtable->Get(
         key, /*value=*/nullptr, /*columns=*/nullptr, /*timestamp=*/nullptr, s,
@@ -145,9 +147,9 @@ bool MemTableListVersion::GetMergeOperands(
 
 bool MemTableListVersion::GetFromHistory(
     const LookupKey& key, std::string* value, PinnableWideColumns* columns,
-    std::string* timestamp, rocksdb_rs::status::Status* s, MergeContext* merge_context,
-    SequenceNumber* max_covering_tombstone_seq, SequenceNumber* seq,
-    const ReadOptions& read_opts, bool* is_blob_index) {
+    std::string* timestamp, rocksdb_rs::status::Status* s,
+    MergeContext* merge_context, SequenceNumber* max_covering_tombstone_seq,
+    SequenceNumber* seq, const ReadOptions& read_opts, bool* is_blob_index) {
   return GetFromList(&memlist_history_, key, value, columns, timestamp, s,
                      merge_context, max_covering_tombstone_seq, seq, read_opts,
                      nullptr /*read_callback*/, is_blob_index);
@@ -155,10 +157,10 @@ bool MemTableListVersion::GetFromHistory(
 
 bool MemTableListVersion::GetFromList(
     std::list<MemTable*>* list, const LookupKey& key, std::string* value,
-    PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* s,
-    MergeContext* merge_context, SequenceNumber* max_covering_tombstone_seq,
-    SequenceNumber* seq, const ReadOptions& read_opts, ReadCallback* callback,
-    bool* is_blob_index) {
+    PinnableWideColumns* columns, std::string* timestamp,
+    rocksdb_rs::status::Status* s, MergeContext* merge_context,
+    SequenceNumber* max_covering_tombstone_seq, SequenceNumber* seq,
+    const ReadOptions& read_opts, ReadCallback* callback, bool* is_blob_index) {
   *seq = kMaxSequenceNumber;
 
   for (auto& memtable : *list) {
@@ -573,11 +575,12 @@ rocksdb_rs::status::Status MemTableList::TryInstallMemtableFlushResults(
       }
       edit_list.push_back(&wal_deletion);
 
-      const auto manifest_write_cb = [this, cfd, batch_count, log_buffer,
-                                      to_delete, mu](const rocksdb_rs::status::Status& status) {
-        RemoveMemTablesOrRestoreFlags(status, cfd, batch_count, log_buffer,
-                                      to_delete, mu);
-      };
+      const auto manifest_write_cb =
+          [this, cfd, batch_count, log_buffer, to_delete,
+           mu](const rocksdb_rs::status::Status& status) {
+            RemoveMemTablesOrRestoreFlags(status, cfd, batch_count, log_buffer,
+                                          to_delete, mu);
+          };
       if (write_edits) {
         // this can release and reacquire the mutex.
         s = vset->LogAndApply(cfd, mutable_cf_options, read_options, edit_list,
@@ -685,8 +688,8 @@ void MemTableList::InstallNewVersion() {
 }
 
 void MemTableList::RemoveMemTablesOrRestoreFlags(
-    const rocksdb_rs::status::Status& s, ColumnFamilyData* cfd, size_t batch_count,
-    LogBuffer* log_buffer, autovector<MemTable*>* to_delete,
+    const rocksdb_rs::status::Status& s, ColumnFamilyData* cfd,
+    size_t batch_count, LogBuffer* log_buffer, autovector<MemTable*>* to_delete,
     InstrumentedMutex* mu) {
   assert(mu);
   mu->AssertHeld();

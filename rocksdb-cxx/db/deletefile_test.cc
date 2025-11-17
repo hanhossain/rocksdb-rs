@@ -7,7 +7,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-
 #include <stdlib.h>
 
 #include <map>
@@ -506,7 +505,8 @@ TEST_F(DeleteFileTest, DeleteLogFiles) {
   // Take the last log file which is expected to be alive and try to delete it
   // Should not succeed because live logs are not allowed to be deleted
   std::unique_ptr<LogFile> alive_log = std::move(logfiles.back());
-  ASSERT_EQ(alive_log->Type(), rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
+  ASSERT_EQ(alive_log->Type(),
+            rocksdb_rs::transaction_log::WalFileType::kAliveLogFile);
   ASSERT_OK(env_->FileExists(wal_dir_ + "/" + alive_log->PathName()));
   fprintf(stdout, "Deleting alive log file %s\n",
           alive_log->PathName().c_str());
@@ -524,7 +524,8 @@ TEST_F(DeleteFileTest, DeleteLogFiles) {
   ASSERT_OK(db_->GetSortedWalFiles(logfiles));
   ASSERT_GT(logfiles.size(), 0UL);
   std::unique_ptr<LogFile> archived_log = std::move(logfiles.front());
-  ASSERT_EQ(archived_log->Type(), rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile);
+  ASSERT_EQ(archived_log->Type(),
+            rocksdb_rs::transaction_log::WalFileType::kArchivedLogFile);
   ASSERT_OK(env_->FileExists(wal_dir_ + "/" + archived_log->PathName()));
   fprintf(stdout, "Deleting archived log file %s\n",
           archived_log->PathName().c_str());
@@ -600,4 +601,3 @@ int main(int argc, char** argv) {
   RegisterCustomObjects(argc, argv);
   return RUN_ALL_TESTS();
 }
-

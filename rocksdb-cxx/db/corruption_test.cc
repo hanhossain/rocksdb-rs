@@ -7,8 +7,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include "rocksdb/options.h"
-
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -25,6 +23,7 @@
 #include "rocksdb/convenience.h"
 #include "rocksdb/db.h"
 #include "rocksdb/env.h"
+#include "rocksdb/options.h"
 #include "rocksdb/table.h"
 #include "rocksdb/utilities/transaction_db.h"
 #include "rocksdb/write_batch.h"
@@ -53,10 +52,9 @@ class ErrorFS : public FileSystemWrapper {
         num_writable_file_errors_(0) {}
   const char* Name() const override { return "ErrorEnv"; }
 
-  virtual rocksdb_rs::io_status::IOStatus NewWritableFile(const std::string& fname,
-                                   const FileOptions& opts,
-                                   std::unique_ptr<FSWritableFile>* result,
-                                   IODebugContext* dbg) override {
+  virtual rocksdb_rs::io_status::IOStatus NewWritableFile(
+      const std::string& fname, const FileOptions& opts,
+      std::unique_ptr<FSWritableFile>* result, IODebugContext* dbg) override {
     result->reset();
     if (writable_file_error_) {
       ++num_writable_file_errors_;
@@ -211,7 +209,8 @@ class CorruptionTest : public testing::Test {
     ASSERT_GE(max_expected, correct);
   }
 
-  void Corrupt(rocksdb_rs::types::FileType filetype, int offset, int bytes_to_corrupt) {
+  void Corrupt(rocksdb_rs::types::FileType filetype, int offset,
+               int bytes_to_corrupt) {
     // Pick file to corrupt
     std::vector<std::string> filenames;
     ASSERT_OK(env_->GetChildren(dbname_, &filenames));
@@ -229,7 +228,8 @@ class CorruptionTest : public testing::Test {
     ASSERT_TRUE(!fname.empty()) << static_cast<int>(filetype);
 
     ASSERT_OK(test::CorruptFile(env_.get(), fname, offset, bytes_to_corrupt,
-                                /*verify_checksum*/ filetype == rocksdb_rs::types::FileType::kTableFile));
+                                /*verify_checksum*/ filetype ==
+                                    rocksdb_rs::types::FileType::kTableFile));
   }
 
   // corrupts exactly one file at level `level`. if no file found at level,
@@ -286,14 +286,16 @@ class CorruptionTest : public testing::Test {
     rocksdb_rs::types::FileType type = rocksdb_rs::types::FileType::kWalFile;
     for (const auto& file : tmp_files) {
       uint64_t number = 0;
-      if (ParseFileName(file, &number, &type) && type == rocksdb_rs::types::FileType::kWalFile) {
+      if (ParseFileName(file, &number, &type) &&
+          type == rocksdb_rs::types::FileType::kWalFile) {
         file_nums.push_back(number);
       }
     }
     std::sort(file_nums.begin(), file_nums.end());
   }
 
-  void CorruptFileWithTruncation(rocksdb_rs::types::FileType file, uint64_t number,
+  void CorruptFileWithTruncation(rocksdb_rs::types::FileType file,
+                                 uint64_t number,
                                  uint64_t bytes_to_truncate = 0) {
     rust::String path;
     switch (file) {
@@ -330,8 +332,10 @@ TEST_F(CorruptionTest, Recovery) {
   // is not available for WAL though.
   CloseDb();
 #endif
-  Corrupt(rocksdb_rs::types::FileType::kWalFile, 19, 1);  // WriteBatch tag for first record
-  Corrupt(rocksdb_rs::types::FileType::kWalFile, log::kBlockSize + 1000, 1);  // Somewhere in second block
+  Corrupt(rocksdb_rs::types::FileType::kWalFile, 19,
+          1);  // WriteBatch tag for first record
+  Corrupt(rocksdb_rs::types::FileType::kWalFile, log::kBlockSize + 1000,
+          1);  // Somewhere in second block
   ASSERT_TRUE(!TryReopen().ok());
   options_.paranoid_checks = false;
   Reopen(&options_);
@@ -1078,7 +1082,8 @@ TEST_F(CorruptionTest, FlushKeyOrderCheck) {
         }
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
-  rocksdb_rs::status::Status s = static_cast_with_check<DBImpl>(db_)->TEST_FlushMemTable();
+  rocksdb_rs::status::Status s =
+      static_cast_with_check<DBImpl>(db_)->TEST_FlushMemTable();
   ASSERT_NOK(s);
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   rocksdb::SyncPoint::GetInstance()->ClearAllCallBacks();
@@ -1330,8 +1335,8 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecovery) {
 
       // Since  it's corrupting second last wal, below key is not found.
       v.clear();
-      ASSERT_TRUE(db_->Get(ReadOptions(), "key" + std::to_string(1), &v).eq(
-                rocksdb_rs::status::Status_NotFound()));
+      ASSERT_TRUE(db_->Get(ReadOptions(), "key" + std::to_string(1), &v)
+                      .eq(rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {
@@ -1382,7 +1387,8 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
   // Create cf test_cf_name.
   ColumnFamilyHandle* cfh = nullptr;
   const std::string test_cf_name = "test_cf";
-  rocksdb_rs::status::Status s = db_->CreateColumnFamily(options, test_cf_name, &cfh);
+  rocksdb_rs::status::Status s =
+      db_->CreateColumnFamily(options, test_cf_name, &cfh);
   ASSERT_OK(s);
   delete cfh;
   CloseDb();
@@ -1505,8 +1511,8 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
     {
       std::string v;
       // Key not visible since it's not committed.
-      ASSERT_TRUE(txn_db->Get(ReadOptions(), handles[1], "foo", &v).eq(
-                rocksdb_rs::status::Status_NotFound()));
+      ASSERT_TRUE(txn_db->Get(ReadOptions(), handles[1], "foo", &v)
+                      .eq(rocksdb_rs::status::Status_NotFound()));
 
       v.clear();
       ASSERT_OK(txn_db->Get(ReadOptions(), "key" + std::to_string(0), &v));
@@ -1514,11 +1520,11 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, TxnDbCrashDuringRecovery) {
 
       // Last WAL is corrupted which contains two keys below.
       v.clear();
-      ASSERT_TRUE(txn_db->Get(ReadOptions(), "key" + std::to_string(1), &v).eq(
-                rocksdb_rs::status::Status_NotFound()));
+      ASSERT_TRUE(txn_db->Get(ReadOptions(), "key" + std::to_string(1), &v)
+                      .eq(rocksdb_rs::status::Status_NotFound()));
       v.clear();
-      ASSERT_TRUE(txn_db->Get(ReadOptions(), handles[1], "foo1", &v).eq(
-                rocksdb_rs::status::Status_NotFound()));
+      ASSERT_TRUE(txn_db->Get(ReadOptions(), handles[1], "foo1", &v)
+                      .eq(rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {
@@ -1577,7 +1583,8 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecoveryWithFlush) {
 
   ColumnFamilyHandle* cfh = nullptr;
   const std::string test_cf_name = "test_cf";
-  rocksdb_rs::status::Status s = db_->CreateColumnFamily(options, test_cf_name, &cfh);
+  rocksdb_rs::status::Status s =
+      db_->CreateColumnFamily(options, test_cf_name, &cfh);
   ASSERT_OK(s);
   delete cfh;
 
@@ -1666,8 +1673,8 @@ TEST_P(CrashDuringRecoveryWithCorruptionTest, CrashDuringRecoveryWithFlush) {
 
       // Since it's corrupting last wal after Flush, below key is not found.
       v.clear();
-      ASSERT_TRUE(db_->Get(ReadOptions(), handles[1], "dontcare", &v).eq(
-                rocksdb_rs::status::Status_NotFound()));
+      ASSERT_TRUE(db_->Get(ReadOptions(), handles[1], "dontcare", &v)
+                      .eq(rocksdb_rs::status::Status_NotFound()));
     }
 
     for (auto* h : handles) {

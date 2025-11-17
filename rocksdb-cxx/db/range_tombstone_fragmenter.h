@@ -13,9 +13,8 @@
 
 #include "db/dbformat.h"
 #include "db/pinned_iterators_manager.h"
-#include "table/internal_iterator.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "table/internal_iterator.h"
 
 namespace rocksdb {
 struct FragmentedRangeTombstoneList;
@@ -185,7 +184,9 @@ class FragmentedRangeTombstoneIterator : public InternalIterator {
   Slice value() const override { return pos_->end_key; }
   bool IsKeyPinned() const override { return false; }
   bool IsValuePinned() const override { return true; }
-  rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status status() const override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   bool empty() const { return tombstones_->empty(); }
   void Invalidate() {

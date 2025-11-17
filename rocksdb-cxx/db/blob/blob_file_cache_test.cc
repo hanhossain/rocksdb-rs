@@ -34,8 +34,8 @@ void WriteBlobFile(uint32_t column_family_id,
                    uint64_t blob_file_number) {
   assert(!immutable_options.cf_paths.empty());
 
-  const std::string blob_file_path =
-      static_cast<std::string>(BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
+  const std::string blob_file_path = static_cast<std::string>(
+      BlobFileName(immutable_options.cf_paths.front().path, blob_file_number));
 
   std::unique_ptr<FSWritableFile> file;
   ASSERT_OK(NewWritableFile(immutable_options.fs.get(), blob_file_path, &file,
@@ -55,8 +55,10 @@ void WriteBlobFile(uint32_t column_family_id,
   constexpr bool has_ttl = false;
   constexpr ExpirationRange expiration_range;
 
-  BlobLogHeader header(column_family_id, rocksdb_rs::compression_type::CompressionType::kNoCompression, has_ttl,
-                       expiration_range);
+  BlobLogHeader header(
+      column_family_id,
+      rocksdb_rs::compression_type::CompressionType::kNoCompression, has_ttl,
+      expiration_range);
 
   ASSERT_OK(blob_log_writer.WriteHeader(header));
 

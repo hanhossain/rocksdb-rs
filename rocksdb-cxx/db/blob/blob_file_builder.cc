@@ -22,12 +22,11 @@
 #include "logging/logging.h"
 #include "options/cf_options.h"
 #include "options/options_helper.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/slice.h"
 #include "test_util/sync_point.h"
 #include "trace_replay/io_tracer.h"
 #include "util/compression.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -96,8 +95,9 @@ BlobFileBuilder::BlobFileBuilder(
 
 BlobFileBuilder::~BlobFileBuilder() = default;
 
-rocksdb_rs::status::Status BlobFileBuilder::Add(const Slice& key, const Slice& value,
-                            std::string* blob_index) {
+rocksdb_rs::status::Status BlobFileBuilder::Add(const Slice& key,
+                                                const Slice& value,
+                                                std::string* blob_index) {
   assert(blob_index);
   assert(blob_index->empty());
 
@@ -116,7 +116,8 @@ rocksdb_rs::status::Status BlobFileBuilder::Add(const Slice& key, const Slice& v
   std::string compressed_blob;
 
   {
-    const rocksdb_rs::status::Status s = CompressBlobIfNeeded(&blob, &compressed_blob);
+    const rocksdb_rs::status::Status s =
+        CompressBlobIfNeeded(&blob, &compressed_blob);
     if (!s.ok()) {
       return s.Clone();
     }
@@ -180,7 +181,8 @@ rocksdb_rs::status::Status BlobFileBuilder::OpenBlobFileIfNeeded() {
   assert(immutable_options_);
   assert(!immutable_options_->cf_paths.empty());
   std::string blob_file_path =
-      static_cast<std::string>(rocksdb_rs::filename::BlobFileName(immutable_options_->cf_paths.front().path, blob_file_number));
+      static_cast<std::string>(rocksdb_rs::filename::BlobFileName(
+          immutable_options_->cf_paths.front().path, blob_file_number));
 
   if (blob_callback_) {
     blob_callback_->OnBlobFileCreationStarted(
@@ -191,7 +193,8 @@ rocksdb_rs::status::Status BlobFileBuilder::OpenBlobFileIfNeeded() {
 
   {
     assert(file_options_);
-    rocksdb_rs::status::Status s = NewWritableFile(fs_, blob_file_path, &file, *file_options_).status();
+    rocksdb_rs::status::Status s =
+        NewWritableFile(fs_, blob_file_path, &file, *file_options_).status();
 
     TEST_SYNC_POINT_CALLBACK(
         "BlobFileBuilder::OpenBlobFileIfNeeded:NewWritableFile", &s);
@@ -256,7 +259,8 @@ rocksdb_rs::status::Status BlobFileBuilder::CompressBlobIfNeeded(
   assert(compressed_blob->empty());
   assert(immutable_options_);
 
-  if (blob_compression_type_ == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+  if (blob_compression_type_ ==
+      rocksdb_rs::compression_type::CompressionType::kNoCompression) {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -288,16 +292,17 @@ rocksdb_rs::status::Status BlobFileBuilder::CompressBlobIfNeeded(
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status BlobFileBuilder::WriteBlobToFile(const Slice& key, const Slice& blob,
-                                        uint64_t* blob_file_number,
-                                        uint64_t* blob_offset) {
+rocksdb_rs::status::Status BlobFileBuilder::WriteBlobToFile(
+    const Slice& key, const Slice& blob, uint64_t* blob_file_number,
+    uint64_t* blob_offset) {
   assert(IsBlobFileOpen());
   assert(blob_file_number);
   assert(blob_offset);
 
   uint64_t key_offset = 0;
 
-  rocksdb_rs::status::Status s = writer_->AddRecord(key, blob, &key_offset, blob_offset);
+  rocksdb_rs::status::Status s =
+      writer_->AddRecord(key, blob, &key_offset, blob_offset);
 
   TEST_SYNC_POINT_CALLBACK("BlobFileBuilder::WriteBlobToFile:AddRecord", &s);
 
@@ -322,7 +327,8 @@ rocksdb_rs::status::Status BlobFileBuilder::CloseBlobFile() {
   std::string checksum_method;
   std::string checksum_value;
 
-  rocksdb_rs::status::Status s = writer_->AppendFooter(footer, &checksum_method, &checksum_value);
+  rocksdb_rs::status::Status s =
+      writer_->AppendFooter(footer, &checksum_method, &checksum_value);
 
   TEST_SYNC_POINT_CALLBACK("BlobFileBuilder::WriteBlobToFile:AppendFooter", &s);
 
@@ -378,11 +384,10 @@ void BlobFileBuilder::Abandon(const rocksdb_rs::status::Status& s) {
   if (blob_callback_) {
     // BlobFileBuilder::Abandon() is called because of error while writing to
     // Blob files. So we can ignore the below error.
-    blob_callback_
-        ->OnBlobFileCompleted(blob_file_paths_->back(), column_family_name_,
-                              job_id_, writer_->get_log_number(),
-                              creation_reason_, s, "", "", blob_count_,
-                              blob_bytes_);
+    blob_callback_->OnBlobFileCompleted(
+        blob_file_paths_->back(), column_family_name_, job_id_,
+        writer_->get_log_number(), creation_reason_, s, "", "", blob_count_,
+        blob_bytes_);
   }
 
   writer_.reset();
@@ -390,9 +395,8 @@ void BlobFileBuilder::Abandon(const rocksdb_rs::status::Status& s) {
   blob_bytes_ = 0;
 }
 
-rocksdb_rs::status::Status BlobFileBuilder::PutBlobIntoCacheIfNeeded(const Slice& blob,
-                                                 uint64_t blob_file_number,
-                                                 uint64_t blob_offset) const {
+rocksdb_rs::status::Status BlobFileBuilder::PutBlobIntoCacheIfNeeded(
+    const Slice& blob, uint64_t blob_file_number, uint64_t blob_offset) const {
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_OK();
 
   BlobSource::SharedCacheInterface blob_cache{immutable_options_->blob_cache};

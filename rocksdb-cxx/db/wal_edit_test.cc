@@ -55,7 +55,8 @@ TEST(WalSet, SmallerSyncedSize) {
   WalSet wals;
   ASSERT_OK(wals.AddWal(WalAddition(kNumber, WalMetadata(kBytes))));
   const auto wals1 = wals.GetWals();
-  rocksdb_rs::status::Status s = wals.AddWal(WalAddition(kNumber, WalMetadata(0)));
+  rocksdb_rs::status::Status s =
+      wals.AddWal(WalAddition(kNumber, WalMetadata(0)));
   const auto wals2 = wals.GetWals();
   ASSERT_OK(s);
   ASSERT_EQ(wals1, wals2);
@@ -135,7 +136,9 @@ class WalSetTest : public DBTestBase {
     ASSERT_OK(wals_.AddWal(WalAddition(number, wal)));
   }
 
-  rocksdb_rs::status::Status CheckWals() const { return wals_.CheckWals(env_, logs_on_disk_); }
+  rocksdb_rs::status::Status CheckWals() const {
+    return wals_.CheckWals(env_, logs_on_disk_);
+  }
 
  private:
   std::string test_dir_;

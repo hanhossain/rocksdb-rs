@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #ifndef GFLAGS
 #include <cstdio>
 int main() {
@@ -54,8 +53,7 @@ DEFINE_int32(value_size, 40, "");
 DEFINE_bool(enable_print, false, "Print options generated to console.");
 
 // Path to the database on file system
-const std::string kDbName =
-    rocksdb::test::PerThreadDBPath("prefix_test");
+const std::string kDbName = rocksdb::test::PerThreadDBPath("prefix_test");
 
 namespace rocksdb {
 
@@ -76,7 +74,8 @@ inline Slice TestKeyToSlice(std::string& s, const TestKey& test_key) {
 }
 
 inline const TestKey SliceToTestKey(const Slice& slice) {
-  return TestKey(rocksdb_rs::coding_lean::DecodeFixed64(slice.data()), rocksdb_rs::coding_lean::DecodeFixed64(slice.data() + 8));
+  return TestKey(rocksdb_rs::coding_lean::DecodeFixed64(slice.data()),
+                 rocksdb_rs::coding_lean::DecodeFixed64(slice.data() + 8));
 }
 
 class TestKeyComparator : public Comparator {
@@ -891,4 +890,3 @@ int main(int argc, char** argv) {
 }
 
 #endif  // GFLAGS
-

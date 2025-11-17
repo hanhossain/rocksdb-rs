@@ -26,7 +26,7 @@ class MergeHelperTest : public testing::Test {
   ~MergeHelperTest() override = default;
 
   rocksdb_rs::status::Status Run(SequenceNumber stop_before, bool at_bottom,
-             SequenceNumber latest_snapshot = 0) {
+                                 SequenceNumber latest_snapshot = 0) {
     iter_.reset(new VectorIterator(ks_, vs_, &icmp_));
     iter_->SeekToFirst();
     merge_helper_.reset(new MergeHelper(env_, icmp_.user_comparator(),

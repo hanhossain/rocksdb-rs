@@ -12,7 +12,6 @@
 
 #pragma once
 
-
 namespace rocksdb {
 namespace log {
 

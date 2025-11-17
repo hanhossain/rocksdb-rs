@@ -4,13 +4,12 @@
 //  (found in the LICENSE.Apache file in the root directory).
 #pragma once
 
-#include "rocksdb/comparator.h"
-
 #include <queue>
 #include <string>
 #include <vector>
 
 #include "memory/arena.h"
+#include "rocksdb/comparator.h"
 #include "rocksdb/db.h"
 #include "rocksdb/iterator.h"
 #include "rocksdb/options.h"
@@ -58,11 +57,13 @@ class ForwardIterator : public InternalIterator {
   virtual ~ForwardIterator();
 
   void SeekForPrev(const Slice& /*target*/) override {
-    status_ = rocksdb_rs::status::Status_NotSupported("ForwardIterator::SeekForPrev()");
+    status_ = rocksdb_rs::status::Status_NotSupported(
+        "ForwardIterator::SeekForPrev()");
     valid_ = false;
   }
   void SeekToLast() override {
-    status_ = rocksdb_rs::status::Status_NotSupported("ForwardIterator::SeekToLast()");
+    status_ = rocksdb_rs::status::Status_NotSupported(
+        "ForwardIterator::SeekToLast()");
     valid_ = false;
   }
   void Prev() override {
@@ -78,7 +79,8 @@ class ForwardIterator : public InternalIterator {
   virtual Slice value() const override;
   virtual rocksdb_rs::status::Status status() const override;
   virtual bool PrepareValue() override;
-  virtual rocksdb_rs::status::Status GetProperty(std::string prop_name, std::string* prop) override;
+  virtual rocksdb_rs::status::Status GetProperty(std::string prop_name,
+                                                 std::string* prop) override;
   virtual void SetPinnedItersMgr(
       PinnedIteratorsManager* pinned_iters_mgr) override;
   virtual bool IsKeyPinned() const override;

@@ -52,7 +52,8 @@ class ImportColumnFamilyJob {
         io_tracer_(io_tracer) {}
 
   // Prepare the job by copying external files into the DB.
-  rocksdb_rs::status::Status Prepare(uint64_t next_file_number, SuperVersion* sv);
+  rocksdb_rs::status::Status Prepare(uint64_t next_file_number,
+                                     SuperVersion* sv);
 
   // Will execute the import job and prepare edit() to be applied.
   // REQUIRES: Mutex held
@@ -70,10 +71,10 @@ class ImportColumnFamilyJob {
  private:
   // Open the external file and populate `file_to_import` with all the
   // external information we need to import this file.
-  rocksdb_rs::status::Status GetIngestedFileInfo(const std::string& external_file,
-                             uint64_t new_file_number, SuperVersion* sv,
-                             const LiveFileMetaData& file_meta,
-                             IngestedFileInfo* file_to_import);
+  rocksdb_rs::status::Status GetIngestedFileInfo(
+      const std::string& external_file, uint64_t new_file_number,
+      SuperVersion* sv, const LiveFileMetaData& file_meta,
+      IngestedFileInfo* file_to_import);
 
   SystemClock* clock_;
   VersionSet* versions_;

@@ -258,8 +258,9 @@ class MergeBasedCounters : public Counters {
 void dumpDb(DB* db) {
   auto it = std::unique_ptr<Iterator>(db->NewIterator(ReadOptions()));
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    // uint64_t value = rocksdb_rs::coding_lean::DecodeFixed64(it->value().data());
-    // std::cout << it->key().ToString() << ": " << value << std::endl;
+    // uint64_t value =
+    // rocksdb_rs::coding_lean::DecodeFixed64(it->value().data()); std::cout <<
+    // it->key().ToString() << ": " << value << std::endl;
   }
   assert(it->status().ok());  // Check for any errors found during the scan
 }
@@ -495,7 +496,8 @@ void testSingleBatchSuccessiveMerge(DB* db, size_t max_num_merges,
   std::string get_value_str;
   ASSERT_OK(db->Get(ReadOptions(), key, &get_value_str));
   assert(get_value_str.size() == sizeof(uint64_t));
-  uint64_t get_value = rocksdb_rs::coding_lean::DecodeFixed64(&get_value_str[0]);
+  uint64_t get_value =
+      rocksdb_rs::coding_lean::DecodeFixed64(&get_value_str[0]);
   ASSERT_EQ(get_value, num_merges * merge_value);
   ASSERT_EQ(num_merge_operator_calls,
             static_cast<size_t>((num_merges % (max_num_merges + 1))));

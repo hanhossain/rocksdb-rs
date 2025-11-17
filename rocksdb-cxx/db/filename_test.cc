@@ -46,16 +46,23 @@ TEST_F(FileNameTest, Parse) {
       {"METADB-2", 2, rocksdb_rs::types::FileType::kMetaDatabase, kAllMode},
       {"METADB-7", 7, rocksdb_rs::types::FileType::kMetaDatabase, kAllMode},
       {"LOG", 0, rocksdb_rs::types::FileType::kInfoLogFile, kDefautInfoLogDir},
-      {"LOG.old", 0, rocksdb_rs::types::FileType::kInfoLogFile, kDefautInfoLogDir},
-      {"LOG.old.6688", 6688, rocksdb_rs::types::FileType::kInfoLogFile, kDefautInfoLogDir},
-      {"rocksdb_dir_LOG", 0, rocksdb_rs::types::FileType::kInfoLogFile, kDifferentInfoLogDir},
-      {"rocksdb_dir_LOG.old", 0, rocksdb_rs::types::FileType::kInfoLogFile, kDifferentInfoLogDir},
-      {"rocksdb_dir_LOG.old.6688", 6688, rocksdb_rs::types::FileType::kInfoLogFile, kDifferentInfoLogDir},
-      {"18446744073709551615.log", 18446744073709551615ull, rocksdb_rs::types::FileType::kWalFile, kAllMode},
+      {"LOG.old", 0, rocksdb_rs::types::FileType::kInfoLogFile,
+       kDefautInfoLogDir},
+      {"LOG.old.6688", 6688, rocksdb_rs::types::FileType::kInfoLogFile,
+       kDefautInfoLogDir},
+      {"rocksdb_dir_LOG", 0, rocksdb_rs::types::FileType::kInfoLogFile,
+       kDifferentInfoLogDir},
+      {"rocksdb_dir_LOG.old", 0, rocksdb_rs::types::FileType::kInfoLogFile,
+       kDifferentInfoLogDir},
+      {"rocksdb_dir_LOG.old.6688", 6688,
+       rocksdb_rs::types::FileType::kInfoLogFile, kDifferentInfoLogDir},
+      {"18446744073709551615.log", 18446744073709551615ull,
+       rocksdb_rs::types::FileType::kWalFile, kAllMode},
   };
   for (char mode : {kDifferentInfoLogDir, kDefautInfoLogDir, kNoCheckLogDir}) {
     for (unsigned int i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
-      InfoLogPrefix info_log_prefix = InfoLogPrefix_new(mode != kDefautInfoLogDir, "/rocksdb/dir");
+      InfoLogPrefix info_log_prefix =
+          InfoLogPrefix_new(mode != kDefautInfoLogDir, "/rocksdb/dir");
       if (cases[i].mode & mode) {
         std::string f = cases[i].fname;
         if (mode == kNoCheckLogDir) {
@@ -109,15 +116,18 @@ TEST_F(FileNameTest, InfoLogFileName) {
   std::string db_absolute_path;
   ASSERT_OK(Env::Default()->GetAbsolutePath(dbname, &db_absolute_path));
 
-  ASSERT_EQ("/data/rocksdb/LOG", static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, "")));
+  ASSERT_EQ("/data/rocksdb/LOG", static_cast<std::string>(InfoLogFileName(
+                                     dbname, db_absolute_path, "")));
   ASSERT_EQ("/data/rocksdb/LOG.old.666",
-            static_cast<std::string>(OldInfoLogFileName(dbname, 666u, db_absolute_path, "")));
+            static_cast<std::string>(
+                OldInfoLogFileName(dbname, 666u, db_absolute_path, "")));
 
   ASSERT_EQ("/data/rocksdb_log/data_rocksdb_LOG",
-            static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path, "/data/rocksdb_log")));
-  ASSERT_EQ(
-      "/data/rocksdb_log/data_rocksdb_LOG.old.666",
-      static_cast<std::string>(OldInfoLogFileName(dbname, 666u, db_absolute_path, "/data/rocksdb_log")));
+            static_cast<std::string>(InfoLogFileName(dbname, db_absolute_path,
+                                                     "/data/rocksdb_log")));
+  ASSERT_EQ("/data/rocksdb_log/data_rocksdb_LOG.old.666",
+            static_cast<std::string>(OldInfoLogFileName(
+                dbname, 666u, db_absolute_path, "/data/rocksdb_log")));
 }
 
 TEST_F(FileNameTest, Construction) {
@@ -144,8 +154,8 @@ TEST_F(FileNameTest, Construction) {
   ASSERT_EQ(rocksdb_rs::types::FileType::kWalFile, type);
 
   fname = static_cast<std::string>(TableFileName({DbPath("bar", 0)}, 200, 0));
-  std::string fname1 =
-      static_cast<std::string>(TableFileName({DbPath("foo", 0), DbPath("bar", 0)}, 200, 1));
+  std::string fname1 = static_cast<std::string>(
+      TableFileName({DbPath("foo", 0), DbPath("bar", 0)}, 200, 1));
   ASSERT_EQ(fname, fname1);
   ASSERT_EQ("bar/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));

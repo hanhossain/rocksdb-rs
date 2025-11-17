@@ -90,7 +90,8 @@ TEST_F(DBWideBasicTest, PutEntity) {
 
       std::array<Slice, num_keys> keys{{first_key, second_key, third_key}};
       std::array<PinnableSlice, num_keys> values;
-      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+      rust::Vec<rocksdb_rs::status::Status> statuses =
+          rocksdb_rs::status::Status_new().create_vec(num_keys);
 
       db_->MultiGet(ReadOptions(), db_->DefaultColumnFamily(), num_keys,
                     &keys[0], &values[0], &statuses[0]);
@@ -110,7 +111,8 @@ TEST_F(DBWideBasicTest, PutEntity) {
 
       std::array<Slice, num_keys> keys{{first_key, second_key, third_key}};
       std::array<PinnableWideColumns, num_keys> results;
-      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+      rust::Vec<rocksdb_rs::status::Status> statuses =
+          rocksdb_rs::status::Status_new().create_vec(num_keys);
 
       db_->MultiGetEntity(ReadOptions(), db_->DefaultColumnFamily(), num_keys,
                           &keys[0], &results[0], &statuses[0]);
@@ -252,7 +254,8 @@ TEST_F(DBWideBasicTest, MultiCFMultiGetEntity) {
       {db_->DefaultColumnFamily(), handles_[1]}};
   std::array<Slice, num_keys> keys{{first_key, second_key}};
   std::array<PinnableWideColumns, num_keys> results;
-  rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+  rust::Vec<rocksdb_rs::status::Status> statuses =
+      rocksdb_rs::status::Status_new().create_vec(num_keys);
 
   db_->MultiGetEntity(ReadOptions(), num_keys, &column_families[0], &keys[0],
                       &results[0], &statuses[0]);
@@ -339,7 +342,8 @@ TEST_F(DBWideBasicTest, MergePlainKeyValue) {
 
       std::array<Slice, num_keys> keys{{first_key, second_key, third_key}};
       std::array<PinnableWideColumns, num_keys> results;
-      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+      rust::Vec<rocksdb_rs::status::Status> statuses =
+          rocksdb_rs::status::Status_new().create_vec(num_keys);
 
       db_->MultiGetEntity(ReadOptions(), db_->DefaultColumnFamily(), num_keys,
                           &keys[0], &results[0], &statuses[0]);
@@ -519,7 +523,8 @@ TEST_F(DBWideBasicTest, MergeEntity) {
 
       std::array<Slice, num_keys> keys{{first_key, second_key}};
       std::array<PinnableSlice, num_keys> values;
-      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+      rust::Vec<rocksdb_rs::status::Status> statuses =
+          rocksdb_rs::status::Status_new().create_vec(num_keys);
 
       db_->MultiGet(ReadOptions(), db_->DefaultColumnFamily(), num_keys,
                     &keys[0], &values[0], &statuses[0]);
@@ -536,7 +541,8 @@ TEST_F(DBWideBasicTest, MergeEntity) {
 
       std::array<Slice, num_keys> keys{{first_key, second_key}};
       std::array<PinnableWideColumns, num_keys> results;
-      rust::Vec<rocksdb_rs::status::Status> statuses = rocksdb_rs::status::Status_new().create_vec(num_keys);
+      rust::Vec<rocksdb_rs::status::Status> statuses =
+          rocksdb_rs::status::Status_new().create_vec(num_keys);
 
       db_->MultiGetEntity(ReadOptions(), db_->DefaultColumnFamily(), num_keys,
                           &keys[0], &results[0], &statuses[0]);

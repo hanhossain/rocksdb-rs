@@ -19,12 +19,11 @@
 #include "db/pre_release_callback.h"
 #include "db/write_callback.h"
 #include "monitoring/instrumented_mutex.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/options.h"
 #include "rocksdb/types.h"
 #include "rocksdb/write_batch.h"
 #include "util/autovector.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -135,7 +134,8 @@ class WriteThread {
     WriteGroup* write_group;
     SequenceNumber sequence;  // the sequence number to use for the first key
     rocksdb_rs::status::Status status;
-    rocksdb_rs::status::Status callback_status;  // status returned by callback->Callback()
+    rocksdb_rs::status::Status
+        callback_status;  // status returned by callback->Callback()
 
     std::aligned_storage<sizeof(std::mutex)>::type state_mutex_bytes;
     std::aligned_storage<sizeof(std::condition_variable)>::type state_cv_bytes;
@@ -307,7 +307,8 @@ class WriteThread {
   //
   // WriteGroup* write_group: the write group
   // Status status:           Status of write operation
-  void ExitAsBatchGroupLeader(WriteGroup& write_group, rocksdb_rs::status::Status& status);
+  void ExitAsBatchGroupLeader(WriteGroup& write_group,
+                              rocksdb_rs::status::Status& status);
 
   // Exit batch group on behalf of batch group leader.
   void ExitAsBatchGroupFollower(Writer* w);

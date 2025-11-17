@@ -12,7 +12,7 @@
 #include "db/blob/blob_constants.h"
 
 namespace rocksdb_rs::status {
-    struct Status;
+struct Status;
 }
 
 namespace rocksdb {

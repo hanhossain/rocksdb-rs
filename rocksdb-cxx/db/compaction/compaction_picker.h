@@ -18,10 +18,9 @@
 #include "db/compaction/compaction.h"
 #include "db/version_set.h"
 #include "options/cf_options.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/env.h"
 #include "rocksdb/options.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -87,16 +86,16 @@ class CompactionPicker {
 
   virtual bool NeedsCompaction(const VersionStorageInfo* vstorage) const = 0;
 
-// Sanitize the input set of compaction input files.
-// When the input parameters do not describe a valid compaction, the
-// function will try to fix the input_files by adding necessary
-// files.  If it's not possible to conver an invalid input_files
-// into a valid one by adding more files, the function will return a
-// non-ok status with specific reason.
-//
-  rocksdb_rs::status::Status SanitizeCompactionInputFiles(std::unordered_set<uint64_t>* input_files,
-                                      const ColumnFamilyMetaData& cf_meta,
-                                      const int output_level) const;
+  // Sanitize the input set of compaction input files.
+  // When the input parameters do not describe a valid compaction, the
+  // function will try to fix the input_files by adding necessary
+  // files.  If it's not possible to conver an invalid input_files
+  // into a valid one by adding more files, the function will return a
+  // non-ok status with specific reason.
+  //
+  rocksdb_rs::status::Status SanitizeCompactionInputFiles(
+      std::unordered_set<uint64_t>* input_files,
+      const ColumnFamilyMetaData& cf_meta, const int output_level) const;
 
   // Free up the files that participated in a compaction
   //
@@ -226,8 +225,8 @@ class CompactionPicker {
  protected:
   const ImmutableOptions& ioptions_;
 
-// A helper function to SanitizeCompactionInputFiles() that
-// sanitizes "input_files" by adding necessary files.
+  // A helper function to SanitizeCompactionInputFiles() that
+  // sanitizes "input_files" by adding necessary files.
   virtual rocksdb_rs::status::Status SanitizeCompactionInputFilesForAllLevels(
       std::unordered_set<uint64_t>* input_files,
       const ColumnFamilyMetaData& cf_meta, const int output_level) const;
@@ -306,10 +305,10 @@ bool FindIntraL0Compaction(const std::vector<FileMetaData*>& level_files,
                            uint64_t max_compaction_bytes,
                            CompactionInputFiles* comp_inputs);
 
-rocksdb_rs::compression_type::CompressionType GetCompressionType(const VersionStorageInfo* vstorage,
-                                   const MutableCFOptions& mutable_cf_options,
-                                   int level, int base_level,
-                                   const bool enable_compression = true);
+rocksdb_rs::compression_type::CompressionType GetCompressionType(
+    const VersionStorageInfo* vstorage,
+    const MutableCFOptions& mutable_cf_options, int level, int base_level,
+    const bool enable_compression = true);
 
 CompressionOptions GetCompressionOptions(
     const MutableCFOptions& mutable_cf_options,

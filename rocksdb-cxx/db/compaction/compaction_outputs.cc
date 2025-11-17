@@ -18,8 +18,9 @@ void CompactionOutputs::NewBuilder(const TableBuilderOptions& tboptions) {
   builder_.reset(NewTableBuilder(tboptions, file_writer_.get()));
 }
 
-rocksdb_rs::status::Status CompactionOutputs::Finish(const rocksdb_rs::status::Status& intput_status,
-                                 const SeqnoToTimeMapping& seqno_time_mapping) {
+rocksdb_rs::status::Status CompactionOutputs::Finish(
+    const rocksdb_rs::status::Status& intput_status,
+    const SeqnoToTimeMapping& seqno_time_mapping) {
   FileMetaData* meta = GetMetaData();
   assert(meta != nullptr);
   rocksdb_rs::status::Status s = intput_status.Clone();
@@ -53,10 +54,9 @@ rocksdb_rs::status::Status CompactionOutputs::Finish(const rocksdb_rs::status::S
   return s;
 }
 
-rocksdb_rs::io_status::IOStatus CompactionOutputs::WriterSyncClose(const rocksdb_rs::status::Status& input_status,
-                                            SystemClock* clock,
-                                            Statistics* statistics,
-                                            bool use_fsync) {
+rocksdb_rs::io_status::IOStatus CompactionOutputs::WriterSyncClose(
+    const rocksdb_rs::status::Status& input_status, SystemClock* clock,
+    Statistics* statistics, bool use_fsync) {
   rocksdb_rs::io_status::IOStatus io_s = rocksdb_rs::io_status::IOStatus_new();
   if (input_status.ok()) {
     StopWatch sw(clock, statistics, COMPACTION_OUTFILE_SYNC_MICROS);

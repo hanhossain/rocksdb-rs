@@ -52,7 +52,8 @@ class DBMergeOperatorTest : public DBTestBase {
     get_impl_options.column_family = db_->DefaultColumnFamily();
     get_impl_options.value = &value;
     get_impl_options.callback = &read_callback;
-    rocksdb_rs::status::Status s = dbfull()->GetImpl(read_opt, key, get_impl_options);
+    rocksdb_rs::status::Status s =
+        dbfull()->GetImpl(read_opt, key, get_impl_options);
     if (!s.ok()) {
       return *s.ToString();
     }
@@ -202,7 +203,6 @@ TEST_F(DBMergeOperatorTest, MergeErrorOnIteration) {
   VerifyDBInternal({{"k1", "v1"}, {"k2", "corrupted"}, {"k2", "v2"}});
 }
 
-
 TEST_F(DBMergeOperatorTest, MergeOperatorFailsWithMustMerge) {
   // This is like a mini-stress test dedicated to `OpFailureScope::kMustMerge`.
   // Some or most of it might be deleted upon adding that option to the actual
@@ -233,7 +233,8 @@ TEST_F(DBMergeOperatorTest, MergeOperatorFailsWithMustMerge) {
         ASSERT_OK(db_->Get(ReadOptions(), "k0", &value));
         rocksdb_rs::status::Status s = db_->Get(ReadOptions(), "k1", &value);
         ASSERT_TRUE(s.IsCorruption());
-        ASSERT_EQ(rocksdb_rs::status::SubCode::kMergeOperatorFailed, s.subcode());
+        ASSERT_EQ(rocksdb_rs::status::SubCode::kMergeOperatorFailed,
+                  s.subcode());
         ASSERT_OK(db_->Get(ReadOptions(), "k2", &value));
       }
 

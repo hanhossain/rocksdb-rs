@@ -247,7 +247,8 @@ TEST_P(DBIteratorTest, IterReseekNewUpperBound) {
   table_options.block_size = 1024;
   table_options.block_size_deviation = 50;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   Reopen(options);
 
   ASSERT_OK(Put("a", rnd.RandomString(400)));
@@ -2449,7 +2450,8 @@ TEST_P(DBIteratorTest, RefreshWithSnapshot) {
 TEST_P(DBIteratorTest, CreationFailure) {
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::NewInternalIterator:StatusCallback", [](void* arg) {
-        *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) = rocksdb_rs::status::Status_Corruption("test status");
+        *(reinterpret_cast<rocksdb_rs::status::Status*>(arg)) =
+            rocksdb_rs::status::Status_Corruption("test status");
       });
   SyncPoint::GetInstance()->EnableProcessing();
 
@@ -2792,7 +2794,8 @@ TEST_P(DBIteratorTest, SeekBackwardAfterOutOfUpperBound) {
 
 TEST_P(DBIteratorTest, AvoidReseekLevelIterator) {
   Options options = CurrentOptions();
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options;
   table_options.block_size = 800;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
@@ -2892,7 +2895,8 @@ TEST_P(DBIteratorTest, AvoidReseekLevelIterator) {
 // usage doesn't break iterator.
 TEST_P(DBIteratorTest, IterateBoundChangedBeforeSeek) {
   Options options = CurrentOptions();
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   BlockBasedTableOptions table_options;
   table_options.block_size = 100;
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));

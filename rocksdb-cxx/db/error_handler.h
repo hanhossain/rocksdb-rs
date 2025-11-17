@@ -7,10 +7,9 @@
 #include "monitoring/instrumented_mutex.h"
 #include "options/db_options.h"
 #include "rocksdb-rs/src/io_status.rs.h"
-#include "rocksdb/listener.h"
-
-#include "rocksdb/env.h"
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/env.h"
+#include "rocksdb/listener.h"
 
 namespace rocksdb {
 
@@ -43,19 +42,22 @@ class ErrorHandler {
         recovery_in_prog_(false),
         soft_error_no_bg_work_(false),
         is_db_stopped_(false),
-        bg_error_stats_(db_options.statistics) {
-  }
+        bg_error_stats_(db_options.statistics) {}
 
   void EnableAutoRecovery() { auto_recovery_ = true; }
 
-  rocksdb_rs::status::Severity GetErrorSeverity(BackgroundErrorReason reason,
-                                    rocksdb_rs::status::Code code, rocksdb_rs::status::SubCode subcode);
+  rocksdb_rs::status::Severity GetErrorSeverity(
+      BackgroundErrorReason reason, rocksdb_rs::status::Code code,
+      rocksdb_rs::status::SubCode subcode);
 
-  const rocksdb_rs::status::Status& SetBGError(const rocksdb_rs::status::Status& bg_err, BackgroundErrorReason reason);
+  const rocksdb_rs::status::Status& SetBGError(
+      const rocksdb_rs::status::Status& bg_err, BackgroundErrorReason reason);
 
   rocksdb_rs::status::Status GetBGError() const { return bg_error_.Clone(); }
 
-  rocksdb_rs::status::Status GetRecoveryError() const { return recovery_error_.Clone(); }
+  rocksdb_rs::status::Status GetRecoveryError() const {
+    return recovery_error_.Clone();
+  }
 
   rocksdb_rs::status::Status ClearBGError();
 
@@ -87,7 +89,8 @@ class ErrorHandler {
   rocksdb_rs::status::Status recovery_error_;
   // A separate IO Status variable used to record any IO errors during
   // the recovery process. At the same time, recovery_error_ is also set.
-  rocksdb_rs::io_status::IOStatus recovery_io_error_ = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus recovery_io_error_ =
+      rocksdb_rs::io_status::IOStatus_new();
   // The condition variable used with db_mutex during auto resume for time
   // wait.
   InstrumentedCondVar cv_;
@@ -109,11 +112,13 @@ class ErrorHandler {
   // The pointer of DB statistics.
   std::shared_ptr<Statistics> bg_error_stats_;
 
-  const rocksdb_rs::status::Status& HandleKnownErrors(const rocksdb_rs::status::Status& bg_err,
-                                  BackgroundErrorReason reason);
-  rocksdb_rs::status::Status OverrideNoSpaceError(const rocksdb_rs::status::Status& bg_error, bool* auto_recovery);
+  const rocksdb_rs::status::Status& HandleKnownErrors(
+      const rocksdb_rs::status::Status& bg_err, BackgroundErrorReason reason);
+  rocksdb_rs::status::Status OverrideNoSpaceError(
+      const rocksdb_rs::status::Status& bg_error, bool* auto_recovery);
   void RecoverFromNoSpace();
-  const rocksdb_rs::status::Status& StartRecoverFromRetryableBGIOError(const rocksdb_rs::io_status::IOStatus& io_error);
+  const rocksdb_rs::status::Status& StartRecoverFromRetryableBGIOError(
+      const rocksdb_rs::io_status::IOStatus& io_error);
   void RecoverFromRetryableBGIOError();
   // First, if it is in recovery and the recovery_error is ok. Set the
   // recovery_error_ to bg_err. Second, if the severity is higher than the

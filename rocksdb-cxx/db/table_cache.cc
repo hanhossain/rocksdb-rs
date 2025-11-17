@@ -53,13 +53,11 @@ static Slice GetSliceForFileNumber(const uint64_t* file_number) {
                sizeof(*file_number));
 }
 
-
 void AppendVarint64(IterKey* key, uint64_t v) {
   char buf[10];
   auto ptr = EncodeVarint64(buf, v);
   key->TrimAppend(key->Size(), buf, ptr - buf);
 }
-
 
 }  // anonymous namespace
 
@@ -96,28 +94,35 @@ rocksdb_rs::status::Status TableCache::GetTableReader(
     const std::shared_ptr<const SliceTransform>& prefix_extractor,
     bool skip_filters, int level, bool prefetch_index_and_filter_in_cache,
     size_t max_file_size_for_l0_meta_pin, Temperature file_temperature) {
-  std::string fname = static_cast<std::string>(rocksdb_rs::filename::TableFileName(
-      ioptions_.cf_paths, file_meta.fd.GetNumber(), file_meta.fd.GetPathId()));
+  std::string fname =
+      static_cast<std::string>(rocksdb_rs::filename::TableFileName(
+          ioptions_.cf_paths, file_meta.fd.GetNumber(),
+          file_meta.fd.GetPathId()));
   std::unique_ptr<FSRandomAccessFile> file;
   FileOptions fopts = file_options;
   fopts.temperature = file_temperature;
-  rocksdb_rs::status::Status s = PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options).status();
+  rocksdb_rs::status::Status s =
+      PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options).status();
   TEST_SYNC_POINT_CALLBACK("TableCache::GetTableReader:BeforeOpenFile",
                            const_cast<rocksdb_rs::status::Status*>(&s));
   if (s.ok()) {
-    s = ioptions_.fs->NewRandomAccessFile(fname, fopts, &file, nullptr).status();
+    s = ioptions_.fs->NewRandomAccessFile(fname, fopts, &file, nullptr)
+            .status();
   }
   if (s.ok()) {
     RecordTick(ioptions_.stats, NO_FILE_OPENS);
   } else if (s.IsPathNotFound()) {
-    fname = static_cast<std::string>(rocksdb_rs::filename::Rocks2LevelTableFileName(fname));
+    fname = static_cast<std::string>(
+        rocksdb_rs::filename::Rocks2LevelTableFileName(fname));
     // If this file is also not found, we want to use the error message
     // that contains the table file name which is less confusing.
     rocksdb_rs::status::Status temp_s =
-        PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options).status();
+        PrepareIOFromReadOptions(ro, ioptions_.clock, fopts.io_options)
+            .status();
     if (temp_s.ok()) {
-      temp_s = ioptions_.fs->NewRandomAccessFile(fname, file_options, &file,
-                                                 nullptr).status();
+      temp_s =
+          ioptions_.fs->NewRandomAccessFile(fname, file_options, &file, nullptr)
+              .status();
     }
     if (temp_s.ok()) {
       RecordTick(ioptions_.stats, NO_FILE_OPENS);
@@ -140,7 +145,9 @@ rocksdb_rs::status::Status TableCache::GetTableReader(
     if (ioptions_.verify_sst_unique_id_in_manifest) {
       expected_unique_id = file_meta.unique_id;
     } else {
-      expected_unique_id = rocksdb_rs::unique_id::UniqueId64x2_null();  // null ID == no verification
+      expected_unique_id =
+          rocksdb_rs::unique_id::UniqueId64x2_null();  // null ID == no
+                                                       // verification
     }
     s = ioptions_.table_factory->NewTableReader(
         ro,
@@ -177,7 +184,8 @@ rocksdb_rs::status::Status TableCache::FindTable(
 
   if (*handle == nullptr) {
     if (no_io) {
-      return rocksdb_rs::status::Status_Incomplete("Table not found in table_cache, no_io is set");
+      return rocksdb_rs::status::Status_Incomplete(
+          "Table not found in table_cache, no_io is set");
     }
     MutexLock load_lock(&loader_mutex_.Get(key));
     // We check the cache again under loading mutex
@@ -187,12 +195,12 @@ rocksdb_rs::status::Status TableCache::FindTable(
     }
 
     std::unique_ptr<TableReader> table_reader;
-    rocksdb_rs::status::Status s = GetTableReader(ro, file_options, internal_comparator, file_meta,
-                              false /* sequential mode */,
-                              block_protection_bytes_per_key, file_read_hist,
-                              &table_reader, prefix_extractor, skip_filters,
-                              level, prefetch_index_and_filter_in_cache,
-                              max_file_size_for_l0_meta_pin, file_temperature);
+    rocksdb_rs::status::Status s = GetTableReader(
+        ro, file_options, internal_comparator, file_meta,
+        false /* sequential mode */, block_protection_bytes_per_key,
+        file_read_hist, &table_reader, prefix_extractor, skip_filters, level,
+        prefetch_index_and_filter_in_cache, max_file_size_for_l0_meta_pin,
+        file_temperature);
     if (!s.ok()) {
       assert(table_reader == nullptr);
       RecordTick(ioptions_.stats, NO_FILE_ERRORS);
@@ -586,9 +594,9 @@ rocksdb_rs::status::Status TableCache::GetTableProperties(
   }
 
   TypedHandle* table_handle = nullptr;
-  rocksdb_rs::status::Status s = FindTable(read_options, file_options, internal_comparator,
-                       file_meta, &table_handle, block_protection_bytes_per_key,
-                       prefix_extractor, no_io);
+  rocksdb_rs::status::Status s = FindTable(
+      read_options, file_options, internal_comparator, file_meta, &table_handle,
+      block_protection_bytes_per_key, prefix_extractor, no_io);
   if (!s.ok()) {
     return s;
   }
@@ -634,9 +642,9 @@ size_t TableCache::GetMemoryUsageByTableReader(
   }
 
   TypedHandle* table_handle = nullptr;
-  rocksdb_rs::status::Status s = FindTable(read_options, file_options, internal_comparator,
-                       file_meta, &table_handle, block_protection_bytes_per_key,
-                       prefix_extractor, true /* no_io */);
+  rocksdb_rs::status::Status s = FindTable(
+      read_options, file_options, internal_comparator, file_meta, &table_handle,
+      block_protection_bytes_per_key, prefix_extractor, true /* no_io */);
   if (!s.ok()) {
     return 0;
   }

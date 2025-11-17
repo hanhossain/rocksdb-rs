@@ -12,7 +12,6 @@
 #include "rocksdb/utilities/debug.h"
 #include "test_util/mock_time_env.h"
 
-
 namespace rocksdb {
 
 class SeqnoTimeTest : public DBTestBase {
@@ -986,7 +985,6 @@ TEST_F(SeqnoTimeTest, EncodeDecodePerferNewTime) {
 }
 
 }  // namespace rocksdb
-
 
 int main(int argc, char** argv) {
   rocksdb::port::InstallStackTraceHandler();

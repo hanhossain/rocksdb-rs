@@ -16,11 +16,13 @@ class EnvWithCustomLogicalBlockSizeCache : public EnvWrapper {
   EnvWithCustomLogicalBlockSizeCache(Env* env, LogicalBlockSizeCache* cache)
       : EnvWrapper(env), cache_(cache) {}
 
-  rocksdb_rs::status::Status RegisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status RegisterDbPaths(
+      const std::vector<std::string>& paths) override {
     return cache_->RefAndCacheLogicalBlockSize(paths);
   }
 
-  rocksdb_rs::status::Status UnregisterDbPaths(const std::vector<std::string>& paths) override {
+  rocksdb_rs::status::Status UnregisterDbPaths(
+      const std::vector<std::string>& paths) override {
     cache_->UnrefAndTryRemoveCachedLogicalBlockSize(paths);
     return rocksdb_rs::status::Status_OK();
   }

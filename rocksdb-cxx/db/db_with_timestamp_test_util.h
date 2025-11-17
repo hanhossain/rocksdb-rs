@@ -89,8 +89,10 @@ class DBBasicTestWithTimestampBase : public DBTestBase {
       Slice ts2_copy = Slice(ts2_buf.get(), kSize);
       auto* ptr1 = const_cast<Slice*>(&ts1_copy);
       auto* ptr2 = const_cast<Slice*>(&ts2_copy);
-      if (!rocksdb_rs::coding::GetFixed64(*ptr1, low1) || !rocksdb_rs::coding::GetFixed64(*ptr1, high1) ||
-          !rocksdb_rs::coding::GetFixed64(*ptr2, low2) || !rocksdb_rs::coding::GetFixed64(*ptr2, high2)) {
+      if (!rocksdb_rs::coding::GetFixed64(*ptr1, low1) ||
+          !rocksdb_rs::coding::GetFixed64(*ptr1, high1) ||
+          !rocksdb_rs::coding::GetFixed64(*ptr2, low2) ||
+          !rocksdb_rs::coding::GetFixed64(*ptr2, high2)) {
         assert(false);
       }
       if (high1 < high2) {

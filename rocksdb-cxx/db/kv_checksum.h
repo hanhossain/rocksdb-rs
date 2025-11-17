@@ -101,13 +101,16 @@ class ProtectionInfo {
         dst[0] = static_cast<uint8_t>(val_);
         break;
       case 2:
-        rocksdb_rs::coding_lean::EncodeFixed16(dst, static_cast<uint16_t>(val_));
+        rocksdb_rs::coding_lean::EncodeFixed16(dst,
+                                               static_cast<uint16_t>(val_));
         break;
       case 4:
-        rocksdb_rs::coding_lean::EncodeFixed32(dst, static_cast<uint32_t>(val_));
+        rocksdb_rs::coding_lean::EncodeFixed32(dst,
+                                               static_cast<uint32_t>(val_));
         break;
       case 8:
-        rocksdb_rs::coding_lean::EncodeFixed64(dst, static_cast<uint64_t>(val_));
+        rocksdb_rs::coding_lean::EncodeFixed64(dst,
+                                               static_cast<uint64_t>(val_));
         break;
       default:
         assert(false);
@@ -121,11 +124,14 @@ class ProtectionInfo {
         return static_cast<uint8_t>(checksum_ptr[0]) ==
                static_cast<uint8_t>(val_);
       case 2:
-        return rocksdb_rs::coding_lean::DecodeFixed16(checksum_ptr) == static_cast<uint16_t>(val_);
+        return rocksdb_rs::coding_lean::DecodeFixed16(checksum_ptr) ==
+               static_cast<uint16_t>(val_);
       case 4:
-        return rocksdb_rs::coding_lean::DecodeFixed32(checksum_ptr) == static_cast<uint32_t>(val_);
+        return rocksdb_rs::coding_lean::DecodeFixed32(checksum_ptr) ==
+               static_cast<uint32_t>(val_);
       case 8:
-        return rocksdb_rs::coding_lean::DecodeFixed64(checksum_ptr) == static_cast<uint64_t>(val_);
+        return rocksdb_rs::coding_lean::DecodeFixed64(checksum_ptr) ==
+               static_cast<uint64_t>(val_);
       default:
         assert(false);
         return false;

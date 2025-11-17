@@ -33,7 +33,8 @@ class ExternalSSTFileBasicTest
     assert(env_->NewWritableFile(file_path, &wfile, EnvOptions()).ok());
     wfile.reset();
     std::unique_ptr<RandomRWFile> rwfile;
-    rocksdb_rs::status::Status s = env_->NewRandomRWFile(file_path, &rwfile, EnvOptions());
+    rocksdb_rs::status::Status s =
+        env_->NewRandomRWFile(file_path, &rwfile, EnvOptions());
     if (s.IsNotSupported()) {
       random_rwfile_supported_ = false;
     } else {
@@ -49,9 +50,9 @@ class ExternalSSTFileBasicTest
     ASSERT_OK(env_->CreateDir(sst_files_dir_));
   }
 
-  rocksdb_rs::status::Status DeprecatedAddFile(const std::vector<std::string>& files,
-                           bool move_files = false,
-                           bool skip_snapshot_check = false) {
+  rocksdb_rs::status::Status DeprecatedAddFile(
+      const std::vector<std::string>& files, bool move_files = false,
+      bool skip_snapshot_check = false) {
     IngestExternalFileOptions opts;
     opts.move_files = move_files;
     opts.snapshot_consistency = !skip_snapshot_check;
@@ -141,7 +142,8 @@ class ExternalSSTFileBasicTest
           true_data->erase(key);
           break;
         default:
-          return rocksdb_rs::status::Status_InvalidArgument("Value type is not supported");
+          return rocksdb_rs::status::Status_InvalidArgument(
+              "Value type is not supported");
       }
       if (!s.ok()) {
         sst_file_writer.Finish();
@@ -179,9 +181,7 @@ class ExternalSSTFileBasicTest
         write_global_seqno, verify_checksums_before_ingest, true_data);
   }
 
-  ~ExternalSSTFileBasicTest() override {
-    DestroyDir(env_, sst_files_dir_);
-  }
+  ~ExternalSSTFileBasicTest() override { DestroyDir(env_, sst_files_dir_); }
 
  protected:
   std::string sst_files_dir_;
@@ -673,7 +673,8 @@ TEST_F(ExternalSSTFileBasicTest, NoCopy) {
 
   s = DeprecatedAddFile({file1}, true /* move file */);
   ASSERT_OK(s) << *s.ToString();
-  ASSERT_TRUE(rocksdb_rs::status::Status_NotFound().eq(env_->FileExists(file1)));
+  ASSERT_TRUE(
+      rocksdb_rs::status::Status_NotFound().eq(env_->FileExists(file1)));
 
   s = DeprecatedAddFile({file2}, false /* copy file */);
   ASSERT_OK(s) << *s.ToString();
@@ -1150,7 +1151,8 @@ TEST_F(ExternalSSTFileBasicTest, SyncFailure) {
     if (i == 0) {
       SyncPoint::GetInstance()->SetCallBack(
           "ExternalSstFileIngestionJob::Prepare:Reopen", [&](void* s) {
-            rocksdb_rs::status::Status* status = static_cast<rocksdb_rs::status::Status*>(s);
+            rocksdb_rs::status::Status* status =
+                static_cast<rocksdb_rs::status::Status*>(s);
             if (status->IsNotSupported()) {
               no_sync = true;
             }
@@ -1159,7 +1161,8 @@ TEST_F(ExternalSSTFileBasicTest, SyncFailure) {
     if (i == 2) {
       SyncPoint::GetInstance()->SetCallBack(
           "ExternalSstFileIngestionJob::NewRandomRWFile", [&](void* s) {
-            rocksdb_rs::status::Status* status = static_cast<rocksdb_rs::status::Status*>(s);
+            rocksdb_rs::status::Status* status =
+                static_cast<rocksdb_rs::status::Status*>(s);
             if (status->IsNotSupported()) {
               no_sync = true;
             }
@@ -1191,7 +1194,8 @@ TEST_F(ExternalSSTFileBasicTest, SyncFailure) {
     if (i == 2) {
       ingest_opt.write_global_seqno = true;
     }
-    rocksdb_rs::status::Status s = db_->IngestExternalFile({file_name}, ingest_opt);
+    rocksdb_rs::status::Status s =
+        db_->IngestExternalFile({file_name}, ingest_opt);
     if (no_sync) {
       ASSERT_OK(s);
     } else {
@@ -1212,7 +1216,8 @@ TEST_F(ExternalSSTFileBasicTest, ReopenNotSupported) {
 
   SyncPoint::GetInstance()->SetCallBack(
       "ExternalSstFileIngestionJob::Prepare:Reopen", [&](void* arg) {
-        rocksdb_rs::status::Status* s = static_cast<rocksdb_rs::status::Status*>(arg);
+        rocksdb_rs::status::Status* s =
+            static_cast<rocksdb_rs::status::Status*>(arg);
         *s = rocksdb_rs::status::Status_NotSupported();
       });
   SyncPoint::GetInstance()->EnableProcessing();
@@ -1894,7 +1899,8 @@ TEST_F(ExternalSSTFileBasicTest, FailIfNotBottommostLevel) {
     IngestExternalFileOptions ifo;
     ifo.fail_if_not_bottommost_level = true;
     ifo.snapshot_consistency = true;
-    const rocksdb_rs::status::Status s = db_->IngestExternalFile({file_path}, ifo);
+    const rocksdb_rs::status::Status s =
+        db_->IngestExternalFile({file_path}, ifo);
     ASSERT_TRUE(s.IsTryAgain());
   }
 
@@ -1917,7 +1923,8 @@ TEST_F(ExternalSSTFileBasicTest, FailIfNotBottommostLevel) {
 
     IngestExternalFileOptions ifo;
     ifo.fail_if_not_bottommost_level = true;
-    const rocksdb_rs::status::Status s = db_->IngestExternalFile({file_path}, ifo);
+    const rocksdb_rs::status::Status s =
+        db_->IngestExternalFile({file_path}, ifo);
     ASSERT_TRUE(s.IsTryAgain());
   }
 }
@@ -2072,7 +2079,6 @@ INSTANTIATE_TEST_CASE_P(ExternalSSTFileBasicTest, ExternalSSTFileBasicTest,
                                         std::make_tuple(true, false),
                                         std::make_tuple(false, true),
                                         std::make_tuple(false, false)));
-
 
 }  // namespace rocksdb
 

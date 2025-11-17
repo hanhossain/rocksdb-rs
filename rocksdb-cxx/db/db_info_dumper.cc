@@ -100,7 +100,8 @@ void DumpDBFileSummary(const ImmutableDBOptions& options,
       std::sort(files.begin(), files.end());
       for (const std::string& file : files) {
         if (rocksdb_rs::filename::ParseFileName(file, &number, &type)) {
-          if (type == rocksdb_rs::types::FileType::kTableFile && ++file_num < 10) {
+          if (type == rocksdb_rs::types::FileType::kTableFile &&
+              ++file_num < 10) {
             file_info.append(file).append(" ");
           }
         }

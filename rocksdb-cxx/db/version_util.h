@@ -27,15 +27,16 @@ class OfflineManifestWriter {
                   /*block_cache_tracer=*/nullptr, /*io_tracer=*/nullptr,
                   /*db_id*/ "", /*db_session_id*/ "") {}
 
-  rocksdb_rs::status::Status Recover(const std::vector<ColumnFamilyDescriptor>& column_families) {
+  rocksdb_rs::status::Status Recover(
+      const std::vector<ColumnFamilyDescriptor>& column_families) {
     return versions_.Recover(column_families, /*read_only*/ false,
                              /*db_id*/ nullptr,
                              /*no_error_if_files_missing*/ true);
   }
 
-  rocksdb_rs::status::Status LogAndApply(const ReadOptions& read_options, ColumnFamilyData* cfd,
-                     VersionEdit* edit,
-                     FSDirectory* dir_contains_current_file) {
+  rocksdb_rs::status::Status LogAndApply(
+      const ReadOptions& read_options, ColumnFamilyData* cfd, VersionEdit* edit,
+      FSDirectory* dir_contains_current_file) {
     // Use `mutex` to imitate a locked DB mutex when calling `LogAndApply()`.
     InstrumentedMutex mutex;
     mutex.Lock();

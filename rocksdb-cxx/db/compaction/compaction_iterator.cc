@@ -161,7 +161,8 @@ void CompactionIterator::Next() {
     if (merge_out_iter_.Valid()) {
       key_ = merge_out_iter_.key();
       value_ = merge_out_iter_.value();
-      rocksdb_rs::status::Status s = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
+      rocksdb_rs::status::Status s =
+          ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
       // MergeUntil stops when it encounters a corrupt key and does not
       // include them in the result, so we expect the keys here to be valid.
       if (!s.ok()) {
@@ -264,8 +265,8 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
       if (decision == CompactionFilter::Decision::kUndetermined &&
           !compaction_filter_->IsStackedBlobDbInternalCompactionFilter()) {
         if (!compaction_) {
-          status_ =
-              rocksdb_rs::status::Status_Corruption("Unexpected blob index outside of compaction");
+          status_ = rocksdb_rs::status::Status_Corruption(
+              "Unexpected blob index outside of compaction");
           validity_info_.Invalidate();
           return false;
         }
@@ -418,7 +419,8 @@ bool CompactionIterator::InvokeFilterIfNeeded(bool* need_skip,
       return false;
     }
 
-    status_ = rocksdb_rs::status::Status_IOError("Failed to access blob during compaction filter");
+    status_ = rocksdb_rs::status::Status_IOError(
+        "Failed to access blob during compaction filter");
     validity_info_.Invalidate();
     return false;
   } else if (decision == CompactionFilter::Decision::kChangeWideColumnEntity) {
@@ -467,7 +469,8 @@ void CompactionIterator::NextFromInput() {
     iter_stats_.num_input_records++;
     is_range_del_ = input_.IsDeleteRangeSentinelKey();
 
-    rocksdb_rs::status::Status pik_status = ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
+    rocksdb_rs::status::Status pik_status =
+        ParseInternalKey(key_, &ikey_, allow_data_in_errors_);
     if (!pik_status.ok()) {
       iter_stats_.num_input_corrupt_records++;
 
@@ -1057,7 +1060,8 @@ void CompactionIterator::NextFromInput() {
   }
 
   if (IsPausingManualCompaction()) {
-    status_ = rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
+    status_ = rocksdb_rs::status::Status_Incomplete(
+        rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
 
   // Propagate corruption status from memtable itereator
@@ -1072,7 +1076,8 @@ bool CompactionIterator::ExtractLargeValueIfNeededImpl() {
   }
 
   blob_index_.clear();
-  const rocksdb_rs::status::Status s = blob_file_builder_->Add(user_key(), value_, &blob_index_);
+  const rocksdb_rs::status::Status s =
+      blob_file_builder_->Add(user_key(), value_, &blob_index_);
 
   if (!s.ok()) {
     status_.copy_from(s);
@@ -1178,15 +1183,16 @@ void CompactionIterator::GarbageCollectBlobIfNeeded() {
         user_key(), value_, &compaction_filter_value_);
 
     if (blob_decision == CompactionFilter::BlobDecision::kCorruption) {
-      status_ =
-          rocksdb_rs::status::Status_Corruption("Corrupted blob reference encountered during GC");
+      status_ = rocksdb_rs::status::Status_Corruption(
+          "Corrupted blob reference encountered during GC");
       validity_info_.Invalidate();
 
       return;
     }
 
     if (blob_decision == CompactionFilter::BlobDecision::kIOError) {
-      status_ = rocksdb_rs::status::Status_IOError("Could not relocate blob during GC");
+      status_ = rocksdb_rs::status::Status_IOError(
+          "Could not relocate blob during GC");
       validity_info_.Invalidate();
 
       return;

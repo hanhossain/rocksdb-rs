@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include "rocksdb/types.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/types.h"
 
 namespace rocksdb {
 
@@ -20,7 +19,8 @@ class PostMemTableCallback {
  public:
   virtual ~PostMemTableCallback() {}
 
-  virtual rocksdb_rs::status::Status operator()(SequenceNumber seq, bool disable_memtable) = 0;
+  virtual rocksdb_rs::status::Status operator()(SequenceNumber seq,
+                                                bool disable_memtable) = 0;
 };
 
 }  // namespace rocksdb

@@ -84,7 +84,8 @@ rocksdb_rs::status::Status BlobFileCache::GetBlobFileReader(
   {
     constexpr size_t charge = 1;
 
-    const rocksdb_rs::status::Status s = cache_.Insert(key, reader.get(), charge, &handle);
+    const rocksdb_rs::status::Status s =
+        cache_.Insert(key, reader.get(), charge, &handle);
     if (!s.ok()) {
       RecordTick(statistics, NO_FILE_ERRORS);
       return s.Clone();

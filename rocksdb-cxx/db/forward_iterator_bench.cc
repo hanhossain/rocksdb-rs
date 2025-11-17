@@ -27,13 +27,12 @@ int main() { return 0; }
 #include <thread>
 
 #include "port/port.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/cache.h"
 #include "rocksdb/db.h"
 #include "rocksdb/table.h"
 #include "test_util/testharness.h"
 #include "util/gflags_compat.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 const int MAX_SHARDS = 100000;
 
@@ -90,8 +89,7 @@ struct ShardState {
 
 struct Reader {
  public:
-  explicit Reader(std::vector<ShardState>* shard_states,
-                  rocksdb::DB* db)
+  explicit Reader(std::vector<ShardState>* shard_states, rocksdb::DB* db)
       : shard_states_(shard_states), db_(db) {
     sem_init(&sem_, 0, 0);
     thread_ = port::Thread(&Reader::run, this);
@@ -138,8 +136,7 @@ struct Reader {
     }
 
     const uint64_t upto = state.last_written.load();
-    for (rocksdb::Iterator* it :
-         {state.it_cacheonly.get(), state.it.get()}) {
+    for (rocksdb::Iterator* it : {state.it_cacheonly.get(), state.it.get()}) {
       if (it == nullptr) {
         continue;
       }
@@ -204,8 +201,7 @@ struct Reader {
 };
 
 struct Writer {
-  explicit Writer(std::vector<ShardState>* shard_states,
-                  rocksdb::DB* db)
+  explicit Writer(std::vector<ShardState>* shard_states, rocksdb::DB* db)
       : shard_states_(shard_states), db_(db) {}
 
   void start() { thread_ = port::Thread(&Writer::run, this); }
@@ -324,21 +320,19 @@ int main(int argc, char** argv) {
 
   std::mt19937 rng{std::random_device()()};
   rocksdb_rs::status::Status status;
-  std::string path =
-      rocksdb::test::PerThreadDBPath("forward_iterator_test");
+  std::string path = rocksdb::test::PerThreadDBPath("forward_iterator_test");
   fprintf(stderr, "db path is %s\n", path.c_str());
   rocksdb::Options options;
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
-  options.compaction_style =
-      rocksdb::CompactionStyle::kCompactionStyleNone;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compaction_style = rocksdb::CompactionStyle::kCompactionStyleNone;
   options.level0_slowdown_writes_trigger = 99999;
   options.level0_stop_writes_trigger = 99999;
   options.use_direct_io_for_flush_and_compaction = true;
   options.write_buffer_size = FLAGS_memtable_size;
   rocksdb::BlockBasedTableOptions table_options;
-  table_options.block_cache =
-      rocksdb::NewLRUCache(FLAGS_block_cache_size);
+  table_options.block_cache = rocksdb::NewLRUCache(FLAGS_block_cache_size);
   table_options.block_size = FLAGS_block_size;
   options.table_factory.reset(
       rocksdb::NewBlockBasedTableFactory(table_options));

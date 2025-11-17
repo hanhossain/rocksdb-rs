@@ -47,8 +47,7 @@ class ForwardLevelIterator : public InternalIterator {
         pinned_iters_mgr_(nullptr),
         prefix_extractor_(prefix_extractor),
         allow_unprepared_value_(allow_unprepared_value),
-        block_protection_bytes_per_key_(block_protection_bytes_per_key) {
-  }
+        block_protection_bytes_per_key_(block_protection_bytes_per_key) {}
 
   ~ForwardLevelIterator() override {
     // Reset current pointer
@@ -98,11 +97,13 @@ class ForwardLevelIterator : public InternalIterator {
     }
   }
   void SeekToLast() override {
-    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::SeekToLast()");
+    status_ = rocksdb_rs::status::Status_NotSupported(
+        "ForwardLevelIterator::SeekToLast()");
     valid_ = false;
   }
   void Prev() override {
-    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::Prev()");
+    status_ =
+        rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::Prev()");
     valid_ = false;
   }
   bool Valid() const override { return valid_; }
@@ -132,7 +133,8 @@ class ForwardLevelIterator : public InternalIterator {
     valid_ = file_iter_->Valid();
   }
   void SeekForPrev(const Slice& /*internal_key*/) override {
-    status_ = rocksdb_rs::status::Status_NotSupported("ForwardLevelIterator::SeekForPrev()");
+    status_ = rocksdb_rs::status::Status_NotSupported(
+        "ForwardLevelIterator::SeekForPrev()");
     valid_ = false;
   }
   void Next() override {
@@ -637,7 +639,8 @@ bool ForwardIterator::PrepareValue() {
   return false;
 }
 
-rocksdb_rs::status::Status ForwardIterator::GetProperty(std::string prop_name, std::string* prop) {
+rocksdb_rs::status::Status ForwardIterator::GetProperty(std::string prop_name,
+                                                        std::string* prop) {
   assert(prop != nullptr);
   if (prop_name == "rocksdb.iterator.super-version-number") {
     *prop = std::to_string(sv_->version_number);
@@ -708,8 +711,8 @@ void ForwardIterator::RebuildIterators(bool refresh_sv) {
             false /* immutable_memtable */));
     range_del_agg.AddTombstones(std::move(range_del_iter));
     // Always return Status_OK().
-    rocksdb_rs::status::Status temp_s = sv_->imm->AddRangeTombstoneIterators(read_options_, &arena_,
-                                                         &range_del_agg);
+    rocksdb_rs::status::Status temp_s = sv_->imm->AddRangeTombstoneIterators(
+        read_options_, &arena_, &range_del_agg);
     assert(temp_s.ok());
   }
   has_iter_trimmed_for_upper_bound_ = false;

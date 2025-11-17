@@ -93,18 +93,20 @@ rocksdb_rs::status::Status DBImplSecondary::FindAndRecoverLogFiles(
 }
 
 // List wal_dir and find all new WALs, return these log numbers
-rocksdb_rs::status::Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64_t>* logs) {
+rocksdb_rs::status::Status DBImplSecondary::FindNewLogNumbers(
+    std::vector<uint64_t>* logs) {
   assert(logs != nullptr);
   std::vector<std::string> filenames;
   rocksdb_rs::status::Status s = rocksdb_rs::status::Status_new();
   IOOptions io_opts;
   io_opts.do_not_recurse = true;
-  s = immutable_db_options_.fs->GetChildren(immutable_db_options_.GetWalDir(),
-                                            io_opts, &filenames,
-                                            /*IODebugContext*=*/nullptr).status();
+  s = immutable_db_options_.fs
+          ->GetChildren(immutable_db_options_.GetWalDir(), io_opts, &filenames,
+                        /*IODebugContext*=*/nullptr)
+          .status();
   if (s.IsNotFound()) {
-    return rocksdb_rs::status::Status_InvalidArgument("Failed to open wal_dir",
-                                   immutable_db_options_.GetWalDir());
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Failed to open wal_dir", immutable_db_options_.GetWalDir());
   } else if (!s.ok()) {
     return s;
   }
@@ -119,7 +121,8 @@ rocksdb_rs::status::Status DBImplSecondary::FindNewLogNumbers(std::vector<uint64
   for (size_t i = 0; i < filenames.size(); i++) {
     uint64_t number;
     rocksdb_rs::types::FileType type;
-    if (rocksdb_rs::filename::ParseFileName(filenames[i], &number, &type) && type == rocksdb_rs::types::FileType::kWalFile &&
+    if (rocksdb_rs::filename::ParseFileName(filenames[i], &number, &type) &&
+        type == rocksdb_rs::types::FileType::kWalFile &&
         number >= log_number_min) {
       logs->push_back(number);
     }
@@ -145,7 +148,8 @@ rocksdb_rs::status::Status DBImplSecondary::MaybeInitLogReader(
     // TODO: min_log_number_to_keep_2pc check needed?
     // Open the log file
     std::string fname =
-        static_cast<std::string>(rocksdb_rs::filename::LogFileName(immutable_db_options_.GetWalDir(), log_number));
+        static_cast<std::string>(rocksdb_rs::filename::LogFileName(
+            immutable_db_options_.GetWalDir(), log_number));
     ROCKS_LOG_INFO(immutable_db_options_.info_log,
                    "Recovering log #%" PRIu64 " mode %d", log_number,
                    static_cast<int>(immutable_db_options_.wal_recovery_mode));
@@ -153,8 +157,10 @@ rocksdb_rs::status::Status DBImplSecondary::MaybeInitLogReader(
     std::unique_ptr<SequentialFileReader> file_reader;
     {
       std::unique_ptr<FSSequentialFile> file;
-      rocksdb_rs::status::Status status = fs_->NewSequentialFile(
-          fname, fs_->OptimizeForLogRead(file_options_), &file, nullptr).status();
+      rocksdb_rs::status::Status status =
+          fs_->NewSequentialFile(fname, fs_->OptimizeForLogRead(file_options_),
+                                 &file, nullptr)
+              .status();
       if (!status.ok()) {
         *log_reader = nullptr;
         return status;
@@ -202,7 +208,8 @@ rocksdb_rs::status::Status DBImplSecondary::RecoverLogFiles(
     auto it = log_readers_.find(log_number);
     assert(it != log_readers_.end());
     log::FragmentBufferedReader* reader = it->second->reader_;
-    const std::unique_ptr<rocksdb_rs::status::Status>& wal_read_status = it->second->status_;
+    const std::unique_ptr<rocksdb_rs::status::Status>& wal_read_status =
+        it->second->status_;
     assert(wal_read_status);
     // Manually update the file number allocation counter in VersionSet.
     versions_->MarkFileNumberUsed(log_number);
@@ -218,7 +225,8 @@ rocksdb_rs::status::Status DBImplSecondary::RecoverLogFiles(
            wal_read_status->ok() && status.ok()) {
       if (record.size() < WriteBatchInternal::kHeader) {
         reader->GetReporter()->Corruption(
-            record.size(), rocksdb_rs::status::Status_Corruption("log record too small"));
+            record.size(),
+            rocksdb_rs::status::Status_Corruption("log record too small"));
         continue;
       }
       status = WriteBatchInternal::SetContents(&batch, record);
@@ -337,23 +345,22 @@ rocksdb_rs::status::Status DBImplSecondary::RecoverLogFiles(
 }
 
 // Implementation of the DB interface
-rocksdb_rs::status::Status DBImplSecondary::Get(const ReadOptions& read_options,
-                            ColumnFamilyHandle* column_family, const Slice& key,
-                            PinnableSlice* value) {
+rocksdb_rs::status::Status DBImplSecondary::Get(
+    const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* value) {
   return GetImpl(read_options, column_family, key, value,
                  /*timestamp*/ nullptr);
 }
 
-rocksdb_rs::status::Status DBImplSecondary::Get(const ReadOptions& read_options,
-                            ColumnFamilyHandle* column_family, const Slice& key,
-                            PinnableSlice* value, std::string* timestamp) {
+rocksdb_rs::status::Status DBImplSecondary::Get(
+    const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* value, std::string* timestamp) {
   return GetImpl(read_options, column_family, key, value, timestamp);
 }
 
-rocksdb_rs::status::Status DBImplSecondary::GetImpl(const ReadOptions& read_options,
-                                ColumnFamilyHandle* column_family,
-                                const Slice& key, PinnableSlice* pinnable_val,
-                                std::string* timestamp) {
+rocksdb_rs::status::Status DBImplSecondary::GetImpl(
+    const ReadOptions& read_options, ColumnFamilyHandle* column_family,
+    const Slice& key, PinnableSlice* pinnable_val, std::string* timestamp) {
   if (read_options.io_activity != Env::IOActivity::kUnknown) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "Cannot call Get with `ReadOptions::io_activity` != "
@@ -452,8 +459,8 @@ rocksdb_rs::status::Status DBImplSecondary::GetImpl(const ReadOptions& read_opti
 Iterator* DBImplSecondary::NewIterator(const ReadOptions& read_options,
                                        ColumnFamilyHandle* column_family) {
   if (read_options.managed) {
-    return NewErrorIterator(
-        rocksdb_rs::status::Status_NotSupported("Managed iterator is not supported anymore."));
+    return NewErrorIterator(rocksdb_rs::status::Status_NotSupported(
+        "Managed iterator is not supported anymore."));
   }
   if (read_options.read_tier == kPersistedTier) {
     return NewErrorIterator(rocksdb_rs::status::Status_NotSupported(
@@ -488,8 +495,8 @@ Iterator* DBImplSecondary::NewIterator(const ReadOptions& read_options,
         "tailing iterator not supported in secondary mode"));
   } else if (read_options.snapshot != nullptr) {
     // TODO (yanqin) support snapshot.
-    return NewErrorIterator(
-        rocksdb_rs::status::Status_NotSupported("snapshot not supported in secondary mode"));
+    return NewErrorIterator(rocksdb_rs::status::Status_NotSupported(
+        "snapshot not supported in secondary mode"));
   } else {
     SequenceNumber snapshot(kMaxSequenceNumber);
     result = NewIteratorImpl(read_options, cfd, snapshot, read_callback);
@@ -524,7 +531,8 @@ rocksdb_rs::status::Status DBImplSecondary::NewIterators(
     const std::vector<ColumnFamilyHandle*>& column_families,
     std::vector<Iterator*>* iterators) {
   if (read_options.managed) {
-    return rocksdb_rs::status::Status_NotSupported("Managed iterator is not supported anymore.");
+    return rocksdb_rs::status::Status_NotSupported(
+        "Managed iterator is not supported anymore.");
   }
   if (read_options.read_tier == kPersistedTier) {
     return rocksdb_rs::status::Status_NotSupported(
@@ -537,14 +545,16 @@ rocksdb_rs::status::Status DBImplSecondary::NewIterators(
   }
   ReadCallback* read_callback = nullptr;  // No read callback provided.
   if (iterators == nullptr) {
-    return rocksdb_rs::status::Status_InvalidArgument("iterators not allowed to be nullptr");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "iterators not allowed to be nullptr");
   }
 
   if (read_options.timestamp) {
     for (auto* cf : column_families) {
       assert(cf);
-      const rocksdb_rs::status::Status s = FailIfTsMismatchCf(cf, *(read_options.timestamp),
-                                          /*ts_for_read=*/true);
+      const rocksdb_rs::status::Status s =
+          FailIfTsMismatchCf(cf, *(read_options.timestamp),
+                             /*ts_for_read=*/true);
       if (!s.ok()) {
         return s.Clone();
       }
@@ -565,7 +575,8 @@ rocksdb_rs::status::Status DBImplSecondary::NewIterators(
         "tailing iterator not supported in secondary mode");
   } else if (read_options.snapshot != nullptr) {
     // TODO (yanqin) support snapshot.
-    return rocksdb_rs::status::Status_NotSupported("snapshot not supported in secondary mode");
+    return rocksdb_rs::status::Status_NotSupported(
+        "snapshot not supported in secondary mode");
   } else {
     SequenceNumber read_seq(kMaxSequenceNumber);
     for (auto cfh : column_families) {
@@ -607,7 +618,10 @@ rocksdb_rs::status::Status DBImplSecondary::CheckConsistency() {
     uint64_t fsize = 0;
     s = env_->GetFileSize(file_path, &fsize);
     if (!s.ok() &&
-        (env_->GetFileSize(rocksdb_rs::filename::Rocks2LevelTableFileName(file_path), &fsize).ok() ||
+        (env_->GetFileSize(
+                 rocksdb_rs::filename::Rocks2LevelTableFileName(file_path),
+                 &fsize)
+             .ok() ||
          s.IsPathNotFound())) {
       s = rocksdb_rs::status::Status_OK();
     }
@@ -616,8 +630,9 @@ rocksdb_rs::status::Status DBImplSecondary::CheckConsistency() {
           "Can't access " + md.name + ": " + *s.ToString() + "\n";
     }
   }
-  return corruption_messages.empty() ? rocksdb_rs::status::Status_OK()
-                                     : rocksdb_rs::status::Status_Corruption(corruption_messages);
+  return corruption_messages.empty()
+             ? rocksdb_rs::status::Status_OK()
+             : rocksdb_rs::status::Status_Corruption(corruption_messages);
 }
 
 rocksdb_rs::status::Status DBImplSecondary::TryCatchUpWithPrimary() {
@@ -686,8 +701,9 @@ rocksdb_rs::status::Status DBImplSecondary::TryCatchUpWithPrimary() {
   return s;
 }
 
-rocksdb_rs::status::Status DB::OpenAsSecondary(const Options& options, const std::string& dbname,
-                           const std::string& secondary_path, DB** dbptr) {
+rocksdb_rs::status::Status DB::OpenAsSecondary(
+    const Options& options, const std::string& dbname,
+    const std::string& secondary_path, DB** dbptr) {
   *dbptr = nullptr;
 
   DBOptions db_options(options);
@@ -696,8 +712,8 @@ rocksdb_rs::status::Status DB::OpenAsSecondary(const Options& options, const std
   column_families.emplace_back(kDefaultColumnFamilyName, cf_options);
   std::vector<ColumnFamilyHandle*> handles;
 
-  rocksdb_rs::status::Status s = DB::OpenAsSecondary(db_options, dbname, secondary_path,
-                                 column_families, &handles, dbptr);
+  rocksdb_rs::status::Status s = DB::OpenAsSecondary(
+      db_options, dbname, secondary_path, column_families, &handles, dbptr);
   if (s.ok()) {
     assert(handles.size() == 1);
     delete handles[0];
@@ -760,7 +776,8 @@ rocksdb_rs::status::Status DB::OpenAsSecondary(
       auto cfd =
           impl->versions_->GetColumnFamilySet()->GetColumnFamily(cf.name);
       if (nullptr == cfd) {
-        s = rocksdb_rs::status::Status_InvalidArgument("Column family not found", cf.name);
+        s = rocksdb_rs::status::Status_InvalidArgument(
+            "Column family not found", cf.name);
         break;
       }
       handles->push_back(new ColumnFamilyHandleImpl(cfd, impl, &impl->mutex_));
@@ -795,13 +812,14 @@ rocksdb_rs::status::Status DBImplSecondary::CompactWithoutInstallation(
     const OpenAndCompactOptions& options, ColumnFamilyHandle* cfh,
     const CompactionServiceInput& input, CompactionServiceResult* result) {
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
-    return rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
+    return rocksdb_rs::status::Status_Incomplete(
+        rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
   InstrumentedMutexLock l(&mutex_);
   auto cfd = static_cast_with_check<ColumnFamilyHandleImpl>(cfh)->cfd();
   if (!cfd) {
-    return rocksdb_rs::status::Status_InvalidArgument("Cannot find column family" +
-                                   cfh->GetName());
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Cannot find column family" + cfh->GetName());
   }
 
   std::unordered_set<uint64_t> input_set;
@@ -820,14 +838,16 @@ rocksdb_rs::status::Status DBImplSecondary::CompactWithoutInstallation(
 
   // Use comp_options to reuse some CompactFiles functions
   CompactionOptions comp_options;
-  comp_options.compression = rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
+  comp_options.compression =
+      rocksdb_rs::compression_type::CompressionType::kDisableCompressionOption;
   comp_options.output_file_size_limit = MaxFileSizeForLevel(
       *mutable_cf_options, input.output_level, cf_options.compaction_style,
       vstorage->base_level(), cf_options.level_compaction_dynamic_level_bytes);
 
   std::vector<CompactionInputFiles> input_files;
-  rocksdb_rs::status::Status s = cfd->compaction_picker()->GetCompactionInputsFromFileNumbers(
-      &input_files, &input_set, vstorage, comp_options);
+  rocksdb_rs::status::Status s =
+      cfd->compaction_picker()->GetCompactionInputsFromFileNumbers(
+          &input_files, &input_set, vstorage, comp_options);
   if (!s.ok()) {
     return s;
   }
@@ -888,10 +908,12 @@ rocksdb_rs::status::Status DB::OpenAndCompact(
     std::string* output,
     const CompactionServiceOptionsOverride& override_options) {
   if (options.canceled && options.canceled->load(std::memory_order_acquire)) {
-    return rocksdb_rs::status::Status_Incomplete(rocksdb_rs::status::SubCode::kManualCompactionPaused);
+    return rocksdb_rs::status::Status_Incomplete(
+        rocksdb_rs::status::SubCode::kManualCompactionPaused);
   }
   CompactionServiceInput compaction_input;
-  rocksdb_rs::status::Status s = CompactionServiceInput::Read(input, &compaction_input);
+  rocksdb_rs::status::Status s =
+      CompactionServiceInput::Read(input, &compaction_input);
   if (!s.ok()) {
     return s;
   }
@@ -948,7 +970,8 @@ rocksdb_rs::status::Status DB::OpenAndCompact(
   s = db_secondary->CompactWithoutInstallation(
       options, handles[0], compaction_input, &compaction_result);
 
-  rocksdb_rs::status::Status serialization_status = compaction_result.Write(output);
+  rocksdb_rs::status::Status serialization_status =
+      compaction_result.Write(output);
 
   for (auto& handle : handles) {
     delete handle;
@@ -967,6 +990,5 @@ rocksdb_rs::status::Status DB::OpenAndCompact(
   return OpenAndCompact(OpenAndCompactOptions(), name, output_directory, input,
                         output, override_options);
 }
-
 
 }  // namespace rocksdb

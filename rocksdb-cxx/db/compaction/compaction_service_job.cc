@@ -57,7 +57,8 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
       compaction_input.has_end ? sub_compact->end->ToString() : "";
 
   std::string compaction_input_binary;
-  rocksdb_rs::status::Status s = compaction_input.Write(&compaction_input_binary);
+  rocksdb_rs::status::Status s =
+      compaction_input.Write(&compaction_input_binary);
   if (!s.ok()) {
     sub_compact->status.copy_from(s);
     return CompactionServiceJobStatus::kFailure;
@@ -171,7 +172,9 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
     auto src_file = compaction_result.output_path + "/" + file.file_name;
     auto tgt_file = TableFileName(compaction->immutable_options()->cf_paths,
                                   file_num, compaction->output_path_id());
-    s = fs_->RenameFile(src_file, static_cast<std::string>(tgt_file), IOOptions(), nullptr).status();
+    s = fs_->RenameFile(src_file, static_cast<std::string>(tgt_file),
+                        IOOptions(), nullptr)
+            .status();
     if (!s.ok()) {
       sub_compact->status.copy_from(s);
       return CompactionServiceJobStatus::kFailure;
@@ -179,7 +182,9 @@ CompactionJob::ProcessKeyValueCompactionWithCompactionService(
 
     FileMetaData meta;
     uint64_t file_size;
-    s = fs_->GetFileSize(static_cast<std::string>(tgt_file), IOOptions(), &file_size, nullptr).status();
+    s = fs_->GetFileSize(static_cast<std::string>(tgt_file), IOOptions(),
+                         &file_size, nullptr)
+            .status();
     if (!s.ok()) {
       sub_compact->status.copy_from(s);
       return CompactionServiceJobStatus::kFailure;
@@ -330,10 +335,10 @@ rocksdb_rs::status::Status CompactionServiceCompactionJob::Run() {
   for (const auto& output_file : sub_compact->GetOutputs()) {
     auto& meta = output_file.meta;
     compaction_result_->output_files.emplace_back(
-        static_cast<std::string>(MakeTableFileName(meta.fd.GetNumber())), meta.fd.smallest_seqno,
-        meta.fd.largest_seqno, meta.smallest.Encode().ToString(),
-        meta.largest.Encode().ToString(), meta.oldest_ancester_time,
-        meta.file_creation_time, meta.epoch_number,
+        static_cast<std::string>(MakeTableFileName(meta.fd.GetNumber())),
+        meta.fd.smallest_seqno, meta.fd.largest_seqno,
+        meta.smallest.Encode().ToString(), meta.largest.Encode().ToString(),
+        meta.oldest_ancester_time, meta.file_creation_time, meta.epoch_number,
         output_file.validator.GetHash(), meta.marked_for_compaction,
         meta.unique_id);
   }
@@ -357,11 +362,14 @@ enum class BinaryFormatVersion : uint32_t {
 
 static std::unordered_map<std::string, OptionTypeInfo> cfd_type_info = {
     {"name",
-     {offsetof(struct ColumnFamilyDescriptor, name), rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct ColumnFamilyDescriptor, name),
+      rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"options",
      {offsetof(struct ColumnFamilyDescriptor, options),
-      rocksdb_rs::utilities::options_type::OptionType::kConfigurable, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kConfigurable,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
       [](const ConfigOptions& opts, const std::string& /*name*/,
          const std::string& value, void* addr) {
@@ -399,10 +407,12 @@ static std::unordered_map<std::string, OptionTypeInfo> cs_input_type_info = {
      OptionTypeInfo::Struct(
          "column_family", &cfd_type_info,
          offsetof(struct CompactionServiceInput, column_family),
-         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
     {"db_options",
      {offsetof(struct CompactionServiceInput, db_options),
-      rocksdb_rs::utilities::options_type::OptionType::kConfigurable, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kConfigurable,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
       [](const ConfigOptions& opts, const std::string& /*name*/,
          const std::string& value, void* addr) {
@@ -431,81 +441,106 @@ static std::unordered_map<std::string, OptionTypeInfo> cs_input_type_info = {
         }
         return result;
       }}},
-    {"snapshots", OptionTypeInfo::Vector<uint64_t>(
-                      offsetof(struct CompactionServiceInput, snapshots),
-                      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
-                      {0, rocksdb_rs::utilities::options_type::OptionType::kUInt64T})},
-    {"input_files", OptionTypeInfo::Vector<std::string>(
-                        offsetof(struct CompactionServiceInput, input_files),
-                        rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
-                        {0, rocksdb_rs::utilities::options_type::OptionType::kEncodedString})},
+    {"snapshots",
+     OptionTypeInfo::Vector<uint64_t>(
+         offsetof(struct CompactionServiceInput, snapshots),
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kUInt64T})},
+    {"input_files",
+     OptionTypeInfo::Vector<std::string>(
+         offsetof(struct CompactionServiceInput, input_files),
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+         {0, rocksdb_rs::utilities::options_type::OptionType::kEncodedString})},
     {"output_level",
-     {offsetof(struct CompactionServiceInput, output_level), rocksdb_rs::utilities::options_type::OptionType::kInt,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct CompactionServiceInput, output_level),
+      rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"db_id",
      {offsetof(struct CompactionServiceInput, db_id),
       rocksdb_rs::utilities::options_type::OptionType::kEncodedString}},
     {"has_begin",
-     {offsetof(struct CompactionServiceInput, has_begin), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct CompactionServiceInput, has_begin),
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"begin",
      {offsetof(struct CompactionServiceInput, begin),
-      rocksdb_rs::utilities::options_type::OptionType::kEncodedString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"has_end",
-     {offsetof(struct CompactionServiceInput, has_end), rocksdb_rs::utilities::options_type::OptionType::kBoolean,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct CompactionServiceInput, has_end),
+      rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"end",
-     {offsetof(struct CompactionServiceInput, end), rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct CompactionServiceInput, end),
+      rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo>
     cs_output_file_type_info = {
         {"file_name",
          {offsetof(struct CompactionServiceOutputFile, file_name),
-          rocksdb_rs::utilities::options_type::OptionType::kEncodedString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"smallest_seqno",
          {offsetof(struct CompactionServiceOutputFile, smallest_seqno),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"largest_seqno",
          {offsetof(struct CompactionServiceOutputFile, largest_seqno),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"smallest_internal_key",
          {offsetof(struct CompactionServiceOutputFile, smallest_internal_key),
-          rocksdb_rs::utilities::options_type::OptionType::kEncodedString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"largest_internal_key",
          {offsetof(struct CompactionServiceOutputFile, largest_internal_key),
-          rocksdb_rs::utilities::options_type::OptionType::kEncodedString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"oldest_ancester_time",
          {offsetof(struct CompactionServiceOutputFile, oldest_ancester_time),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"file_creation_time",
          {offsetof(struct CompactionServiceOutputFile, file_creation_time),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"epoch_number",
          {offsetof(struct CompactionServiceOutputFile, epoch_number),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"paranoid_hash",
          {offsetof(struct CompactionServiceOutputFile, paranoid_hash),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"marked_for_compaction",
          {offsetof(struct CompactionServiceOutputFile, marked_for_compaction),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"unique_id",
          OptionTypeInfo::Array<uint64_t, 2>(
              offsetof(struct CompactionServiceOutputFile, unique_id),
-             rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+             rocksdb_rs::utilities::options_type::OptionVerificationType::
+                 kNormal,
+             rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
              {0, rocksdb_rs::utilities::options_type::OptionType::kUInt64T})},
 };
 
@@ -513,118 +548,148 @@ static std::unordered_map<std::string, OptionTypeInfo>
     compaction_job_stats_type_info = {
         {"elapsed_micros",
          {offsetof(struct CompactionJobStats, elapsed_micros),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"cpu_micros",
-         {offsetof(struct CompactionJobStats, cpu_micros), rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
-          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+         {offsetof(struct CompactionJobStats, cpu_micros),
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_input_records",
          {offsetof(struct CompactionJobStats, num_input_records),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_blobs_read",
          {offsetof(struct CompactionJobStats, num_blobs_read),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_input_files",
          {offsetof(struct CompactionJobStats, num_input_files),
-          rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_input_files_at_output_level",
          {offsetof(struct CompactionJobStats, num_input_files_at_output_level),
-          rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_output_records",
          {offsetof(struct CompactionJobStats, num_output_records),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_output_files",
          {offsetof(struct CompactionJobStats, num_output_files),
-          rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_output_files_blob",
          {offsetof(struct CompactionJobStats, num_output_files_blob),
-          rocksdb_rs::utilities::options_type::OptionType::kSizeT, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kSizeT,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"is_full_compaction",
          {offsetof(struct CompactionJobStats, is_full_compaction),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"is_manual_compaction",
          {offsetof(struct CompactionJobStats, is_manual_compaction),
-          rocksdb_rs::utilities::options_type::OptionType::kBoolean, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kBoolean,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"total_input_bytes",
          {offsetof(struct CompactionJobStats, total_input_bytes),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"total_blob_bytes_read",
          {offsetof(struct CompactionJobStats, total_blob_bytes_read),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"total_output_bytes",
          {offsetof(struct CompactionJobStats, total_output_bytes),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"total_output_bytes_blob",
          {offsetof(struct CompactionJobStats, total_output_bytes_blob),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_records_replaced",
          {offsetof(struct CompactionJobStats, num_records_replaced),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"total_input_raw_key_bytes",
          {offsetof(struct CompactionJobStats, total_input_raw_key_bytes),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"total_input_raw_value_bytes",
          {offsetof(struct CompactionJobStats, total_input_raw_value_bytes),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_input_deletion_records",
          {offsetof(struct CompactionJobStats, num_input_deletion_records),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_expired_deletion_records",
          {offsetof(struct CompactionJobStats, num_expired_deletion_records),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_corrupt_keys",
          {offsetof(struct CompactionJobStats, num_corrupt_keys),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"file_write_nanos",
          {offsetof(struct CompactionJobStats, file_write_nanos),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"file_range_sync_nanos",
          {offsetof(struct CompactionJobStats, file_range_sync_nanos),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"file_fsync_nanos",
          {offsetof(struct CompactionJobStats, file_fsync_nanos),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"file_prepare_write_nanos",
          {offsetof(struct CompactionJobStats, file_prepare_write_nanos),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"smallest_output_key_prefix",
          {offsetof(struct CompactionJobStats, smallest_output_key_prefix),
-          rocksdb_rs::utilities::options_type::OptionType::kEncodedString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"largest_output_key_prefix",
          {offsetof(struct CompactionJobStats, largest_output_key_prefix),
-          rocksdb_rs::utilities::options_type::OptionType::kEncodedString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_single_del_fallthru",
          {offsetof(struct CompactionJobStats, num_single_del_fallthru),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"num_single_del_mismatch",
          {offsetof(struct CompactionJobStats, num_single_del_mismatch),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
@@ -647,10 +712,10 @@ struct StatusSerializationAdapter {
   }
 
   rocksdb_rs::status::Status GetStatus() const {
-    return rocksdb_rs::status::Status_new(static_cast<rocksdb_rs::status::Code>(code),
-                  static_cast<rocksdb_rs::status::SubCode>(subcode),
-                  static_cast<rocksdb_rs::status::Severity>(severity),
-                  message);
+    return rocksdb_rs::status::Status_new(
+        static_cast<rocksdb_rs::status::Code>(code),
+        static_cast<rocksdb_rs::status::SubCode>(subcode),
+        static_cast<rocksdb_rs::status::Severity>(severity), message);
   }
 };
 }  // namespace
@@ -659,26 +724,31 @@ static std::unordered_map<std::string, OptionTypeInfo>
     status_adapter_type_info = {
         {"code",
          {offsetof(struct StatusSerializationAdapter, code),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt8T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt8T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"subcode",
          {offsetof(struct StatusSerializationAdapter, subcode),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt8T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt8T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"severity",
          {offsetof(struct StatusSerializationAdapter, severity),
-          rocksdb_rs::utilities::options_type::OptionType::kUInt8T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kUInt8T,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
         {"message",
          {offsetof(struct StatusSerializationAdapter, message),
-          rocksdb_rs::utilities::options_type::OptionType::kEncodedString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+          rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+          rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
           rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
 };
 
 static std::unordered_map<std::string, OptionTypeInfo> cs_result_type_info = {
     {"status",
      {offsetof(struct CompactionServiceResult, status),
-      rocksdb_rs::utilities::options_type::OptionType::kCustomizable, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kCustomizable,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
       [](const ConfigOptions& opts, const std::string& /*name*/,
          const std::string& value, void* addr) {
@@ -691,18 +761,21 @@ static std::unordered_map<std::string, OptionTypeInfo> cs_result_type_info = {
       },
       [](const ConfigOptions& opts, const std::string& /*name*/,
          const void* addr, std::string* value) {
-        const auto status_obj = static_cast<const rocksdb_rs::status::Status*>(addr);
+        const auto status_obj =
+            static_cast<const rocksdb_rs::status::Status*>(addr);
         StatusSerializationAdapter adapter(*status_obj);
         std::string result;
-        rocksdb_rs::status::Status s = OptionTypeInfo::SerializeType(opts, status_adapter_type_info,
-                                                 &adapter, &result);
+        rocksdb_rs::status::Status s = OptionTypeInfo::SerializeType(
+            opts, status_adapter_type_info, &adapter, &result);
         *value = "{" + result + "}";
         return s;
       },
       [](const ConfigOptions& opts, const std::string& /*name*/,
          const void* addr1, const void* addr2, std::string* mismatch) {
-        const auto status1 = static_cast<const rocksdb_rs::status::Status*>(addr1);
-        const auto status2 = static_cast<const rocksdb_rs::status::Status*>(addr2);
+        const auto status1 =
+            static_cast<const rocksdb_rs::status::Status*>(addr1);
+        const auto status2 =
+            static_cast<const rocksdb_rs::status::Status*>(addr2);
 
         StatusSerializationAdapter adatper1(*status1);
         StatusSerializationAdapter adapter2(*status2);
@@ -712,43 +785,56 @@ static std::unordered_map<std::string, OptionTypeInfo> cs_result_type_info = {
     {"output_files",
      OptionTypeInfo::Vector<CompactionServiceOutputFile>(
          offsetof(struct CompactionServiceResult, output_files),
-         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
-         OptionTypeInfo::Struct("output_files", &cs_output_file_type_info, 0,
-                                rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
-                                rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone))},
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone,
+         OptionTypeInfo::Struct(
+             "output_files", &cs_output_file_type_info, 0,
+             rocksdb_rs::utilities::options_type::OptionVerificationType::
+                 kNormal,
+             rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone))},
     {"output_level",
-     {offsetof(struct CompactionServiceResult, output_level), rocksdb_rs::utilities::options_type::OptionType::kInt,
-      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
+     {offsetof(struct CompactionServiceResult, output_level),
+      rocksdb_rs::utilities::options_type::OptionType::kInt,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"output_path",
      {offsetof(struct CompactionServiceResult, output_path),
-      rocksdb_rs::utilities::options_type::OptionType::kEncodedString, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kEncodedString,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"num_output_records",
      {offsetof(struct CompactionServiceResult, num_output_records),
-      rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"total_bytes",
      {offsetof(struct CompactionServiceResult, total_bytes),
-      rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"bytes_read",
      {offsetof(struct CompactionServiceResult, bytes_read),
-      rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
     {"bytes_written",
      {offsetof(struct CompactionServiceResult, bytes_written),
-      rocksdb_rs::utilities::options_type::OptionType::kUInt64T, rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+      rocksdb_rs::utilities::options_type::OptionType::kUInt64T,
+      rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
       rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone}},
-    {"stats", OptionTypeInfo::Struct(
-                  "stats", &compaction_job_stats_type_info,
-                  offsetof(struct CompactionServiceResult, stats),
-                  rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal, rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
+    {"stats",
+     OptionTypeInfo::Struct(
+         "stats", &compaction_job_stats_type_info,
+         offsetof(struct CompactionServiceResult, stats),
+         rocksdb_rs::utilities::options_type::OptionVerificationType::kNormal,
+         rocksdb_rs::utilities::options_type::OptionTypeFlags::kNone)},
 };
 
-rocksdb_rs::status::Status CompactionServiceInput::Read(const std::string& data_str,
-                                    CompactionServiceInput* obj) {
+rocksdb_rs::status::Status CompactionServiceInput::Read(
+    const std::string& data_str, CompactionServiceInput* obj) {
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
-    return rocksdb_rs::status::Status_InvalidArgument("Invalid CompactionServiceInput string");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Invalid CompactionServiceInput string");
   }
   auto format_version = rocksdb_rs::coding_lean::DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
@@ -767,17 +853,19 @@ rocksdb_rs::status::Status CompactionServiceInput::Read(const std::string& data_
 
 rocksdb_rs::status::Status CompactionServiceInput::Write(std::string* output) {
   char buf[sizeof(BinaryFormatVersion)];
-  rocksdb_rs::coding_lean::EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
+  rocksdb_rs::coding_lean::EncodeFixed32(
+      buf, (uint32_t)BinaryFormatVersion::kOptionsString);
   output->append(buf, sizeof(BinaryFormatVersion));
   ConfigOptions cf;
   cf.invoke_prepare_options = false;
   return OptionTypeInfo::SerializeType(cf, cs_input_type_info, this, output);
 }
 
-rocksdb_rs::status::Status CompactionServiceResult::Read(const std::string& data_str,
-                                     CompactionServiceResult* obj) {
+rocksdb_rs::status::Status CompactionServiceResult::Read(
+    const std::string& data_str, CompactionServiceResult* obj) {
   if (data_str.size() <= sizeof(BinaryFormatVersion)) {
-    return rocksdb_rs::status::Status_InvalidArgument("Invalid CompactionServiceResult string");
+    return rocksdb_rs::status::Status_InvalidArgument(
+        "Invalid CompactionServiceResult string");
   }
   auto format_version = rocksdb_rs::coding_lean::DecodeFixed32(data_str.data());
   if (format_version == (uint32_t)BinaryFormatVersion::kOptionsString) {
@@ -796,7 +884,8 @@ rocksdb_rs::status::Status CompactionServiceResult::Read(const std::string& data
 
 rocksdb_rs::status::Status CompactionServiceResult::Write(std::string* output) {
   char buf[sizeof(BinaryFormatVersion)];
-  rocksdb_rs::coding_lean::EncodeFixed32(buf, (uint32_t)BinaryFormatVersion::kOptionsString);
+  rocksdb_rs::coding_lean::EncodeFixed32(
+      buf, (uint32_t)BinaryFormatVersion::kOptionsString);
   output->append(buf, sizeof(BinaryFormatVersion));
   ConfigOptions cf;
   cf.invoke_prepare_options = false;
@@ -831,4 +920,3 @@ bool CompactionServiceInput::TEST_Equals(CompactionServiceInput* other,
 }
 #endif  // NDEBUG
 }  // namespace rocksdb
-

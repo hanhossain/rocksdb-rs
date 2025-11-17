@@ -464,7 +464,8 @@ TEST_F(DBTest, LevelLimitReopen) {
 
   options.num_levels = 1;
   options.max_bytes_for_level_multiplier_additional.resize(1, 1);
-  rocksdb_rs::status::Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status s =
+      TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_EQ(s.IsInvalidArgument(), true);
   ASSERT_EQ(*s.ToString(),
             "Invalid argument: db has more levels than options.num_levels");
@@ -1120,7 +1121,6 @@ class DelayFilterFactory : public CompactionFilterFactory {
 };
 }  // anonymous namespace
 
-
 static std::string CompressibleString(Random* rnd, int len) {
   std::string r;
   test::CompressibleString(rnd, 0.8, len, &r);
@@ -1189,7 +1189,8 @@ void CheckColumnFamilyMeta(
       ASSERT_GE(file_meta_from_cf.oldest_ancester_time, start_time);
       ASSERT_LE(file_meta_from_cf.oldest_ancester_time, end_time);
       // More from FileStorageInfo
-      ASSERT_EQ(file_meta_from_cf.file_type, rocksdb_rs::types::FileType::kTableFile);
+      ASSERT_EQ(file_meta_from_cf.file_type,
+                rocksdb_rs::types::FileType::kTableFile);
       ASSERT_EQ(file_meta_from_cf.name,
                 "/" + file_meta_from_cf.relative_filename);
       ASSERT_EQ(file_meta_from_cf.directory, file_meta_from_cf.db_path);
@@ -1282,7 +1283,8 @@ static void CheckBlobMetaData(
     const std::string& checksum_method, const std::string& checksum_value,
     uint64_t garbage_blob_count = 0, uint64_t garbage_blob_bytes = 0) {
   ASSERT_EQ(bmd.blob_file_number, blob_file_number);
-  ASSERT_EQ(bmd.blob_file_name, static_cast<std::string>(BlobFileName("", blob_file_number)));
+  ASSERT_EQ(bmd.blob_file_name,
+            static_cast<std::string>(BlobFileName("", blob_file_number)));
   ASSERT_EQ(bmd.blob_file_size,
             total_blob_bytes + BlobLogHeader::kSize + BlobLogFooter::kSize);
 
@@ -1310,8 +1312,10 @@ TEST_F(DBTest, MetaDataTest) {
   for (int i = 0; i < 100; ++i) {
     // Add a single blob reference to each file
     std::string blob_index;
-    BlobIndex::EncodeBlob(&blob_index, /* blob_file_number */ i + 1000,
-                          /* offset */ 1234, /* size */ 5678, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    BlobIndex::EncodeBlob(
+        &blob_index, /* blob_file_number */ i + 1000,
+        /* offset */ 1234, /* size */ 5678,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     WriteBatch batch;
     ASSERT_OK(WriteBatchInternal::PutBlobIndex(&batch, 0, Key(key_index),
@@ -1428,8 +1432,8 @@ void MinLevelHelper(DBTest* self, Options& options) {
 }
 
 // returns false if the calling-Test should be skipped
-bool MinLevelToCompress(rocksdb_rs::compression_type::CompressionType& type, Options& options, int wbits,
-                        int lev, int strategy) {
+bool MinLevelToCompress(rocksdb_rs::compression_type::CompressionType& type,
+                        Options& options, int wbits, int lev, int strategy) {
   fprintf(stderr,
           "Test with compression options : window_bits = %d, level =  %d, "
           "strategy = %d}\n",
@@ -1466,7 +1470,8 @@ bool MinLevelToCompress(rocksdb_rs::compression_type::CompressionType& type, Opt
 
   // do not compress L0
   for (int i = 0; i < 1; i++) {
-    options.compression_per_level[i] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression_per_level[i] =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   for (int i = 1; i < options.num_levels; i++) {
     options.compression_per_level[i] = type;
@@ -1477,7 +1482,8 @@ bool MinLevelToCompress(rocksdb_rs::compression_type::CompressionType& type, Opt
 
 TEST_F(DBTest, MinLevelToCompress1) {
   Options options = CurrentOptions();
-  rocksdb_rs::compression_type::CompressionType type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+  rocksdb_rs::compression_type::CompressionType type =
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   if (!MinLevelToCompress(type, options, -14, -1, 0)) {
     return;
   }
@@ -1486,7 +1492,8 @@ TEST_F(DBTest, MinLevelToCompress1) {
 
   // do not compress L0 and L1
   for (int i = 0; i < 2; i++) {
-    options.compression_per_level[i] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression_per_level[i] =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   for (int i = 2; i < options.num_levels; i++) {
     options.compression_per_level[i] = type;
@@ -1497,7 +1504,8 @@ TEST_F(DBTest, MinLevelToCompress1) {
 
 TEST_F(DBTest, MinLevelToCompress2) {
   Options options = CurrentOptions();
-  rocksdb_rs::compression_type::CompressionType type = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+  rocksdb_rs::compression_type::CompressionType type =
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
   if (!MinLevelToCompress(type, options, 15, -1, 0)) {
     return;
   }
@@ -1506,7 +1514,8 @@ TEST_F(DBTest, MinLevelToCompress2) {
 
   // do not compress L0 and L1
   for (int i = 0; i < 2; i++) {
-    options.compression_per_level[i] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression_per_level[i] =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
   }
   for (int i = 2; i < options.num_levels; i++) {
     options.compression_per_level[i] = type;
@@ -1552,7 +1561,8 @@ static bool Between(uint64_t val, uint64_t low, uint64_t high) {
 TEST_F(DBTest, ApproximateSizesMemTable) {
   Options options = CurrentOptions();
   options.write_buffer_size = 100000000;  // Large write buffer
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   DestroyAndReopen(options);
   auto default_cf = db_->DefaultColumnFamily();
@@ -1699,7 +1709,8 @@ TEST_F(DBTest, ApproximateSizesFilesWithErrorMargin) {
   Options options = CurrentOptions();
   options.table_factory.reset(NewBlockBasedTableFactory(table_options));
   options.write_buffer_size = 24 * 1024;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.target_file_size_base = 24 * 1024;
   DestroyAndReopen(options);
@@ -1772,7 +1783,8 @@ TEST_F(DBTest, ApproximateSizesFilesWithErrorMargin) {
 TEST_F(DBTest, GetApproximateMemTableStats) {
   Options options = CurrentOptions();
   options.write_buffer_size = 100000000;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   DestroyAndReopen(options);
 
@@ -1826,7 +1838,8 @@ TEST_F(DBTest, ApproximateSizes) {
   do {
     Options options = CurrentOptions();
     options.write_buffer_size = 100000000;  // Large write buffer
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.create_if_missing = true;
     DestroyAndReopen(options);
     CreateAndReopenWithCF({"pikachu"}, options);
@@ -1888,7 +1901,8 @@ TEST_F(DBTest, ApproximateSizes) {
 TEST_F(DBTest, ApproximateSizes_MixOfSmallAndLarge) {
   do {
     Options options = CurrentOptions();
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     CreateAndReopenWithCF({"pikachu"}, options);
 
     Random rnd(301);
@@ -2372,7 +2386,8 @@ TEST_F(DBTest, DBOpen_Change_NumLevels) {
 
   options.create_if_missing = false;
   options.num_levels = 2;
-  rocksdb_rs::status::Status s = TryReopenWithColumnFamilies({"default", "pikachu"}, options);
+  rocksdb_rs::status::Status s =
+      TryReopenWithColumnFamilies({"default", "pikachu"}, options);
   ASSERT_TRUE(strstr(s.ToString()->c_str(), "Invalid argument") != nullptr);
   ASSERT_TRUE(db_ == nullptr);
 }
@@ -2380,9 +2395,11 @@ TEST_F(DBTest, DBOpen_Change_NumLevels) {
 TEST_F(DBTest, DestroyDBMetaDatabase) {
   std::string dbname = test::PerThreadDBPath("db_meta");
   ASSERT_OK(env_->CreateDirIfMissing(dbname));
-  std::string metadbname = static_cast<std::string>(MetaDatabaseName(dbname, 0));
+  std::string metadbname =
+      static_cast<std::string>(MetaDatabaseName(dbname, 0));
   ASSERT_OK(env_->CreateDirIfMissing(metadbname));
-  std::string metametadbname = static_cast<std::string>(MetaDatabaseName(metadbname, 0));
+  std::string metametadbname =
+      static_cast<std::string>(MetaDatabaseName(metadbname, 0));
   ASSERT_OK(env_->CreateDirIfMissing(metametadbname));
 
   // Destroy previous versions if they exist. Using the long way.
@@ -2624,7 +2641,8 @@ TEST_F(DBTest, GetLiveBlobFiles) {
   ASSERT_OK(dbfull()->GetLiveFiles(files, &manifest_size));
 
   ASSERT_FALSE(files.empty());
-  ASSERT_EQ(files[0], static_cast<std::string>(BlobFileName("", blob_file_number)));
+  ASSERT_EQ(files[0],
+            static_cast<std::string>(BlobFileName("", blob_file_number)));
 
   ColumnFamilyMetaData cfmd;
 
@@ -2984,8 +3002,8 @@ class ModelDB : public DB {
 
   explicit ModelDB(const Options& options) : options_(options) {}
   using DB::Put;
-  rocksdb_rs::status::Status Put(const WriteOptions& o, ColumnFamilyHandle* cf, const Slice& k,
-             const Slice& v) override {
+  rocksdb_rs::status::Status Put(const WriteOptions& o, ColumnFamilyHandle* cf,
+                                 const Slice& k, const Slice& v) override {
     WriteBatch batch;
     rocksdb_rs::status::Status s = batch.Put(cf, k, v);
     if (!s.ok()) {
@@ -2993,25 +3011,29 @@ class ModelDB : public DB {
     }
     return Write(o, &batch);
   }
-  rocksdb_rs::status::Status Put(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
-             const Slice& /*k*/, const Slice& /*ts*/,
-             const Slice& /*v*/) override {
+  rocksdb_rs::status::Status Put(const WriteOptions& /*o*/,
+                                 ColumnFamilyHandle* /*cf*/, const Slice& /*k*/,
+                                 const Slice& /*ts*/,
+                                 const Slice& /*v*/) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
 
   using DB::PutEntity;
-  rocksdb_rs::status::Status PutEntity(const WriteOptions& /* options */,
-                   ColumnFamilyHandle* /* column_family */,
-                   const Slice& /* key */,
-                   const WideColumns& /* columns */) override {
+  rocksdb_rs::status::Status PutEntity(
+      const WriteOptions& /* options */,
+      ColumnFamilyHandle* /* column_family */, const Slice& /* key */,
+      const WideColumns& /* columns */) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
 
   using DB::Close;
-  rocksdb_rs::status::Status Close() override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status Close() override {
+    return rocksdb_rs::status::Status_OK();
+  }
   using DB::Delete;
-  rocksdb_rs::status::Status Delete(const WriteOptions& o, ColumnFamilyHandle* cf,
-                const Slice& key) override {
+  rocksdb_rs::status::Status Delete(const WriteOptions& o,
+                                    ColumnFamilyHandle* cf,
+                                    const Slice& key) override {
     WriteBatch batch;
     rocksdb_rs::status::Status s = batch.Delete(cf, key);
     if (!s.ok()) {
@@ -3019,13 +3041,16 @@ class ModelDB : public DB {
     }
     return Write(o, &batch);
   }
-  rocksdb_rs::status::Status Delete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
-                const Slice& /*key*/, const Slice& /*ts*/) override {
+  rocksdb_rs::status::Status Delete(const WriteOptions& /*o*/,
+                                    ColumnFamilyHandle* /*cf*/,
+                                    const Slice& /*key*/,
+                                    const Slice& /*ts*/) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
   using DB::SingleDelete;
-  rocksdb_rs::status::Status SingleDelete(const WriteOptions& o, ColumnFamilyHandle* cf,
-                      const Slice& key) override {
+  rocksdb_rs::status::Status SingleDelete(const WriteOptions& o,
+                                          ColumnFamilyHandle* cf,
+                                          const Slice& key) override {
     WriteBatch batch;
     rocksdb_rs::status::Status s = batch.SingleDelete(cf, key);
     if (!s.ok()) {
@@ -3033,13 +3058,16 @@ class ModelDB : public DB {
     }
     return Write(o, &batch);
   }
-  rocksdb_rs::status::Status SingleDelete(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
-                      const Slice& /*key*/, const Slice& /*ts*/) override {
+  rocksdb_rs::status::Status SingleDelete(const WriteOptions& /*o*/,
+                                          ColumnFamilyHandle* /*cf*/,
+                                          const Slice& /*key*/,
+                                          const Slice& /*ts*/) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
   using DB::Merge;
-  rocksdb_rs::status::Status Merge(const WriteOptions& o, ColumnFamilyHandle* cf, const Slice& k,
-               const Slice& v) override {
+  rocksdb_rs::status::Status Merge(const WriteOptions& o,
+                                   ColumnFamilyHandle* cf, const Slice& k,
+                                   const Slice& v) override {
     WriteBatch batch;
     rocksdb_rs::status::Status s = batch.Merge(cf, k, v);
     if (!s.ok()) {
@@ -3047,14 +3075,16 @@ class ModelDB : public DB {
     }
     return Write(o, &batch);
   }
-  rocksdb_rs::status::Status Merge(const WriteOptions& /*o*/, ColumnFamilyHandle* /*cf*/,
-               const Slice& /*k*/, const Slice& /*ts*/,
-               const Slice& /*value*/) override {
+  rocksdb_rs::status::Status Merge(const WriteOptions& /*o*/,
+                                   ColumnFamilyHandle* /*cf*/,
+                                   const Slice& /*k*/, const Slice& /*ts*/,
+                                   const Slice& /*value*/) override {
     return rocksdb_rs::status::Status_NotSupported();
   }
   using DB::Get;
-  rocksdb_rs::status::Status Get(const ReadOptions& /*options*/, ColumnFamilyHandle* /*cf*/,
-             const Slice& key, PinnableSlice* /*value*/) override {
+  rocksdb_rs::status::Status Get(const ReadOptions& /*options*/,
+                                 ColumnFamilyHandle* /*cf*/, const Slice& key,
+                                 PinnableSlice* /*value*/) override {
     return rocksdb_rs::status::Status_NotSupported(key);
   }
 
@@ -3073,7 +3103,9 @@ class ModelDB : public DB {
       const std::vector<ColumnFamilyHandle*>& /*column_family*/,
       const std::vector<Slice>& keys,
       std::vector<std::string>* /*values*/) override {
-    rust::Vec<rocksdb_rs::status::Status> s = rocksdb_rs::status::Status_NotSupported("Not implemented.").create_vec(keys.size());
+    rust::Vec<rocksdb_rs::status::Status> s =
+        rocksdb_rs::status::Status_NotSupported("Not implemented.")
+            .create_vec(keys.size());
     return s;
   }
 
@@ -3107,9 +3139,9 @@ class ModelDB : public DB {
   }
 
   using DB::ClipColumnFamily;
-  virtual rocksdb_rs::status::Status ClipColumnFamily(ColumnFamilyHandle* /*column_family*/,
-                                  const Slice& /*begin*/,
-                                  const Slice& /*end*/) override {
+  virtual rocksdb_rs::status::Status ClipColumnFamily(
+      ColumnFamilyHandle* /*column_family*/, const Slice& /*begin*/,
+      const Slice& /*end*/) override {
     return rocksdb_rs::status::Status_NotSupported("Not implemented.");
   }
 
@@ -3149,9 +3181,10 @@ class ModelDB : public DB {
       return new ModelIter(snapshot_state, false);
     }
   }
-  rocksdb_rs::status::Status NewIterators(const ReadOptions& /*options*/,
-                      const std::vector<ColumnFamilyHandle*>& /*column_family*/,
-                      std::vector<Iterator*>* /*iterators*/) override {
+  rocksdb_rs::status::Status NewIterators(
+      const ReadOptions& /*options*/,
+      const std::vector<ColumnFamilyHandle*>& /*column_family*/,
+      std::vector<Iterator*>* /*iterators*/) override {
     return rocksdb_rs::status::Status_NotSupported("Not supported yet");
   }
   const Snapshot* GetSnapshot() override {
@@ -3164,7 +3197,8 @@ class ModelDB : public DB {
     delete reinterpret_cast<const ModelSnapshot*>(snapshot);
   }
 
-  rocksdb_rs::status::Status Write(const WriteOptions& /*options*/, WriteBatch* batch) override {
+  rocksdb_rs::status::Status Write(const WriteOptions& /*options*/,
+                                   WriteBatch* batch) override {
     class Handler : public WriteBatch::Handler {
      public:
       KVMap* map_;
@@ -3204,10 +3238,10 @@ class ModelDB : public DB {
     return false;
   }
   using DB::GetApproximateSizes;
-  rocksdb_rs::status::Status GetApproximateSizes(const SizeApproximationOptions& /*options*/,
-                             ColumnFamilyHandle* /*column_family*/,
-                             const Range* /*range*/, int n,
-                             uint64_t* sizes) override {
+  rocksdb_rs::status::Status GetApproximateSizes(
+      const SizeApproximationOptions& /*options*/,
+      ColumnFamilyHandle* /*column_family*/, const Range* /*range*/, int n,
+      uint64_t* sizes) override {
     for (int i = 0; i < n; i++) {
       sizes[i] = 0;
     }
@@ -3222,9 +3256,10 @@ class ModelDB : public DB {
     *size = 0;
   }
   using DB::CompactRange;
-  rocksdb_rs::status::Status CompactRange(const CompactRangeOptions& /*options*/,
-                      ColumnFamilyHandle* /*column_family*/,
-                      const Slice* /*start*/, const Slice* /*end*/) override {
+  rocksdb_rs::status::Status CompactRange(
+      const CompactRangeOptions& /*options*/,
+      ColumnFamilyHandle* /*column_family*/, const Slice* /*start*/,
+      const Slice* /*end*/) override {
     return rocksdb_rs::status::Status_NotSupported("Not supported operation.");
   }
 
@@ -3294,8 +3329,9 @@ class ModelDB : public DB {
   DBOptions GetDBOptions() const override { return options_; }
 
   using DB::Flush;
-  rocksdb_rs::status::Status Flush(const rocksdb::FlushOptions& /*options*/,
-               ColumnFamilyHandle* /*column_family*/) override {
+  rocksdb_rs::status::Status Flush(
+      const rocksdb::FlushOptions& /*options*/,
+      ColumnFamilyHandle* /*column_family*/) override {
     rocksdb_rs::status::Status ret = rocksdb_rs::status::Status_new();
     return ret;
   }
@@ -3305,14 +3341,21 @@ class ModelDB : public DB {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status SyncWAL() override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status SyncWAL() override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
-  rocksdb_rs::status::Status DisableFileDeletions() override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status DisableFileDeletions() override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
-  rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status EnableFileDeletions(bool /*force*/) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
-  rocksdb_rs::status::Status GetLiveFiles(std::vector<std::string>&, uint64_t* /*size*/,
-                      bool /*flush_memtable*/ = true) override {
+  rocksdb_rs::status::Status GetLiveFiles(
+      std::vector<std::string>&, uint64_t* /*size*/,
+      bool /*flush_memtable*/ = true) override {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -3327,7 +3370,8 @@ class ModelDB : public DB {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status GetSortedWalFiles(VectorLogPtr& /*files*/) override {
+  rocksdb_rs::status::Status GetSortedWalFiles(
+      VectorLogPtr& /*files*/) override {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -3341,7 +3385,9 @@ class ModelDB : public DB {
     return rocksdb_rs::status::Status_NotSupported();
   }
 
-  rocksdb_rs::status::Status DeleteFile(std::string /*name*/) override { return rocksdb_rs::status::Status_OK(); }
+  rocksdb_rs::status::Status DeleteFile(std::string /*name*/) override {
+    return rocksdb_rs::status::Status_OK();
+  }
 
   rocksdb_rs::status::Status GetUpdatesSince(
       rocksdb::SequenceNumber,
@@ -3354,23 +3400,25 @@ class ModelDB : public DB {
   void GetColumnFamilyMetaData(ColumnFamilyHandle* /*column_family*/,
                                ColumnFamilyMetaData* /*metadata*/) override {}
 
-  rocksdb_rs::status::Status GetDbIdentity(std::string& /*identity*/) const override {
+  rocksdb_rs::status::Status GetDbIdentity(
+      std::string& /*identity*/) const override {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status GetDbSessionId(std::string& /*session_id*/) const override {
+  rocksdb_rs::status::Status GetDbSessionId(
+      std::string& /*session_id*/) const override {
     return rocksdb_rs::status::Status_OK();
   }
 
   SequenceNumber GetLatestSequenceNumber() const override { return 0; }
 
-  rocksdb_rs::status::Status IncreaseFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
-                                  std::string /*ts_low*/) override {
+  rocksdb_rs::status::Status IncreaseFullHistoryTsLow(
+      ColumnFamilyHandle* /*cf*/, std::string /*ts_low*/) override {
     return rocksdb_rs::status::Status_OK();
   }
 
-  rocksdb_rs::status::Status GetFullHistoryTsLow(ColumnFamilyHandle* /*cf*/,
-                             std::string* /*ts_low*/) override {
+  rocksdb_rs::status::Status GetFullHistoryTsLow(
+      ColumnFamilyHandle* /*cf*/, std::string* /*ts_low*/) override {
     return rocksdb_rs::status::Status_OK();
   }
 
@@ -3411,7 +3459,9 @@ class ModelDB : public DB {
 
     Slice key() const override { return iter_->first; }
     Slice value() const override { return iter_->second; }
-    rocksdb_rs::status::Status status() const override { return rocksdb_rs::status::Status_OK(); }
+    rocksdb_rs::status::Status status() const override {
+      return rocksdb_rs::status::Status_OK();
+    }
 
    private:
     const KVMap* const map_;
@@ -3751,7 +3801,8 @@ TEST_P(DBTestWithParam, FIFOCompactionTest) {
     options.write_buffer_size = 100 << 10;  // 100KB
     options.arena_block_size = 4096;
     options.compaction_options_fifo.max_table_files_size = 500 << 10;  // 500KB
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.create_if_missing = true;
     options.max_subcompactions = max_subcompactions_;
     if (iter == 1) {
@@ -3792,7 +3843,8 @@ TEST_F(DBTest, FIFOCompactionTestWithCompaction) {
   options.compaction_options_fifo.max_table_files_size = 1500 << 10;  // 1MB
   options.compaction_options_fifo.allow_compaction = true;
   options.level0_file_num_compaction_trigger = 6;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options = CurrentOptions(options);
   DestroyAndReopen(options);
@@ -3834,7 +3886,8 @@ TEST_F(DBTest, FIFOCompactionStyleWithCompactionAndDelete) {
   options.compaction_options_fifo.max_table_files_size = 1500 << 10;  // 1MB
   options.compaction_options_fifo.allow_compaction = true;
   options.level0_file_num_compaction_trigger = 3;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options = CurrentOptions(options);
   DestroyAndReopen(options);
@@ -3911,7 +3964,8 @@ TEST_F(DBTest, FIFOCompactionWithTTLTest) {
   options.compaction_style = kCompactionStyleFIFO;
   options.write_buffer_size = 10 << 10;  // 10KB
   options.arena_block_size = 4096;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   env_->SetMockSleep();
   options.env = env_;
@@ -4125,7 +4179,8 @@ TEST_F(DBTest, DISABLED_RateLimitingTest) {
   options.target_file_size_base = 1 << 20;     // 1MB
   options.max_bytes_for_level_base = 4 << 20;  // 4MB
   options.max_bytes_for_level_multiplier = 4;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.create_if_missing = true;
   options.env = env_;
   options.statistics = rocksdb::CreateDBStatistics();
@@ -4294,7 +4349,6 @@ TEST_F(DBTest, ConcurrentMemtableNotSupported) {
   ASSERT_NOK(db_->CreateColumnFamily(cf_options, "name", &handle));
 }
 
-
 TEST_F(DBTest, SanitizeNumThreads) {
   for (int attempt = 0; attempt < 2; attempt++) {
     const size_t kTotalTasks = 8;
@@ -4454,7 +4508,8 @@ TEST_F(DBTest, DynamicMemtableOptions) {
   Options options;
   options.env = env_;
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_background_compactions = 1;
   options.write_buffer_size = k64KB;
   options.arena_block_size = 16 * 1024;
@@ -4752,7 +4807,8 @@ TEST_P(DBTestWithParam, ThreadStatusSingleCompaction) {
   options.target_file_size_base = options.write_buffer_size;
   options.max_bytes_for_level_base = options.target_file_size_base * 2;
   options.max_bytes_for_level_multiplier = 2;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options = CurrentOptions(options);
   options.env = env_;
   options.enable_thread_tracking = true;
@@ -4890,7 +4946,8 @@ TEST_P(DBTestWithParam, PreShutdownMultipleCompaction) {
   options.target_file_size_base = options.write_buffer_size;
   options.max_bytes_for_level_base =
       options.target_file_size_base * kNumL0Files;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options = CurrentOptions(options);
   options.env = env_;
   options.enable_thread_tracking = true;
@@ -4979,7 +5036,8 @@ TEST_P(DBTestWithParam, PreShutdownCompactionMiddle) {
   options.target_file_size_base = options.write_buffer_size;
   options.max_bytes_for_level_base =
       options.target_file_size_base * kNumL0Files;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options = CurrentOptions(options);
   options.env = env_;
   options.enable_thread_tracking = true;
@@ -5085,9 +5143,12 @@ TEST_F(DBTest, DynamicLevelCompressionPerLevel) {
   options.num_levels = 5;
 
   options.compression_per_level.resize(3);
-  options.compression_per_level[0] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
-  options.compression_per_level[1] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
-  options.compression_per_level[2] = rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
+  options.compression_per_level[0] =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression_per_level[1] =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression_per_level[2] =
+      rocksdb_rs::compression_type::CompressionType::kSnappyCompression;
 
   OnFileDeletionListener* listener = new OnFileDeletionListener();
   options.listeners.emplace_back(listener);
@@ -5173,9 +5234,12 @@ TEST_F(DBTest, DynamicLevelCompressionPerLevel2) {
   options.table_factory = mtf;
 
   options.compression_per_level.resize(3);
-  options.compression_per_level[0] = rocksdb_rs::compression_type::CompressionType::kNoCompression;
-  options.compression_per_level[1] = rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
-  options.compression_per_level[2] = rocksdb_rs::compression_type::CompressionType::kZlibCompression;
+  options.compression_per_level[0] =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression_per_level[1] =
+      rocksdb_rs::compression_type::CompressionType::kLZ4Compression;
+  options.compression_per_level[2] =
+      rocksdb_rs::compression_type::CompressionType::kZlibCompression;
 
   DestroyAndReopen(options);
   // When base level is L4, L4 is LZ4.
@@ -5186,14 +5250,20 @@ TEST_F(DBTest, DynamicLevelCompressionPerLevel2) {
       "LevelCompactionPicker::PickCompaction:Return", [&](void* arg) {
         Compaction* compaction = reinterpret_cast<Compaction*>(arg);
         if (compaction->output_level() == 4) {
-          ASSERT_TRUE(compaction->output_compression() == rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+          ASSERT_TRUE(
+              compaction->output_compression() ==
+              rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
           num_lz4.fetch_add(1);
         }
       });
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "FlushJob::WriteLevel0Table:output_compression", [&](void* arg) {
-        auto* compression = reinterpret_cast<rocksdb_rs::compression_type::CompressionType*>(arg);
-        ASSERT_TRUE(*compression == rocksdb_rs::compression_type::CompressionType::kNoCompression);
+        auto* compression =
+            reinterpret_cast<rocksdb_rs::compression_type::CompressionType*>(
+                arg);
+        ASSERT_TRUE(
+            *compression ==
+            rocksdb_rs::compression_type::CompressionType::kNoCompression);
         num_no.fetch_add(1);
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -5228,17 +5298,25 @@ TEST_F(DBTest, DynamicLevelCompressionPerLevel2) {
       "LevelCompactionPicker::PickCompaction:Return", [&](void* arg) {
         Compaction* compaction = reinterpret_cast<Compaction*>(arg);
         if (compaction->output_level() == 4 && compaction->start_level() == 3) {
-          ASSERT_TRUE(compaction->output_compression() == rocksdb_rs::compression_type::CompressionType::kZlibCompression);
+          ASSERT_TRUE(
+              compaction->output_compression() ==
+              rocksdb_rs::compression_type::CompressionType::kZlibCompression);
           num_zlib.fetch_add(1);
         } else {
-          ASSERT_TRUE(compaction->output_compression() == rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
+          ASSERT_TRUE(
+              compaction->output_compression() ==
+              rocksdb_rs::compression_type::CompressionType::kLZ4Compression);
           num_lz4.fetch_add(1);
         }
       });
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
       "FlushJob::WriteLevel0Table:output_compression", [&](void* arg) {
-        auto* compression = reinterpret_cast<rocksdb_rs::compression_type::CompressionType*>(arg);
-        ASSERT_TRUE(*compression == rocksdb_rs::compression_type::CompressionType::kNoCompression);
+        auto* compression =
+            reinterpret_cast<rocksdb_rs::compression_type::CompressionType*>(
+                arg);
+        ASSERT_TRUE(
+            *compression ==
+            rocksdb_rs::compression_type::CompressionType::kNoCompression);
         num_no.fetch_add(1);
       });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
@@ -5274,7 +5352,8 @@ TEST_F(DBTest, DynamicCompactionOptions) {
   options.level_compaction_dynamic_level_bytes = false;
   options.env = env_;
   options.create_if_missing = true;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.soft_pending_compaction_bytes_limit = 1024 * 1024;
   options.write_buffer_size = k64KB;
   options.arena_block_size = 4 * k4KB;
@@ -5664,14 +5743,14 @@ TEST_F(DBTest, FileCreationRandomFailure) {
   }
 }
 
-
 TEST_F(DBTest, DynamicMiscOptions) {
   // Test max_sequential_skip_in_iterations
   Options options;
   options.env = env_;
   options.create_if_missing = true;
   options.max_sequential_skip_in_iterations = 16;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.statistics = rocksdb::CreateDBStatistics();
   DestroyAndReopen(options);
 
@@ -5734,7 +5813,8 @@ TEST_F(DBTest, DynamicMiscOptions) {
   ASSERT_OK(dbfull()->SetOptions({{"compression", "kNoCompression"}}));
   ASSERT_OK(dbfull()->TEST_GetLatestMutableCFOptions(handles_[0],
                                                      &mutable_cf_options));
-  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kNoCompression, mutable_cf_options.compression);
+  ASSERT_EQ(rocksdb_rs::compression_type::CompressionType::kNoCompression,
+            mutable_cf_options.compression);
 
   if (Snappy_Supported()) {
     ASSERT_OK(dbfull()->SetOptions({{"compression", "kSnappyCompression"}}));
@@ -5807,9 +5887,12 @@ TEST_F(DBTest, EncodeDecompressedBlockSizeTest) {
   // iter 2 -- lz4
   // iter 3 -- lz4HC
   // iter 4 -- xpress
-  rocksdb_rs::compression_type::CompressionType compressions[] = {rocksdb_rs::compression_type::CompressionType::kZlibCompression, rocksdb_rs::compression_type::CompressionType::kBZip2Compression,
-                                    rocksdb_rs::compression_type::CompressionType::kLZ4Compression, rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression,
-                                    rocksdb_rs::compression_type::CompressionType::kXpressCompression};
+  rocksdb_rs::compression_type::CompressionType compressions[] = {
+      rocksdb_rs::compression_type::CompressionType::kZlibCompression,
+      rocksdb_rs::compression_type::CompressionType::kBZip2Compression,
+      rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+      rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression,
+      rocksdb_rs::compression_type::CompressionType::kXpressCompression};
   for (auto comp : compressions) {
     if (!CompressionTypeSupported(comp)) {
       continue;
@@ -5875,7 +5958,8 @@ TEST_F(DBTest, CloseSpeedup) {
   // Delete archival files.
   bool deleteDir = true;
   for (size_t i = 0; i < filenames.size(); ++i) {
-    rocksdb_rs::status::Status s = env_->DeleteFile(dbname_ + "/" + filenames[i]);
+    rocksdb_rs::status::Status s =
+        env_->DeleteFile(dbname_ + "/" + filenames[i]);
     if (!s.ok()) {
       deleteDir = false;
     }
@@ -6094,7 +6178,8 @@ TEST_F(DBTest, SuggestCompactRangeTest) {
   options.arena_block_size = 4 << 10;
   options.level0_file_num_compaction_trigger = 4;
   options.num_levels = 4;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_base = 450 << 10;
   options.target_file_size_base = 98 << 10;
   options.max_compaction_bytes = static_cast<uint64_t>(1) << 60;  // inf
@@ -6159,7 +6244,8 @@ TEST_F(DBTest, SuggestCompactRangeUniversal) {
   options.arena_block_size = 4 << 10;
   options.level0_file_num_compaction_trigger = 4;
   options.num_levels = 4;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_base = 450 << 10;
   options.target_file_size_base = 98 << 10;
   options.max_compaction_bytes = static_cast<uint64_t>(1) << 60;  // inf
@@ -6456,7 +6542,8 @@ TEST_F(DBTest, FlushesInParallelWithCompactRange) {
     options.write_buffer_size = 110 << 10;
     options.level0_file_num_compaction_trigger = 4;
     options.num_levels = 4;
-    options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+    options.compression =
+        rocksdb_rs::compression_type::CompressionType::kNoCompression;
     options.max_bytes_for_level_base = 450 << 10;
     options.target_file_size_base = 98 << 10;
     options.max_write_buffer_number = 2;
@@ -6592,11 +6679,11 @@ TEST_F(DBTest, HardLimit) {
   CreateAndReopenWithCF({"pikachu"}, options);
 
   std::atomic<int> callback_count(0);
-  rocksdb::SyncPoint::GetInstance()->SetCallBack(
-      "DBImpl::DelayWrite:Wait", [&](void* /*arg*/) {
-        callback_count.fetch_add(1);
-        sleeping_task_low.WakeUp();
-      });
+  rocksdb::SyncPoint::GetInstance()->SetCallBack("DBImpl::DelayWrite:Wait",
+                                                 [&](void* /*arg*/) {
+                                                   callback_count.fetch_add(1);
+                                                   sleeping_task_low.WakeUp();
+                                                 });
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
   Random rnd(301);
@@ -6621,7 +6708,8 @@ TEST_F(DBTest, HardLimit) {
 #if !defined(ROCKSDB_DISABLE_STALL_NOTIFICATION)
 class WriteStallListener : public EventListener {
  public:
-  WriteStallListener() : condition_(rocksdb_rs::types::WriteStallCondition::kNormal) {}
+  WriteStallListener()
+      : condition_(rocksdb_rs::types::WriteStallCondition::kNormal) {}
   void OnStallConditionsChanged(const WriteStallInfo& info) override {
     MutexLock l(&mutex_);
     condition_ = info.condition.cur;
@@ -6650,7 +6738,8 @@ TEST_F(DBTest, SoftLimit) {
   options.max_bytes_for_level_base = 50000;
   options.max_bytes_for_level_multiplier = 10;
   options.max_background_compactions = 1;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   WriteStallListener* listener = new WriteStallListener();
   options.listeners.emplace_back(listener);
 
@@ -6729,7 +6818,8 @@ TEST_F(DBTest, SoftLimit) {
     WaitForFlush();
   }
   ASSERT_TRUE(dbfull()->TEST_write_controler().NeedsDelay());
-  ASSERT_TRUE(listener->CheckCondition(rocksdb_rs::types::WriteStallCondition::kDelayed));
+  ASSERT_TRUE(listener->CheckCondition(
+      rocksdb_rs::types::WriteStallCondition::kDelayed));
 
   sleeping_task_low.WakeUp();
   sleeping_task_low.WaitUntilDone();
@@ -6744,7 +6834,8 @@ TEST_F(DBTest, SoftLimit) {
   // The L1 file size is around 30KB.
   ASSERT_EQ(NumTableFilesAtLevel(1), 1);
   ASSERT_TRUE(!dbfull()->TEST_write_controler().NeedsDelay());
-  ASSERT_TRUE(listener->CheckCondition(rocksdb_rs::types::WriteStallCondition::kNormal));
+  ASSERT_TRUE(listener->CheckCondition(
+      rocksdb_rs::types::WriteStallCondition::kNormal));
 
   // Only allow one compactin going through.
   rocksdb::SyncPoint::GetInstance()->SetCallBack(
@@ -6779,7 +6870,8 @@ TEST_F(DBTest, SoftLimit) {
   // doesn't trigger soft_pending_compaction_bytes_limit
   ASSERT_EQ(NumTableFilesAtLevel(1), 1);
   ASSERT_TRUE(!dbfull()->TEST_write_controler().NeedsDelay());
-  ASSERT_TRUE(listener->CheckCondition(rocksdb_rs::types::WriteStallCondition::kNormal));
+  ASSERT_TRUE(listener->CheckCondition(
+      rocksdb_rs::types::WriteStallCondition::kNormal));
 
   // Create 3 L0 files, making score of L0 to be 3, higher than L0.
   for (int i = 0; i < 3; i++) {
@@ -6802,13 +6894,15 @@ TEST_F(DBTest, SoftLimit) {
   // triggerring soft_pending_compaction_bytes_limit
   ASSERT_EQ(NumTableFilesAtLevel(1), 1);
   ASSERT_TRUE(dbfull()->TEST_write_controler().NeedsDelay());
-  ASSERT_TRUE(listener->CheckCondition(rocksdb_rs::types::WriteStallCondition::kDelayed));
+  ASSERT_TRUE(listener->CheckCondition(
+      rocksdb_rs::types::WriteStallCondition::kDelayed));
 
   sleeping_task_low.WakeUp();
   sleeping_task_low.WaitUntilSleeping();
 
   ASSERT_TRUE(!dbfull()->TEST_write_controler().NeedsDelay());
-  ASSERT_TRUE(listener->CheckCondition(rocksdb_rs::types::WriteStallCondition::kNormal));
+  ASSERT_TRUE(listener->CheckCondition(
+      rocksdb_rs::types::WriteStallCondition::kNormal));
 
   // shrink level base so L2 will hit soft limit easier.
   ASSERT_OK(dbfull()->SetOptions({
@@ -6818,7 +6912,8 @@ TEST_F(DBTest, SoftLimit) {
   ASSERT_OK(Put("", ""));
   ASSERT_OK(Flush());
   ASSERT_TRUE(dbfull()->TEST_write_controler().NeedsDelay());
-  ASSERT_TRUE(listener->CheckCondition(rocksdb_rs::types::WriteStallCondition::kDelayed));
+  ASSERT_TRUE(listener->CheckCondition(
+      rocksdb_rs::types::WriteStallCondition::kDelayed));
 
   sleeping_task_low.WaitUntilSleeping();
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
@@ -6832,7 +6927,8 @@ TEST_F(DBTest, LastWriteBufferDelay) {
   options.write_buffer_size = 100000;
   options.max_write_buffer_number = 4;
   options.delayed_write_rate = 20000;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.disable_auto_compactions = true;
   int kNumKeysPerMemtable = 3;
   options.memtable_factory.reset(
@@ -6863,9 +6959,12 @@ TEST_F(DBTest, LastWriteBufferDelay) {
 #endif  // !defined(ROCKSDB_DISABLE_STALL_NOTIFICATION)
 
 TEST_F(DBTest, FailWhenCompressionNotSupportedTest) {
-  rocksdb_rs::compression_type::CompressionType compressions[] = {rocksdb_rs::compression_type::CompressionType::kZlibCompression, rocksdb_rs::compression_type::CompressionType::kBZip2Compression,
-                                    rocksdb_rs::compression_type::CompressionType::kLZ4Compression, rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression,
-                                    rocksdb_rs::compression_type::CompressionType::kXpressCompression};
+  rocksdb_rs::compression_type::CompressionType compressions[] = {
+      rocksdb_rs::compression_type::CompressionType::kZlibCompression,
+      rocksdb_rs::compression_type::CompressionType::kBZip2Compression,
+      rocksdb_rs::compression_type::CompressionType::kLZ4Compression,
+      rocksdb_rs::compression_type::CompressionType::kLZ4HCCompression,
+      rocksdb_rs::compression_type::CompressionType::kXpressCompression};
   for (auto comp : compressions) {
     if (!CompressionTypeSupported(comp)) {
       // not supported, we should fail the Open()
@@ -6873,7 +6972,8 @@ TEST_F(DBTest, FailWhenCompressionNotSupportedTest) {
       options.compression = comp;
       ASSERT_TRUE(!TryReopen(options).ok());
       // Try if CreateColumnFamily also fails
-      options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+      options.compression =
+          rocksdb_rs::compression_type::CompressionType::kNoCompression;
       ASSERT_OK(TryReopen(options));
       ColumnFamilyOptions cf_options(options);
       cf_options.compression = comp;
@@ -7042,7 +7142,6 @@ TEST_F(DBTest, ReusePinnableSlice) {
       1);
 }
 
-
 TEST_F(DBTest, DeletingOldWalAfterDrop) {
   rocksdb::SyncPoint::GetInstance()->LoadDependency(
       {{"Test:AllowFlushes", "DBImpl::BGWorkFlush"},
@@ -7052,7 +7151,8 @@ TEST_F(DBTest, DeletingOldWalAfterDrop) {
   rocksdb::SyncPoint::GetInstance()->DisableProcessing();
   Options options = CurrentOptions();
   options.max_total_wal_size = 8192;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.write_buffer_size = 1 << 20;
   options.level0_file_num_compaction_trigger = (1 << 30);
   options.level0_slowdown_writes_trigger = (1 << 30);
@@ -7167,7 +7267,6 @@ TEST_F(DBTest, LargeBlockSizeTest) {
   ASSERT_NOK(TryReopenWithColumnFamilies({"default", "pikachu"}, options));
 }
 
-
 TEST_F(DBTest, CreationTimeOfOldestFile) {
   const int kNumKeysPerFile = 32;
   const int kNumLevelFiles = 2;
@@ -7236,7 +7335,8 @@ TEST_F(DBTest, CreationTimeOfOldestFile) {
   // At this point there should be 2 files, one with file_creation_time = 0 and
   // the other non-zero. GetCreationTimeOfOldestFile API should return 0.
   uint64_t creation_time;
-  rocksdb_rs::status::Status s1 = dbfull()->GetCreationTimeOfOldestFile(&creation_time);
+  rocksdb_rs::status::Status s1 =
+      dbfull()->GetCreationTimeOfOldestFile(&creation_time);
   ASSERT_EQ(0, creation_time);
   ASSERT_TRUE(s1.eq(rocksdb_rs::status::Status_OK()));
 

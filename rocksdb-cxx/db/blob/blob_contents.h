@@ -8,10 +8,9 @@
 #include <memory>
 
 #include "memory/memory_allocator_impl.h"
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/advanced_cache.h"
 #include "rocksdb/slice.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -36,7 +35,8 @@ class BlobContents {
 
   // For TypedCacheInterface
   const Slice& ContentSlice() const { return data_; }
-  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole = rocksdb_rs::cache::CacheEntryRole::kBlobValue;
+  static constexpr rocksdb_rs::cache::CacheEntryRole kCacheEntryRole =
+      rocksdb_rs::cache::CacheEntryRole::kBlobValue;
 
  private:
   CacheAllocationPtr allocation_;

@@ -69,8 +69,8 @@ class FlushJob {
            SnapshotChecker* snapshot_checker, JobContext* job_context,
            FlushReason flush_reason, LogBuffer* log_buffer,
            FSDirectory* db_directory, FSDirectory* output_file_directory,
-           rocksdb_rs::compression_type::CompressionType output_compression, Statistics* stats,
-           EventLogger* event_logger, bool measure_io_stats,
+           rocksdb_rs::compression_type::CompressionType output_compression,
+           Statistics* stats, EventLogger* event_logger, bool measure_io_stats,
            const bool sync_output_directory, const bool write_manifest,
            Env::Priority thread_pri, const std::shared_ptr<IOTracer>& io_tracer,
            const SeqnoToTimeMapping& seq_time_mapping,
@@ -84,8 +84,8 @@ class FlushJob {
   // Once PickMemTable() is called, either Run() or Cancel() has to be called.
   void PickMemTable();
   rocksdb_rs::status::Status Run(LogsWithPrepTracker* prep_tracker = nullptr,
-             FileMetaData* file_meta = nullptr,
-             bool* switched_to_mempurge = nullptr);
+                                 FileMetaData* file_meta = nullptr,
+                                 bool* switched_to_mempurge = nullptr);
   void Cancel();
   const autovector<MemTable*>& GetMemTables() const { return mems_; }
 

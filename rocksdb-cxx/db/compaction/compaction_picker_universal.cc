@@ -1445,4 +1445,3 @@ uint64_t UniversalCompactionBuilder::GetMaxOverlappingBytes() const {
   }
 }
 }  // namespace rocksdb
-

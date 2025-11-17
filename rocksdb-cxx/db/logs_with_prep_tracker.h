@@ -12,7 +12,6 @@
 #include <unordered_map>
 #include <vector>
 
-
 namespace rocksdb {
 
 // This class is used to track the log files with outstanding prepare entries.

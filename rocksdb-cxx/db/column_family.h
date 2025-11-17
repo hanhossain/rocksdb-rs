@@ -171,7 +171,8 @@ class ColumnFamilyHandleImpl : public ColumnFamilyHandle {
 
   virtual uint32_t GetID() const override;
   virtual const std::string& GetName() const override;
-  virtual rocksdb_rs::status::Status GetDescriptor(ColumnFamilyDescriptor* desc) override;
+  virtual rocksdb_rs::status::Status GetDescriptor(
+      ColumnFamilyDescriptor* desc) override;
   virtual const Comparator* GetComparator() const override;
 
  private:
@@ -245,13 +246,14 @@ struct SuperVersion {
   autovector<MemTable*> to_delete;
 };
 
-extern rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options);
+extern rocksdb_rs::status::Status CheckCompressionSupported(
+    const ColumnFamilyOptions& cf_options);
 
 extern rocksdb_rs::status::Status CheckConcurrentWritesSupported(
     const ColumnFamilyOptions& cf_options);
 
-extern rocksdb_rs::status::Status CheckCFPathsSupported(const DBOptions& db_options,
-                                    const ColumnFamilyOptions& cf_options);
+extern rocksdb_rs::status::Status CheckCFPathsSupported(
+    const DBOptions& db_options, const ColumnFamilyOptions& cf_options);
 
 extern ColumnFamilyOptions SanitizeOptions(const ImmutableDBOptions& db_options,
                                            const ColumnFamilyOptions& src);
@@ -333,8 +335,8 @@ class ColumnFamilyData {
   bool is_delete_range_supported() { return is_delete_range_supported_; }
 
   // Validate CF options against DB options
-  static rocksdb_rs::status::Status ValidateOptions(const DBOptions& db_options,
-                                const ColumnFamilyOptions& cf_options);
+  static rocksdb_rs::status::Status ValidateOptions(
+      const DBOptions& db_options, const ColumnFamilyOptions& cf_options);
   // REQUIRES: DB mutex held
   rocksdb_rs::status::Status SetOptions(
       const DBOptions& db_options,
@@ -395,9 +397,9 @@ class ColumnFamilyData {
   //    duration of this function.
   //
   // Thread-safe
-  rocksdb_rs::status::Status RangesOverlapWithMemtables(const autovector<Range>& ranges,
-                                    SuperVersion* super_version,
-                                    bool allow_data_in_errors, bool* overlap);
+  rocksdb_rs::status::Status RangesOverlapWithMemtables(
+      const autovector<Range>& ranges, SuperVersion* super_version,
+      bool allow_data_in_errors, bool* overlap);
 
   // A flag to tell a manual compaction is to compact all levels together
   // instead of a specific level.
@@ -462,7 +464,8 @@ class ColumnFamilyData {
   bool queued_for_flush() { return queued_for_flush_; }
   bool queued_for_compaction() { return queued_for_compaction_; }
 
-  static std::pair<rocksdb_rs::types::WriteStallCondition, rocksdb_rs::types::WriteStallCause>
+  static std::pair<rocksdb_rs::types::WriteStallCondition,
+                   rocksdb_rs::types::WriteStallCause>
   GetWriteStallConditionAndCause(
       int num_unflushed_memtables, int num_l0_files,
       uint64_t num_compaction_needed_bytes,

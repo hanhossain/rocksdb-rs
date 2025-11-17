@@ -40,11 +40,12 @@ Reader::Reader(std::shared_ptr<Logger> info_log,
       log_number_(log_num),
       recycled_(false),
       first_record_read_(false),
-      compression_type_(rocksdb_rs::compression_type::CompressionType::kNoCompression),
+      compression_type_(
+          rocksdb_rs::compression_type::CompressionType::kNoCompression),
       compression_type_record_read_(false),
       uncompress_(nullptr),
       hash_state_(nullptr),
-      uncompress_hash_state_(nullptr){};
+      uncompress_hash_state_(nullptr) {};
 
 Reader::~Reader() {
   delete[] backing_store_;
@@ -176,7 +177,8 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch,
         prospective_record_offset = physical_record_offset;
         scratch->clear();
         last_record_offset_ = prospective_record_offset;
-        CompressionTypeRecord compression_record(rocksdb_rs::compression_type::CompressionType::kNoCompression);
+        CompressionTypeRecord compression_record(
+            rocksdb_rs::compression_type::CompressionType::kNoCompression);
         rocksdb_rs::status::Status s = compression_record.DecodeFrom(&fragment);
         if (!s.ok()) {
           ReportCorruption(fragment.size(),
@@ -364,8 +366,10 @@ void Reader::UnmarkEOFInternal() {
   // rate limiter if priority is not IO_TOTAL, e.g., when there is not enough
   // content left until EOF to read.
   rocksdb_rs::status::Status status =
-      file_->Read(remaining, &read_buffer, backing_store_ + eof_offset_,
-                  Env::IO_TOTAL /* rate_limiter_priority */).status();
+      file_
+          ->Read(remaining, &read_buffer, backing_store_ + eof_offset_,
+                 Env::IO_TOTAL /* rate_limiter_priority */)
+          .status();
 
   size_t added = read_buffer.size();
   end_of_buffer_offset_ += added;
@@ -400,7 +404,8 @@ void Reader::ReportCorruption(size_t bytes, const char* reason) {
   ReportDrop(bytes, rocksdb_rs::status::Status_Corruption(reason));
 }
 
-void Reader::ReportDrop(size_t bytes, const rocksdb_rs::status::Status& reason) {
+void Reader::ReportDrop(size_t bytes,
+                        const rocksdb_rs::status::Status& reason) {
   if (reporter_ != nullptr) {
     reporter_->Corruption(bytes, reason);
   }
@@ -415,8 +420,11 @@ bool Reader::ReadMore(size_t* drop_size, int* error) {
     // Note that the Read here might overcharge SequentialFileReader's internal
     // rate limiter if priority is not IO_TOTAL, e.g., when there is not enough
     // content left until EOF to read.
-    rocksdb_rs::status::Status status = file_->Read(kBlockSize, &buffer_, backing_store_,
-                                Env::IO_TOTAL /* rate_limiter_priority */).status();
+    rocksdb_rs::status::Status status =
+        file_
+            ->Read(kBlockSize, &buffer_, backing_store_,
+                   Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
     TEST_SYNC_POINT_CALLBACK("LogReader::ReadMore:AfterReadFile", &status);
     end_of_buffer_offset_ += buffer_.size();
     if (!status.ok()) {
@@ -483,7 +491,8 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result, size_t* drop_size,
         }
         continue;
       }
-      const uint32_t log_num = rocksdb_rs::coding_lean::DecodeFixed32(header + 7);
+      const uint32_t log_num =
+          rocksdb_rs::coding_lean::DecodeFixed32(header + 7);
       if (log_num != log_number_) {
         return kOldRecord;
       }
@@ -511,7 +520,8 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result, size_t* drop_size,
 
     // Check crc
     if (checksum_) {
-      uint32_t expected_crc = crc32c::Unmask(rocksdb_rs::coding_lean::DecodeFixed32(header));
+      uint32_t expected_crc =
+          crc32c::Unmask(rocksdb_rs::coding_lean::DecodeFixed32(header));
       uint32_t actual_crc = crc32c::Value(header + 6, length + header_size - 6);
       if (actual_crc != expected_crc) {
         // Drop the rest of the buffer since "length" itself may have
@@ -696,7 +706,8 @@ bool FragmentBufferedReader::ReadRecord(Slice* record, std::string* scratch,
         prospective_record_offset = physical_record_offset;
         last_record_offset_ = prospective_record_offset;
         in_fragmented_record_ = false;
-        CompressionTypeRecord compression_record(rocksdb_rs::compression_type::CompressionType::kNoCompression);
+        CompressionTypeRecord compression_record(
+            rocksdb_rs::compression_type::CompressionType::kNoCompression);
         rocksdb_rs::status::Status s = compression_record.DecodeFrom(&fragment);
         if (!s.ok()) {
           ReportCorruption(fragment.size(),
@@ -791,8 +802,11 @@ bool FragmentBufferedReader::TryReadMore(size_t* drop_size, int* error) {
     // Note that the Read here might overcharge SequentialFileReader's internal
     // rate limiter if priority is not IO_TOTAL, e.g., when there is not enough
     // content left until EOF to read.
-    rocksdb_rs::status::Status status = file_->Read(kBlockSize, &buffer_, backing_store_,
-                                Env::IO_TOTAL /* rate_limiter_priority */).status();
+    rocksdb_rs::status::Status status =
+        file_
+            ->Read(kBlockSize, &buffer_, backing_store_,
+                   Env::IO_TOTAL /* rate_limiter_priority */)
+            .status();
     end_of_buffer_offset_ += buffer_.size();
     if (!status.ok()) {
       buffer_.clear();
@@ -886,7 +900,8 @@ bool FragmentBufferedReader::TryReadFragment(
   }
 
   if (checksum_) {
-    uint32_t expected_crc = crc32c::Unmask(rocksdb_rs::coding_lean::DecodeFixed32(header));
+    uint32_t expected_crc =
+        crc32c::Unmask(rocksdb_rs::coding_lean::DecodeFixed32(header));
     uint32_t actual_crc = crc32c::Value(header + 6, length + header_size - 6);
     if (actual_crc != expected_crc) {
       *drop_size = buffer_.size();

@@ -797,8 +797,9 @@ struct ObsoleteFileInfo {
   }
   void DeleteMetadata() {
     if (file_metadata_cache_res_mgr) {
-      rocksdb_rs::status::Status s = file_metadata_cache_res_mgr->UpdateCacheReservation(
-          metadata->ApproximateMemoryUsage(), false /* increase */);
+      rocksdb_rs::status::Status s =
+          file_metadata_cache_res_mgr->UpdateCacheReservation(
+              metadata->ApproximateMemoryUsage(), false /* increase */);
     }
     delete metadata;
     metadata = nullptr;
@@ -842,10 +843,9 @@ class Version {
                             MergeIteratorBuilder* merger_iter_builder,
                             int level, bool allow_unprepared_value);
 
-  rocksdb_rs::status::Status OverlapWithLevelIterator(const ReadOptions&, const FileOptions&,
-                                  const Slice& smallest_user_key,
-                                  const Slice& largest_user_key, int level,
-                                  bool* overlap);
+  rocksdb_rs::status::Status OverlapWithLevelIterator(
+      const ReadOptions&, const FileOptions&, const Slice& smallest_user_key,
+      const Slice& largest_user_key, int level, bool* overlap);
 
   // Lookup the value for key or get all merge operands for key.
   // If do_merge = true (default) then lookup value for key.
@@ -870,8 +870,8 @@ class Version {
   // REQUIRES: lock is not held
   // REQUIRES: pinned_iters_mgr != nullptr
   void Get(const ReadOptions&, const LookupKey& key, PinnableSlice* value,
-           PinnableWideColumns* columns, std::string* timestamp, rocksdb_rs::status::Status* status,
-           MergeContext* merge_context,
+           PinnableWideColumns* columns, std::string* timestamp,
+           rocksdb_rs::status::Status* status, MergeContext* merge_context,
            SequenceNumber* max_covering_tombstone_seq,
            PinnedIteratorsManager* pinned_iters_mgr,
            bool* value_found = nullptr, bool* key_exists = nullptr,
@@ -885,17 +885,21 @@ class Version {
   // corresponding blob file is part of this Version) retrieves the blob and
   // saves it in *value.
   // REQUIRES: blob_index_slice stores an encoded blob reference
-  rocksdb_rs::status::Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
-                 const Slice& blob_index_slice,
-                 FilePrefetchBuffer* prefetch_buffer, PinnableSlice* value,
-                 uint64_t* bytes_read) const;
+  rocksdb_rs::status::Status GetBlob(const ReadOptions& read_options,
+                                     const Slice& user_key,
+                                     const Slice& blob_index_slice,
+                                     FilePrefetchBuffer* prefetch_buffer,
+                                     PinnableSlice* value,
+                                     uint64_t* bytes_read) const;
 
   // Retrieves a blob using a blob reference and saves it in *value,
   // assuming the corresponding blob file is part of this Version.
-  rocksdb_rs::status::Status GetBlob(const ReadOptions& read_options, const Slice& user_key,
-                 const BlobIndex& blob_index,
-                 FilePrefetchBuffer* prefetch_buffer, PinnableSlice* value,
-                 uint64_t* bytes_read) const;
+  rocksdb_rs::status::Status GetBlob(const ReadOptions& read_options,
+                                     const Slice& user_key,
+                                     const BlobIndex& blob_index,
+                                     FilePrefetchBuffer* prefetch_buffer,
+                                     PinnableSlice* value,
+                                     uint64_t* bytes_read) const;
 
   struct BlobReadContext {
     BlobReadContext(const BlobIndex& blob_idx, const KeyContext* key_ctx)
@@ -944,27 +948,28 @@ class Version {
   // specified in "file_meta".  If the file name of "file_meta" is
   // known ahead, passing it by a non-null "fname" can save a
   // file-name conversion.
-  rocksdb_rs::status::Status GetTableProperties(const ReadOptions& read_options,
-                            std::shared_ptr<const TableProperties>* tp,
-                            const FileMetaData* file_meta,
-                            const std::string* fname = nullptr) const;
+  rocksdb_rs::status::Status GetTableProperties(
+      const ReadOptions& read_options,
+      std::shared_ptr<const TableProperties>* tp, const FileMetaData* file_meta,
+      const std::string* fname = nullptr) const;
 
   // REQUIRES: lock is held
   // On success, *props will be populated with all SSTables' table properties.
   // The keys of `props` are the sst file name, the values of `props` are the
   // tables' properties, represented as std::shared_ptr.
-  rocksdb_rs::status::Status GetPropertiesOfAllTables(const ReadOptions& read_options,
-                                  TablePropertiesCollection* props);
-  rocksdb_rs::status::Status GetPropertiesOfAllTables(const ReadOptions& read_options,
-                                  TablePropertiesCollection* props, int level);
-  rocksdb_rs::status::Status GetPropertiesOfTablesInRange(const ReadOptions& read_options,
-                                      const Range* range, std::size_t n,
-                                      TablePropertiesCollection* props) const;
+  rocksdb_rs::status::Status GetPropertiesOfAllTables(
+      const ReadOptions& read_options, TablePropertiesCollection* props);
+  rocksdb_rs::status::Status GetPropertiesOfAllTables(
+      const ReadOptions& read_options, TablePropertiesCollection* props,
+      int level);
+  rocksdb_rs::status::Status GetPropertiesOfTablesInRange(
+      const ReadOptions& read_options, const Range* range, std::size_t n,
+      TablePropertiesCollection* props) const;
 
   // Print summary of range delete tombstones in SST files into out_str,
   // with maximum max_entries_to_print entries printed out.
-  rocksdb_rs::status::Status TablesRangeTombstoneSummary(int max_entries_to_print,
-                                     std::string* out_str);
+  rocksdb_rs::status::Status TablesRangeTombstoneSummary(
+      int max_entries_to_print, std::string* out_str);
 
   // REQUIRES: lock is held
   // On success, "tp" will contains the aggregated table property among
@@ -1041,10 +1046,10 @@ class Version {
   void UpdateAccumulatedStats(const ReadOptions& read_options);
 
   DECLARE_SYNC_AND_ASYNC(
-      /* ret_type */ rocksdb_rs::status::Status, /* func_name */ MultiGetFromSST,
-      const ReadOptions& read_options, MultiGetRange file_range,
-      int hit_file_level, bool skip_filters, bool skip_range_deletions,
-      FdWithKeyRange* f,
+      /* ret_type */ rocksdb_rs::status::Status,
+      /* func_name */ MultiGetFromSST, const ReadOptions& read_options,
+      MultiGetRange file_range, int hit_file_level, bool skip_filters,
+      bool skip_range_deletions, FdWithKeyRange* f,
       std::unordered_map<uint64_t, BlobReadContexts>& blob_ctxs,
       TableCache::TypedHandle* table_handle, uint64_t& num_filter_read,
       uint64_t& num_index_read, uint64_t& num_sst_read);
@@ -1190,7 +1195,8 @@ class VersionSet {
       const autovector<VersionEdit*>& edit_list, InstrumentedMutex* mu,
       FSDirectory* dir_contains_current_file, bool new_descriptor_log = false,
       const ColumnFamilyOptions* column_family_options = nullptr,
-      const std::function<void(const rocksdb_rs::status::Status&)>& manifest_wcb = {}) {
+      const std::function<void(const rocksdb_rs::status::Status&)>&
+          manifest_wcb = {}) {
     autovector<ColumnFamilyData*> cfds;
     cfds.emplace_back(column_family_data);
     autovector<const MutableCFOptions*> mutable_cf_options_list;
@@ -1213,26 +1219,26 @@ class VersionSet {
       InstrumentedMutex* mu, FSDirectory* dir_contains_current_file,
       bool new_descriptor_log = false,
       const ColumnFamilyOptions* new_cf_options = nullptr,
-      const std::vector<std::function<void(const rocksdb_rs::status::Status&)>>& manifest_wcbs =
-          {});
+      const std::vector<std::function<void(const rocksdb_rs::status::Status&)>>&
+          manifest_wcbs = {});
 
-  static rocksdb_rs::status::Status GetCurrentManifestPath(const std::string& dbname,
-                                       FileSystem* fs,
-                                       std::string* manifest_filename,
-                                       uint64_t* manifest_file_number);
+  static rocksdb_rs::status::Status GetCurrentManifestPath(
+      const std::string& dbname, FileSystem* fs, std::string* manifest_filename,
+      uint64_t* manifest_file_number);
   void WakeUpWaitingManifestWriters();
 
   // Recover the last saved descriptor (MANIFEST) from persistent storage.
   // If read_only == true, Recover() will not complain if some column families
   // are not opened
-  rocksdb_rs::status::Status Recover(const std::vector<ColumnFamilyDescriptor>& column_families,
-                 bool read_only = false, std::string* db_id = nullptr,
-                 bool no_error_if_files_missing = false);
+  rocksdb_rs::status::Status Recover(
+      const std::vector<ColumnFamilyDescriptor>& column_families,
+      bool read_only = false, std::string* db_id = nullptr,
+      bool no_error_if_files_missing = false);
 
-  rocksdb_rs::status::Status TryRecover(const std::vector<ColumnFamilyDescriptor>& column_families,
-                    bool read_only,
-                    const std::vector<std::string>& files_in_dbname,
-                    std::string* db_id, bool* has_missing_table_file);
+  rocksdb_rs::status::Status TryRecover(
+      const std::vector<ColumnFamilyDescriptor>& column_families,
+      bool read_only, const std::vector<std::string>& files_in_dbname,
+      std::string* db_id, bool* has_missing_table_file);
 
   // Try to recover the version set to the most recent consistent state
   // recorded in the specified manifest.
@@ -1247,8 +1253,9 @@ class VersionSet {
 
   // Reads a manifest file and returns a list of column families in
   // column_families.
-  static rocksdb_rs::status::Status ListColumnFamilies(std::vector<std::string>* column_families,
-                                   const std::string& dbname, FileSystem* fs);
+  static rocksdb_rs::status::Status ListColumnFamilies(
+      std::vector<std::string>* column_families, const std::string& dbname,
+      FileSystem* fs);
   static rocksdb_rs::status::Status ListColumnFamiliesFromManifest(
       const std::string& manifest_path, FileSystem* fs,
       std::vector<std::string>* column_families);
@@ -1262,18 +1269,19 @@ class VersionSet {
   // For example, a db currently has 7 levels [0-6], and a call to
   // to reduce to 5 [0-4] can only be executed when only one level
   // among [4-6] contains files.
-  static rocksdb_rs::status::Status ReduceNumberOfLevels(const std::string& dbname,
-                                     const Options* options,
-                                     const FileOptions& file_options,
-                                     int new_levels);
+  static rocksdb_rs::status::Status ReduceNumberOfLevels(
+      const std::string& dbname, const Options* options,
+      const FileOptions& file_options, int new_levels);
 
   // Get the checksum information of all live files
-  rocksdb_rs::status::Status GetLiveFilesChecksumInfo(FileChecksumList* checksum_list);
+  rocksdb_rs::status::Status GetLiveFilesChecksumInfo(
+      FileChecksumList* checksum_list);
 
   // printf contents (for debugging)
-  rocksdb_rs::status::Status DumpManifest(Options& options, std::string& manifestFileName,
-                      bool verbose, bool hex = false, bool json = false,
-                      const std::vector<ColumnFamilyDescriptor>& cf_descs = {});
+  rocksdb_rs::status::Status DumpManifest(
+      Options& options, std::string& manifestFileName, bool verbose,
+      bool hex = false, bool json = false,
+      const std::vector<ColumnFamilyDescriptor>& cf_descs = {});
 
   const std::string& DbSessionId() const { return db_session_id_; }
 
@@ -1449,7 +1457,8 @@ class VersionSet {
   uint64_t manifest_file_size() const { return manifest_file_size_; }
 
   rocksdb_rs::status::Status GetMetadataForFile(uint64_t number, int* filelevel,
-                            FileMetaData** metadata, ColumnFamilyData** cfd);
+                                                FileMetaData** metadata,
+                                                ColumnFamilyData** cfd);
 
   // This function doesn't support leveldb SST filenames
   void GetLiveFilesMetaData(std::vector<LiveFileMetaData>* metadata);
@@ -1501,7 +1510,9 @@ class VersionSet {
   static uint64_t GetTotalBlobFileSize(Version* dummy_versions);
 
   // Get the IO Status returned by written Manifest.
-  const rocksdb_rs::io_status::IOStatus& io_status() const { return io_status_; }
+  const rocksdb_rs::io_status::IOStatus& io_status() const {
+    return io_status_;
+  }
 
   // The returned WalSet needs to be accessed with DB mutex held.
   const WalSet& GetWalSet() const { return wals_; }
@@ -1534,7 +1545,8 @@ class VersionSet {
 
   struct LogReporter : public log::Reader::Reporter {
     rocksdb_rs::status::Status* status;
-    virtual void Corruption(size_t /*bytes*/, const rocksdb_rs::status::Status& s) override {
+    virtual void Corruption(size_t /*bytes*/,
+                            const rocksdb_rs::status::Status& s) override {
       if (status->ok()) {
         status->copy_from(s);
       }
@@ -1566,7 +1578,8 @@ class VersionSet {
   // Save current contents to *log
   rocksdb_rs::status::Status WriteCurrentStateToManifest(
       const std::unordered_map<uint32_t, MutableCFState>& curr_state,
-      const VersionEdit& wal_additions, log::Writer* log, rocksdb_rs::io_status::IOStatus& io_s);
+      const VersionEdit& wal_additions, log::Writer* log,
+      rocksdb_rs::io_status::IOStatus& io_s);
 
   void AppendVersion(ColumnFamilyData* column_family_data, Version* v);
 
@@ -1575,8 +1588,10 @@ class VersionSet {
                                        const VersionEdit* edit);
 
   rocksdb_rs::status::Status VerifyFileMetadata(const ReadOptions& read_options,
-                            ColumnFamilyData* cfd, const std::string& fpath,
-                            int level, const FileMetaData& meta);
+                                                ColumnFamilyData* cfd,
+                                                const std::string& fpath,
+                                                int level,
+                                                const FileMetaData& meta);
 
   // Protected by DB mutex.
   WalSet wals_;
@@ -1639,7 +1654,8 @@ class VersionSet {
   BlockCacheTracer* const block_cache_tracer_;
 
   // Store the IO status when Manifest is written
-  rocksdb_rs::io_status::IOStatus io_status_ = rocksdb_rs::io_status::IOStatus_new();
+  rocksdb_rs::io_status::IOStatus io_status_ =
+      rocksdb_rs::io_status::IOStatus_new();
 
   std::shared_ptr<IOTracer> io_tracer_;
 
@@ -1647,18 +1663,17 @@ class VersionSet {
 
  private:
   // REQUIRES db mutex at beginning. may release and re-acquire db mutex
-  rocksdb_rs::status::Status ProcessManifestWrites(std::deque<ManifestWriter>& writers,
-                               InstrumentedMutex* mu,
-                               FSDirectory* dir_contains_current_file,
-                               bool new_descriptor_log,
-                               const ColumnFamilyOptions* new_cf_options,
-                               const ReadOptions& read_options);
+  rocksdb_rs::status::Status ProcessManifestWrites(
+      std::deque<ManifestWriter>& writers, InstrumentedMutex* mu,
+      FSDirectory* dir_contains_current_file, bool new_descriptor_log,
+      const ColumnFamilyOptions* new_cf_options,
+      const ReadOptions& read_options);
 
   void LogAndApplyCFHelper(VersionEdit* edit,
                            SequenceNumber* max_last_sequence);
-  rocksdb_rs::status::Status LogAndApplyHelper(ColumnFamilyData* cfd, VersionBuilder* b,
-                           VersionEdit* edit, SequenceNumber* max_last_sequence,
-                           InstrumentedMutex* mu);
+  rocksdb_rs::status::Status LogAndApplyHelper(
+      ColumnFamilyData* cfd, VersionBuilder* b, VersionEdit* edit,
+      SequenceNumber* max_last_sequence, InstrumentedMutex* mu);
 };
 
 // ReactiveVersionSet represents a collection of versions of the column
@@ -1682,10 +1697,11 @@ class ReactiveVersionSet : public VersionSet {
       rocksdb_rs::status::Status* manifest_read_status,
       std::unordered_set<ColumnFamilyData*>* cfds_changed);
 
-  rocksdb_rs::status::Status Recover(const std::vector<ColumnFamilyDescriptor>& column_families,
-                 std::unique_ptr<log::FragmentBufferedReader>* manifest_reader,
-                 std::unique_ptr<log::Reader::Reporter>* manifest_reporter,
-                 std::unique_ptr<rocksdb_rs::status::Status>* manifest_reader_status);
+  rocksdb_rs::status::Status Recover(
+      const std::vector<ColumnFamilyDescriptor>& column_families,
+      std::unique_ptr<log::FragmentBufferedReader>* manifest_reader,
+      std::unique_ptr<log::Reader::Reporter>* manifest_reporter,
+      std::unique_ptr<rocksdb_rs::status::Status>* manifest_reader_status);
 #ifndef NDEBUG
   uint64_t TEST_read_edits_in_atomic_group() const;
 #endif  //! NDEBUG
@@ -1716,9 +1732,10 @@ class ReactiveVersionSet : public VersionSet {
       const autovector<autovector<VersionEdit*>>& /*edit_lists*/,
       InstrumentedMutex* /*mu*/, FSDirectory* /*dir_contains_current_file*/,
       bool /*new_descriptor_log*/, const ColumnFamilyOptions* /*new_cf_option*/,
-      const std::vector<std::function<void(const rocksdb_rs::status::Status&)>>& /*manifest_wcbs*/)
-      override {
-    return rocksdb_rs::status::Status_NotSupported("not supported in reactive mode");
+      const std::vector<std::function<void(
+          const rocksdb_rs::status::Status&)>>& /*manifest_wcbs*/) override {
+    return rocksdb_rs::status::Status_NotSupported(
+        "not supported in reactive mode");
   }
 
   // No copy allowed

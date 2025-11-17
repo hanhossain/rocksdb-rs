@@ -7,16 +7,16 @@
 
 #include <string>
 
-#include "rocksdb/slice.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/slice.h"
 
 namespace rocksdb {
 
 // Simple implementation of SlicePart variants of Put().  Child classes
 // can override these method with more performant solutions if they choose.
-rocksdb_rs::status::Status WriteBatchBase::Put(ColumnFamilyHandle* column_family,
-                           const SliceParts& key, const SliceParts& value) {
+rocksdb_rs::status::Status WriteBatchBase::Put(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const SliceParts& value) {
   std::string key_buf, value_buf;
   Slice key_slice(key, &key_buf);
   Slice value_slice(value, &value_buf);
@@ -24,7 +24,8 @@ rocksdb_rs::status::Status WriteBatchBase::Put(ColumnFamilyHandle* column_family
   return Put(column_family, key_slice, value_slice);
 }
 
-rocksdb_rs::status::Status WriteBatchBase::Put(const SliceParts& key, const SliceParts& value) {
+rocksdb_rs::status::Status WriteBatchBase::Put(const SliceParts& key,
+                                               const SliceParts& value) {
   std::string key_buf, value_buf;
   Slice key_slice(key, &key_buf);
   Slice value_slice(value, &value_buf);
@@ -32,8 +33,8 @@ rocksdb_rs::status::Status WriteBatchBase::Put(const SliceParts& key, const Slic
   return Put(key_slice, value_slice);
 }
 
-rocksdb_rs::status::Status WriteBatchBase::Delete(ColumnFamilyHandle* column_family,
-                              const SliceParts& key) {
+rocksdb_rs::status::Status WriteBatchBase::Delete(
+    ColumnFamilyHandle* column_family, const SliceParts& key) {
   std::string key_buf;
   Slice key_slice(key, &key_buf);
   return Delete(column_family, key_slice);
@@ -45,8 +46,8 @@ rocksdb_rs::status::Status WriteBatchBase::Delete(const SliceParts& key) {
   return Delete(key_slice);
 }
 
-rocksdb_rs::status::Status WriteBatchBase::SingleDelete(ColumnFamilyHandle* column_family,
-                                    const SliceParts& key) {
+rocksdb_rs::status::Status WriteBatchBase::SingleDelete(
+    ColumnFamilyHandle* column_family, const SliceParts& key) {
   std::string key_buf;
   Slice key_slice(key, &key_buf);
   return SingleDelete(column_family, key_slice);
@@ -58,25 +59,26 @@ rocksdb_rs::status::Status WriteBatchBase::SingleDelete(const SliceParts& key) {
   return SingleDelete(key_slice);
 }
 
-rocksdb_rs::status::Status WriteBatchBase::DeleteRange(ColumnFamilyHandle* column_family,
-                                   const SliceParts& begin_key,
-                                   const SliceParts& end_key) {
+rocksdb_rs::status::Status WriteBatchBase::DeleteRange(
+    ColumnFamilyHandle* column_family, const SliceParts& begin_key,
+    const SliceParts& end_key) {
   std::string begin_key_buf, end_key_buf;
   Slice begin_key_slice(begin_key, &begin_key_buf);
   Slice end_key_slice(end_key, &end_key_buf);
   return DeleteRange(column_family, begin_key_slice, end_key_slice);
 }
 
-rocksdb_rs::status::Status WriteBatchBase::DeleteRange(const SliceParts& begin_key,
-                                   const SliceParts& end_key) {
+rocksdb_rs::status::Status WriteBatchBase::DeleteRange(
+    const SliceParts& begin_key, const SliceParts& end_key) {
   std::string begin_key_buf, end_key_buf;
   Slice begin_key_slice(begin_key, &begin_key_buf);
   Slice end_key_slice(end_key, &end_key_buf);
   return DeleteRange(begin_key_slice, end_key_slice);
 }
 
-rocksdb_rs::status::Status WriteBatchBase::Merge(ColumnFamilyHandle* column_family,
-                             const SliceParts& key, const SliceParts& value) {
+rocksdb_rs::status::Status WriteBatchBase::Merge(
+    ColumnFamilyHandle* column_family, const SliceParts& key,
+    const SliceParts& value) {
   std::string key_buf, value_buf;
   Slice key_slice(key, &key_buf);
   Slice value_slice(value, &value_buf);
@@ -84,7 +86,8 @@ rocksdb_rs::status::Status WriteBatchBase::Merge(ColumnFamilyHandle* column_fami
   return Merge(column_family, key_slice, value_slice);
 }
 
-rocksdb_rs::status::Status WriteBatchBase::Merge(const SliceParts& key, const SliceParts& value) {
+rocksdb_rs::status::Status WriteBatchBase::Merge(const SliceParts& key,
+                                                 const SliceParts& value) {
   std::string key_buf, value_buf;
   Slice key_slice(key, &key_buf);
   Slice value_slice(value, &value_buf);

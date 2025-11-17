@@ -40,8 +40,9 @@ class EnvCounter : public SpecialEnv {
   explicit EnvCounter(Env* base)
       : SpecialEnv(base), num_new_writable_file_(0) {}
   int GetNumberOfNewWritableFileCalls() { return num_new_writable_file_; }
-  rocksdb_rs::status::Status NewWritableFile(const std::string& f, std::unique_ptr<WritableFile>* r,
-                         const EnvOptions& soptions) override {
+  rocksdb_rs::status::Status NewWritableFile(
+      const std::string& f, std::unique_ptr<WritableFile>* r,
+      const EnvOptions& soptions) override {
     ++num_new_writable_file_;
     return EnvWrapper::NewWritableFile(f, r, soptions);
   }
@@ -168,8 +169,9 @@ class ColumnFamilyTestBase : public testing::Test {
     db_ = nullptr;
   }
 
-  rocksdb_rs::status::Status TryOpen(std::vector<std::string> cf,
-                 std::vector<ColumnFamilyOptions> options = {}) {
+  rocksdb_rs::status::Status TryOpen(
+      std::vector<std::string> cf,
+      std::vector<ColumnFamilyOptions> options = {}) {
     std::vector<ColumnFamilyDescriptor> column_families;
     names_.clear();
     for (size_t i = 0; i < cf.size(); ++i) {
@@ -180,8 +182,9 @@ class ColumnFamilyTestBase : public testing::Test {
     return DB::Open(db_options_, dbname_, column_families, &handles_, &db_);
   }
 
-  rocksdb_rs::status::Status OpenReadOnly(std::vector<std::string> cf,
-                      std::vector<ColumnFamilyOptions> options = {}) {
+  rocksdb_rs::status::Status OpenReadOnly(
+      std::vector<std::string> cf,
+      std::vector<ColumnFamilyOptions> options = {}) {
     std::vector<ColumnFamilyDescriptor> column_families;
     names_.clear();
     for (size_t i = 0; i < cf.size(); ++i) {
@@ -320,19 +323,24 @@ class ColumnFamilyTestBase : public testing::Test {
     ASSERT_EQ(value, MaxTotalInMemoryState());
   }
 
-  rocksdb_rs::status::Status Put(int cf, const std::string& key, const std::string& value) {
+  rocksdb_rs::status::Status Put(int cf, const std::string& key,
+                                 const std::string& value) {
     return db_->Put(WriteOptions(), handles_[cf], Slice(key), Slice(value));
   }
-  rocksdb_rs::status::Status Merge(int cf, const std::string& key, const std::string& value) {
+  rocksdb_rs::status::Status Merge(int cf, const std::string& key,
+                                   const std::string& value) {
     return db_->Merge(WriteOptions(), handles_[cf], Slice(key), Slice(value));
   }
-  rocksdb_rs::status::Status Flush(int cf) { return db_->Flush(FlushOptions(), handles_[cf]); }
+  rocksdb_rs::status::Status Flush(int cf) {
+    return db_->Flush(FlushOptions(), handles_[cf]);
+  }
 
   std::string Get(int cf, const std::string& key) {
     ReadOptions options;
     options.verify_checksums = true;
     std::string result;
-    rocksdb_rs::status::Status s = db_->Get(options, handles_[cf], Slice(key), &result);
+    rocksdb_rs::status::Status s =
+        db_->Get(options, handles_[cf], Slice(key), &result);
     if (s.IsNotFound()) {
       result = "NOT_FOUND";
     } else if (!s.ok()) {
@@ -419,7 +427,8 @@ class ColumnFamilyTestBase : public testing::Test {
     }
     EXPECT_OK(s);
     for (const auto& wal : wal_files) {
-      if (wal->Type() == rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) {
+      if (wal->Type() ==
+          rocksdb_rs::transaction_log::WalFileType::kAliveLogFile) {
         ++ret;
       }
     }
@@ -543,8 +552,7 @@ TEST_P(ColumnFamilyTest, CreateCFRaceWithGetAggProperty) {
         "DBImpl::WriteOptionsFile:2"}});
   rocksdb::SyncPoint::GetInstance()->EnableProcessing();
 
-  rocksdb::port::Thread thread(
-      [&] { CreateColumnFamilies({"one"}); });
+  rocksdb::port::Thread thread([&] { CreateColumnFamilies({"one"}); });
 
   TEST_SYNC_POINT("ColumnFamilyTest.CreateCFRaceWithGetAggProperty:1");
   uint64_t pv;
@@ -1190,9 +1198,8 @@ class TestComparator : public Comparator {
     return 0;
   }
   const char* Name() const override { return "Test"; }
-  void FindShortestSeparator(
-      std::string* /*start*/,
-      const rocksdb::Slice& /*limit*/) const override {}
+  void FindShortestSeparator(std::string* /*start*/,
+                             const rocksdb::Slice& /*limit*/) const override {}
   void FindShortSuccessor(std::string* /*key*/) const override {}
 };
 
@@ -2467,8 +2474,8 @@ TEST_P(ColumnFamilyTest, CreateAndDropRace) {
 
   // Start a thread that will drop the first column family
   // and its comparator
-  rocksdb::port::Thread drop_cf_thread(DropSingleColumnFamily, this,
-                                                 1, &comparators);
+  rocksdb::port::Thread drop_cf_thread(DropSingleColumnFamily, this, 1,
+                                       &comparators);
 
   DropColumnFamilies({2});
 

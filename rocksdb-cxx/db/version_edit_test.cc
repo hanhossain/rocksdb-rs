@@ -73,24 +73,28 @@ TEST_F(VersionEditTest, EncodeDecodeNewFile4) {
                kBig + 600, true, Temperature::kUnknown, kInvalidBlobFileNumber,
                kUnknownOldestAncesterTime, kUnknownFileCreationTime,
                300 /* epoch_number */, kUnknownFileChecksum,
-               kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
+               kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
   edit.AddFile(4, 301, 3, 100, InternalKey("foo", kBig + 501, kTypeValue),
                InternalKey("zoo", kBig + 601, kTypeDeletion), kBig + 501,
                kBig + 601, false, Temperature::kUnknown, kInvalidBlobFileNumber,
                kUnknownOldestAncesterTime, kUnknownFileCreationTime,
                301 /* epoch_number */, kUnknownFileChecksum,
-               kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, false);
+               kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, false);
   edit.AddFile(5, 302, 0, 100, InternalKey("foo", kBig + 502, kTypeValue),
                InternalKey("zoo", kBig + 602, kTypeDeletion), kBig + 502,
                kBig + 602, true, Temperature::kUnknown, kInvalidBlobFileNumber,
                666, 888, 302 /* epoch_number */, kUnknownFileChecksum,
-               kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
+               kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
   edit.AddFile(5, 303, 0, 100, InternalKey("foo", kBig + 503, kTypeBlobIndex),
                InternalKey("zoo", kBig + 603, kTypeBlobIndex), kBig + 503,
                kBig + 603, true, Temperature::kUnknown, 1001,
                kUnknownOldestAncesterTime, kUnknownFileCreationTime,
                303 /* epoch_number */, kUnknownFileChecksum,
-               kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
+               kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
 
   edit.DeleteFile(4, 700);
 
@@ -147,15 +151,15 @@ TEST_F(VersionEditTest, EncodeDecodeNewFile4HandleFileBoundary) {
       kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
       0 /* compensated_range_deletion_size */, 0 /* tail_size */,
       false /* user_defined_timestamps_persisted */);
-  edit.AddFile(3, 300, 3, 100,
-               InternalKey(smallest + min_ts, kBig + 500, kTypeValue),
-               InternalKey(largest + min_ts, kBig + 600, kTypeDeletion),
-               kBig + 500, kBig + 600, true, Temperature::kUnknown,
-               kInvalidBlobFileNumber, kUnknownOldestAncesterTime,
-               kUnknownFileCreationTime, 300 /* epoch_number */,
-               kUnknownFileChecksum, kUnknownFileChecksumFuncName,
-               rocksdb_rs::unique_id::UniqueId64x2_null(), 0 /* compensated_range_deletion_size */,
-               0 /* tail_size */, true /* user_defined_timestamps_persisted */);
+  edit.AddFile(
+      3, 300, 3, 100, InternalKey(smallest + min_ts, kBig + 500, kTypeValue),
+      InternalKey(largest + min_ts, kBig + 600, kTypeDeletion), kBig + 500,
+      kBig + 600, true, Temperature::kUnknown, kInvalidBlobFileNumber,
+      kUnknownOldestAncesterTime, kUnknownFileCreationTime,
+      300 /* epoch_number */, kUnknownFileChecksum,
+      kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(),
+      0 /* compensated_range_deletion_size */, 0 /* tail_size */,
+      true /* user_defined_timestamps_persisted */);
 
   std::string encoded;
   edit.EncodeTo(&encoded, ts_sz);
@@ -186,7 +190,8 @@ TEST_F(VersionEditTest, ForwardCompatibleNewFile4) {
                kBig + 600, true, Temperature::kUnknown, kInvalidBlobFileNumber,
                kUnknownOldestAncesterTime, kUnknownFileCreationTime,
                300 /* epoch_number */, kUnknownFileChecksum,
-               kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
+               kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
   edit.AddFile(4, 301, 3, 100, InternalKey("foo", kBig + 501, kTypeValue),
                InternalKey("zoo", kBig + 601, kTypeDeletion), kBig + 501,
                kBig + 601, false, Temperature::kUnknown, kInvalidBlobFileNumber,
@@ -240,7 +245,8 @@ TEST_F(VersionEditTest, NewFile4NotSupportedField) {
                kBig + 600, true, Temperature::kUnknown, kInvalidBlobFileNumber,
                kUnknownOldestAncesterTime, kUnknownFileCreationTime,
                300 /* epoch_number */, kUnknownFileChecksum,
-               kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
+               kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
 
   edit.SetComparatorName("foo");
   edit.SetLogNumber(kBig + 100);
@@ -271,7 +277,8 @@ TEST_F(VersionEditTest, EncodeEmptyFile) {
                Temperature::kUnknown, kInvalidBlobFileNumber,
                kUnknownOldestAncesterTime, kUnknownFileCreationTime,
                1 /*epoch_number*/, kUnknownFileChecksum,
-               kUnknownFileChecksumFuncName, rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
+               kUnknownFileChecksumFuncName,
+               rocksdb_rs::unique_id::UniqueId64x2_null(), 0, 0, true);
   std::string buffer;
   ASSERT_TRUE(!edit.EncodeTo(&buffer, 0 /* ts_sz */));
 }
@@ -698,8 +705,9 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
     constexpr uint64_t size = 100;
 
     std::string blob_index;
-    BlobIndex::EncodeBlob(&blob_index, blob_file_number, offset, size,
-                          rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    BlobIndex::EncodeBlob(
+        &blob_index, blob_file_number, offset, size,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     constexpr SequenceNumber seq = 201;
 
@@ -714,8 +722,9 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
     constexpr uint64_t size = 300;
 
     std::string blob_index;
-    BlobIndex::EncodeBlob(&blob_index, expected_oldest_blob_file_number, offset,
-                          size, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    BlobIndex::EncodeBlob(
+        &blob_index, expected_oldest_blob_file_number, offset, size,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     constexpr SequenceNumber seq = 202;
 
@@ -749,8 +758,9 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
     constexpr uint64_t size = 500;
 
     std::string blob_index;
-    BlobIndex::EncodeBlobTTL(&blob_index, expiration, blob_file_number, offset,
-                             size, rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    BlobIndex::EncodeBlobTTL(
+        &blob_index, expiration, blob_file_number, offset, size,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     constexpr SequenceNumber seq = 204;
 
@@ -775,8 +785,9 @@ TEST(FileMetaDataTest, UpdateBoundariesBlobIndex) {
     constexpr uint64_t size = 1000;
 
     std::string blob_index;
-    BlobIndex::EncodeBlob(&blob_index, kInvalidBlobFileNumber, offset, size,
-                          rocksdb_rs::compression_type::CompressionType::kNoCompression);
+    BlobIndex::EncodeBlob(
+        &blob_index, kInvalidBlobFileNumber, offset, size,
+        rocksdb_rs::compression_type::CompressionType::kNoCompression);
 
     constexpr SequenceNumber seq = 206;
 

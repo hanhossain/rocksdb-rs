@@ -8,9 +8,8 @@
 #include <cstdint>
 #include <string>
 
-#include "rocksdb/wide_columns.h"
-
 #include "rocksdb-rs/src/status.rs.h"
+#include "rocksdb/wide_columns.h"
 
 namespace rocksdb {
 
@@ -43,26 +42,30 @@ class Slice;
 
 class WideColumnSerialization {
  public:
-  static rocksdb_rs::status::Status Serialize(const WideColumns& columns, std::string& output);
+  static rocksdb_rs::status::Status Serialize(const WideColumns& columns,
+                                              std::string& output);
   static rocksdb_rs::status::Status Serialize(const Slice& value_of_default,
-                          const WideColumns& other_columns,
-                          std::string& output);
+                                              const WideColumns& other_columns,
+                                              std::string& output);
 
-  static rocksdb_rs::status::Status Deserialize(Slice& input, WideColumns& columns);
+  static rocksdb_rs::status::Status Deserialize(Slice& input,
+                                                WideColumns& columns);
 
   static WideColumns::const_iterator Find(const WideColumns& columns,
                                           const Slice& column_name);
-  static rocksdb_rs::status::Status GetValueOfDefaultColumn(Slice& input, Slice& value);
+  static rocksdb_rs::status::Status GetValueOfDefaultColumn(Slice& input,
+                                                            Slice& value);
 
   static constexpr uint32_t kCurrentVersion = 1;
 
  private:
   static rocksdb_rs::status::Status SerializeImpl(const Slice* value_of_default,
-                              const WideColumns& columns, std::string& output);
+                                                  const WideColumns& columns,
+                                                  std::string& output);
 };
 
-inline rocksdb_rs::status::Status WideColumnSerialization::Serialize(const WideColumns& columns,
-                                                 std::string& output) {
+inline rocksdb_rs::status::Status WideColumnSerialization::Serialize(
+    const WideColumns& columns, std::string& output) {
   constexpr Slice* value_of_default = nullptr;
 
   return SerializeImpl(value_of_default, columns, output);

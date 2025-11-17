@@ -7,7 +7,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-
 #include <stdlib.h>
 
 #include <algorithm>
@@ -120,7 +119,8 @@ TEST_F(ObsoleteFilesTest, RaceForObsoleteFileDeletion) {
   });
   SyncPoint::GetInstance()->SetCallBack(
       "DBImpl::DeleteObsoleteFileImpl:AfterDeletion", [&](void* arg) {
-        rocksdb_rs::status::Status* p_status = reinterpret_cast<rocksdb_rs::status::Status*>(arg);
+        rocksdb_rs::status::Status* p_status =
+            reinterpret_cast<rocksdb_rs::status::Status*>(arg);
         ASSERT_OK(*p_status);
       });
   SyncPoint::GetInstance()->SetCallBack(
@@ -177,8 +177,8 @@ TEST_F(ObsoleteFilesTest, DeleteObsoleteOptionsFile) {
     Slice dummy_info_log_name_prefix;
     rocksdb_rs::types::FileType type;
     rocksdb_rs::transaction_log::WalFileType log_type;
-    if (ParseFileName(file, &file_num, dummy_info_log_name_prefix.ToString(), &type,
-                      &log_type) &&
+    if (ParseFileName(file, &file_num, dummy_info_log_name_prefix.ToString(),
+                      &type, &log_type) &&
         type == rocksdb_rs::types::FileType::kOptionsFile) {
       opts_file_count++;
     }
@@ -314,4 +314,3 @@ int main(int argc, char** argv) {
   RegisterCustomObjects(argc, argv);
   return RUN_ALL_TESTS();
 }
-

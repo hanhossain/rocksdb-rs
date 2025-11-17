@@ -24,7 +24,6 @@
 #include "test_util/testutil.h"
 #include "util/random.h"
 
-
 namespace rocksdb {
 
 // A helper function that ensures the table properties returned in
@@ -615,7 +614,6 @@ INSTANTIATE_TEST_CASE_P(DBTablePropertiesTest, DBTablePropertiesTest,
                                           "kCompactionStyleUniversal"));
 
 }  // namespace rocksdb
-
 
 int main(int argc, char** argv) {
   rocksdb::port::InstallStackTraceHandler();

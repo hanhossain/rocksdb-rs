@@ -4,7 +4,6 @@
 //  (found in the LICENSE.Apache file in the root directory).
 //
 
-
 #include "rocksdb/convenience.h"
 
 #include "db/db_impl/db_impl.h"
@@ -17,40 +16,46 @@ void CancelAllBackgroundWork(DB* db, bool wait) {
       ->CancelAllBackgroundWork(wait);
 }
 
-rocksdb_rs::status::Status DeleteFilesInRange(DB* db, ColumnFamilyHandle* column_family,
-                          const Slice* begin, const Slice* end,
-                          bool include_end) {
+rocksdb_rs::status::Status DeleteFilesInRange(DB* db,
+                                              ColumnFamilyHandle* column_family,
+                                              const Slice* begin,
+                                              const Slice* end,
+                                              bool include_end) {
   RangePtr range(begin, end);
   return DeleteFilesInRanges(db, column_family, &range, 1, include_end);
 }
 
-rocksdb_rs::status::Status DeleteFilesInRanges(DB* db, ColumnFamilyHandle* column_family,
-                           const RangePtr* ranges, size_t n, bool include_end) {
+rocksdb_rs::status::Status DeleteFilesInRanges(
+    DB* db, ColumnFamilyHandle* column_family, const RangePtr* ranges, size_t n,
+    bool include_end) {
   return (static_cast_with_check<DBImpl>(db->GetRootDB()))
       ->DeleteFilesInRanges(column_family, ranges, n, include_end);
 }
 
 rocksdb_rs::status::Status VerifySstFileChecksum(const Options& options,
-                             const EnvOptions& env_options,
-                             const std::string& file_path) {
+                                                 const EnvOptions& env_options,
+                                                 const std::string& file_path) {
   // TODO: plumb Env::IOActivity
   const ReadOptions read_options;
   return VerifySstFileChecksum(options, env_options, read_options, file_path);
 }
-rocksdb_rs::status::Status VerifySstFileChecksum(const Options& options,
-                             const EnvOptions& env_options,
-                             const ReadOptions& read_options,
-                             const std::string& file_path,
-                             const SequenceNumber& largest_seqno) {
+rocksdb_rs::status::Status VerifySstFileChecksum(
+    const Options& options, const EnvOptions& env_options,
+    const ReadOptions& read_options, const std::string& file_path,
+    const SequenceNumber& largest_seqno) {
   std::unique_ptr<FSRandomAccessFile> file;
   uint64_t file_size;
   InternalKeyComparator internal_comparator(options.comparator);
   ImmutableOptions ioptions(options);
 
-  rocksdb_rs::status::Status s = ioptions.fs->NewRandomAccessFile(
-      file_path, FileOptions(env_options), &file, nullptr).status();
+  rocksdb_rs::status::Status s =
+      ioptions.fs
+          ->NewRandomAccessFile(file_path, FileOptions(env_options), &file,
+                                nullptr)
+          .status();
   if (s.ok()) {
-    s = ioptions.fs->GetFileSize(file_path, IOOptions(), &file_size, nullptr).status();
+    s = ioptions.fs->GetFileSize(file_path, IOOptions(), &file_size, nullptr)
+            .status();
   } else {
     return s;
   }

@@ -94,7 +94,8 @@ DBIter::DBIter(Env* _env, const ReadOptions& read_options,
          user_comparator_.user_comparator()->timestamp_size());
 }
 
-rocksdb_rs::status::Status DBIter::GetProperty(std::string prop_name, std::string* prop) {
+rocksdb_rs::status::Status DBIter::GetProperty(std::string prop_name,
+                                               std::string* prop) {
   if (prop == nullptr) {
     return rocksdb_rs::status::Status_InvalidArgument("prop is nullptr");
   }
@@ -116,9 +117,11 @@ rocksdb_rs::status::Status DBIter::GetProperty(std::string prop_name, std::strin
 }
 
 bool DBIter::ParseKey(ParsedInternalKey* ikey) {
-  rocksdb_rs::status::Status s = ParseInternalKey(iter_.key(), ikey, false /* log_err_key */);
+  rocksdb_rs::status::Status s =
+      ParseInternalKey(iter_.key(), ikey, false /* log_err_key */);
   if (!s.ok()) {
-    status_ = rocksdb_rs::status::Status_Corruption("In DBIter: ", s.getState());
+    status_ =
+        rocksdb_rs::status::Status_Corruption("In DBIter: ", s.getState());
     valid_ = false;
     ROCKS_LOG_ERROR(logger_, "In DBIter: %s", status_.getState()->c_str());
     return false;
@@ -189,7 +192,8 @@ bool DBIter::SetBlobValueIfNeeded(const Slice& user_key,
   }
 
   if (!version_) {
-    status_ = rocksdb_rs::status::Status_Corruption("Encountered unexpected blob index.");
+    status_ = rocksdb_rs::status::Status_Corruption(
+        "Encountered unexpected blob index.");
     valid_ = false;
     return false;
   }
@@ -205,8 +209,9 @@ bool DBIter::SetBlobValueIfNeeded(const Slice& user_key,
   constexpr FilePrefetchBuffer* prefetch_buffer = nullptr;
   constexpr uint64_t* bytes_read = nullptr;
 
-  const rocksdb_rs::status::Status s = version_->GetBlob(read_options, user_key, blob_index,
-                                     prefetch_buffer, &blob_value_, bytes_read);
+  const rocksdb_rs::status::Status s =
+      version_->GetBlob(read_options, user_key, blob_index, prefetch_buffer,
+                        &blob_value_, bytes_read);
 
   if (!s.ok()) {
     status_.copy_from(s);
@@ -222,7 +227,8 @@ bool DBIter::SetValueAndColumnsFromEntity(Slice slice) {
   assert(value_.empty());
   assert(wide_columns_.empty());
 
-  const rocksdb_rs::status::Status s = WideColumnSerialization::Deserialize(slice, wide_columns_);
+  const rocksdb_rs::status::Status s =
+      WideColumnSerialization::Deserialize(slice, wide_columns_);
 
   if (!s.ok()) {
     status_.copy_from(s);
@@ -384,8 +390,9 @@ bool DBIter::FindNextUserEntryInternal(bool skipping_saved_key,
                 return false;
               }
 
-              SetValueAndColumnsFromPlain(expose_blob_index_ ? iter_.value()
-                                                             : static_cast<const Slice&>(blob_value_));
+              SetValueAndColumnsFromPlain(
+                  expose_blob_index_ ? iter_.value()
+                                     : static_cast<const Slice&>(blob_value_));
             } else if (ikey_.type == kTypeWideColumnEntity) {
               if (!SetValueAndColumnsFromEntity(iter_.value())) {
                 return false;
@@ -512,7 +519,8 @@ bool DBIter::FindNextUserEntryInternal(bool skipping_saved_key,
 bool DBIter::MergeValuesNewToOld() {
   if (!merge_operator_) {
     ROCKS_LOG_ERROR(logger_, "Options::merge_operator is null.");
-    status_ = rocksdb_rs::status::Status_InvalidArgument("merge_operator_ must be set.");
+    status_ = rocksdb_rs::status::Status_InvalidArgument(
+        "merge_operator_ must be set.");
     valid_ = false;
     return false;
   }
@@ -573,8 +581,8 @@ bool DBIter::MergeValuesNewToOld() {
       PERF_COUNTER_ADD(internal_merge_count, 1);
     } else if (kTypeBlobIndex == ikey.type) {
       if (expose_blob_index_) {
-        status_ =
-            rocksdb_rs::status::Status_NotSupported("BlobDB does not support merge operator.");
+        status_ = rocksdb_rs::status::Status_NotSupported(
+            "BlobDB does not support merge operator.");
         valid_ = false;
         return false;
       }
@@ -985,8 +993,8 @@ bool DBIter::FindValueForCurrentKey() {
         return true;
       } else if (last_not_merge_type == kTypeBlobIndex) {
         if (expose_blob_index_) {
-          status_ =
-              rocksdb_rs::status::Status_NotSupported("BlobDB does not support merge operator.");
+          status_ = rocksdb_rs::status::Status_NotSupported(
+              "BlobDB does not support merge operator.");
           valid_ = false;
           return false;
         }
@@ -994,7 +1002,8 @@ bool DBIter::FindValueForCurrentKey() {
           return false;
         }
         valid_ = true;
-        if (!Merge(&static_cast<const Slice &>(blob_value_), saved_key_.GetUserKey())) {
+        if (!Merge(&static_cast<const Slice&>(blob_value_),
+                   saved_key_.GetUserKey())) {
           return false;
         }
 
@@ -1024,8 +1033,9 @@ bool DBIter::FindValueForCurrentKey() {
         return false;
       }
 
-      SetValueAndColumnsFromPlain(expose_blob_index_ ? pinned_value_
-                                                     : static_cast<const Slice&>(blob_value_));
+      SetValueAndColumnsFromPlain(expose_blob_index_
+                                      ? pinned_value_
+                                      : static_cast<const Slice&>(blob_value_));
 
       break;
     case kTypeWideColumnEntity:
@@ -1130,8 +1140,9 @@ bool DBIter::FindValueForCurrentKeyUsingSeek() {
         return false;
       }
 
-      SetValueAndColumnsFromPlain(expose_blob_index_ ? pinned_value_
-                                                     : static_cast<const Slice&>(blob_value_));
+      SetValueAndColumnsFromPlain(expose_blob_index_
+                                      ? pinned_value_
+                                      : static_cast<const Slice&>(blob_value_));
     } else if (ikey.type == kTypeWideColumnEntity) {
       if (!SetValueAndColumnsFromEntity(pinned_value_)) {
         return false;
@@ -1196,8 +1207,8 @@ bool DBIter::FindValueForCurrentKeyUsingSeek() {
       PERF_COUNTER_ADD(internal_merge_count, 1);
     } else if (ikey.type == kTypeBlobIndex) {
       if (expose_blob_index_) {
-        status_ =
-            rocksdb_rs::status::Status_NotSupported("BlobDB does not support merge operator.");
+        status_ = rocksdb_rs::status::Status_NotSupported(
+            "BlobDB does not support merge operator.");
         valid_ = false;
         return false;
       }
@@ -1205,7 +1216,8 @@ bool DBIter::FindValueForCurrentKeyUsingSeek() {
         return false;
       }
       valid_ = true;
-      if (!Merge(&static_cast<const Slice&>(blob_value_), saved_key_.GetUserKey())) {
+      if (!Merge(&static_cast<const Slice&>(blob_value_),
+                 saved_key_.GetUserKey())) {
         return false;
       }
 
@@ -1362,7 +1374,8 @@ bool DBIter::TooManyInternalKeysSkipped(bool increment) {
   if ((max_skippable_internal_keys_ > 0) &&
       (num_internal_keys_skipped_ > max_skippable_internal_keys_)) {
     valid_ = false;
-    status_ = rocksdb_rs::status::Status_Incomplete("Too many internal keys skipped.");
+    status_ = rocksdb_rs::status::Status_Incomplete(
+        "Too many internal keys skipped.");
     return true;
   } else if (increment) {
     num_internal_keys_skipped_++;
@@ -1456,7 +1469,8 @@ void DBIter::Seek(const Slice& target) {
     } else {
       upper_bound = Slice("");
     }
-    db_impl_->TraceIteratorSeek(cfd_->GetID(), target, lower_bound, upper_bound);
+    db_impl_->TraceIteratorSeek(cfd_->GetID(), target, lower_bound,
+                                upper_bound);
   }
 
   status_ = rocksdb_rs::status::Status_OK();
@@ -1529,9 +1543,8 @@ void DBIter::SeekForPrev(const Slice& target) {
     } else {
       upper_bound = Slice("");
     }
-    db_impl_
-        ->TraceIteratorSeekForPrev(cfd_->GetID(), target, lower_bound,
-                                   upper_bound);
+    db_impl_->TraceIteratorSeekForPrev(cfd_->GetID(), target, lower_bound,
+                                       upper_bound);
   }
 
   status_ = rocksdb_rs::status::Status_OK();

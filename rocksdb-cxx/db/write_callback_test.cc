@@ -3,7 +3,6 @@
 //  COPYING file in the root directory) and Apache 2.0 License
 //  (found in the LICENSE.Apache file in the root directory).
 
-
 #include "db/write_callback.h"
 
 #include <atomic>
@@ -54,7 +53,9 @@ class WriteCallbackTestWriteCallback1 : public WriteCallback {
 
 class WriteCallbackTestWriteCallback2 : public WriteCallback {
  public:
-  rocksdb_rs::status::Status Callback(DB* /*db*/) override { return rocksdb_rs::status::Status_Busy(); }
+  rocksdb_rs::status::Status Callback(DB* /*db*/) override {
+    return rocksdb_rs::status::Status_Busy();
+  }
   bool AllowWriteBatching() override { return true; }
 };
 
@@ -316,8 +317,10 @@ TEST_P(WriteCallbackPTest, WriteWithCallbackTest) {
         class PublishSeqCallback : public PreReleaseCallback {
          public:
           PublishSeqCallback(DBImpl* db_impl_in) : db_impl_(db_impl_in) {}
-          rocksdb_rs::status::Status Callback(SequenceNumber last_seq, bool /*not used*/, uint64_t,
-                          size_t /*index*/, size_t /*total*/) override {
+          rocksdb_rs::status::Status Callback(SequenceNumber last_seq,
+                                              bool /*not used*/, uint64_t,
+                                              size_t /*index*/,
+                                              size_t /*total*/) override {
             db_impl_->SetLastPublishedSequence(last_seq);
             return rocksdb_rs::status::Status_OK();
           }
@@ -451,4 +454,3 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-

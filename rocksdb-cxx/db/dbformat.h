@@ -217,8 +217,9 @@ void ReplaceInternalKeyWithMinTimestamp(std::string* result, const Slice& key,
 // stores the parsed data in "*result", and returns true.
 //
 // On error, returns false, leaves "*result" in an undefined state.
-rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key, ParsedInternalKey* result,
-                        bool log_err_key);
+rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key,
+                                            ParsedInternalKey* result,
+                                            bool log_err_key);
 
 // Returns the user key portion of an internal key.
 inline Slice ExtractUserKey(const Slice& internal_key) {
@@ -254,7 +255,8 @@ inline Slice ExtractTimestampFromKey(const Slice& internal_key, size_t ts_sz) {
 inline uint64_t ExtractInternalKeyFooter(const Slice& internal_key) {
   assert(internal_key.size() >= kNumInternalBytes);
   const size_t n = internal_key.size();
-  return rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
+  return rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() + n -
+                                                kNumInternalBytes);
 }
 
 inline ValueType ExtractValueType(const Slice& internal_key) {
@@ -400,15 +402,18 @@ inline int InternalKeyComparator::Compare(const InternalKey& a,
 }
 
 inline rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key,
-                               ParsedInternalKey* result, bool log_err_key) {
+                                                   ParsedInternalKey* result,
+                                                   bool log_err_key) {
   const size_t n = internal_key.size();
 
   if (n < kNumInternalBytes) {
-    return rocksdb_rs::status::Status_Corruption("Corrupted Key: Internal Key too small. Size=" +
-                              std::to_string(n) + ". ");
+    return rocksdb_rs::status::Status_Corruption(
+        "Corrupted Key: Internal Key too small. Size=" + std::to_string(n) +
+        ". ");
   }
 
-  uint64_t num = rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
+  uint64_t num = rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() +
+                                                        n - kNumInternalBytes);
   unsigned char c = num & 0xff;
   result->sequence = num >> 8;
   result->type = static_cast<ValueType>(c);
@@ -418,8 +423,8 @@ inline rocksdb_rs::status::Status ParseInternalKey(const Slice& internal_key,
   if (IsExtendedValueType(result->type)) {
     return rocksdb_rs::status::Status_OK();
   } else {
-    return rocksdb_rs::status::Status_Corruption("Corrupted Key",
-                              result->DebugString(log_err_key, true));
+    return rocksdb_rs::status::Status_Corruption(
+        "Corrupted Key", result->DebugString(log_err_key, true));
   }
 }
 
@@ -432,14 +437,16 @@ inline void UpdateInternalKey(std::string* ikey, uint64_t seq, ValueType t) {
 
   // Note: Since C++11, strings are guaranteed to be stored contiguously and
   // string::operator[]() is guaranteed not to change ikey.data().
-  rocksdb_rs::coding_lean::EncodeFixed64(&(*ikey)[ikey_sz - kNumInternalBytes], newval);
+  rocksdb_rs::coding_lean::EncodeFixed64(&(*ikey)[ikey_sz - kNumInternalBytes],
+                                         newval);
 }
 
 // Get the sequence number from the internal key
 inline uint64_t GetInternalKeySeqno(const Slice& internal_key) {
   const size_t n = internal_key.size();
   assert(n >= kNumInternalBytes);
-  uint64_t num = rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() + n - kNumInternalBytes);
+  uint64_t num = rocksdb_rs::coding_lean::DecodeFixed64(internal_key.data() +
+                                                        n - kNumInternalBytes);
   return num >> 8;
 }
 
@@ -626,7 +633,8 @@ class IterKey {
              ts->size());
     }
     uint64_t newval = (seq << 8) | t;
-    rocksdb_rs::coding_lean::EncodeFixed64(&buf_[key_size_ - kNumInternalBytes], newval);
+    rocksdb_rs::coding_lean::EncodeFixed64(&buf_[key_size_ - kNumInternalBytes],
+                                           newval);
   }
 
   bool IsKeyPinned() const { return (key_ != buf_); }
@@ -650,7 +658,7 @@ class IterKey {
       memcpy(buf_ + psize + usize, ts->data(), ts_sz);
     }
     rocksdb_rs::coding_lean::EncodeFixed64(buf_ + usize + psize + ts_sz,
-                  PackSequenceAndType(s, value_type));
+                                           PackSequenceAndType(s, value_type));
 
     key_ = buf_;
     key_size_ = psize + usize + sizeof(uint64_t) + ts_sz;
@@ -680,8 +688,10 @@ class IterKey {
 
   void EncodeLengthPrefixedKey(const Slice& key) {
     auto size = key.size();
-    EnlargeBufferIfNeeded(size + static_cast<size_t>(rocksdb_rs::coding::VarintLength(size)));
-    char* ptr = rocksdb_rs::coding::EncodeVarint32(buf_, static_cast<uint32_t>(size));
+    EnlargeBufferIfNeeded(
+        size + static_cast<size_t>(rocksdb_rs::coding::VarintLength(size)));
+    char* ptr =
+        rocksdb_rs::coding::EncodeVarint32(buf_, static_cast<uint32_t>(size));
     memcpy(ptr, key.data(), size);
     key_ = buf_;
     is_user_key_ = true;
@@ -799,8 +809,9 @@ bool ReadKeyFromWriteBatchEntry(Slice* input, Slice* key, bool cf_record);
 // If user-defined timestamp is enabled for a column family, then the `key`
 // resulting from this call will include timestamp.
 rocksdb_rs::status::Status ReadRecordFromWriteBatch(Slice* input, char* tag,
-                                uint32_t* column_family, Slice* key,
-                                Slice* value, Slice* blob, Slice* xid);
+                                                    uint32_t* column_family,
+                                                    Slice* key, Slice* value,
+                                                    Slice* blob, Slice* xid);
 
 // When user call DeleteRange() to delete a range of keys,
 // we will store a serialized RangeTombstone in MemTable and SST.
@@ -883,10 +894,10 @@ inline int InternalKeyComparator::Compare(const Slice& akey,
   //    decreasing type (though sequence# should be enough to disambiguate)
   int r = user_comparator_.Compare(ExtractUserKey(akey), ExtractUserKey(bkey));
   if (r == 0) {
-    const uint64_t anum =
-        rocksdb_rs::coding_lean::DecodeFixed64(akey.data() + akey.size() - kNumInternalBytes);
-    const uint64_t bnum =
-        rocksdb_rs::coding_lean::DecodeFixed64(bkey.data() + bkey.size() - kNumInternalBytes);
+    const uint64_t anum = rocksdb_rs::coding_lean::DecodeFixed64(
+        akey.data() + akey.size() - kNumInternalBytes);
+    const uint64_t bnum = rocksdb_rs::coding_lean::DecodeFixed64(
+        bkey.data() + bkey.size() - kNumInternalBytes);
     if (anum > bnum) {
       r = -1;
     } else if (anum < bnum) {
@@ -904,10 +915,12 @@ inline int InternalKeyComparator::CompareKeySeq(const Slice& akey,
   int r = user_comparator_.Compare(ExtractUserKey(akey), ExtractUserKey(bkey));
   if (r == 0) {
     // Shift the number to exclude the last byte which contains the value type
-    const uint64_t anum =
-        rocksdb_rs::coding_lean::DecodeFixed64(akey.data() + akey.size() - kNumInternalBytes) >> 8;
-    const uint64_t bnum =
-        rocksdb_rs::coding_lean::DecodeFixed64(bkey.data() + bkey.size() - kNumInternalBytes) >> 8;
+    const uint64_t anum = rocksdb_rs::coding_lean::DecodeFixed64(
+                              akey.data() + akey.size() - kNumInternalBytes) >>
+                          8;
+    const uint64_t bnum = rocksdb_rs::coding_lean::DecodeFixed64(
+                              bkey.data() + bkey.size() - kNumInternalBytes) >>
+                          8;
     if (anum > bnum) {
       r = -1;
     } else if (anum < bnum) {

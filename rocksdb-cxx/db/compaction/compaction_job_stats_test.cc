@@ -154,8 +154,9 @@ class CompactionJobStatsTest : public testing::Test,
     ASSERT_OK(TryReopenWithColumnFamilies(cfs, options));
   }
 
-  rocksdb_rs::status::Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
-                                     const std::vector<Options>& options) {
+  rocksdb_rs::status::Status TryReopenWithColumnFamilies(
+      const std::vector<std::string>& cfs,
+      const std::vector<Options>& options) {
     Close();
     EXPECT_EQ(cfs.size(), options.size());
     std::vector<ColumnFamilyDescriptor> column_families;
@@ -166,8 +167,8 @@ class CompactionJobStatsTest : public testing::Test,
     return DB::Open(db_opts, dbname_, column_families, &handles_, &db_);
   }
 
-  rocksdb_rs::status::Status TryReopenWithColumnFamilies(const std::vector<std::string>& cfs,
-                                     const Options& options) {
+  rocksdb_rs::status::Status TryReopenWithColumnFamilies(
+      const std::vector<std::string>& cfs, const Options& options) {
     Close();
     std::vector<Options> v_opts(cfs.size(), options);
     return TryReopenWithColumnFamilies(cfs, v_opts);
@@ -213,16 +214,19 @@ class CompactionJobStatsTest : public testing::Test,
     }
   }
 
-  rocksdb_rs::status::Status Put(const Slice& k, const Slice& v, WriteOptions wo = WriteOptions()) {
+  rocksdb_rs::status::Status Put(const Slice& k, const Slice& v,
+                                 WriteOptions wo = WriteOptions()) {
     return db_->Put(wo, k, v);
   }
 
   rocksdb_rs::status::Status Put(int cf, const Slice& k, const Slice& v,
-             WriteOptions wo = WriteOptions()) {
+                                 WriteOptions wo = WriteOptions()) {
     return db_->Put(wo, handles_[cf], k, v);
   }
 
-  rocksdb_rs::status::Status Delete(const std::string& k) { return db_->Delete(WriteOptions(), k); }
+  rocksdb_rs::status::Status Delete(const std::string& k) {
+    return db_->Delete(WriteOptions(), k);
+  }
 
   rocksdb_rs::status::Status Delete(int cf, const std::string& k) {
     return db_->Delete(WriteOptions(), handles_[cf], k);
@@ -290,8 +294,8 @@ class CompactionJobStatsTest : public testing::Test,
     return result;
   }
 
-  rocksdb_rs::status::Status Size(uint64_t* size, const Slice& start, const Slice& limit,
-              int cf = 0) {
+  rocksdb_rs::status::Status Size(uint64_t* size, const Slice& start,
+                                  const Slice& limit, int cf = 0) {
     Range r(start, limit);
     if (cf == 0) {
       return db_->GetApproximateSizes(&r, 1, size);
@@ -622,7 +626,8 @@ TEST_P(CompactionJobStatsTest, CompactionJobStatsTest) {
   // just enough setting to hold off auto-compaction.
   options.level0_file_num_compaction_trigger = kTestScale + 1;
   options.num_levels = 3;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_subcompactions = max_subcompactions_;
   options.bytes_per_sync = 512 * 1024;
 
@@ -732,7 +737,8 @@ TEST_P(CompactionJobStatsTest, CompactionJobStatsTest) {
     std::string L1_files(L1_buf);
     ASSERT_EQ(L1_files, FilesPerLevel(1));
     options.compression = GetAnyCompression();
-    if (options.compression == rocksdb_rs::compression_type::CompressionType::kNoCompression) {
+    if (options.compression ==
+        rocksdb_rs::compression_type::CompressionType::kNoCompression) {
       break;
     }
     stats_checker->EnableCompression(true);
@@ -821,7 +827,8 @@ TEST_P(CompactionJobStatsTest, DeletionStatsTest) {
   options.create_if_missing = true;
   options.level0_file_num_compaction_trigger = kTestScale + 1;
   options.num_levels = 3;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.max_bytes_for_level_multiplier = 2;
   options.max_subcompactions = max_subcompactions_;
 
@@ -902,7 +909,8 @@ TEST_P(CompactionJobStatsTest, UniversalCompactionTest) {
   options.listeners.emplace_back(stats_checker);
   options.create_if_missing = true;
   options.num_levels = 3;
-  options.compression = rocksdb_rs::compression_type::CompressionType::kNoCompression;
+  options.compression =
+      rocksdb_rs::compression_type::CompressionType::kNoCompression;
   options.level0_file_num_compaction_trigger = 2;
   options.target_file_size_base = num_keys_per_table * 1000;
   options.compaction_style = kCompactionStyleUniversal;
@@ -959,7 +967,6 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
 
 #else
 

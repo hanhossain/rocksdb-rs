@@ -267,7 +267,7 @@ namespace {
 struct TestHandler : public WriteBatch::Handler {
   std::string seen;
   rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
-               const Slice& value) override {
+                                   const Slice& value) override {
     if (column_family_id == 0) {
       seen += "Put(" + key.ToString() + ", " + value.ToString() + ")";
     } else {
@@ -276,7 +276,8 @@ struct TestHandler : public WriteBatch::Handler {
     }
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
+                                      const Slice& key) override {
     if (column_family_id == 0) {
       seen += "Delete(" + key.ToString() + ")";
     } else {
@@ -285,7 +286,8 @@ struct TestHandler : public WriteBatch::Handler {
     }
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id, const Slice& key) override {
+  rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
+                                            const Slice& key) override {
     if (column_family_id == 0) {
       seen += "SingleDelete(" + key.ToString() + ")";
     } else {
@@ -294,8 +296,9 @@ struct TestHandler : public WriteBatch::Handler {
     }
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id, const Slice& begin_key,
-                       const Slice& end_key) override {
+  rocksdb_rs::status::Status DeleteRangeCF(uint32_t column_family_id,
+                                           const Slice& begin_key,
+                                           const Slice& end_key) override {
     if (column_family_id == 0) {
       seen += "DeleteRange(" + begin_key.ToString() + ", " +
               end_key.ToString() + ")";
@@ -305,8 +308,9 @@ struct TestHandler : public WriteBatch::Handler {
     }
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
-                 const Slice& value) override {
+  rocksdb_rs::status::Status MergeCF(uint32_t column_family_id,
+                                     const Slice& key,
+                                     const Slice& value) override {
     if (column_family_id == 0) {
       seen += "Merge(" + key.ToString() + ", " + value.ToString() + ")";
     } else {
@@ -335,7 +339,8 @@ struct TestHandler : public WriteBatch::Handler {
     seen += "MarkCommit(" + xid.ToString() + ")";
     return rocksdb_rs::status::Status_OK();
   }
-  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& xid, const Slice& ts) override {
+  rocksdb_rs::status::Status MarkCommitWithTimestamp(const Slice& xid,
+                                                     const Slice& ts) override {
     seen += "MarkCommitWithTimestamp(" + xid.ToString() + ", " +
             ts.ToString(true) + ")";
     return rocksdb_rs::status::Status_OK();
@@ -481,8 +486,9 @@ TEST_F(WriteBatchTest, DISABLED_ManyUpdates) {
   struct NoopHandler : public WriteBatch::Handler {
     uint32_t num_seen = 0;
     char expected_char = 'A';
-    rocksdb_rs::status::Status PutCF(uint32_t /*column_family_id*/, const Slice& key,
-                 const Slice& value) override {
+    rocksdb_rs::status::Status PutCF(uint32_t /*column_family_id*/,
+                                     const Slice& key,
+                                     const Slice& value) override {
       EXPECT_EQ(kKeyValueSize, key.size());
       EXPECT_EQ(kKeyValueSize, value.size());
       EXPECT_EQ(expected_char, key[0]);
@@ -497,17 +503,18 @@ TEST_F(WriteBatchTest, DISABLED_ManyUpdates) {
       return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status DeleteCF(uint32_t /*column_family_id*/,
-                    const Slice& /*key*/) override {
+                                        const Slice& /*key*/) override {
       ADD_FAILURE();
       return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status SingleDeleteCF(uint32_t /*column_family_id*/,
-                          const Slice& /*key*/) override {
+                                              const Slice& /*key*/) override {
       ADD_FAILURE();
       return rocksdb_rs::status::Status_OK();
     }
-    rocksdb_rs::status::Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
-                   const Slice& /*value*/) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t /*column_family_id*/,
+                                       const Slice& /*key*/,
+                                       const Slice& /*value*/) override {
       ADD_FAILURE();
       return rocksdb_rs::status::Status_OK();
     }
@@ -536,8 +543,9 @@ TEST_F(WriteBatchTest, DISABLED_LargeKeyValue) {
 
   struct NoopHandler : public WriteBatch::Handler {
     int num_seen = 0;
-    rocksdb_rs::status::Status PutCF(uint32_t /*column_family_id*/, const Slice& key,
-                 const Slice& value) override {
+    rocksdb_rs::status::Status PutCF(uint32_t /*column_family_id*/,
+                                     const Slice& key,
+                                     const Slice& value) override {
       EXPECT_EQ(kKeyValueSize, key.size());
       EXPECT_EQ(kKeyValueSize, value.size());
       EXPECT_EQ('A' + num_seen, key[0]);
@@ -548,17 +556,18 @@ TEST_F(WriteBatchTest, DISABLED_LargeKeyValue) {
       return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status DeleteCF(uint32_t /*column_family_id*/,
-                    const Slice& /*key*/) override {
+                                        const Slice& /*key*/) override {
       ADD_FAILURE();
       return rocksdb_rs::status::Status_OK();
     }
     rocksdb_rs::status::Status SingleDeleteCF(uint32_t /*column_family_id*/,
-                          const Slice& /*key*/) override {
+                                              const Slice& /*key*/) override {
       ADD_FAILURE();
       return rocksdb_rs::status::Status_OK();
     }
-    rocksdb_rs::status::Status MergeCF(uint32_t /*column_family_id*/, const Slice& /*key*/,
-                   const Slice& /*value*/) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t /*column_family_id*/,
+                                       const Slice& /*key*/,
+                                       const Slice& /*value*/) override {
       ADD_FAILURE();
       return rocksdb_rs::status::Status_OK();
     }
@@ -575,22 +584,25 @@ TEST_F(WriteBatchTest, Continue) {
 
   struct Handler : public TestHandler {
     int num_seen = 0;
-    rocksdb_rs::status::Status PutCF(uint32_t column_family_id, const Slice& key,
-                 const Slice& value) override {
+    rocksdb_rs::status::Status PutCF(uint32_t column_family_id,
+                                     const Slice& key,
+                                     const Slice& value) override {
       ++num_seen;
       return TestHandler::PutCF(column_family_id, key, value);
     }
-    rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id, const Slice& key) override {
+    rocksdb_rs::status::Status DeleteCF(uint32_t column_family_id,
+                                        const Slice& key) override {
       ++num_seen;
       return TestHandler::DeleteCF(column_family_id, key);
     }
     rocksdb_rs::status::Status SingleDeleteCF(uint32_t column_family_id,
-                          const Slice& key) override {
+                                              const Slice& key) override {
       ++num_seen;
       return TestHandler::SingleDeleteCF(column_family_id, key);
     }
-    rocksdb_rs::status::Status MergeCF(uint32_t column_family_id, const Slice& key,
-                   const Slice& value) override {
+    rocksdb_rs::status::Status MergeCF(uint32_t column_family_id,
+                                       const Slice& key,
+                                       const Slice& value) override {
       ++num_seen;
       return TestHandler::MergeCF(column_family_id, key, value);
     }
@@ -931,7 +943,8 @@ class TimestampChecker : public WriteBatch::Handler {
   explicit TimestampChecker(
       std::unordered_map<uint32_t, const Comparator*> cf_to_ucmps, Slice ts)
       : cf_to_ucmps_(std::move(cf_to_ucmps)), timestamp_(std::move(ts)) {}
-  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key, const Slice& /*value*/) override {
+  rocksdb_rs::status::Status PutCF(uint32_t cf, const Slice& key,
+                                   const Slice& /*value*/) override {
     auto cf_iter = cf_to_ucmps_.find(cf);
     if (cf_iter == cf_to_ucmps_.end()) {
       return rocksdb_rs::status::Status_Corruption();

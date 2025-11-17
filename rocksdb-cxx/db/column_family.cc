@@ -85,7 +85,8 @@ const std::string& ColumnFamilyHandleImpl::GetName() const {
   return cfd()->GetName();
 }
 
-rocksdb_rs::status::Status ColumnFamilyHandleImpl::GetDescriptor(ColumnFamilyDescriptor* desc) {
+rocksdb_rs::status::Status ColumnFamilyHandleImpl::GetDescriptor(
+    ColumnFamilyDescriptor* desc) {
   // accessing mutable cf-options requires db mutex.
   InstrumentedMutexLock l(mutex_);
   *desc = ColumnFamilyDescriptor(cfd()->GetName(), cfd()->GetLatestCFOptions());
@@ -110,7 +111,8 @@ void GetIntTblPropCollectorFactory(
   }
 }
 
-rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& cf_options) {
+rocksdb_rs::status::Status CheckCompressionSupported(
+    const ColumnFamilyOptions& cf_options) {
   if (!cf_options.compression_per_level.empty()) {
     for (size_t level = 0; level < cf_options.compression_per_level.size();
          ++level) {
@@ -160,7 +162,8 @@ rocksdb_rs::status::Status CheckCompressionSupported(const ColumnFamilyOptions& 
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status CheckConcurrentWritesSupported(const ColumnFamilyOptions& cf_options) {
+rocksdb_rs::status::Status CheckConcurrentWritesSupported(
+    const ColumnFamilyOptions& cf_options) {
   if (cf_options.inplace_update_support) {
     return rocksdb_rs::status::Status_InvalidArgument(
         "In-place memtable updates (inplace_update_support) is not compatible "
@@ -173,8 +176,8 @@ rocksdb_rs::status::Status CheckConcurrentWritesSupported(const ColumnFamilyOpti
   return rocksdb_rs::status::Status_OK();
 }
 
-rocksdb_rs::status::Status CheckCFPathsSupported(const DBOptions& db_options,
-                             const ColumnFamilyOptions& cf_options) {
+rocksdb_rs::status::Status CheckCFPathsSupported(
+    const DBOptions& db_options, const ColumnFamilyOptions& cf_options) {
   // More than one cf_paths are supported only in universal
   // and level compaction styles. This function also checks the case
   // in which cf_paths is not specified, which results in db_paths
@@ -202,9 +205,9 @@ const uint64_t kDefaultPeriodicCompSecs = 0xfffffffffffffffe;
 ColumnFamilyOptions SanitizeOptions(const ImmutableDBOptions& db_options,
                                     const ColumnFamilyOptions& src) {
   ColumnFamilyOptions result = src;
-  size_t clamp_max = std::conditional<
-      sizeof(size_t) == 4, std::integral_constant<size_t, 0xffffffff>,
-      std::integral_constant<uint64_t, 64ull << 30>>::type::value;
+  size_t clamp_max = std::conditional < sizeof(size_t) == 4,
+         std::integral_constant<size_t, 0xffffffff>,
+         std::integral_constant < uint64_t, 64ull << 30 >> ::type::value;
   ClipToRange(&result.write_buffer_size, (static_cast<size_t>(64)) << 10,
               clamp_max);
   // if user sets arena_block_size, we trust user to use this value. Otherwise,
@@ -629,15 +632,16 @@ ColumnFamilyData::ColumnFamilyData(
         cf_options.table_factory->GetOptions<BlockBasedTableOptions>();
     const auto& options_overrides = bbto->cache_usage_options.options_overrides;
     const auto file_metadata_charged =
-        options_overrides.at(rocksdb_rs::cache::CacheEntryRole::kFileMetadata).charged;
+        options_overrides.at(rocksdb_rs::cache::CacheEntryRole::kFileMetadata)
+            .charged;
     if (bbto->block_cache &&
         file_metadata_charged == CacheEntryRoleOptions::Decision::kEnabled) {
       // TODO(hx235): Add a `ConcurrentCacheReservationManager` at DB scope
       // responsible for reservation of `ObsoleteFileInfo` so that we can keep
       // this `file_metadata_cache_res_mgr_` nonconcurrent
       file_metadata_cache_res_mgr_.reset(new ConcurrentCacheReservationManager(
-          std::make_shared<
-              CacheReservationManagerImpl<rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>(
+          std::make_shared<CacheReservationManagerImpl<
+              rocksdb_rs::cache::CacheEntryRole::kFileMetadata>>(
               bbto->block_cache)));
     }
   }
@@ -689,7 +693,8 @@ ColumnFamilyData::~ColumnFamilyData() {
   if (db_paths_registered_) {
     // TODO(cc): considering using ioptions_.fs, currently some tests rely on
     // EnvWrapper, that's the main reason why we use env here.
-    rocksdb_rs::status::Status s = ioptions_.env->UnregisterDbPaths(GetDbPaths());
+    rocksdb_rs::status::Status s =
+        ioptions_.env->UnregisterDbPaths(GetDbPaths());
     if (!s.ok()) {
       ROCKS_LOG_ERROR(
           ioptions_.logger,
@@ -864,17 +869,20 @@ int GetL0ThresholdSpeedupCompaction(int level0_file_num_compaction_trigger,
 }
 }  // anonymous namespace
 
-std::pair<rocksdb_rs::types::WriteStallCondition, rocksdb_rs::types::WriteStallCause>
+std::pair<rocksdb_rs::types::WriteStallCondition,
+          rocksdb_rs::types::WriteStallCause>
 ColumnFamilyData::GetWriteStallConditionAndCause(
     int num_unflushed_memtables, int num_l0_files,
     uint64_t num_compaction_needed_bytes,
     const MutableCFOptions& mutable_cf_options,
     const ImmutableCFOptions& immutable_cf_options) {
   if (num_unflushed_memtables >= mutable_cf_options.max_write_buffer_number) {
-    return {rocksdb_rs::types::WriteStallCondition::kStopped, rocksdb_rs::types::WriteStallCause::kMemtableLimit};
+    return {rocksdb_rs::types::WriteStallCondition::kStopped,
+            rocksdb_rs::types::WriteStallCause::kMemtableLimit};
   } else if (!mutable_cf_options.disable_auto_compactions &&
              num_l0_files >= mutable_cf_options.level0_stop_writes_trigger) {
-    return {rocksdb_rs::types::WriteStallCondition::kStopped, rocksdb_rs::types::WriteStallCause::kL0FileCountLimit};
+    return {rocksdb_rs::types::WriteStallCondition::kStopped,
+            rocksdb_rs::types::WriteStallCause::kL0FileCountLimit};
   } else if (!mutable_cf_options.disable_auto_compactions &&
              mutable_cf_options.hard_pending_compaction_bytes_limit > 0 &&
              num_compaction_needed_bytes >=
@@ -886,12 +894,14 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
                  mutable_cf_options.max_write_buffer_number - 1 &&
              num_unflushed_memtables - 1 >=
                  immutable_cf_options.min_write_buffer_number_to_merge) {
-    return {rocksdb_rs::types::WriteStallCondition::kDelayed, rocksdb_rs::types::WriteStallCause::kMemtableLimit};
+    return {rocksdb_rs::types::WriteStallCondition::kDelayed,
+            rocksdb_rs::types::WriteStallCause::kMemtableLimit};
   } else if (!mutable_cf_options.disable_auto_compactions &&
              mutable_cf_options.level0_slowdown_writes_trigger >= 0 &&
              num_l0_files >=
                  mutable_cf_options.level0_slowdown_writes_trigger) {
-    return {rocksdb_rs::types::WriteStallCondition::kDelayed, rocksdb_rs::types::WriteStallCause::kL0FileCountLimit};
+    return {rocksdb_rs::types::WriteStallCondition::kDelayed,
+            rocksdb_rs::types::WriteStallCause::kL0FileCountLimit};
   } else if (!mutable_cf_options.disable_auto_compactions &&
              mutable_cf_options.soft_pending_compaction_bytes_limit > 0 &&
              num_compaction_needed_bytes >=
@@ -899,10 +909,12 @@ ColumnFamilyData::GetWriteStallConditionAndCause(
     return {rocksdb_rs::types::WriteStallCondition::kDelayed,
             rocksdb_rs::types::WriteStallCause::kPendingCompactionBytes};
   }
-  return {rocksdb_rs::types::WriteStallCondition::kNormal, rocksdb_rs::types::WriteStallCause::kNone};
+  return {rocksdb_rs::types::WriteStallCondition::kNormal,
+          rocksdb_rs::types::WriteStallCause::kNone};
 }
 
-rocksdb_rs::types::WriteStallCondition ColumnFamilyData::RecalculateWriteStallConditions(
+rocksdb_rs::types::WriteStallCondition
+ColumnFamilyData::RecalculateWriteStallConditions(
     const MutableCFOptions& mutable_cf_options) {
   auto write_stall_condition = rocksdb_rs::types::WriteStallCondition::kNormal;
   if (current_ != nullptr) {
@@ -921,8 +933,10 @@ rocksdb_rs::types::WriteStallCondition ColumnFamilyData::RecalculateWriteStallCo
     bool was_stopped = write_controller->IsStopped();
     bool needed_delay = write_controller->NeedsDelay();
 
-    if (write_stall_condition == rocksdb_rs::types::WriteStallCondition::kStopped &&
-        write_stall_cause == rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
+    if (write_stall_condition ==
+            rocksdb_rs::types::WriteStallCondition::kStopped &&
+        write_stall_cause ==
+            rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
       write_controller_token_ = write_controller->GetStopToken();
       internal_stats_->AddCFStats(InternalStats::MEMTABLE_LIMIT_STOPS, 1);
       ROCKS_LOG_WARN(
@@ -931,8 +945,10 @@ rocksdb_rs::types::WriteStallCondition ColumnFamilyData::RecalculateWriteStallCo
           "(waiting for flush), max_write_buffer_number is set to %d",
           name_.c_str(), imm()->NumNotFlushed(),
           mutable_cf_options.max_write_buffer_number);
-    } else if (write_stall_condition == rocksdb_rs::types::WriteStallCondition::kStopped &&
-               write_stall_cause == rocksdb_rs::types::WriteStallCause::kL0FileCountLimit) {
+    } else if (write_stall_condition ==
+                   rocksdb_rs::types::WriteStallCondition::kStopped &&
+               write_stall_cause ==
+                   rocksdb_rs::types::WriteStallCause::kL0FileCountLimit) {
       write_controller_token_ = write_controller->GetStopToken();
       internal_stats_->AddCFStats(InternalStats::L0_FILE_COUNT_LIMIT_STOPS, 1);
       if (compaction_picker_->IsLevel0CompactionInProgress()) {
@@ -943,8 +959,10 @@ rocksdb_rs::types::WriteStallCondition ColumnFamilyData::RecalculateWriteStallCo
       ROCKS_LOG_WARN(ioptions_.logger,
                      "[%s] Stopping writes because we have %d level-0 files",
                      name_.c_str(), vstorage->l0_delay_trigger_count());
-    } else if (write_stall_condition == rocksdb_rs::types::WriteStallCondition::kStopped &&
-               write_stall_cause == rocksdb_rs::types::WriteStallCause::kPendingCompactionBytes) {
+    } else if (write_stall_condition ==
+                   rocksdb_rs::types::WriteStallCondition::kStopped &&
+               write_stall_cause == rocksdb_rs::types::WriteStallCause::
+                                        kPendingCompactionBytes) {
       write_controller_token_ = write_controller->GetStopToken();
       internal_stats_->AddCFStats(
           InternalStats::PENDING_COMPACTION_BYTES_LIMIT_STOPS, 1);
@@ -953,8 +971,10 @@ rocksdb_rs::types::WriteStallCondition ColumnFamilyData::RecalculateWriteStallCo
           "[%s] Stopping writes because of estimated pending compaction "
           "bytes %" PRIu64,
           name_.c_str(), compaction_needed_bytes);
-    } else if (write_stall_condition == rocksdb_rs::types::WriteStallCondition::kDelayed &&
-               write_stall_cause == rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
+    } else if (write_stall_condition ==
+                   rocksdb_rs::types::WriteStallCondition::kDelayed &&
+               write_stall_cause ==
+                   rocksdb_rs::types::WriteStallCause::kMemtableLimit) {
       write_controller_token_ =
           SetupDelay(write_controller, compaction_needed_bytes,
                      prev_compaction_needed_bytes_, was_stopped,
@@ -968,8 +988,10 @@ rocksdb_rs::types::WriteStallCondition ColumnFamilyData::RecalculateWriteStallCo
           name_.c_str(), imm()->NumNotFlushed(),
           mutable_cf_options.max_write_buffer_number,
           write_controller->delayed_write_rate());
-    } else if (write_stall_condition == rocksdb_rs::types::WriteStallCondition::kDelayed &&
-               write_stall_cause == rocksdb_rs::types::WriteStallCause::kL0FileCountLimit) {
+    } else if (write_stall_condition ==
+                   rocksdb_rs::types::WriteStallCondition::kDelayed &&
+               write_stall_cause ==
+                   rocksdb_rs::types::WriteStallCause::kL0FileCountLimit) {
       // L0 is the last two files from stopping.
       bool near_stop = vstorage->l0_delay_trigger_count() >=
                        mutable_cf_options.level0_stop_writes_trigger - 2;
@@ -988,8 +1010,10 @@ rocksdb_rs::types::WriteStallCondition ColumnFamilyData::RecalculateWriteStallCo
                      "rate %" PRIu64,
                      name_.c_str(), vstorage->l0_delay_trigger_count(),
                      write_controller->delayed_write_rate());
-    } else if (write_stall_condition == rocksdb_rs::types::WriteStallCondition::kDelayed &&
-               write_stall_cause == rocksdb_rs::types::WriteStallCause::kPendingCompactionBytes) {
+    } else if (write_stall_condition ==
+                   rocksdb_rs::types::WriteStallCondition::kDelayed &&
+               write_stall_cause == rocksdb_rs::types::WriteStallCause::
+                                        kPendingCompactionBytes) {
       // If the distance to hard limit is less than 1/4 of the gap between soft
       // and
       // hard bytes limit, we think it is near stop and speed up the slowdown.
@@ -1015,7 +1039,8 @@ rocksdb_rs::types::WriteStallCondition ColumnFamilyData::RecalculateWriteStallCo
           name_.c_str(), vstorage->estimated_compaction_needed_bytes(),
           write_controller->delayed_write_rate());
     } else {
-      assert(write_stall_condition == rocksdb_rs::types::WriteStallCondition::kNormal);
+      assert(write_stall_condition ==
+             rocksdb_rs::types::WriteStallCondition::kNormal);
       if (vstorage->l0_delay_trigger_count() >=
           GetL0ThresholdSpeedupCompaction(
               mutable_cf_options.level0_file_num_compaction_trigger,
@@ -1445,8 +1470,8 @@ rocksdb_rs::status::Status ColumnFamilyData::SetOptions(
       BuildColumnFamilyOptions(initial_cf_options_, mutable_cf_options_);
   ConfigOptions config_opts;
   config_opts.mutable_options_only = true;
-  rocksdb_rs::status::Status s = GetColumnFamilyOptionsFromMap(config_opts, cf_opts, options_map,
-                                           &cf_opts);
+  rocksdb_rs::status::Status s = GetColumnFamilyOptionsFromMap(
+      config_opts, cf_opts, options_map, &cf_opts);
   if (s.ok()) {
     s = ValidateOptions(db_opts, cf_opts);
   }
@@ -1490,7 +1515,8 @@ rocksdb_rs::status::Status ColumnFamilyData::AddDirectories(
     if (existing_dir == created_dirs->end()) {
       std::unique_ptr<FSDirectory> path_directory;
       s = DBImpl::CreateAndNewDirectory(ioptions_.fs.get(), p.path,
-                                        &path_directory).status();
+                                        &path_directory)
+              .status();
       if (!s.ok()) {
         return s;
       }

@@ -5,10 +5,9 @@
 
 #include "db/wal_edit.h"
 
+#include "rocksdb-rs/src/status.rs.h"
 #include "rocksdb/slice.h"
 #include "util/coding.h"
-
-#include "rocksdb-rs/src/status.rs.h"
 
 namespace rocksdb {
 
@@ -27,20 +26,23 @@ rocksdb_rs::status::Status WalAddition::DecodeFrom(Slice* src) {
   constexpr char class_name[] = "WalAddition";
 
   if (!GetVarint64(src, &number_)) {
-    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding WAL log number");
+    return rocksdb_rs::status::Status_Corruption(
+        class_name, "Error decoding WAL log number");
   }
 
   while (true) {
     uint32_t tag_value = 0;
     if (!GetVarint32(src, &tag_value)) {
-      return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding tag");
+      return rocksdb_rs::status::Status_Corruption(class_name,
+                                                   "Error decoding tag");
     }
     WalAdditionTag tag = static_cast<WalAdditionTag>(tag_value);
     switch (tag) {
       case WalAdditionTag::kSyncedSize: {
         uint64_t size = 0;
         if (!GetVarint64(src, &size)) {
-          return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding WAL file size");
+          return rocksdb_rs::status::Status_Corruption(
+              class_name, "Error decoding WAL file size");
         }
         metadata_.SetSyncedSizeInBytes(size);
         break;
@@ -83,7 +85,8 @@ rocksdb_rs::status::Status WalDeletion::DecodeFrom(Slice* src) {
   constexpr char class_name[] = "WalDeletion";
 
   if (!GetVarint64(src, &number_)) {
-    return rocksdb_rs::status::Status_Corruption(class_name, "Error decoding WAL log number");
+    return rocksdb_rs::status::Status_Corruption(
+        class_name, "Error decoding WAL log number");
   }
 
   return rocksdb_rs::status::Status_OK();
