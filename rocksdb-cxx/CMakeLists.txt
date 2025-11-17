@@ -45,13 +45,17 @@ project(rocksdb
         HOMEPAGE_URL https://rocksdb.org/
         LANGUAGES CXX C ASM)
 
-FetchContent_Declare(
-        Corrosion
-        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-        GIT_TAG v0.5.1
-        # FETCHCONTENT_FULLY_DISCONNECTED ON # uncomment this line for offline development
-)
-FetchContent_MakeAvailable(Corrosion)
+option(FROM_CARGO "called from rust" OFF)
+
+if (NOT FROM_CARGO)
+    FetchContent_Declare(
+            Corrosion
+            GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+            GIT_TAG v0.5.1
+            # FETCHCONTENT_FULLY_DISCONNECTED ON # uncomment this line for offline development
+    )
+    FetchContent_MakeAvailable(Corrosion)
+endif ()
 
 if (POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -1112,22 +1116,30 @@ string(REGEX REPLACE "[^0-9: /-]+" "" GIT_DATE "${GIT_DATE}")
 set(BUILD_VERSION_CC ${CMAKE_BINARY_DIR}/build_version.cc)
 configure_file(util/build_version.cc.in ${BUILD_VERSION_CC} @ONLY)
 
-set(ROCKSDBRS_TRIPLE_OUT_DIR ${CMAKE_BINARY_DIR}/cargo/build/${Rust_CARGO_TARGET_CACHED})
-set(ROCKSDBRS_CXXBRIDGE ${ROCKSDBRS_TRIPLE_OUT_DIR}/cxxbridge)
+if (NOT FROM_CARGO)
+    set(ROCKSDBRS_TRIPLE_OUT_DIR ${CMAKE_BINARY_DIR}/cargo/build/${Rust_CARGO_TARGET_CACHED})
+    set(ROCKSDBRS_CXXBRIDGE ${ROCKSDBRS_TRIPLE_OUT_DIR}/cxxbridge)
 
-corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
+    corrosion_import_crate(MANIFEST_PATH ../Cargo.toml)
+endif ()
 
 add_library(${ROCKSDB_STATIC_LIB} STATIC ${SOURCES} ${BUILD_VERSION_CC})
-target_include_directories(${ROCKSDB_STATIC_LIB} PUBLIC ${ROCKSDBRS_CXXBRIDGE})
+if (NOT FROM_CARGO)
+    target_include_directories(${ROCKSDB_STATIC_LIB} PUBLIC ${ROCKSDBRS_CXXBRIDGE})
+    target_link_libraries(${ROCKSDB_STATIC_LIB}
+            PUBLIC rocksdb_rs)
+endif ()
 target_link_libraries(${ROCKSDB_STATIC_LIB}
-        PUBLIC rocksdb_rs
         PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
 if (ROCKSDB_BUILD_SHARED)
     add_library(${ROCKSDB_SHARED_LIB} SHARED ${SOURCES} ${BUILD_VERSION_CC})
-    target_include_directories(${ROCKSDB_SHARED_LIB} PUBLIC ${ROCKSDBRS_CXXBRIDGE})
+    if (NOT FROM_CARGO)
+        target_include_directories(${ROCKSDB_SHARED_LIB} PUBLIC ${ROCKSDBRS_CXXBRIDGE})
+        target_link_libraries(${ROCKSDB_SHARED_LIB}
+                PUBLIC rocksdb_rs)
+    endif ()
     target_link_libraries(${ROCKSDB_SHARED_LIB}
-            PUBLIC rocksdb_rs
             PRIVATE ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
 
     if (WIN32)
@@ -1174,8 +1186,12 @@ if (WITH_TESTS OR WITH_BENCHMARK_TOOLS)
             test_util/mock_time_env.cc
             test_util/secondary_cache_test_util.cc
             test_util/testharness.cc)
-    target_include_directories(testharness PUBLIC ${ROCKSDBRS_CXXBRIDGE})
-    target_link_libraries(testharness gtest rocksdb_rs)
+    if (NOT FROM_CARGO)
+        target_include_directories(testharness PUBLIC ${ROCKSDBRS_CXXBRIDGE})
+        target_link_libraries(testharness rocksdb_rs)
+    endif ()
+    target_link_libraries(testharness gtest)
+
 endif ()
 
 if (WITH_TESTS)
