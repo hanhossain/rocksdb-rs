@@ -1,6 +1,7 @@
 # C++
 /build
 /cmake-build-*
+/.cache
 
 # Rust
 /target
