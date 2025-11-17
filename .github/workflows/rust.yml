@@ -22,11 +22,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ ubuntu-latest, macos-latest ]
     steps:
-    - uses: actions/checkout@v5
-    - uses: dtolnay/rust-toolchain@stable
-    - name: Build
-      run: cargo build --all-targets --features build-cpp
-    - name: Run tests
-      run: cargo test --features build-cpp
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build
+        run: cargo build --all-targets --features build-cpp
+      - name: Run tests
+        run: cargo test --features build-cpp

@@ -26,37 +26,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ ubuntu-latest, macos-latest ]
         include:
-        - os: ubuntu-latest
-          deps: sudo apt-get install -y ninja-build libgflags-dev
-        - os: macos-latest
-          deps: brew install ninja gflags
+          - os: ubuntu-latest
+            deps: sudo apt-get install -y ninja-build libgflags-dev
+          - os: macos-latest
+            deps: brew install ninja gflags
 
     steps:
-    - uses: actions/checkout@v5
-    - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
 
-    - name: Install dependencies
-      run: ${{ matrix.deps }}
+      - name: Install dependencies
+        run: ${{ matrix.deps }}
 
-    # - name: Run sccache-cache
-    #   uses: mozilla-actions/sccache-action@v0.0.5
+      # - name: Run sccache-cache
+      #   uses: mozilla-actions/sccache-action@v0.0.5
 
-    - name: Create build directory
-      run: mkdir -p ${{ github.workspace }}/build
+      - name: Create build directory
+        run: mkdir -p ${{ github.workspace }}/build
 
-    - name: Configure CMake
-      working-directory: ${{ github.workspace }}/build
-      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=OFF ../rocksdb-cxx
+      - name: Configure CMake
+        working-directory: ${{ github.workspace }}/build
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=OFF ../rocksdb-cxx
 
-    - name: Build
-      working-directory: ${{ github.workspace }}/build
-      run: ninja
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: ninja
 
-    - name: Test
-      working-directory: ${{ github.workspace }}/build
-      run: ninja check
+      - name: Test
+        working-directory: ${{ github.workspace }}/build
+        run: ninja check
 
   test:
     runs-on: ${{ matrix.os }}
@@ -64,61 +64,61 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ ubuntu-latest, macos-latest ]
         include:
-        - os: ubuntu-latest
-          deps: sudo apt-get install -y ninja-build libgflags-dev
-        - os: macos-latest
-          deps: brew install ninja gflags
+          - os: ubuntu-latest
+            deps: sudo apt-get install -y ninja-build libgflags-dev
+          - os: macos-latest
+            deps: brew install ninja gflags
 
     steps:
-    - uses: actions/checkout@v5
-    - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
 
-    - name: Install dependencies
-      run: ${{ matrix.deps }}
+      - name: Install dependencies
+        run: ${{ matrix.deps }}
 
-    # - name: Run sccache-cache
-    #   uses: mozilla-actions/sccache-action@v0.0.5
+      # - name: Run sccache-cache
+      #   uses: mozilla-actions/sccache-action@v0.0.5
 
-    - name: Create build directory
-      run: mkdir -p ${{ github.workspace }}/build
+      - name: Create build directory
+        run: mkdir -p ${{ github.workspace }}/build
 
-    - name: Configure CMake
-      working-directory: ${{ github.workspace }}/build
-      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=ON ../rocksdb-cxx
+      - name: Configure CMake
+        working-directory: ${{ github.workspace }}/build
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=ON ../rocksdb-cxx
 
-    - name: Build
-      working-directory: ${{ github.workspace }}/build
-      run: ninja
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: ninja
 
-    - name: Test
-      working-directory: ${{ github.workspace }}/build
-      run: ninja check
+      - name: Test
+        working-directory: ${{ github.workspace }}/build
+        run: ninja check
   
   build-examples:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ ubuntu-latest, macos-latest ]
         include:
-        - os: ubuntu-latest
-          deps: sudo apt-get install -y ninja-build libgflags-dev
-        - os: macos-latest
-          deps: brew install ninja gflags
+          - os: ubuntu-latest
+            deps: sudo apt-get install -y ninja-build libgflags-dev
+          - os: macos-latest
+            deps: brew install ninja gflags
     steps:
-    - uses: actions/checkout@v5
-    - uses: dtolnay/rust-toolchain@stable
-    - name: Install dependencies
-      run: ${{ matrix.deps }}
-    # - name: Run sccache-cache
-    #   uses: mozilla-actions/sccache-action@v0.0.5
-    - name: Create build directory
-      run: mkdir -p ${{ github.workspace }}/build
-    - name: Configure CMake
-      working-directory: ${{ github.workspace }}/build
-      run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_TESTS=OFF -DWITH_EXAMPLES=ON ../rocksdb-cxx
-    - name: Build
-      working-directory: ${{ github.workspace }}/build
-      run: ninja
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: ${{ matrix.deps }}
+      # - name: Run sccache-cache
+      #   uses: mozilla-actions/sccache-action@v0.0.5
+      - name: Create build directory
+        run: mkdir -p ${{ github.workspace }}/build
+      - name: Configure CMake
+        working-directory: ${{ github.workspace }}/build
+        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_TESTS=OFF -DWITH_EXAMPLES=ON ../rocksdb-cxx
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: ninja
