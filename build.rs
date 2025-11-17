@@ -42,5 +42,4 @@ fn main() {
     }
 
     println!("cargo::rerun-if-changed=rocksdb-cxx");
-    println!("cargo::rerun-if-changed=build_version.cc");
 }
