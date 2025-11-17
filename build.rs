@@ -35,6 +35,7 @@ fn main() {
             .generator("Ninja")
             .define("WITH_TESTS", "NO")
             .define("FROM_CARGO", "ON")
+            .define("WITH_GFLAGS", "OFF")
             .build_target("rocksdb")
             .build();
         println!("cargo::rustc-link-search=native={}/build", dst.display());
