@@ -15,7 +15,7 @@ regex = "1.12.2"
 xxhash-rust = { version = "0.8.15", features = ["xxh3"] }
 
 [build-dependencies]
-cmake = "0.1.54"
+cmake = "0.1.57"
 cxx-build = { version = "1.0.188", features = ["parallel"] }
 
 [features]
