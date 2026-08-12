@@ -30,6 +30,7 @@ jobs:
         include:
           - os: ubuntu-latest
             deps: sudo apt-get install -y ninja-build libgflags-dev
+            compiler_env: CC=clang CXX=clang++
           - os: macos-latest
             deps: brew install ninja gflags
 
@@ -48,7 +49,7 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{ github.workspace }}/build
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=OFF ..
+        run: ${{ matrix.compiler_env }} cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=OFF ..
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
@@ -68,6 +69,7 @@ jobs:
         include:
           - os: ubuntu-latest
             deps: sudo apt-get install -y ninja-build libgflags-dev
+            compiler_env: CC=clang CXX=clang++
           - os: macos-latest
             deps: brew install ninja gflags
 
@@ -86,7 +88,7 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{ github.workspace }}/build
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=ON ..
+        run: ${{ matrix.compiler_env }} -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_ALL_TESTS=ON ..
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
@@ -105,6 +107,7 @@ jobs:
         include:
           - os: ubuntu-latest
             deps: sudo apt-get install -y ninja-build libgflags-dev
+            compiler_env: CC=clang CXX=clang++
           - os: macos-latest
             deps: brew install ninja gflags
     steps:
@@ -118,7 +121,7 @@ jobs:
         run: mkdir -p ${{ github.workspace }}/build
       - name: Configure CMake
         working-directory: ${{ github.workspace }}/build
-        run: cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_TESTS=OFF -DWITH_EXAMPLES=ON ..
+        run: ${{ matrix.compiler_env }} cmake -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_COLOR_DIAGNOSTICS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DWITH_TESTS=OFF -DWITH_EXAMPLES=ON ..
       - name: Build
         working-directory: ${{ github.workspace }}/build
         run: ninja
