@@ -14,10 +14,6 @@ updates:
         patterns:
           - cxx
           - cxx-build
-      autocxx:
-        patterns:
-          - autocxx
-          - autocxx-build
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
