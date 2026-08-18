@@ -9,14 +9,14 @@ edition = "2024"
 crate-type = ["staticlib", "rlib"]
 
 [dependencies]
-cxx = { version = "1.0.194", features = ["c++17"] }
+cxx = { version = "1.0.199", features = ["c++17"] }
 lazy_static = "1.5.0"
-regex = "1.12.3"
-xxhash-rust = { version = "0.8.15", features = ["xxh3"] }
+regex = "1.13.1"
+xxhash-rust = { version = "0.8.18", features = ["xxh3"] }
 
 [build-dependencies]
 cmake = "0.1.58"
-cxx-build = { version = "1.0.194", features = ["parallel"] }
+cxx-build = { version = "1.0.199", features = ["parallel"] }
 
 [features]
 build-cpp = []
