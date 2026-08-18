@@ -1,7 +1,7 @@
 use crate::filename::ffix::{FileType, InfoLogPrefix, WalFileType};
 use cxx::CxxVector;
-use lazy_static::lazy_static;
 use regex::Regex;
+use std::sync::LazyLock;
 
 const ROCKSDB_BLOB_FILE_EXT: &str = "blob";
 const ROCKSDB_TFILE_EXT: &str = "sst";
@@ -240,9 +240,7 @@ fn rocks_to_level_table_file_name(fullname: &str) -> String {
 /// The reverse function of MakeTableFileName
 // TODO(yhchiang): could merge this function with ParseFileName()
 fn table_file_name_to_number(name: &str) -> u64 {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"(\d+)\.[^.]*$").unwrap();
-    }
+    static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\d+)\.[^.]*$").unwrap());
     RE.captures(name)
         .map(|cap| cap[1].parse().unwrap())
         .unwrap_or(0)
@@ -327,10 +325,7 @@ fn identity_file_name(dbname: &str) -> String {
 }
 
 fn normalize_path(path: &str) -> String {
-    lazy_static! {
-        static ref RE: Regex = Regex::new("/+").unwrap();
-    }
-
+    static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new("/+").unwrap());
     let mut normalized = String::new();
 
     let path = if path.len() > 2 && &path[..1] == "/" {
@@ -348,10 +343,7 @@ fn normalize_path(path: &str) -> String {
 
 /// Given a path, flatten the path name by replacing all chars not in {[0-9,a-z,A-Z,-,_,.]} with _.
 fn get_info_log_prefix(path: &str) -> String {
-    lazy_static! {
-        static ref RE: Regex = Regex::new("[^a-zA-Z0-9-._]").unwrap();
-    }
-
+    static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new("[^a-zA-Z0-9-._]").unwrap());
     if path.is_empty() {
         return "".to_string();
     }
@@ -532,16 +524,6 @@ fn parse(file_name: &str) -> Option<ParseResult> {
 ///    dbname/OPTIONS-[0-9]+.dbtmp
 ///    Disregards / at the beginning
 fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Option<ParseResult> {
-    lazy_static! {
-        static ref OLD_LOG_FILE_REGEX: Regex = Regex::new(r"^(\.old)?$").unwrap();
-        static ref OLD_LOG_FILE_WITH_NUM_REGEX: Regex = Regex::new(r"^\.old\.(\d+)$").unwrap();
-        static ref MANIFEST_OR_METADB_FILE_REGEX: Regex =
-            Regex::new(r"^(MANIFEST|METADB)-(\d+)$").unwrap();
-        static ref OPTIONS_FILE_REGEX: Regex = Regex::new(r"^OPTIONS-(\d+)(\.dbtmp)?$").unwrap();
-        static ref GENERAL_FILE_REGEX: Regex =
-            Regex::new(r"^(archive/)?(\d+)\.(log|sst|ldb|blob|dbtmp)$").unwrap();
-    }
-
     let mut rest = file_name;
     if file_name.len() > 1 && file_name.starts_with('/') {
         rest = &file_name[1..];
@@ -575,6 +557,8 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
     if !info_log_name_prefix.is_empty() && rest.starts_with(info_log_name_prefix) {
         let rest_log_name = &rest[info_log_name_prefix.len()..];
 
+        static OLD_LOG_FILE_REGEX: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"^(\.old)?$").unwrap());
         if OLD_LOG_FILE_REGEX.is_match(rest_log_name) {
             return Some(ParseResult {
                 number: 0,
@@ -583,6 +567,8 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
             });
         }
 
+        static OLD_LOG_FILE_WITH_NUM_REGEX: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"^\.old\.(\d+)$").unwrap());
         let captures = OLD_LOG_FILE_WITH_NUM_REGEX.captures(rest_log_name)?;
         let number = captures.get(1).unwrap().as_str().parse().ok()?;
         return Some(ParseResult {
@@ -592,6 +578,8 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
         });
     }
 
+    static MANIFEST_OR_METADB_FILE_REGEX: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^(MANIFEST|METADB)-(\d+)$").unwrap());
     if let Some(captures) = MANIFEST_OR_METADB_FILE_REGEX.captures(&rest) {
         let number = captures.get(2).unwrap().as_str().parse().ok()?;
         let prefix = captures.get(1).unwrap().as_str();
@@ -607,6 +595,8 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
         });
     }
 
+    static OPTIONS_FILE_REGEX: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^OPTIONS-(\d+)(\.dbtmp)?$").unwrap());
     if let Some(captures) = OPTIONS_FILE_REGEX.captures(&rest) {
         let number = captures.get(1).unwrap().as_str().parse().ok()?;
         let file_type = match captures.get(2) {
@@ -620,6 +610,8 @@ fn parse_with_info_log_prefix(file_name: &str, info_log_name_prefix: &str) -> Op
         });
     }
 
+    static GENERAL_FILE_REGEX: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^(archive/)?(\d+)\.(log|sst|ldb|blob|dbtmp)$").unwrap());
     let captures = GENERAL_FILE_REGEX.captures(&rest)?;
     let number = captures.get(2).unwrap().as_str().parse().ok()?;
     let archive_dir_found = captures.get(1).is_some();
