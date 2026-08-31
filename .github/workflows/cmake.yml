@@ -35,7 +35,7 @@ jobs:
             deps: brew update && brew install ninja gflags cmake
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Install dependencies
@@ -74,7 +74,7 @@ jobs:
             deps: brew update && brew install ninja gflags cmake
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Install dependencies
@@ -114,7 +114,7 @@ jobs:
           - os: macos-latest
             deps: brew update && brew install ninja gflags
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
         run: ${{ matrix.deps }}
